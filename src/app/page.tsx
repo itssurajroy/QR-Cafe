@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { CoffeeIcon, CheckCircleIcon } from "@/components/Icons";
+import { CoffeeIcon, CheckCircleIcon, BellIcon, SparklesIcon, QrCodeIcon, PrinterIcon, MessageCircleIcon } from "@/components/Icons";
 
 const TESTIMONIALS = [
   {
@@ -288,9 +288,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Bento Card 1: Voice KDS (Double width on desktop) */}
             <div className="md:col-span-2 bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                🔊
-              </div>
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center" aria-hidden="true"><BellIcon className="w-6 h-6" /></div>
               <h3 className="text-xl font-black text-stone-900">Realtime Spoken Voice KDS &amp; Call Bells</h3>
               <p className="text-xs text-stone-500 leading-relaxed max-w-lg">
                 Kitchen tablets ring audio chimes and speak out loud: <em>&quot;Table 3 needs Water!&quot;</em> or <em>&quot;New Order for Table 1!&quot;</em>. Kanban columns auto-sort tickets with urgency heatmaps and flashing alerts past 15 minutes.
@@ -306,9 +304,7 @@ export default function Home() {
 
             {/* Bento Card 2: 1-Click WhatsApp E-Bills */}
             <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">
-                💬
-              </div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center" aria-hidden="true"><MessageCircleIcon className="w-6 h-6" /></div>
               <h3 className="text-xl font-black text-stone-900">100% Free WhatsApp E-Bills</h3>
               <p className="text-xs text-stone-500 leading-relaxed">
                 Cashiers send itemized receipts directly to customer WhatsApp in 1 click. Zero monthly Twilio or Meta API charges.
@@ -320,9 +316,7 @@ export default function Home() {
 
             {/* Bento Card 3: 5★ Google Review Engine */}
             <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                ⭐
-              </div>
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center" aria-hidden="true"><SparklesIcon className="w-6 h-6" /></div>
               <h3 className="text-xl font-black text-stone-900">5★ Google Review Capture</h3>
               <p className="text-xs text-stone-500 leading-relaxed">
                 When meals are delivered, 4★ and 5★ ratings automatically open the café&apos;s direct Google Business Review page.
@@ -334,9 +328,7 @@ export default function Home() {
 
             {/* Bento Card 4: Table Management */}
             <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                💎
-              </div>
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center" aria-hidden="true"><QrCodeIcon className="w-6 h-6" /></div>
               <h3 className="text-xl font-black text-stone-900">Table Management</h3>
               <p className="text-xs text-stone-500 leading-relaxed">
                 Track table occupancy, view live order status, and clear tables instantly for faster turnaround.
@@ -348,9 +340,7 @@ export default function Home() {
 
             {/* Bento Card 5: GST Invoicing & Quick Cash POS */}
             <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                🧾
-              </div>
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center" aria-hidden="true"><PrinterIcon className="w-6 h-6" /></div>
               <h3 className="text-xl font-black text-stone-900">GST Invoicing &amp; Cash POS</h3>
               <p className="text-xs text-stone-500 leading-relaxed">
                 Quick tender buttons (₹100, ₹200, ₹500, ₹2000, Exact), CGST/SGST 5% splits, and standard 80mm thermal receipt printing.

@@ -1,8 +1,14 @@
 "use client";
 
-import { SearchIcon } from "@/components/Icons";
-import { getCategoryEmoji } from "@/lib/utils";
+import { SearchIcon, FlameIcon, UtensilsIcon, SparklesIcon, CoffeeIcon } from "@/components/Icons";
 import type { Category } from "@/types";
+
+function CategoryIcon({ name, className = "w-3.5 h-3.5" }: { name: string; className?: string }) {
+  const n = name.toLowerCase();
+  if (n.includes("dessert") || n.includes("sweet") || n.includes("cake")) return <SparklesIcon className={className} />;
+  if (n.includes("beverage") || n.includes("drink") || n.includes("coffee") || n.includes("tea")) return <CoffeeIcon className={className} />;
+  return <UtensilsIcon className={className} />;
+}
 
 interface MenuCategoryFilterProps {
   categories: Category[];
@@ -32,16 +38,18 @@ export function MenuCategoryFilter({
           placeholder={tSearch}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-stone-50/90 border border-stone-200 rounded-2xl px-4 py-2.5 pl-10 text-xs text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-all shadow-inner"
+          aria-label="Search menu"
+          className="w-full bg-white border border-stone-200 rounded-2xl px-4 py-3 pl-10 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#D97706] focus:ring-2 focus:ring-[#D97706]/20 transition-all shadow-sm min-h-[44px]"
         />
-        <div className="absolute left-3.5 top-3 text-stone-500 pointer-events-none">
+        <div className="absolute left-3.5 top-3.5 text-stone-500 pointer-events-none" aria-hidden="true">
           <SearchIcon className="w-4 h-4" />
         </div>
         {search && (
           <button
             type="button"
             onClick={() => onSearchChange("")}
-            className="absolute right-3 top-2.5 text-stone-500 hover:text-stone-900 text-xs bg-stone-800 px-2 py-0.5 rounded-lg cursor-pointer"
+            aria-label="Clear search"
+            className="absolute right-3 top-2.5 text-stone-600 hover:text-stone-900 text-xs bg-stone-100 border border-stone-200 px-2.5 py-1 rounded-lg cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center transition-colors"
           >
             ✕
           </button>
@@ -54,13 +62,14 @@ export function MenuCategoryFilter({
           <button
             type="button"
             onClick={() => onCatChange("all")}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 ${
+            aria-pressed={activeCat === "all"}
+            className={`px-4 py-2.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#D97706]/30 ${
               activeCat === "all"
-                ? "bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 shadow-md shadow-amber-500/30 font-black"
-                : "bg-white text-stone-600 hover:bg-stone-800 border border-stone-200"
+                ? "bg-[#D97706] text-white shadow-md font-black"
+                : "bg-white text-stone-700 hover:bg-stone-50 border border-stone-200"
             }`}
           >
-            <span>🔥</span>
+            <span aria-hidden="true"><FlameIcon className="w-3.5 h-3.5" /></span>
             <span>{tAll}</span>
           </button>
           {categories.map((c) => (
@@ -68,13 +77,14 @@ export function MenuCategoryFilter({
               type="button"
               key={c.id}
               onClick={() => onCatChange(c.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 ${
+              aria-pressed={c.id === activeCat}
+              className={`px-4 py-2.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#D97706]/30 ${
                 c.id === activeCat
-                  ? "bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 shadow-md shadow-amber-500/30 font-black"
-                  : "bg-white text-stone-600 hover:bg-stone-800 border border-stone-200"
+                  ? "bg-[#D97706] text-white shadow-md font-black"
+                  : "bg-white text-stone-700 hover:bg-stone-50 border border-stone-200"
               }`}
             >
-              <span>{getCategoryEmoji(c.name)}</span>
+              <span aria-hidden="true"><CategoryIcon name={c.name} /></span>
               <span>{c.name}</span>
             </button>
           ))}

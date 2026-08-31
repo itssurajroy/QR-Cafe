@@ -168,6 +168,15 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    ACCENT COLOR SYSTEM (Per-Café Theming)
    ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+:focus-visible { outline: 2px solid #D97706; outline-offset: 2px; }
+
 .accent-btn { background-color: var(--accent); color: #ffffff; }
 .accent-btn:hover { filter: brightness(1.06); }
 .accent-text { color: var(--accent); }
