@@ -287,7 +287,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Bento Card 1: Voice KDS (Double width on desktop) */}
-            <div className="md:col-span-2 bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="md:col-span-2 bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 🔊
               </div>
@@ -295,7 +295,7 @@ export default function Home() {
               <p className="text-xs text-stone-500 leading-relaxed max-w-lg">
                 Kitchen tablets ring audio chimes and speak out loud: <em>&quot;Table 3 needs Water!&quot;</em> or <em>&quot;New Order for Table 1!&quot;</em>. Kanban columns auto-sort tickets with urgency heatmaps and flashing alerts past 15 minutes.
               </p>
-              <div className="bg-stone-950 border border-stone-200/90 rounded-2xl p-3.5 flex items-center justify-between font-mono text-xs">
+              <div className="bg-stone-50 border border-stone-200/90 rounded-2xl p-3.5 flex items-center justify-between font-mono text-xs">
                 <span className="text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                   KDS Line Station Live
@@ -305,7 +305,7 @@ export default function Home() {
             </div>
 
             {/* Bento Card 2: 1-Click WhatsApp E-Bills */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">
                 💬
               </div>
@@ -313,13 +313,13 @@ export default function Home() {
               <p className="text-xs text-stone-500 leading-relaxed">
                 Cashiers send itemized receipts directly to customer WhatsApp in 1 click. Zero monthly Twilio or Meta API charges.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-200 text-[11px] text-stone-600 font-mono">
+              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-[11px] text-stone-600 font-mono">
                 🧾 Bill #POS-482 • ₹525.00 ✓
               </div>
             </div>
 
             {/* Bento Card 3: 5★ Google Review Engine */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 ⭐
               </div>
@@ -333,7 +333,7 @@ export default function Home() {
             </div>
 
             {/* Bento Card 4: Table Management */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 💎
               </div>
@@ -341,13 +341,13 @@ export default function Home() {
               <p className="text-xs text-stone-500 leading-relaxed">
                 Track table occupancy, view live order status, and clear tables instantly for faster turnaround.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-200 text-[11px] text-emerald-400 font-bold font-mono">
+              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-[11px] text-emerald-400 font-bold font-mono">
                 Table #04 Cleared Successfully
               </div>
             </div>
 
             {/* Bento Card 5: GST Invoicing & Quick Cash POS */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 🧾
               </div>
@@ -355,7 +355,7 @@ export default function Home() {
               <p className="text-xs text-stone-500 leading-relaxed">
                 Quick tender buttons (₹100, ₹200, ₹500, ₹2000, Exact), CGST/SGST 5% splits, and standard 80mm thermal receipt printing.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-200 text-[11px] text-stone-600 font-mono">
+              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-[11px] text-stone-600 font-mono">
                 CGST 2.5% + SGST 2.5% Tax Breakdown
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function Home() {
 
           <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
             {/* Step Selection Tabs */}
-            <div className="grid grid-cols-3 gap-2 bg-stone-950 p-1.5 rounded-2xl border border-stone-200">
+            <div className="grid grid-cols-3 gap-2 bg-stone-50 p-1.5 rounded-2xl border border-stone-200">
               <button
                 type="button"
                 onClick={() => setActiveStep(1)}
@@ -431,7 +431,7 @@ export default function Home() {
                     <li className="flex items-center gap-2">✓ Automated WhatsApp e-bill capture</li>
                   </ul>
                 </div>
-                <div className="bg-stone-950 border border-stone-200 rounded-2xl p-4 text-left space-y-3 font-sans">
+                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 text-left space-y-3 font-sans">
                   <div className="flex justify-between items-center border-b border-stone-200 pb-2">
                     <span className="text-xs font-bold text-amber-400">Table #04 Dine-In</span>
                     <span className="text-[10px] text-stone-500">Live Browser</span>
@@ -471,7 +471,7 @@ export default function Home() {
                     <li className="flex items-center gap-2">✓ Color-coded wait time alerts past 15 mins</li>
                   </ul>
                 </div>
-                <div className="bg-stone-950 border border-stone-200 rounded-2xl p-4 text-left space-y-3">
+                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 text-left space-y-3">
                   <div className="flex justify-between items-center border-b border-stone-200 pb-2">
                     <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -513,7 +513,7 @@ export default function Home() {
                     <li className="flex items-center gap-2">✓ 4★ and 5★ reviews routed to Google Business</li>
                   </ul>
                 </div>
-                <div className="bg-stone-950 border border-stone-200 rounded-2xl p-4 text-left space-y-2.5">
+                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 text-left space-y-2.5">
                   <div className="flex justify-between items-center border-b border-stone-200 pb-2">
                     <span className="text-xs font-bold text-amber-400">POS Cashier Settle</span>
                     <span className="text-[10px] text-emerald-400 font-bold">PAID IN CASH ✓</span>
@@ -594,7 +594,7 @@ export default function Home() {
             </div>
 
             {/* Output Projection */}
-            <div className="bg-stone-950 border border-amber-500/40 rounded-2xl p-6 flex flex-col justify-between text-center space-y-4 shadow-inner">
+            <div className="bg-stone-50 border border-amber-500/40 rounded-2xl p-6 flex flex-col justify-between text-center space-y-4 shadow-inner">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-stone-500">
                   Estimated Monthly Revenue Lift

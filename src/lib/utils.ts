@@ -180,16 +180,17 @@ const IMAGE_MAP: Record<string, string> = {
   idli: "idli",
 };
 
-/** Get an Unsplash food image URL based on item name */
 export function getItemImage(name: string, isVeg: boolean): string {
   const lower = name.toLowerCase();
   for (const [key, term] of Object.entries(IMAGE_MAP)) {
     if (lower.includes(key)) {
-      return `https://source.unsplash.com/400x300/?${term},food`;
+      const seed = term.replace(/[^a-z0-9]/g, "");
+      return `https://picsum.photos/seed/${seed}-${lower.length}/400/300`;
     }
   }
-  const fallback = isVeg ? "vegetarian,food" : "food,dish";
-  return `https://source.unsplash.com/400x300/?${fallback}`;
+  const fallback = isVeg ? "veg" : "food";
+  const hash = name.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  return `https://picsum.photos/seed/${fallback}-${hash % 1000}/400/300`;
 }
 
 // ─── Category Emoji ───────────────────────────────────────────────────────────
