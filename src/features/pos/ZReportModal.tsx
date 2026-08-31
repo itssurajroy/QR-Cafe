@@ -66,8 +66,9 @@ export function ZReportModal({
               const floatRupees = parseFloat(openingFloat) || 0;
               const expectedCashInDrawer = floatRupees + todayCash / 100;
               const taxRate = Number(restaurant?.tax_rate || 5);
-              const cgst = Math.round((todayRev * (taxRate / 2)) / 100);
-              const sgst = cgst;
+              const totalTax = (todayRev * taxRate) / (100 + taxRate);
+              const cgst = Math.round(totalTax / 2);
+              const sgst = Math.round(totalTax / 2);
 
               return (
                 <>

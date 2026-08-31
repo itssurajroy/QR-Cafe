@@ -187,7 +187,7 @@ export default function PosClient({
         .from("orders")
         .insert({
           restaurant_id: restaurant.id,
-          table_label: selectedTable?.label || "Counter",
+          table_id: selectedTable?.id || null,
           customer_name: "Walk-in",
           total_paise: finalTotalPaise,
           status: status === "paid" ? "served" : "pending",
