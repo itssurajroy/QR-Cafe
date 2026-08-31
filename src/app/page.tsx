@@ -79,6 +79,7 @@ export default function Home() {
 
   // Testimonial Auto-Carousel
   const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setToastVisible(true), 2500);
@@ -113,24 +114,24 @@ export default function Home() {
   }, [countersStarted]);
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black antialiased relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#FFFBF5] text-stone-800 flex flex-col justify-between selection:bg-amber-500 selection:text-black antialiased relative overflow-hidden font-sans">
       {/* Background Ambient Grid & Radial Halos */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(245,158,11,0.15),rgba(255,255,255,0))] pointer-events-none"></div>
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
 
       {/* Floating Live Social Proof Toast */}
       {toastVisible && (
-        <div className="fixed bottom-6 left-6 z-50 bg-stone-900/95 border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 max-w-xs">
+        <div className="fixed bottom-6 left-6 z-50 bg-white/95 border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 max-w-xs">
           <div className="w-9 h-9 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-base shadow-md shadow-amber-500/20 shrink-0">
             ☕
           </div>
           <div className="text-xs">
-            <p className="font-bold text-white leading-tight">{toastMsg.name}</p>
-            <p className="text-[11px] text-stone-400">Order placed from <span className="text-amber-400 font-semibold">{toastMsg.table}</span> • {toastMsg.time}</p>
+            <p className="font-bold text-stone-900 leading-tight">{toastMsg.name}</p>
+            <p className="text-[11px] text-stone-500">Order placed from <span className="text-amber-400 font-semibold">{toastMsg.table}</span> • {toastMsg.time}</p>
           </div>
           <button
             onClick={() => setToastVisible(false)}
-            className="text-stone-500 hover:text-white text-xs pl-1 cursor-pointer"
+            className="text-stone-500 hover:text-stone-900 text-xs pl-1 cursor-pointer"
           >
             ✕
           </button>
@@ -138,45 +139,66 @@ export default function Home() {
       )}
 
       {/* Top Navbar */}
-      <header className="border-b border-stone-800/80 backdrop-blur-2xl sticky top-0 z-50 bg-stone-950/80">
+      <header className="border-b border-stone-200 backdrop-blur-2xl sticky top-0 z-50 bg-white/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
               <CoffeeIcon className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-extrabold tracking-tight text-base sm:text-lg bg-gradient-to-r from-white via-stone-200 to-stone-400 bg-clip-text text-transparent block">
+              <span className="font-extrabold tracking-tight text-base sm:text-lg text-stone-900 block">
                 QR Café
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-amber-400 font-bold block -mt-1">
+              <span className="text-[9px] uppercase tracking-widest text-[#D97706] font-bold block -mt-1">
                 Restaurant OS
               </span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-stone-400">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#simulator" className="hover:text-white transition-colors">How It Works</a>
-            <a href="#calculator" className="hover:text-white transition-colors">ROI Calculator</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faqs" className="hover:text-white transition-colors">FAQ</a>
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-stone-500">
+            <a href="#features" className="hover:text-stone-900 transition-colors">Features</a>
+            <a href="#simulator" className="hover:text-stone-900 transition-colors">How It Works</a>
+            <a href="#calculator" className="hover:text-stone-900 transition-colors">ROI Calculator</a>
+            <a href="#pricing" className="hover:text-stone-900 transition-colors">Pricing</a>
+            <a href="#faqs" className="hover:text-stone-900 transition-colors">FAQ</a>
           </nav>
 
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="text-xs font-bold text-stone-300 hover:text-white px-3 py-2 rounded-xl transition-colors"
+              className="hidden sm:inline-flex text-xs font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl transition-colors"
             >
               Sign In
             </Link>
             <Link
               href="/onboarding"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+              className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-black text-xs transition-all shadow-md active:scale-95 cursor-pointer"
             >
               Start Free 7-Day Trial &rarr;
             </Link>
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              className="md:hidden w-9 h-9 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-50"
+              aria-label="Menu"
+            >
+              {mobileNavOpen ? "✕" : "☰"}
+            </button>
           </div>
         </div>
+        {mobileNavOpen && (
+          <div className="md:hidden border-t border-stone-200 bg-white px-6 py-4 space-y-3 shadow-lg">
+            <a href="#features" onClick={() => setMobileNavOpen(false)} className="block text-sm font-bold text-stone-700 hover:text-stone-900">Features</a>
+            <a href="#simulator" onClick={() => setMobileNavOpen(false)} className="block text-sm font-bold text-stone-700 hover:text-stone-900">How It Works</a>
+            <a href="#calculator" onClick={() => setMobileNavOpen(false)} className="block text-sm font-bold text-stone-700 hover:text-stone-900">ROI Calculator</a>
+            <a href="#pricing" onClick={() => setMobileNavOpen(false)} className="block text-sm font-bold text-stone-700 hover:text-stone-900">Pricing</a>
+            <a href="#faqs" onClick={() => setMobileNavOpen(false)} className="block text-sm font-bold text-stone-700 hover:text-stone-900">FAQ</a>
+            <div className="flex gap-2 pt-2 border-t border-stone-100">
+              <Link href="/login" className="flex-1 py-2.5 rounded-xl bg-white border border-stone-200 text-center text-sm font-bold text-stone-700">Sign In</Link>
+              <Link href="/onboarding" className="flex-1 py-2.5 rounded-xl bg-[#D97706] text-white text-center text-sm font-black">Start Trial →</Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Container */}
@@ -189,15 +211,15 @@ export default function Home() {
             The #1 Operating System for Modern Dine-In Cafés
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-stone-900 leading-[1.1]">
             Turn Every Table into an <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">
               Autonomous Revenue Engine
             </span>
           </h1>
 
-          <p className="text-base sm:text-lg text-stone-400 max-w-2xl mx-auto leading-relaxed">
-            Eliminate server delays, accelerate table turn speed, and automate kitchen dispatch. Contactless QR dine-in, live spoken voice KDS, fast cash POS, and zero-cost WhatsApp bills.
+          <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
+            Warm, welcoming service with contactless QR ordering, gentle voice KDS for the kitchen, and handwritten-bill-free POS — hospitality first, revenue follows.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
@@ -208,8 +230,8 @@ export default function Home() {
               <span>🚀 Launch Café in 60s (Free 7-Day Trial)</span>
             </Link>
             <Link
-              href="/c/curry-leaf/t/01"
-              className="px-6 py-4 rounded-2xl bg-stone-900/90 hover:bg-stone-800 border border-stone-800 text-stone-200 font-bold text-sm transition-colors shadow-lg flex items-center gap-2"
+              href="/c/curry-leaf/t/T1"
+              className="px-6 py-4 rounded-2xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 font-bold text-sm transition-colors shadow-md flex items-center gap-2"
             >
               <span>📱 Live Table QR Demo &rarr;</span>
             </Link>
@@ -223,9 +245,9 @@ export default function Home() {
               { value: `₹${revenueCount}Cr+`, label: "Revenue Generated", sub: "For our partners", icon: "💰" },
               { value: "4.9★", label: "Average Rating", sub: "From café owners", icon: "🌟" },
             ].map((stat) => (
-              <div key={stat.label} className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800/80 backdrop-blur-md text-center hover:border-amber-500/30 transition-all">
+              <div key={stat.label} className="p-4 rounded-2xl bg-white border border-stone-200 backdrop-blur-md text-center hover:border-amber-500/30 transition-all">
                 <div className="text-2xl mb-1">{stat.icon}</div>
-                <span className="text-2xl font-black text-white font-mono">{stat.value}</span>
+                <span className="text-2xl font-black text-stone-900 font-mono">{stat.value}</span>
                 <p className="text-xs text-amber-400 font-bold mt-0.5">{stat.label}</p>
                 <p className="text-[10px] text-stone-500 mt-0.5">{stat.sub}</p>
               </div>
@@ -241,7 +263,7 @@ export default function Home() {
               { icon: "💰", label: "No Commission Fees" },
               { icon: "🔒", label: "FSSAI Safe" },
             ].map((badge) => (
-              <div key={badge.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-900/60 border border-stone-800 text-xs text-stone-400">
+              <div key={badge.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-stone-200 text-xs text-stone-500">
                 <span>{badge.icon}</span>
                 <span className="font-bold">{badge.label}</span>
               </div>
@@ -255,25 +277,25 @@ export default function Home() {
             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
               Next-Gen Restaurant Architecture
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
+            <h2 className="text-3xl sm:text-4xl font-black text-stone-900">
               Everything Your Floor Needs to Excel
             </h2>
-            <p className="text-xs sm:text-sm text-stone-400 max-w-xl mx-auto">
+            <p className="text-xs sm:text-sm text-stone-500 max-w-xl mx-auto">
               Built on Next.js Turbopack, Postgres Realtime channels, and Web Speech synthesis for ultra-responsive performance.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Bento Card 1: Voice KDS (Double width on desktop) */}
-            <div className="md:col-span-2 bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="md:col-span-2 bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 🔊
               </div>
-              <h3 className="text-xl font-black text-white">Realtime Spoken Voice KDS &amp; Call Bells</h3>
-              <p className="text-xs text-stone-400 leading-relaxed max-w-lg">
+              <h3 className="text-xl font-black text-stone-900">Realtime Spoken Voice KDS &amp; Call Bells</h3>
+              <p className="text-xs text-stone-500 leading-relaxed max-w-lg">
                 Kitchen tablets ring audio chimes and speak out loud: <em>&quot;Table 3 needs Water!&quot;</em> or <em>&quot;New Order for Table 1!&quot;</em>. Kanban columns auto-sort tickets with urgency heatmaps and flashing alerts past 15 minutes.
               </p>
-              <div className="bg-stone-950 border border-stone-800/90 rounded-2xl p-3.5 flex items-center justify-between font-mono text-xs">
+              <div className="bg-stone-950 border border-stone-200/90 rounded-2xl p-3.5 flex items-center justify-between font-mono text-xs">
                 <span className="text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                   KDS Line Station Live
@@ -283,26 +305,26 @@ export default function Home() {
             </div>
 
             {/* Bento Card 2: 1-Click WhatsApp E-Bills */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">
                 💬
               </div>
-              <h3 className="text-xl font-black text-white">100% Free WhatsApp E-Bills</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="text-xl font-black text-stone-900">100% Free WhatsApp E-Bills</h3>
+              <p className="text-xs text-stone-500 leading-relaxed">
                 Cashiers send itemized receipts directly to customer WhatsApp in 1 click. Zero monthly Twilio or Meta API charges.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-[11px] text-stone-300 font-mono">
+              <div className="p-3 rounded-xl bg-stone-950 border border-stone-200 text-[11px] text-stone-600 font-mono">
                 🧾 Bill #POS-482 • ₹525.00 ✓
               </div>
             </div>
 
             {/* Bento Card 3: 5★ Google Review Engine */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 ⭐
               </div>
-              <h3 className="text-xl font-black text-white">5★ Google Review Capture</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="text-xl font-black text-stone-900">5★ Google Review Capture</h3>
+              <p className="text-xs text-stone-500 leading-relaxed">
                 When meals are delivered, 4★ and 5★ ratings automatically open the café&apos;s direct Google Business Review page.
               </p>
               <span className="text-[11px] text-amber-400 font-bold block bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl text-center">
@@ -310,30 +332,30 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Bento Card 4: Phone-Based Loyalty Engine */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            {/* Bento Card 4: Table Management */}
+            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 💎
               </div>
-              <h3 className="text-xl font-black text-white">Zero-Cost Loyalty Points</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
-                Automatically calculates +1 Point per ₹100 spent on cash bills to drive recurring guest visits and retention.
+              <h3 className="text-xl font-black text-stone-900">Table Management</h3>
+              <p className="text-xs text-stone-500 leading-relaxed">
+                Track table occupancy, view live order status, and clear tables instantly for faster turnaround.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-[11px] text-emerald-400 font-bold font-mono">
-                +6 Loyalty Points Earned Today
+              <div className="p-3 rounded-xl bg-stone-950 border border-stone-200 text-[11px] text-emerald-400 font-bold font-mono">
+                Table #04 Cleared Successfully
               </div>
             </div>
 
             {/* Bento Card 5: GST Invoicing & Quick Cash POS */}
-            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="bg-gradient-to-br from-stone-900 via-stone-900/90 to-stone-950 border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
                 🧾
               </div>
-              <h3 className="text-xl font-black text-white">GST Invoicing &amp; Cash POS</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="text-xl font-black text-stone-900">GST Invoicing &amp; Cash POS</h3>
+              <p className="text-xs text-stone-500 leading-relaxed">
                 Quick tender buttons (₹100, ₹200, ₹500, ₹2000, Exact), CGST/SGST 5% splits, and standard 80mm thermal receipt printing.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-[11px] text-stone-300 font-mono">
+              <div className="p-3 rounded-xl bg-stone-950 border border-stone-200 text-[11px] text-stone-600 font-mono">
                 CGST 2.5% + SGST 2.5% Tax Breakdown
               </div>
             </div>
@@ -346,24 +368,24 @@ export default function Home() {
             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
               Interactive Operating Flow
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
+            <h2 className="text-2xl sm:text-3xl font-black text-stone-900">
               Experience the 3-Step Live Floor Synchronizer
             </h2>
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-stone-500">
               Click each step to preview how guests, kitchen chefs, and cashiers stay seamlessly synchronized.
             </p>
           </div>
 
-          <div className="bg-stone-900/80 border border-stone-800/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
+          <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
             {/* Step Selection Tabs */}
-            <div className="grid grid-cols-3 gap-2 bg-stone-950 p-1.5 rounded-2xl border border-stone-800">
+            <div className="grid grid-cols-3 gap-2 bg-stone-950 p-1.5 rounded-2xl border border-stone-200">
               <button
                 type="button"
                 onClick={() => setActiveStep(1)}
                 className={`py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-2 ${
                   activeStep === 1
                     ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20"
-                    : "text-stone-400 hover:text-stone-200"
+                    : "text-stone-500 hover:text-stone-700"
                 }`}
               >
                 <span>📱 1. Table QR Order</span>
@@ -374,7 +396,7 @@ export default function Home() {
                 className={`py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-2 ${
                   activeStep === 2
                     ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20"
-                    : "text-stone-400 hover:text-stone-200"
+                    : "text-stone-500 hover:text-stone-700"
                 }`}
               >
                 <span>👨‍🍳 2. Kitchen Voice KDS</span>
@@ -385,7 +407,7 @@ export default function Home() {
                 className={`py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-2 ${
                   activeStep === 3
                     ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20"
-                    : "text-stone-400 hover:text-stone-200"
+                    : "text-stone-500 hover:text-stone-700"
                 }`}
               >
                 <span>🧾 3. POS Cash &amp; WhatsApp</span>
@@ -399,32 +421,32 @@ export default function Home() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
                     Step 1: Contactless Self-Ordering
                   </span>
-                  <h3 className="text-xl font-black text-white">Guests Scan, Browse &amp; Place Orders in Seconds</h3>
-                  <p className="text-xs text-stone-300 leading-relaxed">
+                  <h3 className="text-xl font-black text-stone-900">Guests Scan, Browse &amp; Place Orders in Seconds</h3>
+                  <p className="text-xs text-stone-600 leading-relaxed">
                     Customers scan table-specific QR tent stands to view bilingual English/Hindi menus with dietary veg tags, custom cooking notes, and service call bells (Need Water / Call Waiter).
                   </p>
-                  <ul className="space-y-1.5 text-xs text-stone-300">
+                  <ul className="space-y-1.5 text-xs text-stone-600">
                     <li className="flex items-center gap-2">✓ No app download needed (instant mobile browser)</li>
                     <li className="flex items-center gap-2">✓ Cash-at-Counter confirmation notice</li>
                     <li className="flex items-center gap-2">✓ Automated WhatsApp e-bill capture</li>
                   </ul>
                 </div>
-                <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 text-left space-y-3 font-sans">
-                  <div className="flex justify-between items-center border-b border-stone-800 pb-2">
+                <div className="bg-stone-950 border border-stone-200 rounded-2xl p-4 text-left space-y-3 font-sans">
+                  <div className="flex justify-between items-center border-b border-stone-200 pb-2">
                     <span className="text-xs font-bold text-amber-400">Table #04 Dine-In</span>
                     <span className="text-[10px] text-stone-500">Live Browser</span>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs text-stone-200">
+                    <div className="flex justify-between text-xs text-stone-700">
                       <span>1x Hazelnut Cold Brew</span>
                       <span className="font-mono text-amber-400">₹220</span>
                     </div>
-                    <div className="flex justify-between text-xs text-stone-200">
+                    <div className="flex justify-between text-xs text-stone-700">
                       <span>1x Artisan Truffle Pizza</span>
                       <span className="font-mono text-amber-400">₹380</span>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-stone-800 flex justify-between items-center text-xs font-black">
+                  <div className="pt-2 border-t border-stone-200 flex justify-between items-center text-xs font-black">
                     <span>Total: ₹600</span>
                     <span className="px-2 py-1 rounded-lg bg-amber-500 text-stone-950 text-[10px]">Order Sent ✓</span>
                   </div>
@@ -439,34 +461,34 @@ export default function Home() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
                     Step 2: Voice-Enabled Kitchen KDS
                   </span>
-                  <h3 className="text-xl font-black text-white">Chefs Hear Voice Announcements &amp; Track Tickets</h3>
-                  <p className="text-xs text-stone-300 leading-relaxed">
+                  <h3 className="text-xl font-black text-stone-900">Chefs Hear Voice Announcements &amp; Track Tickets</h3>
+                  <p className="text-xs text-stone-600 leading-relaxed">
                     The kitchen display screen rings audio chimes and speaks out loud: <em>&quot;New Order for Table 4!&quot;</em> or <em>&quot;Table 2 needs Water!&quot;</em>. Kanban columns auto-sort tickets with urgency heatmaps.
                   </p>
-                  <ul className="space-y-1.5 text-xs text-stone-300">
+                  <ul className="space-y-1.5 text-xs text-stone-600">
                     <li className="flex items-center gap-2">✓ Realtime WebSocket syncing</li>
                     <li className="flex items-center gap-2">✓ Browser-native spoken voice alerts</li>
                     <li className="flex items-center gap-2">✓ Color-coded wait time alerts past 15 mins</li>
                   </ul>
                 </div>
-                <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 text-left space-y-3">
-                  <div className="flex justify-between items-center border-b border-stone-800 pb-2">
+                <div className="bg-stone-950 border border-stone-200 rounded-2xl p-4 text-left space-y-3">
+                  <div className="flex justify-between items-center border-b border-stone-200 pb-2">
                     <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                       KDS Line Station
                     </span>
                     <span className="text-[10px] font-mono text-amber-400">⏱ 02m 14s</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800 space-y-1">
-                    <div className="text-xs font-extrabold text-white">Ticket #A-492 • Table 4</div>
-                    <div className="text-[11px] text-stone-300">• Hazelnut Cold Brew (Less Sugar)</div>
-                    <div className="text-[11px] text-stone-300">• Artisan Truffle Pizza (Extra Crisp)</div>
+                  <div className="p-2.5 rounded-xl bg-white border border-stone-200 space-y-1">
+                    <div className="text-xs font-extrabold text-stone-900">Ticket #A-492 • Table 4</div>
+                    <div className="text-[11px] text-stone-600">• Hazelnut Cold Brew (Less Sugar)</div>
+                    <div className="text-[11px] text-stone-600">• Artisan Truffle Pizza (Extra Crisp)</div>
                   </div>
                   <div className="flex gap-2 pt-1">
                     <button className="flex-1 py-1.5 rounded-lg bg-amber-500 text-stone-950 font-black text-[10px]">
                       Mark Cooking 🔥
                     </button>
-                    <button className="flex-1 py-1.5 rounded-lg bg-stone-800 text-stone-300 font-bold text-[10px]">
+                    <button className="flex-1 py-1.5 rounded-lg bg-stone-100 text-stone-600 font-bold text-[10px]">
                       Mark Ready 🔔
                     </button>
                   </div>
@@ -481,36 +503,33 @@ export default function Home() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
                     Step 3: Fast Cashier Settle &amp; Reviews
                   </span>
-                  <h3 className="text-xl font-black text-white">1-Click Cash Settlement, WhatsApp Bills &amp; Google Reviews</h3>
-                  <p className="text-xs text-stone-300 leading-relaxed">
-                    Cashiers settle open table tabs with instant change calculators, print 80mm thermal receipts with GST breakdowns, and dispatch digital WhatsApp receipts with loyalty points and direct Google Review links.
+                  <h3 className="text-xl font-black text-stone-900">1-Click Cash Settlement, WhatsApp Bills &amp; Google Reviews</h3>
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    Cashiers settle open table tabs with instant change calculators, print 80mm thermal receipts with GST breakdowns, and dispatch digital WhatsApp receipts with direct Google Review links.
                   </p>
-                  <ul className="space-y-1.5 text-xs text-stone-300">
+                  <ul className="space-y-1.5 text-xs text-stone-600">
                     <li className="flex items-center gap-2">✓ 100% Free WhatsApp Web E-Receipts (Zero API fees)</li>
-                    <li className="flex items-center gap-2">✓ Automatic 1 pt per ₹100 loyalty tracking</li>
+                    <li className="flex items-center gap-2">✓ Automatic status syncing across devices</li>
                     <li className="flex items-center gap-2">✓ 4★ and 5★ reviews routed to Google Business</li>
                   </ul>
                 </div>
-                <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 text-left space-y-2.5">
-                  <div className="flex justify-between items-center border-b border-stone-800 pb-2">
+                <div className="bg-stone-950 border border-stone-200 rounded-2xl p-4 text-left space-y-2.5">
+                  <div className="flex justify-between items-center border-b border-stone-200 pb-2">
                     <span className="text-xs font-bold text-amber-400">POS Cashier Settle</span>
                     <span className="text-[10px] text-emerald-400 font-bold">PAID IN CASH ✓</span>
                   </div>
-                  <div className="text-xs text-stone-300 space-y-1 font-mono">
+                  <div className="text-xs text-stone-600 space-y-1 font-mono">
                     <div className="flex justify-between">
                       <span>Total:</span>
-                      <span className="font-bold text-white">₹630.00</span>
+                      <span className="font-bold text-stone-900">₹630.00</span>
                     </div>
-                    <div className="flex justify-between text-stone-400 text-[11px]">
-                      <span>Loyalty Points:</span>
-                      <span className="text-amber-400 font-bold">+6 pts</span>
-                    </div>
+
                   </div>
                   <div className="pt-2 flex gap-2">
-                    <button className="flex-1 py-2 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center gap-1">
+                    <button className="flex-1 py-2 rounded-lg bg-emerald-600 text-stone-900 font-black text-xs flex items-center justify-center gap-1">
                       <span>💬 WhatsApp Bill</span>
                     </button>
-                    <button className="flex-1 py-2 rounded-lg bg-stone-800 text-stone-200 font-bold text-xs">
+                    <button className="flex-1 py-2 rounded-lg bg-stone-100 text-stone-700 font-bold text-xs">
                       🖨️ Thermal Print
                     </button>
                   </div>
@@ -526,10 +545,10 @@ export default function Home() {
             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
               Interactive ROI Calculator
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
+            <h2 className="text-2xl sm:text-3xl font-black text-stone-900">
               Calculate Your Monthly Revenue Growth
             </h2>
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-stone-500">
               See how autonomous QR ordering and faster turnover directly boost your bottom line.
             </p>
           </div>
@@ -539,7 +558,7 @@ export default function Home() {
             <div className="space-y-6 text-left">
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-stone-300">Daily Table Orders Served</span>
+                  <span className="text-stone-600">Daily Table Orders Served</span>
                   <span className="text-amber-400 font-mono text-sm">{dailyTables} tables/day</span>
                 </div>
                 <input
@@ -555,7 +574,7 @@ export default function Home() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-stone-300">Average Bill Amount (Ticket Size)</span>
+                  <span className="text-stone-600">Average Bill Amount (Ticket Size)</span>
                   <span className="text-amber-400 font-mono text-sm">₹{avgTicket}</span>
                 </div>
                 <input
@@ -569,7 +588,7 @@ export default function Home() {
                 />
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-stone-950/80 border border-stone-800 text-[11px] text-stone-400 leading-relaxed">
+              <div className="p-3.5 rounded-2xl bg-white/80 border border-stone-200 text-[11px] text-stone-500 leading-relaxed">
                 💡 <em>Based on hospitality benchmark studies, digital QR menus increase average ticket size by 12% and accelerate table turns by 6 minutes.</em>
               </div>
             </div>
@@ -577,7 +596,7 @@ export default function Home() {
             {/* Output Projection */}
             <div className="bg-stone-950 border border-amber-500/40 rounded-2xl p-6 flex flex-col justify-between text-center space-y-4 shadow-inner">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                <span className="text-[10px] font-black uppercase tracking-wider text-stone-500">
                   Estimated Monthly Revenue Lift
                 </span>
                 <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono mt-1">
@@ -588,9 +607,9 @@ export default function Home() {
                 </span>
               </div>
 
-              <div className="border-t border-stone-800 pt-3 flex justify-between text-xs text-stone-300">
+              <div className="border-t border-stone-200 pt-3 flex justify-between text-xs text-stone-600">
                 <span>QR Café SaaS Plan:</span>
-                <span className="font-mono text-white font-bold">₹799 / mo</span>
+                <span className="font-mono text-stone-900 font-bold">₹799 / mo</span>
               </div>
 
               <Link
@@ -609,26 +628,26 @@ export default function Home() {
             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
               Trusted by 100+ Café Founders
             </span>
-            <h2 className="text-3xl font-black text-white">Loved by High-Volume Kitchens</h2>
+            <h2 className="text-3xl font-black text-stone-900">Loved by High-Volume Kitchens</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, idx) => (
               <div
                 key={idx}
-                className="bg-stone-900/60 border border-stone-800 rounded-3xl p-6 space-y-4 shadow-lg backdrop-blur-md flex flex-col justify-between"
+                className="bg-white border border-stone-200 rounded-3xl p-6 space-y-4 shadow-lg backdrop-blur-md flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <span className="text-amber-400 text-sm tracking-widest">{t.rating}</span>
-                  <p className="text-xs text-stone-300 leading-relaxed italic">&quot;{t.quote}&quot;</p>
+                  <p className="text-xs text-stone-600 leading-relaxed italic">&quot;{t.quote}&quot;</p>
                 </div>
-                <div className="border-t border-stone-800 pt-3 flex items-center gap-3">
+                <div className="border-t border-stone-200 pt-3 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold flex items-center justify-center text-sm">
                     {t.author.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">{t.author}</h4>
-                    <p className="text-[10px] text-stone-400">{t.role} • {t.tables}</p>
+                    <h4 className="text-xs font-bold text-stone-900">{t.author}</h4>
+                    <p className="text-[10px] text-stone-500">{t.role} • {t.tables}</p>
                   </div>
                 </div>
               </div>
@@ -642,10 +661,10 @@ export default function Home() {
             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
               Transparent Flat Pricing
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
+            <h2 className="text-2xl sm:text-3xl font-black text-stone-900">
               One Simple All-in-One Plan
             </h2>
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-stone-500">
               No hidden fees, no limits, no feature lockouts. <strong>7-day full-access free trial</strong> included.
             </p>
           </div>
@@ -657,37 +676,37 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
               <div>
-                <h3 className="text-xl font-black text-white">All-in-One Pro Plan</h3>
-                <p className="text-xs text-stone-400 mt-0.5">Everything you need to operate a modern café or restaurant</p>
+                <h3 className="text-xl font-black text-stone-900">All-in-One Pro Plan</h3>
+                <p className="text-xs text-stone-500 mt-0.5">Everything you need to operate a modern café or restaurant</p>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-black text-amber-400 font-mono">₹799</span>
-                <span className="text-xs text-stone-400">/ month</span>
+                <span className="text-xs text-stone-500">/ month</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="flex items-center gap-2 text-xs text-stone-200">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span><strong>Unlimited Tables</strong> &amp; QR Tent Stands</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-stone-200">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span><strong>Unlimited Menu Dishes</strong> &amp; Modifiers</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-stone-200">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span><strong>Live Kitchen Display (KDS)</strong> with Voice Calls</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-stone-200">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span>Point-of-Sale (POS) Fast Billing &amp; Receipts</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-stone-200">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span>Automated GST Tax Invoicing &amp; Analytics</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-stone-200">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span>Custom Logo, Theme Branding &amp; Google Reviews</span>
               </div>
@@ -708,7 +727,7 @@ export default function Home() {
             <span className="text-xs font-black uppercase tracking-widest text-amber-400">
               Frequently Asked Questions
             </span>
-            <h2 className="text-3xl font-black text-white">Got Questions? We&apos;ve Got Answers</h2>
+            <h2 className="text-3xl font-black text-stone-900">Got Questions? We&apos;ve Got Answers</h2>
           </div>
 
           <div className="space-y-3">
@@ -717,18 +736,18 @@ export default function Home() {
               return (
                 <div
                   key={idx}
-                  className="bg-stone-900/70 border border-stone-800/80 rounded-2xl overflow-hidden transition-colors"
+                  className="bg-white/70 border border-stone-200 rounded-2xl overflow-hidden transition-colors"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
                     className="w-full p-4 text-left flex justify-between items-center gap-4 cursor-pointer"
                   >
-                    <span className="text-xs sm:text-sm font-bold text-white">{faq.q}</span>
+                    <span className="text-xs sm:text-sm font-bold text-stone-900">{faq.q}</span>
                     <span className="text-amber-400 text-sm font-bold">{isOpen ? "−" : "+"}</span>
                   </button>
                   {isOpen && (
-                    <div className="px-4 pb-4 text-xs text-stone-400 leading-relaxed border-t border-stone-800/60 pt-3">
+                    <div className="px-4 pb-4 text-xs text-stone-500 leading-relaxed border-t border-stone-200/60 pt-3">
                       {faq.a}
                     </div>
                   )}
@@ -740,10 +759,10 @@ export default function Home() {
 
         {/* FINAL LAUNCH CTA CARD */}
         <section className="w-full max-w-4xl bg-gradient-to-r from-amber-500/20 via-stone-900 to-amber-500/20 border border-amber-500/40 rounded-3xl p-8 sm:p-12 text-center space-y-6 shadow-2xl backdrop-blur-2xl">
-          <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-black text-stone-900 leading-tight">
             Ready to Automate Your Café?
           </h2>
-          <p className="text-xs sm:text-sm text-stone-300 max-w-xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
             Join forward-thinking café founders accelerating table turnover, cutting food waste, and delighting guests with contactless dine-in.
           </p>
           <div className="pt-2">
@@ -758,14 +777,14 @@ export default function Home() {
       </main>
 
       {/* Clean Modern Footer */}
-      <footer className="border-t border-stone-800/80 py-8 text-center text-xs text-stone-500 bg-stone-950/90 relative z-10">
+      <footer className="border-t border-stone-200 py-8 text-center text-xs text-stone-500 bg-white/90 relative z-10">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} QR Café Platform • Fully Automated Multi-Tenant Restaurant OS</p>
-          <div className="flex items-center gap-6 text-stone-400">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <Link href="/login" className="hover:text-white transition-colors">Staff Login</Link>
-            <Link href="/onboarding" className="hover:text-white transition-colors">Get Started</Link>
+          <div className="flex items-center gap-6 text-stone-500">
+            <a href="#features" className="hover:text-stone-900 transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-stone-900 transition-colors">Pricing</a>
+            <Link href="/login" className="hover:text-stone-900 transition-colors">Staff Login</Link>
+            <Link href="/onboarding" className="hover:text-stone-900 transition-colors">Get Started</Link>
           </div>
         </div>
       </footer>

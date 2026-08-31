@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0a09",
+  themeColor: "#FFFBF5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-stone-950 text-stone-100">
+      <body className="min-h-full flex flex-col bg-[#FFFBF5] text-stone-800">
         <ErrorBoundary>
           <ToastProvider>
             {children}

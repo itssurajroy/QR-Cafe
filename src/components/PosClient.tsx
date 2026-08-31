@@ -193,7 +193,7 @@ export default function PosClient({
           total_paise: finalTotalPaise,
           status: status === "paid" ? "served" : "pending",
           payment_status: status,
-          payment_method: status === "paid" ? paymentMethod : null,
+          payment_method: paymentMethod || "cash",
           order_number: orderNumber,
         })
         .select()

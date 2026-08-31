@@ -31,8 +31,8 @@ export function TablesTab({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-extrabold text-white">Table QR Codes</h2>
-          <p className="text-xs text-stone-400">Generate, inspect, and print table tent cards</p>
+          <h2 className="text-lg font-extrabold text-stone-900">Table QR Codes</h2>
+          <p className="text-xs text-stone-500">Generate, inspect, and print table tent cards</p>
         </div>
 
         <button
@@ -50,18 +50,18 @@ export function TablesTab({
         {tableList.map((t) => (
           <div
             key={t.id}
-            className="bg-stone-900 border border-stone-800 rounded-3xl p-5 text-center space-y-3 shadow-xl flex flex-col justify-between"
+            className="bg-white border border-stone-200 rounded-3xl p-5 text-center space-y-3 shadow-xl flex flex-col justify-between"
           >
             <div>
               <span className="font-black text-amber-400 font-mono text-xl block">{t.label}</span>
-              <span className="text-xs text-stone-400 font-medium">{t.seats} Seats</span>
+              <span className="text-xs text-stone-500 font-medium">{t.seats} Seats</span>
             </div>
 
             <div className="space-y-2">
               <button
                 type="button"
                 onClick={() => showQr(t)}
-                className="w-full py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs cursor-pointer border border-stone-700"
+                className="w-full py-2 rounded-xl bg-stone-100 hover:bg-stone-700 text-stone-200 font-bold text-xs cursor-pointer border border-stone-700"
               >
                 View QR Stand
               </button>
@@ -78,13 +78,13 @@ export function TablesTab({
       </div>
 
       {/* Quick Add Table */}
-      <form onSubmit={handleAddTable} className="bg-stone-900 border border-stone-800 rounded-3xl p-4 flex gap-3 items-center">
+      <form onSubmit={handleAddTable} className="bg-white border border-stone-200 rounded-3xl p-4 flex gap-3 items-center">
         <input
           type="text"
           placeholder="Table Label (e.g. T07)"
           value={newTableLabel}
           onChange={(e) => setNewTableLabel(e.target.value)}
-          className="bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs text-white flex-1 focus:outline-none focus:border-amber-500"
+          className="bg-white border border-stone-200 rounded-xl p-2.5 text-xs text-stone-900 flex-1 focus:outline-none focus:border-amber-500"
         />
         <input
           type="number"
@@ -92,7 +92,7 @@ export function TablesTab({
           max={20}
           value={newTableSeats}
           onChange={(e) => setNewTableSeats(Number(e.target.value))}
-          className="w-24 bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs text-white text-center"
+          className="w-24 bg-white border border-stone-200 rounded-xl p-2.5 text-xs text-stone-900 text-center"
         />
         <button
           type="submit"

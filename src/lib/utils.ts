@@ -255,9 +255,3 @@ export function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-// ─── Loyalty Points ───────────────────────────────────────────────────────────
-
-/** Calculate loyalty points earned from total paise (1 pt per ₹100) */
-export function calculateLoyaltyPoints(totalPaise: number): number {
-  return Math.floor(totalPaise / 10000);
-}

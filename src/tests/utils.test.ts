@@ -23,7 +23,6 @@ import {
   getStarRating,
   truncate,
   generateSlug,
-  calculateLoyaltyPoints,
   getUrgencyColor,
 } from "../lib/utils";
 
@@ -228,16 +227,6 @@ describe("generateSlug()", () => {
 
   it("handles special chars", () => {
     expect(generateSlug("Café@2024")).toBe("caf2024");
-  });
-});
-
-// ─── Loyalty ──────────────────────────────────────────────────────────────────
-
-describe("calculateLoyaltyPoints()", () => {
-  it("gives 1 pt per ₹100", () => {
-    expect(calculateLoyaltyPoints(10000)).toBe(1);  // ₹100 = 1 pt
-    expect(calculateLoyaltyPoints(50000)).toBe(5);  // ₹500 = 5 pts
-    expect(calculateLoyaltyPoints(9999)).toBe(0);   // ₹99.99 = 0 pts
   });
 });
 

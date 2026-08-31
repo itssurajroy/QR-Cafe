@@ -19,15 +19,15 @@ const BASE =
 
 const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
-    "bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 shadow-md shadow-amber-500/25",
+    "bg-[#D97706] hover:bg-[#B45309] text-white shadow-md shadow-amber-500/20",
   ghost:
-    "bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700",
+    "bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-sm",
   danger:
-    "bg-red-950 hover:bg-red-900 text-red-300 border border-red-800",
+    "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200",
   outline:
-    "bg-transparent hover:bg-stone-900 text-stone-300 border border-stone-700",
+    "bg-transparent hover:bg-stone-50 text-stone-600 border border-stone-300",
   success:
-    "bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800",
+    "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200",
 };
 
 const SIZES: Record<NonNullable<ButtonProps["size"]>, string> = {

@@ -32,7 +32,7 @@ export function MenuItemCard({
 
   return (
     <div
-      className="bg-stone-900/80 border border-stone-800/90 hover:border-stone-700/60 rounded-3xl p-3.5 flex gap-3.5 shadow-lg transition-all active:scale-[0.99] group relative backdrop-blur-md animate-fade-in-up"
+      className="bg-white border border-stone-200 hover:border-stone-700/60 rounded-3xl p-3.5 flex gap-3.5 shadow-lg transition-all active:scale-[0.99] group relative backdrop-blur-md animate-fade-in-up"
       style={{ animationDelay: `${idx * 30}ms`, animationFillMode: "both" }}
     >
       {isFeatured && (
@@ -43,7 +43,7 @@ export function MenuItemCard({
 
       {/* Dish Visual Thumbnail */}
       <div
-        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 bg-stone-950 border border-stone-800 relative cursor-pointer touch-manipulation shadow-md"
+        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 bg-stone-50 border border-stone-200 relative cursor-pointer touch-manipulation shadow-md"
         onClick={() => onImageClick(item)}
       >
         <img
@@ -61,7 +61,7 @@ export function MenuItemCard({
         >
           ●
         </span>
-        <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md text-[9px] font-bold text-stone-300">
+        <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md text-[9px] font-bold text-stone-600">
           ⏱ {prepTime}
         </span>
       </div>
@@ -69,7 +69,7 @@ export function MenuItemCard({
       {/* Dish Details */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <div>
-          <h3 className="font-extrabold text-white text-sm sm:text-base tracking-tight truncate">
+          <h3 className="font-extrabold text-stone-900 text-sm sm:text-base tracking-tight truncate">
             {item.name}
           </h3>
 
@@ -84,7 +84,7 @@ export function MenuItemCard({
           </div>
 
           {item.description && (
-            <p className="text-xs text-stone-400 mt-1 leading-relaxed line-clamp-2">
+            <p className="text-xs text-stone-500 mt-1 leading-relaxed line-clamp-2">
               {item.description}
             </p>
           )}
@@ -106,7 +106,7 @@ export function MenuItemCard({
                 <span>{tAdd}</span>
               </button>
             ) : (
-              <div className="flex items-center gap-1.5 bg-stone-950 border border-stone-800 px-2 py-1 rounded-2xl shadow-inner">
+              <div className="flex items-center gap-1.5 bg-stone-50 border border-stone-200 px-2 py-1 rounded-2xl shadow-inner">
                 <button
                   type="button"
                   onClick={() => onDecrease(item.id)}

@@ -2,11 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --background: #0c0a09;
-  --foreground: #f5f5f4;
-  --accent: #f59e0b;
-  --accent-rgb: 245, 158, 11;
-  --accent-amber: #f59e0b;
+  --background: #FFFBF5;
+  --foreground: #1c1917;
+  --accent: #D97706;
+  --accent-rgb: 217, 119, 6;
+  --accent-amber: #D97706;
   --font-heading: 'Outfit', system-ui, sans-serif;
 }
 
@@ -21,18 +21,17 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Custom sleek scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1c1917;
+  background: #f5f5f4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #44403c;
+  background: #a8a29e;
   border-radius: 9999px;
 }
 
@@ -44,44 +43,44 @@ h1, h2, h3, h4, h5, h6 {
    GLASSMORPHISM UTILITIES
    ============================================ */
 .glass {
-  background: rgba(28, 25, 23, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .glass-panel {
-  background: rgba(28, 25, 23, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(68, 64, 60, 0.5);
+  border: 1px solid rgba(231, 229, 228, 0.9);
 }
 
 .glass-panel-glow {
-  background: rgba(28, 25, 23, 0.85);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(var(--accent-rgb), 0.3);
-  box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 0 20px rgba(var(--accent-rgb), 0.06);
 }
 
 .glass-card {
-  background: rgba(28, 25, 23, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  background: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #e7e5e4;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.04);
 }
 
 /* ============================================
    GRADIENT MESH BACKGROUNDS
    ============================================ */
 .gradient-mesh {
-  background-color: #0c0a09;
+  background-color: var(--background);
   background-image:
     radial-gradient(ellipse 80% 50% at 20% 20%, rgba(var(--accent-rgb), 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 80% at 50% 0%, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%);
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(var(--accent-rgb), 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 80% at 50% 0%, rgba(var(--accent-rgb), 0.04) 0%, transparent 70%);
 }
 
 /* ============================================
@@ -93,7 +92,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #1c1917 25%, #292524 50%, #1c1917 75%);
+  background: linear-gradient(90deg, #f5f5f4 25%, #e7e5e4 50%, #f5f5f4 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -169,11 +168,12 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    ACCENT COLOR SYSTEM (Per-Café Theming)
    ============================================ */
-.accent-btn { background-color: var(--accent); color: #0c0a09; }
-.accent-btn:hover { filter: brightness(1.1); }
+.accent-btn { background-color: var(--accent); color: #ffffff; }
+.accent-btn:hover { filter: brightness(1.06); }
 .accent-text { color: var(--accent); }
 .accent-border { border-color: var(--accent); }
-.accent-bg-subtle { background-color: rgba(var(--accent-rgb), 0.12); }
+.accent-bg-subtle { background-color: rgba(var(--accent-rgb), 0.08); }
+::selection { background: #D97706; color: #fff; }
 
 /* ============================================
    INTERACTIVE ELEMENTS

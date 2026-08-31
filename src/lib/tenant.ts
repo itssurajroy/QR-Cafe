@@ -89,6 +89,11 @@ export async function getTenantByTableToken(
   };
 }
 
+import { resolveTableByLabel as _resolve } from "./table-helpers";
+export function resolveTableByLabel(tables: { label: string }[], rawLabel: string) {
+  return _resolve(tables as any, rawLabel) as any;
+}
+
 // Resolve a tenant and table by cafe slug and table label (used by /c/[slug]/t/[tableLabel]).
 export async function getTenantBySlugAndTableLabel(
   slug: string,
@@ -98,18 +103,20 @@ export async function getTenantBySlugAndTableLabel(
   const tenant = await getRestaurantBySlug(slug);
   if (!tenant) return { tenant: null, table: null };
 
-  const cleanLabel = decodeURIComponent(tableLabel).trim();
-
-  // Search by exact label or case-insensitive
-  const { data: table } = await db
+  const { data: tables } = await db
     .from("restaurant_tables")
     .select("id, label, seats, qr_token, active, restaurant_id")
     .eq("restaurant_id", tenant.id)
-    .ilike("label", cleanLabel)
+    .eq("active", true);
+
+  const table = resolveTableByLabel((tables as any) || [], tableLabel);
+  if (table) return { tenant, table };
+  const { data: fallback } = await db
+    .from("restaurant_tables")
+    .select("id, label, seats, qr_token, active, restaurant_id")
+    .eq("restaurant_id", tenant.id)
+    .ilike("label", decodeURIComponent(tableLabel).trim())
     .maybeSingle();
 
-  return {
-    tenant,
-    table: table || null,
-  };
+  return { tenant, table: fallback || null };
 }

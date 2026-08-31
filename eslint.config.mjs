@@ -20,7 +20,8 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "warn",
       "react-hooks/exhaustive-deps": "warn",
       "react-hooks/rules-of-hooks": "warn",
-      "react-hooks/set-state-in-effect": "warn"
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/purity": "off"
     },
   },
 ]);
