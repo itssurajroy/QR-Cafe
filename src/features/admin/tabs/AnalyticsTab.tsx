@@ -13,23 +13,23 @@ interface AnalyticsTabProps {
 
 export function ReportSummary({ report }: AnalyticsTabProps) {
   return (
-    <div className="bg-white border border-stone-200 rounded-3xl p-6 space-y-6 shadow-xl">
-      <h2 className="text-base font-black text-stone-900">Today Sales Summary</h2>
+    <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 space-y-6 shadow-xl">
+      <h2 className="text-base font-black text-white">Today Sales Summary</h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-1">
-          <span className="text-[10px] font-bold text-stone-500 uppercase">Today Revenue</span>
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <span className="text-[10px] font-bold text-stone-400 uppercase">Today Revenue</span>
           <div className="text-2xl font-black text-amber-400 font-mono">{paise(report.revenue)}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-1">
-          <span className="text-[10px] font-bold text-stone-500 uppercase">Paid Orders</span>
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <span className="text-[10px] font-bold text-stone-400 uppercase">Paid Orders</span>
           <div className="text-2xl font-black text-emerald-400 font-mono">{report.paid}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-1">
-          <span className="text-[10px] font-bold text-stone-500 uppercase">Total Tickets</span>
-          <div className="text-2xl font-black text-stone-900 font-mono">{report.orders}</div>
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <span className="text-[10px] font-bold text-stone-400 uppercase">Total Tickets</span>
+          <div className="text-2xl font-black text-white font-mono">{report.orders}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-1">
-          <span className="text-[10px] font-bold text-stone-500 uppercase">Avg Ticket Size</span>
+        <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+          <span className="text-[10px] font-bold text-stone-400 uppercase">Avg Ticket Size</span>
           <div className="text-2xl font-black text-amber-400 font-mono">{paise(report.avg)}</div>
         </div>
       </div>
@@ -45,16 +45,16 @@ interface FloorIntelligenceProps {
 
 export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }: FloorIntelligenceProps) {
   return (
-    <div className="bg-white border border-stone-200 rounded-3xl p-6 space-y-6 shadow-xl">
+    <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 space-y-6 shadow-xl">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
-          <h2 className="text-base font-black text-stone-900">Floor Intelligence &amp; Dining Trends</h2>
-          <p className="text-xs text-stone-500">Peak dining rush hours, dish velocity &amp; revenue channels</p>
+          <h2 className="text-base font-black text-white">Floor Intelligence &amp; Dining Trends</h2>
+          <p className="text-xs text-stone-400">Peak dining rush hours, dish velocity &amp; revenue channels</p>
         </div>
         <button
           type="button"
           onClick={loadAnalytics}
-          className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-700 text-stone-600 text-xs font-bold border border-stone-700 cursor-pointer"
+          className="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-bold border border-stone-700 cursor-pointer"
         >
           🔄 Refresh Stats
         </button>
@@ -68,9 +68,9 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
       ) : analytics ? (
         <div className="space-y-6">
           {/* 1. Peak Hour Rush Heatmap (8 AM - 11 PM) */}
-          <div className="p-5 rounded-2xl bg-white border border-stone-200 space-y-3">
+          <div className="p-5 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
                 🔥 Peak Hour Dining Rush Heatmap (8:00 AM – 11:00 PM)
               </span>
               <span className="text-[10px] text-stone-500 font-mono">Floor Occupancy Intensity</span>
@@ -108,14 +108,14 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                           : "bg-emerald-600/70"
                       } group-hover:scale-105`}
                     ></div>
-                    <span className="text-[9px] font-mono text-stone-500 block mt-1">
+                    <span className="text-[9px] font-mono text-stone-400 block mt-1">
                       {slot.hour.replace(" ", "")}
                     </span>
 
                     {/* Tooltip on Hover */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-white border border-stone-700 text-stone-900 text-[10px] rounded-lg p-2 whitespace-nowrap shadow-xl z-20 pointer-events-none font-sans">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-stone-900 border border-stone-700 text-white text-[10px] rounded-lg p-2 whitespace-nowrap shadow-xl z-20 pointer-events-none font-sans">
                       <p className="font-bold text-amber-400">{slot.hour} • {slot.label}</p>
-                      <p className="text-stone-600 font-mono">{slot.count} guest orders</p>
+                      <p className="text-stone-300 font-mono">{slot.count} guest orders</p>
                     </div>
                   </div>
                 );
@@ -126,8 +126,8 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
           {/* 2. Leaderboards & Channels */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Top Selling Leaderboard */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-3">
-              <span className="text-xs font-bold text-stone-900 uppercase tracking-wider block">
+            <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
+              <span className="text-xs font-bold text-white uppercase tracking-wider block">
                 🏆 Top 10 High-Velocity Dishes
               </span>
               <div className="space-y-2">
@@ -138,12 +138,12 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                   { name: "Signature Cappuccino", quantity: 76, revenue: 13680 },
                   { name: "Pesto Genovese Pasta", quantity: 62, revenue: 19840 },
                 ]).map((it: any, idx: number) => (
-                  <div key={idx} className="flex justify-between items-center text-xs border-b border-stone-200/40 pb-1.5">
+                  <div key={idx} className="flex justify-between items-center text-xs border-b border-stone-800/40 pb-1.5">
                     <div className="flex items-center gap-2">
                       <span className="w-4 text-center font-mono text-[10px] text-stone-500 font-bold">
                         #{idx + 1}
                       </span>
-                      <span className="text-stone-900 font-medium">{it.name}</span>
+                      <span className="text-white font-medium">{it.name}</span>
                     </div>
                     <div className="text-right">
                       <span className="text-amber-400 font-mono font-bold">×{it.quantity}</span>
@@ -154,20 +154,20 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
             </div>
 
             {/* Payment Distribution */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-3 flex flex-col justify-between">
+            <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3 flex flex-col justify-between">
               <div>
-                <span className="text-xs font-bold text-stone-900 uppercase tracking-wider block mb-2">
+                <span className="text-xs font-bold text-white uppercase tracking-wider block mb-2">
                   💳 Settlement Methods
                 </span>
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/60 border border-stone-200">
-                    <span className="text-stone-600 font-medium">💵 Cash at Counter</span>
+                  <div className="flex justify-between items-center p-2.5 rounded-xl bg-stone-900/60 border border-stone-800">
+                    <span className="text-stone-300 font-medium">💵 Cash at Counter</span>
                     <span className="font-bold font-mono text-amber-400">
                       {analytics.cash_count || 148} orders (PAID)
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-2.5 rounded-xl bg-white/60 border border-stone-200">
-                    <span className="text-stone-600 font-medium">📱 UPI / QR Channels</span>
+                  <div className="flex justify-between items-center p-2.5 rounded-xl bg-stone-900/60 border border-stone-800">
+                    <span className="text-stone-300 font-medium">📱 UPI / QR Channels</span>
                     <span className="font-bold font-mono text-emerald-400">
                       {analytics.upi_count || 32} orders
                     </span>
@@ -175,7 +175,7 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-stone-600">
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-stone-300">
                 💡 <strong>Smart Floor Tip</strong>: Peak rush occurs between <strong>7:00 PM – 9:00 PM</strong>. Prepping coffee beans and pizza dough before 6:30 PM reduces ticket dispatch times by 4.2 minutes.
               </div>
             </div>

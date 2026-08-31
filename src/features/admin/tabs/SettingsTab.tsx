@@ -86,31 +86,31 @@ export function SettingsTab(props: SettingsTabProps) {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-stone-900 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
             <span>⚙️ Café Core Settings & Financial Governance</span>
           </h2>
-          <p className="text-xs text-stone-500 mt-1">
+          <p className="text-xs text-stone-400 mt-1">
             Global tax rules, official receipts info, and UPI payment setup.
           </p>
         </div>
       </div>
 
-      <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8">
+      <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8">
         <form onSubmit={handleSaveSettings} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-black text-stone-500 uppercase tracking-wider block">
+              <label className="text-xs font-black text-stone-400 uppercase tracking-wider block">
                 Brand Name (Receipts & QR)
               </label>
               <input
                 required
-                className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm font-bold text-stone-900 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-amber-500 transition-colors"
                 value={props.settingsCafeName}
                 onChange={(e) => props.setSettingsCafeName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black text-stone-500 uppercase tracking-wider block">
+              <label className="text-xs font-black text-stone-400 uppercase tracking-wider block">
                 Tax Rate (%)
               </label>
               <input
@@ -118,20 +118,20 @@ export function SettingsTab(props: SettingsTabProps) {
                 step="0.1"
                 min="0"
                 required
-                className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm font-bold text-stone-900 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-amber-500 transition-colors"
                 value={props.settingsTaxRate}
                 onChange={(e) => props.setSettingsTaxRate(Number(e.target.value))}
               />
             </div>
           </div>
 
-          <div className="space-y-2 pt-4 border-t border-stone-200/60">
-            <label className="text-xs font-black text-stone-500 uppercase tracking-wider block">
+          <div className="space-y-2 pt-4 border-t border-stone-800/60">
+            <label className="text-xs font-black text-stone-400 uppercase tracking-wider block">
               Direct-to-Bank UPI ID (Zero Commission)
             </label>
             <input
               placeholder="e.g. owner-name@okbank"
-              className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm font-bold text-emerald-400 focus:outline-none focus:border-amber-500 transition-colors"
+              className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm font-bold text-emerald-400 focus:outline-none focus:border-amber-500 transition-colors"
               value={props.settingsUpiId}
               onChange={(e) => props.setSettingsUpiId(e.target.value)}
             />
@@ -140,8 +140,8 @@ export function SettingsTab(props: SettingsTabProps) {
             </p>
           </div>
 
-          <div className="space-y-2 pt-4 border-t border-stone-200/60">
-            <label className="text-xs font-black text-stone-500 uppercase tracking-wider block">
+          <div className="space-y-2 pt-4 border-t border-stone-800/60">
+            <label className="text-xs font-black text-stone-400 uppercase tracking-wider block">
               Custom UPI QR Image (Optional)
             </label>
             <div className="flex items-center gap-4">
@@ -154,7 +154,7 @@ export function SettingsTab(props: SettingsTabProps) {
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={uploadingImage}
-                  className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs font-bold text-stone-600 focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-stone-100 file:text-amber-400 hover:file:bg-stone-700 transition-colors cursor-pointer"
+                  className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2 text-xs font-bold text-stone-300 focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-stone-800 file:text-amber-400 hover:file:bg-stone-700 transition-colors cursor-pointer"
                 />
                 {uploadingImage && <p className="text-[10px] text-amber-500 mt-1">Uploading...</p>}
               </div>
@@ -164,23 +164,23 @@ export function SettingsTab(props: SettingsTabProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-200/60">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-800/60">
             <div className="space-y-2">
-              <label className="text-xs font-black text-stone-500 uppercase tracking-wider block">
+              <label className="text-xs font-black text-stone-400 uppercase tracking-wider block">
                 Support Phone
               </label>
               <input
-                className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm font-bold text-stone-900 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-amber-500 transition-colors"
                 value={props.settingsPhone}
                 onChange={(e) => props.setSettingsPhone(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black text-stone-500 uppercase tracking-wider block">
+              <label className="text-xs font-black text-stone-400 uppercase tracking-wider block">
                 Address (For Receipts)
               </label>
               <input
-                className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm font-bold text-stone-900 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-amber-500 transition-colors"
                 value={props.settingsAddress}
                 onChange={(e) => props.setSettingsAddress(e.target.value)}
               />

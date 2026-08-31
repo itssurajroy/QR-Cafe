@@ -128,19 +128,19 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-stone-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-black">
+    <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-black">
       {/* Top Header */}
-      <header className="border-b border-stone-200/80 bg-white/60 backdrop-blur-md px-6 py-4">
+      <header className="border-b border-stone-800/80 bg-stone-900/60 backdrop-blur-md px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-lg shadow-md shadow-amber-500/20">
               <CoffeeIcon className="w-5 h-5" />
             </div>
-            <span className="font-extrabold text-stone-900 text-base tracking-tight">QR Café Platform</span>
+            <span className="font-extrabold text-white text-base tracking-tight">QR Café Platform</span>
           </Link>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs text-stone-500 hidden sm:inline">Already registered?</span>
+            <span className="text-xs text-stone-400 hidden sm:inline">Already registered?</span>
             <Link
               href="/login"
               className="text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl bg-amber-500/10"
@@ -162,7 +162,7 @@ export default function OnboardingPage() {
             >
               1
             </span>
-            <span className={`text-xs font-bold ${step >= 1 ? "text-stone-900" : "text-stone-500"}`}>
+            <span className={`text-xs font-bold ${step >= 1 ? "text-white" : "text-stone-500"}`}>
               Café Setup
             </span>
           </div>
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
             >
               2
             </span>
-            <span className={`text-xs font-bold ${step >= 2 ? "text-stone-900" : "text-stone-500"}`}>
+            <span className={`text-xs font-bold ${step >= 2 ? "text-white" : "text-stone-500"}`}>
               Tables & Menu
             </span>
           </div>
@@ -188,21 +188,21 @@ export default function OnboardingPage() {
             >
               3
             </span>
-            <span className={`text-xs font-bold ${step >= 3 ? "text-stone-900" : "text-stone-500"}`}>
+            <span className={`text-xs font-bold ${step >= 3 ? "text-white" : "text-stone-500"}`}>
               Account & Launch
             </span>
           </div>
         </div>
 
         {/* Wizard Container */}
-        <div className="bg-white/90 border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleOnboard}>
             {/* Step 1: Café Identity */}
             {step === 1 && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-xl font-extrabold text-stone-900">Create Your Café Space</h2>
-                  <p className="text-xs text-stone-500 mt-1">
+                  <h2 className="text-xl font-extrabold text-white">Create Your Café Space</h2>
+                  <p className="text-xs text-stone-400 mt-1">
                     Set up your business name and custom ordering domain.
                   </p>
                 </div>
@@ -217,7 +217,7 @@ export default function OnboardingPage() {
                     placeholder="e.g. Blue Lagoon Specialty Coffee"
                     value={cafeName}
                     onChange={(e) => autoSlug(e.target.value)}
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
                   />
                 </div>
 
@@ -225,7 +225,7 @@ export default function OnboardingPage() {
                   <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Store Link (URL)
                   </label>
-                  <div className="flex items-center bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs">
+                  <div className="flex items-center bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs">
                     <span className="text-stone-500 font-mono">yourdomain.com/c/</span>
                     <input
                       type="text"
@@ -246,7 +246,7 @@ export default function OnboardingPage() {
                     <select
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
                     >
                       <option value="INR">INR (₹)</option>
                       <option value="USD">USD ($)</option>
@@ -263,7 +263,7 @@ export default function OnboardingPage() {
                     <select
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
                     >
                       <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
                       <option value="America/New_York">America/New_York (EST)</option>
@@ -280,7 +280,7 @@ export default function OnboardingPage() {
                     placeholder="e.g. Handcrafted brews & artisanal bites"
                     value={tagline}
                     onChange={(e) => setTagline(e.target.value)}
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
                   />
                 </div>
 
@@ -296,9 +296,9 @@ export default function OnboardingPage() {
                     placeholder="e.g. https://g.page/r/your-cafe/review or https://search.google.com/..."
                     value={googleReviewUrl}
                     onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
                   />
-                  <p className="text-[10px] text-stone-500 mt-1">
+                  <p className="text-[10px] text-stone-400 mt-1">
                     Customers who rate 4★ or 5★ on their live order tracker will be prompted to leave a review directly on your Google page.
                   </p>
                 </div>
@@ -318,8 +318,8 @@ export default function OnboardingPage() {
             {step === 2 && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-xl font-extrabold text-stone-900">Tables & Starter Menu</h2>
-                  <p className="text-xs text-stone-500 mt-1">
+                  <h2 className="text-xl font-extrabold text-white">Tables & Starter Menu</h2>
+                  <p className="text-xs text-stone-400 mt-1">
                     Choose your seating setup and starter menu template to launch fast.
                   </p>
                 </div>
@@ -337,7 +337,7 @@ export default function OnboardingPage() {
                       onChange={(e) => setTableCount(Number(e.target.value))}
                       className="flex-1 accent-amber-500 cursor-pointer"
                     />
-                    <span className="font-mono font-bold text-amber-400 bg-white px-3 py-1.5 rounded-xl border border-stone-200 text-xs">
+                    <span className="font-mono font-bold text-amber-400 bg-stone-950 px-3 py-1.5 rounded-xl border border-stone-800 text-xs">
                       {tableCount} Tables (T01 - T{tableCount < 10 ? "0" + tableCount : tableCount})
                     </span>
                   </div>
@@ -355,14 +355,14 @@ export default function OnboardingPage() {
                         className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
                           preset === opt.id
                             ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500"
-                            : "bg-white border-stone-200/80 hover:border-stone-700"
+                            : "bg-stone-950 border-stone-800/80 hover:border-stone-700"
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-lg">{opt.icon}</span>
-                          <span className="font-bold text-xs text-stone-900">{opt.title}</span>
+                          <span className="font-bold text-xs text-white">{opt.title}</span>
                         </div>
-                        <p className="text-[11px] text-stone-500 leading-relaxed">{opt.desc}</p>
+                        <p className="text-[11px] text-stone-400 leading-relaxed">{opt.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -391,8 +391,8 @@ export default function OnboardingPage() {
             {step === 3 && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-xl font-extrabold text-stone-900">Owner Account & Security</h2>
-                  <p className="text-xs text-stone-500 mt-1">
+                  <h2 className="text-xl font-extrabold text-white">Owner Account & Security</h2>
+                  <p className="text-xs text-stone-400 mt-1">
                     Your café will be provisioned with a <strong>7-Day Free Trial</strong> (All-in-One Plan: Unlimited Tables, KDS & Billing).
                   </p>
                 </div>
@@ -400,8 +400,8 @@ export default function OnboardingPage() {
                 {/* Plan Highlights Badge */}
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-black text-stone-900 block">All-in-One Plan (7 Days Free)</span>
-                    <span className="text-[11px] text-stone-500">Unlimited Tables, Real-time KDS, Full POS Billing</span>
+                    <span className="font-black text-white block">All-in-One Plan (7 Days Free)</span>
+                    <span className="text-[11px] text-stone-400">Unlimited Tables, Real-time KDS, Full POS Billing</span>
                   </div>
                   <span className="text-amber-400 font-mono font-black text-xs">₹799/mo after trial</span>
                 </div>
@@ -416,7 +416,7 @@ export default function OnboardingPage() {
                     placeholder="manager@yourcafe.com"
                     value={ownerEmail}
                     onChange={(e) => setOwnerEmail(e.target.value)}
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
@@ -430,7 +430,7 @@ export default function OnboardingPage() {
                     placeholder="••••••••••••"
                     value={ownerPassword}
                     onChange={(e) => setOwnerPassword(e.target.value)}
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
@@ -463,7 +463,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-stone-200/60 py-4 text-center text-xs text-stone-500">
+      <footer className="border-t border-stone-800/60 py-4 text-center text-xs text-stone-500">
         QR Café • Next-Gen Point of Sale & Dine-In Ordering
       </footer>
     </main>

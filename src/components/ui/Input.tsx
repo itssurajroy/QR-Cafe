@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-[10px] font-bold text-stone-600 uppercase tracking-wider"
+            className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider"
           >
             {label}
           </label>
@@ -39,11 +39,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={`
-              w-full bg-white border rounded-xl px-3 py-2.5 text-xs text-stone-800
-              placeholder-stone-400 transition-colors outline-none shadow-sm
-              focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]/20
+              w-full bg-stone-950 border rounded-xl px-3 py-2.5 text-xs text-stone-200
+              placeholder-stone-600 transition-colors outline-none
+              focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${error ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/20" : "border-stone-200"}
+              ${error ? "border-red-600 focus:border-red-500 focus:ring-red-500/20" : "border-stone-800"}
               ${leftIcon ? "pl-9" : ""}
               ${rightIcon ? "pr-9" : ""}
               ${className}
@@ -89,7 +89,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-[10px] font-bold text-stone-600 uppercase tracking-wider"
+            className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider"
           >
             {label}
           </label>
@@ -99,11 +99,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={`
-            w-full bg-white border rounded-xl px-3 py-2.5 text-xs text-stone-800
-            placeholder-stone-400 transition-colors outline-none resize-none shadow-sm
-            focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]/20
+            w-full bg-stone-950 border rounded-xl px-3 py-2.5 text-xs text-stone-200
+            placeholder-stone-600 transition-colors outline-none resize-none
+            focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30
             disabled:opacity-50
-            ${error ? "border-rose-400" : "border-stone-200"}
+            ${error ? "border-red-600" : "border-stone-800"}
             ${className}
           `}
           {...props}
@@ -117,4 +117,3 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 
 Textarea.displayName = "Textarea";
-

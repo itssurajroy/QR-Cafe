@@ -5,7 +5,8 @@ import { CoffeeIcon, BellIcon } from "@/components/Icons";
 interface MenuHeaderProps {
   restaurantName: string;
   tableLabel: string;
-
+  lang: "en" | "hi";
+  onLangToggle: () => void;
   onHelpClick: () => void;
   vegOnly: boolean;
   onVegToggle: () => void;
@@ -15,14 +16,15 @@ interface MenuHeaderProps {
 export function MenuHeader({
   restaurantName,
   tableLabel,
-
+  lang,
+  onLangToggle,
   onHelpClick,
   vegOnly,
   onVegToggle,
   t,
 }: MenuHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-stone-200/80 px-4 py-3 shadow-xl transition-all">
+    <header className="sticky top-0 z-30 bg-stone-900/95 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 shadow-xl transition-all">
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -30,7 +32,7 @@ export function MenuHeader({
               <CoffeeIcon className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-base font-black text-stone-900 tracking-tight truncate">
+              <h1 className="text-sm sm:text-base font-black text-white tracking-tight truncate">
                 {restaurantName}
               </h1>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -55,7 +57,13 @@ export function MenuHeader({
               <span className="hidden sm:inline">Help</span>
             </button>
 
-
+            <button
+              type="button"
+              onClick={onLangToggle}
+              className="px-2.5 py-1.5 rounded-xl bg-stone-800/90 hover:bg-stone-700 text-stone-200 text-xs font-black border border-stone-700/80 cursor-pointer touch-manipulation font-mono transition-all active:scale-95 shadow-sm"
+            >
+              {lang === "en" ? "🇮🇳 HI" : "🇬🇧 EN"}
+            </button>
 
             <button
               type="button"
@@ -63,7 +71,7 @@ export function MenuHeader({
               className={`flex items-center gap-1.5 text-xs font-black px-3 py-1.5 rounded-xl border transition-all cursor-pointer touch-manipulation active:scale-95 shadow-sm ${
                 vegOnly
                   ? "bg-emerald-950/90 border-emerald-600 text-emerald-400 shadow-emerald-950/50"
-                  : "bg-white border-stone-200 text-stone-500 hover:text-stone-200"
+                  : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>

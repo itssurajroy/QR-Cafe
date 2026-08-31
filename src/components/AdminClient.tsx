@@ -526,7 +526,7 @@ export default function AdminClient({
       url = `${origin}/c/${slug}/t/${encodeURIComponent(tableOrToken.label)}`;
     }
     const dataUrl = await QRCode.toDataURL(url, {
-      width: 800,
+      width: 600,
       margin: 2,
       errorCorrectionLevel: "H",
       color: {
@@ -555,7 +555,7 @@ export default function AdminClient({
   }
 
   return (
-    <main className="min-h-screen bg-[#FFFBF5] text-stone-800 selection:bg-[#D97706] selection:text-white flex flex-col">
+    <main className="min-h-screen bg-stone-950 text-stone-100 selection:bg-amber-500 selection:text-black flex flex-col">
       {/* SaaS Subscription Top Bar Banner */}
       <div
         className={`px-6 py-2.5 text-xs font-bold flex items-center justify-between shadow-md no-print ${
@@ -582,10 +582,10 @@ export default function AdminClient({
             href="/admin/billing"
             className={`px-3 py-1 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
               isSuspended
-                ? "bg-red-600 hover:bg-red-500 text-stone-900"
+                ? "bg-red-600 hover:bg-red-500 text-white"
                 : isTrial
                 ? "bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm"
-                : "bg-emerald-800 hover:bg-emerald-700 text-stone-900"
+                : "bg-emerald-800 hover:bg-emerald-700 text-white"
             }`}
           >
             {isSuspended ? "Renew Now &rarr;" : isTrial ? "Subscribe (₹799/mo) &rarr;" : "Manage Billing &rarr;"}
@@ -593,25 +593,25 @@ export default function AdminClient({
         </div>
       </div>
 
-      <header className="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-md no-print">
+      <header className="bg-stone-900 border-b border-stone-800 sticky top-0 z-20 shadow-md no-print">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-xl shadow-md shadow-amber-500/20">
               📊
             </div>
             <div>
-              <h1 className="font-extrabold text-stone-900 text-base" style={{ fontFamily: "var(--font-heading)" }}>{restaurant?.name || "Café Admin"}</h1>
-              <p className="text-[11px] text-stone-500">Operations &amp; Setup Hub</p>
+              <h1 className="font-extrabold text-white text-base" style={{ fontFamily: "var(--font-heading)" }}>{restaurant?.name || "Café Admin"}</h1>
+              <p className="text-[11px] text-stone-400">Operations &amp; Setup Hub</p>
             </div>
           </div>
 
           {/* Live Revenue Ticker */}
-          <div className="hidden md:flex items-center gap-4 bg-white border border-stone-200 rounded-xl px-3 py-2">
+          <div className="hidden md:flex items-center gap-4 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2">
             <div className="text-center">
               <p className="text-[10px] text-stone-500 uppercase tracking-wider">Today's Revenue</p>
               <p className="text-sm font-black text-amber-400 font-mono">₹{(liveRevenue / 100).toLocaleString("en-IN")}</p>
             </div>
-            <div className="w-px h-6 bg-stone-100"></div>
+            <div className="w-px h-6 bg-stone-800"></div>
             <div className="text-center">
               <p className="text-[10px] text-stone-500 uppercase tracking-wider">Orders</p>
               <p className="text-sm font-black text-emerald-400 font-mono">{liveOrders}</p>
@@ -626,35 +626,35 @@ export default function AdminClient({
       <div className="max-w-5xl mx-auto p-6 space-y-6 no-print flex-1 w-full">
         {/* Onboarding Starter Checklist (Dismissible) */}
         {!dismissChecklist && (
-          <div className="p-4 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-3 relative">
+          <div className="p-4 rounded-3xl bg-stone-900/90 border border-stone-800 shadow-xl space-y-3 relative">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-base">🚀</span>
-                <h3 className="font-black text-xs text-stone-900">Café Launch Checklist</h3>
+                <h3 className="font-black text-xs text-white">Café Launch Checklist</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setDismissChecklist(true)}
-                className="text-[11px] text-stone-500 hover:text-stone-600 font-bold"
+                className="text-[11px] text-stone-500 hover:text-stone-300 font-bold"
               >
                 Dismiss ✕
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-stone-200">
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-950 border border-stone-800">
                 <span className={itemList.length > 0 ? "text-emerald-400 font-bold" : "text-stone-600"}>
                   {itemList.length > 0 ? "✓" : "○"}
                 </span>
-                <span className="text-stone-600">Add Menu Dishes ({itemList.length})</span>
+                <span className="text-stone-300">Add Menu Dishes ({itemList.length})</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-stone-200">
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-950 border border-stone-800">
                 <span className={tableList.length > 0 ? "text-emerald-400 font-bold" : "text-stone-600"}>
                   {tableList.length > 0 ? "✓" : "○"}
                 </span>
-                <span className="text-stone-600">Generate Tables & QRs ({tableList.length})</span>
+                <span className="text-stone-300">Generate Tables & QRs ({tableList.length})</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-stone-200">
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-950 border border-stone-800">
                 <span className="text-amber-400 font-bold">★</span>
                 <Link href={restaurant?.slug ? `/c/${restaurant.slug}` : "/"} className="text-amber-400 hover:underline">
                   Test Guest Menu ↗
@@ -775,11 +775,11 @@ export default function AdminClient({
 
         {/* TAB 6: OWNER GOVERNANCE & DIAGNOSTIC MANUAL */}
         {tab === "help" && (
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl max-w-4xl">
-            <div className="flex justify-between items-start flex-wrap gap-4 border-b border-stone-200 pb-4">
+          <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl max-w-4xl">
+            <div className="flex justify-between items-start flex-wrap gap-4 border-b border-stone-800 pb-4">
               <div>
-                <h2 className="text-xl font-black text-stone-900">🏛️ Owner Governance &amp; Operating Manual</h2>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <h2 className="text-xl font-black text-white">🏛️ Owner Governance &amp; Operating Manual</h2>
+                <p className="text-xs text-stone-400 mt-0.5">
                   Subscription controls, multi-tenant governance, Google Review setup &amp; hardware diagnostics
                 </p>
               </div>
@@ -789,12 +789,12 @@ export default function AdminClient({
             </div>
 
             {/* 1. INTERACTIVE 1-CLICK SYSTEM DIAGNOSTICS */}
-            <div className="p-5 rounded-3xl bg-white border border-amber-500/30 space-y-4 shadow-inner">
+            <div className="p-5 rounded-3xl bg-stone-950 border border-amber-500/30 space-y-4 shadow-inner">
               <div>
                 <h3 className="text-sm font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
                   <span>🛠️ Live Floor &amp; Hardware Self-Diagnostics</span>
                 </h3>
-                <p className="text-[11px] text-stone-500 mt-0.5">
+                <p className="text-[11px] text-stone-400 mt-0.5">
                   Test your browser audio, WhatsApp URL encoding, and tax calculations before operating live.
                 </p>
               </div>
@@ -814,10 +814,10 @@ export default function AdminClient({
                       flash("err", "Web Speech API not supported on this browser.");
                     }
                   }}
-                  className="p-3.5 rounded-2xl bg-white hover:bg-stone-100 border border-stone-200 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">🔊</span>
-                  <div className="text-xs font-bold text-stone-900">Test Voice Call Bell</div>
+                  <div className="text-xs font-bold text-white">Test Voice Call Bell</div>
                   <div className="text-[10px] text-stone-500 font-mono">Speak: Table 01 Call</div>
                 </button>
 
@@ -833,12 +833,13 @@ export default function AdminClient({
                       `Subtotal: ₹600.00\n` +
                       `GST (5%): ₹30.00\n` +
                       `*TOTAL: ₹630.00* (PAID IN CASH)\n` +
+                      `Loyalty Points: +6 pts\n` +
                       `---------------------------------\n` +
                       `Thank you for dining with us! 🙏`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(sampleMsg)}`, "_blank");
                     flash("ok", "💬 WhatsApp Test Receipt Dispatched!");
                   }}
-                  className="p-3.5 rounded-2xl bg-white hover:bg-stone-100 border border-stone-200 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">💬</span>
                   <div className="text-xs font-bold text-emerald-400">Test WhatsApp Bill</div>
@@ -857,7 +858,7 @@ export default function AdminClient({
                     const sgst = (gstTotal / 2).toFixed(2);
                     flash("ok", `🧮 GST Test (₹1,000 Bill): Taxable=₹${taxable}, CGST (${taxRate / 2}%)=₹${cgst}, SGST (${taxRate / 2}%)=₹${sgst}`);
                   }}
-                  className="p-3.5 rounded-2xl bg-white hover:bg-stone-100 border border-stone-200 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">🧮</span>
                   <div className="text-xs font-bold text-amber-400">Verify GST Math</div>
@@ -881,7 +882,7 @@ export default function AdminClient({
                       flash("err", "Server unreachable");
                     }
                   }}
-                  className="p-3.5 rounded-2xl bg-white hover:bg-stone-100 border border-stone-200 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">⚡</span>
                   <div className="text-xs font-bold text-stone-200">Ping Server Latency</div>
@@ -896,19 +897,19 @@ export default function AdminClient({
                 <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
                   A
                 </span>
-                <h3 className="text-sm font-extrabold text-stone-900">Subscription &amp; SaaS Billing Governance</h3>
+                <h3 className="text-sm font-extrabold text-white">Subscription &amp; SaaS Billing Governance</h3>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-2 text-stone-600 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2 text-stone-300 leading-relaxed">
                 <p>
                   QR Café operates on a unified flat plan at <strong>₹799/month</strong> with unlimited tables, dishes, KDS screens, and cash POS registers.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-[11px]">
-                  <div className="p-2.5 rounded-xl bg-white border border-stone-200">
+                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800">
                     <span className="text-stone-500 block">Subscription Status:</span>
                     <span className="text-emerald-400 font-bold uppercase">{plan}</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-white border border-stone-200">
+                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800">
                     <span className="text-stone-500 block">Trial Expiry / Renewal:</span>
                     <span className="text-amber-400 font-bold">{trialEnds ? trialEnds.toLocaleDateString("en-IN") : "Active"}</span>
                   </div>
@@ -930,14 +931,14 @@ export default function AdminClient({
                 <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
                   B
                 </span>
-                <h3 className="text-sm font-extrabold text-stone-900">Floor Deployment &amp; Table QR Stands</h3>
+                <h3 className="text-sm font-extrabold text-white">Floor Deployment &amp; Table QR Stands</h3>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-2 text-stone-600 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2 text-stone-300 leading-relaxed">
                 <p>
                   Each table has a permanent human-readable URL (e.g. <code>/c/{restaurant?.slug || "cafe"}/t/01</code>). In the <strong>Tables Tab</strong>, you can add tables and click <strong>&quot;Print All Tent Cards 🖨️&quot;</strong> to generate ready-to-fold acrylic table inserts.
                 </p>
-                <ul className="space-y-1 text-stone-500 list-disc pl-4 pt-1">
+                <ul className="space-y-1 text-stone-400 list-disc pl-4 pt-1">
                   <li>Table QR stands never expire and work with any standard smartphone camera.</li>
                   <li>Chefs hear spoken announcements immediately on the Kitchen KDS (`/kds`).</li>
                   <li>Cashiers can view all open tables simultaneously on the Cloud POS (`/pos`).</li>
@@ -951,17 +952,17 @@ export default function AdminClient({
                 <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
                   C
                 </span>
-                <h3 className="text-sm font-extrabold text-stone-900">Google Business 5★ Review Capture Setup</h3>
+                <h3 className="text-sm font-extrabold text-white">Google Business 5★ Review Capture Setup</h3>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-2 text-stone-600 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2 text-stone-300 leading-relaxed">
                 <p>
                   To maximize your restaurant&apos;s local Google Maps ranking, set your Google Place Review URL in the <strong>Branding Tab</strong>.
                 </p>
-                <div className="p-3 rounded-xl bg-white border border-stone-200 font-mono text-[11px] text-amber-400">
+                <div className="p-3 rounded-xl bg-stone-900 border border-stone-800 font-mono text-[11px] text-amber-400">
                   Current Review URL: {restaurant?.google_review_url || "Not configured yet (Add in Branding tab)"}
                 </div>
-                <p className="text-stone-500">
+                <p className="text-stone-400">
                   Whenever a guest rates their meal 4★ or 5★ on the live order tracker, or receives a WhatsApp bill, they are 1-click routed directly to leave a 5-star Google review.
                 </p>
               </div>
@@ -998,13 +999,13 @@ export default function AdminClient({
           className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
           onClick={() => setQrModal(null)}
         >
-            <div
-            className="bg-white border border-stone-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center border-t-4 border-t-[#D97706]"
+          <div
+            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-200 pb-2">
-              <h3 className="text-sm font-black text-stone-900" style={{fontFamily:"var(--font-heading)"}}>Table {qrModal.label} — Scan to Order</h3>
-              <button onClick={() => setQrModal(null)} className="text-stone-500 hover:text-stone-900 text-xs">
+            <div className="flex justify-between items-center border-b border-stone-800 pb-2">
+              <h3 className="text-sm font-black text-white">Table {qrModal.label} QR Stand</h3>
+              <button onClick={() => setQrModal(null)} className="text-stone-400 hover:text-white text-xs">
                 ✕
               </button>
             </div>
@@ -1013,14 +1014,14 @@ export default function AdminClient({
               <img src={qrModal.url} alt={`QR for Table ${qrModal.label}`} className="w-56 h-56 mx-auto" />
             </div>
 
-            <p className="text-[11px] text-stone-500">
+            <p className="text-[11px] text-stone-400">
               Scan with any mobile camera to launch digital ordering for Table {qrModal.label}
             </p>
 
             <button
               type="button"
               onClick={() => window.print()}
-              className="w-full py-2.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-black text-xs cursor-pointer shadow-md"
+              className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs cursor-pointer shadow-md"
             >
               Print Stand Card 🖨️
             </button>
@@ -1035,21 +1036,21 @@ export default function AdminClient({
           onClick={() => setShowItemModal(false)}
         >
           <div
-            className="bg-white border border-stone-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
+            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-200 pb-3">
-              <h3 className="text-base font-black text-stone-900">Add Menu Dish</h3>
-              <button onClick={() => setShowItemModal(false)} className="text-stone-500 hover:text-stone-900 text-xs">
+            <div className="flex justify-between items-center border-b border-stone-800 pb-3">
+              <h3 className="text-base font-black text-white">Add Menu Dish</h3>
+              <button onClick={() => setShowItemModal(false)} className="text-stone-400 hover:text-white text-xs">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateItem} className="space-y-3">
               <div>
-                <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block mb-1">Dish Name</label>
+                <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Dish Name</label>
                 <input
-                  className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                  className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                   placeholder="e.g. Hazelnut Iced Latte"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
@@ -1059,9 +1060,9 @@ export default function AdminClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block mb-1">Price (₹)</label>
+                  <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Price (₹)</label>
                   <input
-                    className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                    className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                     placeholder="e.g. 240"
                     type="number"
                     step="0.01"
@@ -1071,9 +1072,9 @@ export default function AdminClient({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block mb-1">Category</label>
+                  <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Category</label>
                   <select
-                    className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                    className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                     value={newItemCatId}
                     onChange={(e) => setNewItemCatId(e.target.value)}
                   >
@@ -1087,16 +1088,16 @@ export default function AdminClient({
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block mb-1">Description (Optional)</label>
+                <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Description (Optional)</label>
                 <input
-                  className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                  className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                   placeholder="Freshly brewed espresso with toasted hazelnut syrup"
                   value={newItemDesc}
                   onChange={(e) => setNewItemDesc(e.target.value)}
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-xs text-stone-600 font-semibold cursor-pointer pt-1">
+              <label className="flex items-center gap-2 text-xs text-stone-300 font-semibold cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={newItemVeg}
@@ -1110,7 +1111,7 @@ export default function AdminClient({
                 <button
                   type="button"
                   onClick={() => setShowItemModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-700 text-stone-600 font-bold text-xs cursor-pointer border border-stone-700"
+                  className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
                 >
                   Cancel
                 </button>
@@ -1133,21 +1134,21 @@ export default function AdminClient({
           onClick={() => setShowCatModal(false)}
         >
           <div
-            className="bg-white border border-stone-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
+            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-200 pb-3">
-              <h3 className="text-base font-black text-stone-900">Create New Category</h3>
-              <button onClick={() => setShowCatModal(false)} className="text-stone-500 hover:text-stone-900 text-xs">
+            <div className="flex justify-between items-center border-b border-stone-800 pb-3">
+              <h3 className="text-base font-black text-white">Create New Category</h3>
+              <button onClick={() => setShowCatModal(false)} className="text-stone-400 hover:text-white text-xs">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateCategory} className="space-y-3">
               <div>
-                <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block mb-1">Category Name</label>
+                <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Category Name</label>
                 <input
-                  className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                  className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                   placeholder="e.g. Artisanal Breads & Toasts"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
@@ -1159,7 +1160,7 @@ export default function AdminClient({
                 <button
                   type="button"
                   onClick={() => setShowCatModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-700 text-stone-600 font-bold text-xs cursor-pointer border border-stone-700"
+                  className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
                 >
                   Cancel
                 </button>
@@ -1182,17 +1183,17 @@ export default function AdminClient({
           onClick={() => setShowBulkMenuModal(false)}
         >
           <div
-            className="bg-white border border-stone-200 rounded-3xl p-6 max-w-2xl w-full space-y-4 shadow-2xl"
+            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-2xl w-full space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-200 pb-3">
+            <div className="flex justify-between items-center border-b border-stone-800 pb-3">
               <div>
-                <h3 className="text-base font-black text-stone-900">📥 Bulk Import Menu Dishes</h3>
-                <p className="text-[11px] text-stone-500">
+                <h3 className="text-base font-black text-white">📥 Bulk Import Menu Dishes</h3>
+                <p className="text-[11px] text-stone-400">
                   Paste raw spreadsheet text or CSV (Format: <code>Dish Name, Price, Category, Veg/Non-Veg, Description</code>)
                 </p>
               </div>
-              <button onClick={() => setShowBulkMenuModal(false)} className="text-stone-500 hover:text-stone-900 text-xs">
+              <button onClick={() => setShowBulkMenuModal(false)} className="text-stone-400 hover:text-white text-xs">
                 ✕
               </button>
             </div>
@@ -1200,7 +1201,7 @@ export default function AdminClient({
             <div className="space-y-3">
               {/* Sample Preset Shortcut */}
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
                   Raw CSV / Spreadsheet Text
                 </label>
                 <button
@@ -1226,7 +1227,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 value={bulkMenuText}
                 onChange={(e) => handleBulkParse(e.target.value)}
                 placeholder="Hazelnut Cold Brew, 220, Coffee, Veg, Espresso and milk&#10;Truffle Pizza, 380, Food, Veg, Crispy sourdough pizza"
-                className="w-full bg-white border border-stone-200 rounded-2xl p-3 text-xs text-stone-100 font-mono focus:outline-none focus:border-amber-500"
+                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-3 text-xs text-stone-100 font-mono focus:outline-none focus:border-amber-500"
               ></textarea>
 
               {/* Live Parsed Preview Table */}
@@ -1235,12 +1236,12 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">
                     ✓ Validated {parsedBulkItems.length} Dishes Ready to Import:
                   </span>
-                  <div className="max-h-40 overflow-y-auto rounded-xl border border-stone-200 bg-white/80 p-2 space-y-1">
+                  <div className="max-h-40 overflow-y-auto rounded-xl border border-stone-800 bg-stone-950/80 p-2 space-y-1">
                     {parsedBulkItems.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-xs p-1.5 rounded-lg hover:bg-white border-b border-stone-200/40">
+                      <div key={idx} className="flex justify-between items-center text-xs p-1.5 rounded-lg hover:bg-stone-900 border-b border-stone-800/40">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${item.isVeg ? "bg-emerald-400" : "bg-red-400"}`}></span>
-                          <span className="font-bold text-stone-900">{item.name}</span>
+                          <span className="font-bold text-white">{item.name}</span>
                           <span className="text-[10px] text-stone-500 font-mono">({item.category})</span>
                         </div>
                         <span className="text-amber-400 font-mono font-bold">₹{item.price}</span>
@@ -1251,11 +1252,11 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
               )}
             </div>
 
-            <div className="flex gap-2 pt-2 border-t border-stone-200">
+            <div className="flex gap-2 pt-2 border-t border-stone-800">
               <button
                 type="button"
                 onClick={() => setShowBulkMenuModal(false)}
-                className="flex-1 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-700 text-stone-600 font-bold text-xs cursor-pointer border border-stone-700"
+                className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
               >
                 Cancel
               </button>
@@ -1263,7 +1264,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 type="button"
                 disabled={isImportingMenu || parsedBulkItems.length === 0}
                 onClick={handleBulkImportSubmit}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-stone-900 font-black text-xs shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-50"
               >
                 {isImportingMenu ? "Importing Dishes…" : `Import ${parsedBulkItems.length} Dishes →`}
               </button>
@@ -1279,13 +1280,13 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
           onClick={() => setBulkQrModal(false)}
         >
           <div
-            className="bg-white border border-stone-200 rounded-3xl p-6 max-w-4xl w-full space-y-6 shadow-2xl"
+            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-4xl w-full space-y-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-200 pb-3 no-print">
+            <div className="flex justify-between items-center border-b border-stone-800 pb-3 no-print">
               <div>
-                <h3 className="text-base font-black text-stone-900">🖨️ Ready-to-Fold 80mm Table Tent Cards</h3>
-                <p className="text-xs text-stone-500">
+                <h3 className="text-base font-black text-white">🖨️ Ready-to-Fold 80mm Table Tent Cards</h3>
+                <p className="text-xs text-stone-400">
                   Formatted for standard A4 cardstock or 80mm tabletop acrylic stands
                 </p>
               </div>
@@ -1297,7 +1298,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 >
                   Print All Stand Cards 🖨️
                 </button>
-                <button onClick={() => setBulkQrModal(false)} className="text-stone-500 hover:text-stone-900 text-xs px-2">
+                <button onClick={() => setBulkQrModal(false)} className="text-stone-400 hover:text-white text-xs px-2">
                   ✕
                 </button>
               </div>

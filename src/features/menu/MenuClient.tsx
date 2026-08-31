@@ -87,7 +87,8 @@ export function MenuClient({
   upiQrUrl?: string;
 }) {
   const router = useRouter();
-  const t = I18N.en;
+  const [lang, setLang] = useState<"en" | "hi">("en");
+  const t = I18N[lang];
 
   // Apply per-café accent color
   useEffect(() => {
@@ -155,6 +156,7 @@ export function MenuClient({
     });
   }, [items, activeCat, vegOnly, search]);
 
+  const loyaltyPoints = Math.floor(totalPaise / 10000); // 1 pt per ₹100
 
   // Actions
   function handleAdd(item: Item, spiceLevel?: string, sizeVariant?: string, note?: string) {
@@ -255,10 +257,10 @@ export function MenuClient({
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-100 pb-36 font-sans antialiased selection:bg-amber-500 selection:text-black">
+    <main className="min-h-screen bg-stone-950 text-stone-100 pb-36 font-sans antialiased selection:bg-amber-500 selection:text-black">
       {/* Offline Awareness Banner */}
       {isOffline && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-red-600 text-stone-900 text-xs font-bold text-center py-2 px-4 flex items-center justify-center gap-2 animate-fade-in-up">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-red-600 text-white text-xs font-bold text-center py-2 px-4 flex items-center justify-center gap-2 animate-fade-in-up">
           <span>⚠️</span>
           <span>You appear offline — orders may not submit. Check your connection.</span>
         </div>
@@ -267,7 +269,8 @@ export function MenuClient({
       <MenuHeader
         restaurantName={restaurantName}
         tableLabel={tableLabel}
-
+        lang={lang}
+        onLangToggle={() => setLang(lang === "en" ? "hi" : "en")}
         onHelpClick={() => setServiceModal(true)}
         vegOnly={vegOnly}
         onVegToggle={() => setVegOnly(!vegOnly)}
@@ -303,7 +306,7 @@ export function MenuClient({
         ))}
 
         {visibleItems.length === 0 && (
-          <div className="text-center py-20 px-4 bg-white/40 rounded-3xl border border-dashed border-stone-200">
+          <div className="text-center py-20 px-4 bg-stone-900/40 rounded-3xl border border-dashed border-stone-800">
             <CoffeeIcon className="w-10 h-10 text-stone-500 mx-auto mb-4 animate-float" />
             <p className="text-stone-200 font-bold text-base">{t.emptyMenu}</p>
             <p className="text-stone-500 text-xs mt-1">Try browsing all categories or clear your search</p>
@@ -315,7 +318,7 @@ export function MenuClient({
       {upsellItem && (
         <div className="fixed bottom-28 left-0 right-0 z-40 px-4 pointer-events-auto">
           <div className="max-w-xl mx-auto">
-            <div className="bg-white/95 border border-amber-500/30 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-slide-in-bottom">
+            <div className="bg-stone-900/95 border border-amber-500/30 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-slide-in-bottom">
               <img
                 src={upsellItem.image_url || getItemImage(upsellItem.name, upsellItem.is_veg)}
                 alt={upsellItem.name}
@@ -323,7 +326,7 @@ export function MenuClient({
               />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Customers also ordered</p>
-                <p className="text-xs font-bold text-stone-900 truncate">{upsellItem.name}</p>
+                <p className="text-xs font-bold text-white truncate">{upsellItem.name}</p>
                 <p className="text-[11px] text-amber-400 font-mono font-bold">{paise(upsellItem.price_paise)}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -337,7 +340,7 @@ export function MenuClient({
                 <button
                   type="button"
                   onClick={() => setUpsellItem(null)}
-                  className="text-stone-500 hover:text-stone-900 text-xs cursor-pointer"
+                  className="text-stone-500 hover:text-white text-xs cursor-pointer"
                 >
                   ✕
                 </button>
@@ -392,7 +395,7 @@ export function MenuClient({
         restaurantName={restaurantName}
         totalQty={totalQty}
         totalPaise={totalPaise}
-
+        loyaltyPoints={loyaltyPoints}
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
         name={name}
@@ -405,7 +408,7 @@ export function MenuClient({
         onIncrease={handleIncrease}
         onDecrease={decreaseQty}
         onUpdateNote={updateNotes}
-
+        lang={lang}
         t={t}
         upiQrUrl={upiQrUrl}
       />

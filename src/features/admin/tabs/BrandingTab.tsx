@@ -24,22 +24,22 @@ export function BrandingTab({
   handleSaveBranding,
 }: BrandingTabProps) {
   return (
-    <div className="bg-white border border-stone-200 rounded-3xl p-6 space-y-6 shadow-xl max-w-xl">
+    <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 space-y-6 shadow-xl max-w-xl">
       <div>
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-black text-stone-900">Custom Café Branding</h2>
+          <h2 className="text-base font-black text-white">Custom Café Branding</h2>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-stone-950">
             Pro Feature
           </span>
         </div>
-        <p className="text-xs text-stone-500 mt-1">
+        <p className="text-xs text-stone-400 mt-1">
           Customize your guest ordering theme, logo, and receipt tagline.
         </p>
       </div>
 
       <form onSubmit={handleSaveBranding} className="space-y-4 text-xs">
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Logo Image URL
           </label>
           <input
@@ -47,12 +47,12 @@ export function BrandingTab({
             placeholder="https://yourdomain.com/logo.png"
             value={brandingLogoUrl}
             onChange={(e) => setBrandingLogoUrl(e.target.value)}
-            className="w-full bg-white border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-amber-500"
+            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
           />
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Receipt & Menu Tagline
           </label>
           <input
@@ -60,12 +60,12 @@ export function BrandingTab({
             placeholder="e.g. Crafted with passion since 2021"
             value={brandingTagline}
             onChange={(e) => setBrandingTagline(e.target.value)}
-            className="w-full bg-white border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-amber-500"
+            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
           />
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Google Business Review Link
           </label>
           <input
@@ -73,25 +73,25 @@ export function BrandingTab({
             placeholder="https://g.page/r/your-cafe/review or https://search.google.com/..."
             value={brandingGoogleReviewUrl}
             onChange={(e) => setBrandingGoogleReviewUrl(e.target.value)}
-            className="w-full bg-white border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-amber-500 text-xs"
+            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 text-xs"
           />
-          <p className="text-[11px] text-stone-500 mt-1">
+          <p className="text-[11px] text-stone-400 mt-1">
             When guests rate their meal 4★ or 5★ on the live order tracker, they are directly prompted to post on this Google Review link.
           </p>
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Theme Accent Color
           </label>
-          <div className="flex items-center gap-3 bg-white border border-stone-200 rounded-xl p-2.5">
+          <div className="flex items-center gap-3 bg-stone-950 border border-stone-800 rounded-xl p-2.5">
             <input
               type="color"
               value={brandingAccentColor}
               onChange={(e) => setBrandingAccentColor(e.target.value)}
               className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
             />
-            <span className="font-mono text-stone-600 font-bold">{brandingAccentColor}</span>
+            <span className="font-mono text-stone-300 font-bold">{brandingAccentColor}</span>
           </div>
         </div>
 

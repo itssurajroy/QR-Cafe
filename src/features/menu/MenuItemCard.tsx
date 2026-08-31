@@ -32,11 +32,11 @@ export function MenuItemCard({
 
   return (
     <div
-      className="bg-white border border-stone-200 hover:border-stone-700/60 rounded-3xl p-3.5 flex gap-3.5 shadow-lg transition-all active:scale-[0.99] group relative backdrop-blur-md animate-fade-in-up"
+      className="bg-stone-900/80 border border-stone-800/90 hover:border-stone-700/60 rounded-3xl p-3.5 flex gap-3.5 shadow-lg transition-all active:scale-[0.99] group relative backdrop-blur-md animate-fade-in-up"
       style={{ animationDelay: `${idx * 30}ms`, animationFillMode: "both" }}
     >
       {isFeatured && (
-        <div className="absolute -top-2 left-4 px-2 py-1 rounded-full bg-[#D97706] text-white text-[9px] font-black uppercase tracking-wider shadow-md z-10 flex items-center gap-1">
+        <div className="absolute -top-2 left-4 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[9px] font-black uppercase tracking-wider shadow-lg shadow-amber-500/30 z-10 flex items-center gap-1">
           <span aria-hidden="true"><SparklesIcon className="w-3 h-3" /></span>
           Chef's Pick
         </div>
@@ -44,7 +44,7 @@ export function MenuItemCard({
 
       {/* Dish Visual Thumbnail */}
       <div
-        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 bg-stone-50 border border-stone-200 relative cursor-pointer touch-manipulation shadow-md"
+        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 bg-stone-950 border border-stone-800 relative cursor-pointer touch-manipulation shadow-md"
         onClick={() => onImageClick(item)}
       >
         <img
@@ -62,15 +62,15 @@ export function MenuItemCard({
         >
           ●
         </span>
-        <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1">
-          <span aria-hidden="true">⏱</span> {prepTime}
+        <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md text-[9px] font-bold text-stone-300">
+          ⏱ {prepTime}
         </span>
       </div>
 
       {/* Dish Details */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <div>
-          <h3 className="font-extrabold text-stone-900 text-sm sm:text-base tracking-tight truncate">
+          <h3 className="font-extrabold text-white text-sm sm:text-base tracking-tight truncate">
             {item.name}
           </h3>
 
@@ -85,14 +85,14 @@ export function MenuItemCard({
           </div>
 
           {item.description && (
-            <p className="text-xs text-stone-500 mt-1 leading-relaxed line-clamp-2">
+            <p className="text-xs text-stone-400 mt-1 leading-relaxed line-clamp-2">
               {item.description}
             </p>
           )}
         </div>
 
         <div className="mt-2 flex items-center justify-between">
-          <span className="font-extrabold text-[#B45309] text-sm sm:text-base font-mono">
+          <span className="font-extrabold text-amber-400 text-sm sm:text-base font-mono">
             {paise(item.price_paise)}
           </span>
 
@@ -102,29 +102,29 @@ export function MenuItemCard({
                 type="button"
                 onClick={() => onAdd(item)}
                 aria-label={`Add ${item.name} to cart`}
-                className="px-4 py-2.5 min-h-[44px] rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-black text-xs shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5 touch-manipulation transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D97706]/30"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs shadow-md shadow-amber-500/25 active:scale-95 cursor-pointer flex items-center gap-1.5 touch-manipulation transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
               >
                 <span aria-hidden="true"><SparklesIcon className="w-3.5 h-3.5" /></span>
                 <span>{tAdd}</span>
               </button>
             ) : (
-              <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 px-1.5 py-1 rounded-2xl shadow-inner">
+              <div className="flex items-center gap-2 bg-stone-950 border border-stone-800 px-1.5 py-1 rounded-2xl shadow-inner">
                 <button
                   type="button"
                   onClick={() => onDecrease(item.id)}
                   aria-label={`Remove one ${item.name}`}
-                  className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-xl bg-white border border-stone-200 hover:bg-stone-50 flex items-center justify-center font-black text-stone-700 text-base cursor-pointer active:scale-90 touch-manipulation transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-stone-300"
+                  className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-xl bg-stone-800 hover:bg-red-900 flex items-center justify-center font-black text-stone-200 text-base cursor-pointer active:scale-90 touch-manipulation transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-stone-600"
                 >
                   −
                 </button>
-                <span className="font-black text-xs text-[#B45309] min-w-5 text-center font-mono">
+                <span className="font-black text-xs text-amber-400 min-w-5 text-center font-mono">
                   {inCartQty}
                 </span>
                 <button
                   type="button"
                   onClick={() => onIncrease(item.id)}
                   aria-label={`Add one more ${item.name}`}
-                  className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-xl bg-[#D97706] hover:bg-[#B45309] flex items-center justify-center font-black text-white text-base cursor-pointer active:scale-90 touch-manipulation transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D97706]/30"
+                  className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-xl bg-stone-800 hover:bg-amber-900 flex items-center justify-center font-black text-stone-200 text-base cursor-pointer active:scale-90 touch-manipulation transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                 >
                   +
                 </button>

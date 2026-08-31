@@ -12,7 +12,7 @@ interface MenuCartDrawerProps {
   restaurantName: string;
   totalQty: number;
   totalPaise: number;
-
+  loyaltyPoints: number;
   paymentMethod: "counter" | "online";
   setPaymentMethod: (m: "counter" | "online") => void;
   name: string;
@@ -25,7 +25,7 @@ interface MenuCartDrawerProps {
   onIncrease: (id: string) => void;
   onDecrease: (id: string) => void;
   onUpdateNote: (id: string, note: string) => void;
-
+  lang: "en" | "hi";
   t: Record<string, string>;
   upiQrUrl?: string;
 }
@@ -38,7 +38,7 @@ export function MenuCartDrawer({
   restaurantName,
   totalQty,
   totalPaise,
-
+  loyaltyPoints,
   paymentMethod,
   setPaymentMethod,
   name,
@@ -51,7 +51,7 @@ export function MenuCartDrawer({
   onIncrease,
   onDecrease,
   onUpdateNote,
-
+  lang,
   t,
   upiQrUrl,
 }: MenuCartDrawerProps) {
@@ -63,23 +63,23 @@ export function MenuCartDrawer({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white border border-stone-200 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 max-h-[90vh] flex flex-col shadow-2xl animate-slide-in-bottom"
+        className="w-full max-w-lg bg-stone-900 border border-stone-800 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 max-h-[90vh] flex flex-col shadow-2xl animate-slide-in-bottom"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+        <div className="flex items-center justify-between border-b border-stone-800 pb-3">
           <div>
-            <h2 className="text-base font-black text-stone-900 flex items-center gap-2">
+            <h2 className="text-base font-black text-white flex items-center gap-2">
               <ShoppingBagIcon className="w-5 h-5 text-amber-400" />
               <span>{t.orderSummary}</span>
             </h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-xs text-stone-400 mt-0.5">
               Table {tableLabel} • {restaurantName}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-stone-800 hover:bg-stone-700 flex items-center justify-center text-stone-500 hover:text-stone-900 text-xs cursor-pointer touch-manipulation"
+            className="w-8 h-8 rounded-full bg-stone-800 hover:bg-stone-700 flex items-center justify-center text-stone-400 hover:text-white text-xs cursor-pointer touch-manipulation"
           >
             ✕
           </button>
@@ -89,11 +89,11 @@ export function MenuCartDrawer({
           {cartLines.map((l) => (
             <div
               key={l.item.id}
-              className="bg-stone-50/80 border border-stone-200 rounded-2xl p-3 space-y-2"
+              className="bg-stone-950/80 border border-stone-800 rounded-2xl p-3 space-y-2"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-bold text-stone-900 text-sm">
+                  <span className="font-bold text-white text-sm">
                     {l.item.name}
                   </span>
                   <span className="text-xs text-amber-400 ml-2 font-semibold font-mono">
@@ -114,7 +114,7 @@ export function MenuCartDrawer({
                   >
                     −
                   </button>
-                  <span className="font-black text-xs text-stone-900 min-w-5 text-center font-mono">
+                  <span className="font-black text-xs text-white min-w-5 text-center font-mono">
                     {l.quantity}
                   </span>
                   <button
@@ -132,13 +132,24 @@ export function MenuCartDrawer({
                 value={l.notes || ""}
                 maxLength={200}
                 onChange={(e) => onUpdateNote(l.item.id, e.target.value)}
-                className="text-xs bg-white border border-stone-200 rounded-xl w-full p-2.5 text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                className="text-xs bg-stone-900 border border-stone-800 rounded-xl w-full p-2.5 text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
               />
             </div>
           ))}
         </div>
 
-        <div className="border-t border-stone-200 pt-3 space-y-2.5">
+        <div className="border-t border-stone-800 pt-3 space-y-2.5">
+          {/* Loyalty Points Preview */}
+          {loyaltyPoints > 0 && (
+            <div className="p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/50 flex items-center justify-between">
+              <span className="text-xs text-amber-300 font-bold">
+                🏆 Loyalty Points Earned
+              </span>
+              <span className="text-xs font-black text-amber-400 font-mono">
+                +{loyaltyPoints} pts
+              </span>
+            </div>
+          )}
           {/* Payment Method Selector */}
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -146,18 +157,20 @@ export function MenuCartDrawer({
               onClick={() => setPaymentMethod("counter")}
               className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                 paymentMethod === "counter"
-                  ? "bg-amber-500/15 border-amber-500 text-stone-900 shadow-md shadow-amber-500/10"
-                  : "bg-stone-50 border-stone-200 text-stone-500 hover:border-stone-700"
+                  ? "bg-amber-500/15 border-amber-500 text-white shadow-md shadow-amber-500/10"
+                  : "bg-stone-950 border-stone-800 text-stone-400 hover:border-stone-700"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">💵</span>
-                <span className="text-xs font-black text-stone-900">
-                  Pay at Counter
+                <span className="text-xs font-black text-white">
+                  {lang === "hi" ? "काउंटर पर नकद" : "Pay at Counter"}
                 </span>
               </div>
-              <span className="text-[10px] text-stone-500 block leading-tight">
-                Pay with cash at the billing counter after your meal.
+              <span className="text-[10px] text-stone-400 block leading-tight">
+                {lang === "hi"
+                  ? "भोजन के बाद काउंटर पर नकद दें"
+                  : "Settle cash/card after meal"}
               </span>
             </button>
 
@@ -166,59 +179,68 @@ export function MenuCartDrawer({
               onClick={() => setPaymentMethod("online")}
               className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                 paymentMethod === "online"
-                  ? "bg-purple-950/60 border-purple-500 text-stone-900 shadow-md shadow-purple-500/15"
-                  : "bg-stone-50 border-stone-200 text-stone-500 hover:border-stone-700"
+                  ? "bg-purple-950/60 border-purple-500 text-white shadow-md shadow-purple-500/15"
+                  : "bg-stone-950 border-stone-800 text-stone-400 hover:border-stone-700"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">📱</span>
                 <span className="text-xs font-black text-purple-300">
-                  Scan UPI QR
+                  {lang === "hi" ? "UPI द्वारा भुगतान" : "Scan UPI QR"}
                 </span>
               </div>
-              <span className="text-[10px] text-stone-500 block leading-tight">
-                Scan and pay instantly using Google Pay, PhonePe, or Paytm.
+              <span className="text-[10px] text-stone-400 block leading-tight">
+                {lang === "hi"
+                  ? "GPay / PhonePe / Paytm से QR स्कैन करें"
+                  : "GPay, PhonePe, Paytm QR"}
               </span>
             </button>
           </div>
 
           {/* Render UPI QR if selected and available */}
           {paymentMethod === "online" && upiQrUrl && (
-            <div className="flex flex-col items-center p-4 bg-white border border-stone-200 rounded-2xl animate-fade-in-up">
-              <span className="text-xs font-black text-stone-900 mb-2 uppercase tracking-widest text-center">
-                Scan to Pay
+            <div className="flex flex-col items-center p-4 bg-stone-900 border border-stone-800 rounded-2xl animate-fade-in-up">
+              <span className="text-xs font-black text-white mb-2 uppercase tracking-widest text-center">
+                {lang === "hi" ? "स्कैन करके भुगतान करें" : "Scan to Pay"}
               </span>
               <img src={upiQrUrl} alt="Store UPI QR" className="w-32 h-32 rounded-xl bg-white p-2" />
               <span className="text-[10px] text-stone-500 mt-2 text-center">
-                Please pay exact amount ₹{(totalPaise / 100).toFixed(2)}
+                {lang === "hi" ? "कृपया कुल राशि ₹" + (totalPaise / 100).toFixed(2) + " का भुगतान करें" : "Please pay exact amount ₹" + (totalPaise / 100).toFixed(2)}
               </span>
             </div>
           )}
 
           {/* Guest Details */}
-          <div className="bg-stone-50/90 border border-stone-200 rounded-2xl p-3 space-y-2">
+          <div className="bg-stone-950/90 border border-stone-800 rounded-2xl p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                <span>💬 WhatsApp Bill</span>
+                <span>💬 WhatsApp Bill &amp; Loyalty Points</span>
+              </span>
+              <span className="text-[10px] text-stone-400 font-mono">
+                +1 pt / ₹100
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold text-stone-500 block mb-1">
-                  Your Name
+                <label className="text-[10px] font-bold text-stone-400 block mb-1">
+                  {lang === "hi" ? "आपका नाम" : "Your Name"}
                 </label>
                 <input
-                  placeholder="e.g. Alex Smith"
+                  placeholder={
+                    lang === "hi" ? "उदा. राहुल शर्मा" : "e.g. Alex Smith"
+                  }
                   value={name}
                   maxLength={50}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white border border-stone-200 rounded-xl p-2.5 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-900 border border-stone-800 rounded-xl p-2.5 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-stone-500 block mb-1">
-                  WhatsApp Phone (For Bill)
+                <label className="text-[10px] font-bold text-stone-400 block mb-1">
+                  {lang === "hi"
+                    ? "व्हाट्सएप नंबर (बिल के लिए)"
+                    : "WhatsApp Phone (For Bill)"}
                 </label>
                 <input
                   type="tel"
@@ -226,12 +248,14 @@ export function MenuCartDrawer({
                   value={phone}
                   maxLength={15}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-white border border-stone-200 rounded-xl p-2.5 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500 font-mono"
+                  className="w-full bg-stone-900 border border-stone-800 rounded-xl p-2.5 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500 font-mono"
                 />
               </div>
             </div>
-            <p className="text-[10px] text-stone-500">
-              Enter your phone number to receive your digital bill directly on WhatsApp.
+            <p className="text-[10px] text-stone-400">
+              {lang === "hi"
+                ? "भोजन के बाद आपके व्हाट्सएप पर डिजिटल रसीद और लॉयल्टी रिवार्ड भेजे जाएंगे।"
+                : "Enter your phone number to receive your digital bill & earned loyalty points directly on WhatsApp."}
             </p>
           </div>
 
@@ -242,7 +266,7 @@ export function MenuCartDrawer({
           )}
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xs uppercase tracking-wider text-stone-500 font-bold">
+            <span className="text-xs uppercase tracking-wider text-stone-400 font-bold">
               {t.totalBill}
             </span>
             <span className="text-xl font-black text-amber-400 font-mono">
@@ -254,7 +278,7 @@ export function MenuCartDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-600 font-bold text-xs transition-colors cursor-pointer touch-manipulation"
+              className="flex-1 py-3 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs transition-colors cursor-pointer touch-manipulation"
             >
               {t.keepBrowsing}
             </button>

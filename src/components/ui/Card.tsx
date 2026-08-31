@@ -11,13 +11,13 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const VARIANTS: Record<NonNullable<CardProps["variant"]>, string> = {
   default:
-    "bg-white border border-stone-200 shadow-sm",
+    "bg-stone-900/80 border border-stone-800/90 backdrop-blur-md shadow-lg",
   elevated:
-    "bg-white border border-stone-200 shadow-xl",
+    "bg-stone-900/90 border border-stone-700/60 backdrop-blur-xl shadow-2xl",
   flat:
-    "bg-stone-50 border border-stone-200",
+    "bg-stone-900/60 border border-stone-800",
   inset:
-    "bg-stone-50 border border-stone-200",
+    "bg-stone-950/80 border border-stone-800",
 };
 
 const PADDINGS: Record<NonNullable<CardProps["padding"]>, string> = {
@@ -59,10 +59,10 @@ export function CardHeader({
   return (
     <div className="flex items-center justify-between mb-4">
       <div>
-        <h3 className="font-black text-stone-900 text-sm" style={{ fontFamily: "var(--font-heading)" }}>
+        <h3 className="font-black text-white text-sm" style={{ fontFamily: "var(--font-heading)" }}>
           {title}
         </h3>
-        {subtitle && <p className="text-xs text-stone-500 mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-stone-400 mt-0.5">{subtitle}</p>}
       </div>
       {action && <div>{action}</div>}
     </div>
