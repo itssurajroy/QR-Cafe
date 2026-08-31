@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const parsed = createOrderSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Validation failed", issues: parsed.error.flatten() },
+      { error: "Validation failed", details: parsed.error.flatten() },
       { status: 422 },
     );
   }

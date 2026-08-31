@@ -59,7 +59,11 @@ export async function getRestaurantBySlug(slug: string): Promise<Tenant | null> 
     .eq("slug", slug)
     .maybeSingle();
 
-  if (error || !data) return null;
+  if (error) {
+    console.error("[getRestaurantBySlug] Supabase Error:", error);
+    return null;
+  }
+  if (!data) return null;
   return data as Tenant;
 }
 
