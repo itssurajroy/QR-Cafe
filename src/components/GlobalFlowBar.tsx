@@ -15,7 +15,7 @@ export default function GlobalFlowBar() {
 
   const LINKS = [
     { href: "/", label: "🏠 Home", color: "text-stone-300 hover:text-white" },
-    { href: "/c/curry-leaf/t/01", label: "📱 Table 01 QR", color: "text-amber-400 font-bold" },
+    { href: "/c/curry-leaf/t/T1", label: "📱 Table T1 QR", color: "text-amber-400 font-bold" },
     { href: "/pos", label: "⚡ All-in-One POS", color: "text-amber-400 font-bold" },
     { href: "/admin", label: "📊 Café Admin", color: "text-purple-400 font-bold" },
     { href: "/super", label: "🏢 Super Admin", color: "text-blue-400 font-bold" },

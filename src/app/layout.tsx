@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import GlobalFlowBar from "@/components/GlobalFlowBar";
+import OfflineBanner from "@/components/OfflineBanner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastProvider";
 
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col bg-[#FFFBF5] text-stone-800">
         <ErrorBoundary>
           <ToastProvider>
+            <OfflineBanner />
             {children}
             <GlobalFlowBar />
           </ToastProvider>
