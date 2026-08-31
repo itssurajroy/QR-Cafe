@@ -1,0 +1,38 @@
+{
+  "name": "QR Café — Dine-In Ordering & POS",
+  "short_name": "QR Café",
+  "description": "Seamless QR table ordering, real-time kitchen display, and full POS billing.",
+  "start_url": "/pos",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#0c0a09",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "POS Terminal",
+      "short_name": "POS",
+      "url": "/pos",
+      "description": "Open the billing POS terminal"
+    },
+    {
+      "name": "Admin Dashboard",
+      "short_name": "Admin",
+      "url": "/admin",
+      "description": "Manage your café"
+    }
+  ]
+}

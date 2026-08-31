@@ -1,0 +1,70 @@
+/**
+ * QR Café UI Library — Card
+ * Glass-morphism container used throughout the app.
+ */
+
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Use "elevated" for shadow-2xl glow version, "flat" for border-only */
+  variant?: "default" | "elevated" | "flat" | "inset";
+  padding?: "none" | "sm" | "md" | "lg";
+}
+
+const VARIANTS: Record<NonNullable<CardProps["variant"]>, string> = {
+  default:
+    "bg-stone-900/80 border border-stone-800/90 backdrop-blur-md shadow-lg",
+  elevated:
+    "bg-stone-900/90 border border-stone-700/60 backdrop-blur-xl shadow-2xl",
+  flat:
+    "bg-stone-900/60 border border-stone-800",
+  inset:
+    "bg-stone-950/80 border border-stone-800",
+};
+
+const PADDINGS: Record<NonNullable<CardProps["padding"]>, string> = {
+  none: "",
+  sm: "p-3",
+  md: "p-4 sm:p-5",
+  lg: "p-5 sm:p-8",
+};
+
+export function Card({
+  variant = "default",
+  padding = "md",
+  className = "",
+  children,
+  ...props
+}: CardProps) {
+  return (
+    <div
+      className={`rounded-3xl ${VARIANTS[variant]} ${PADDINGS[padding]} ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * CardHeader — title + optional subtitle inside a Card
+ */
+export function CardHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <div>
+        <h3 className="font-black text-white text-sm" style={{ fontFamily: "var(--font-heading)" }}>
+          {title}
+        </h3>
+        {subtitle && <p className="text-xs text-stone-400 mt-0.5">{subtitle}</p>}
+      </div>
+      {action && <div>{action}</div>}
+    </div>
+  );
+}
