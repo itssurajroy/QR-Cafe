@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
 
     const rowsToInsert = rawItems.map((item: any) => {
       const categoryName = (item.category || "General Menu").trim().toLowerCase();
-      let catId = catMap.get(categoryName) || defaultCatId;
+      const catId = catMap.get(categoryName) || defaultCatId;
       const pricePaise = Math.max(0, Math.round(Number(item.price || 0) * 100));
 
       return {

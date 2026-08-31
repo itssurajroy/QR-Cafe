@@ -189,6 +189,7 @@ export default function PosClient({
           restaurant_id: restaurant.id,
           table_id: selectedTable?.id || null,
           customer_name: "Walk-in",
+          subtotal_paise: subtotalPaise,
           total_paise: finalTotalPaise,
           status: status === "paid" ? "served" : "pending",
           payment_status: status,
