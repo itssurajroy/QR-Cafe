@@ -25,9 +25,32 @@ export function KitchenView({
   const handleServe = (id: string, status: string, orderNumber: string, tableLabel: string) => {
     const order = liveOrders.find((o) => o.id === id);
     handleUpdateOrderStatus(id, status, orderNumber, tableLabel);
-    if (status === "served" && order?.payment_status !== "paid") {
-      setTimeout(() => setCollectOrder(order), 400);
+    if (status === "served") {
+      setCollectOrder(order);
       setCollectPhone(order?.customer_phone || "");
+      if (order?.customer_phone) {
+        setTimeout(() => {
+          const modPromise = import("jspdf") as any;
+          modPromise.then((mod: any) => {
+            const Doc = mod.jsPDF || mod.default;
+            const doc = new Doc();
+            const rName = restaurant?.name || "QR Café";
+            doc.setFontSize(16); doc.text(rName, 10, 15);
+            doc.setFontSize(10); doc.text(`${restaurant?.address || ""} • ${restaurant?.phone || ""}`, 10, 22);
+            doc.text(`Bill: ${order.order_number} • Table: ${order.table_label} • ${new Date().toLocaleString("en-IN")}`, 10, 30);
+            doc.setFontSize(12); doc.text(order.payment_status === "paid" ? "PAID" : "UNPAID — Collect at counter", 10, 38);
+            let y = 48; doc.setFontSize(10);
+            (order.items || []).forEach((it: any) => {
+              const line = `${it.item_name} x${it.quantity} — ₹${((it.unit_price_paise || 0) * it.quantity / 100).toFixed(2)}`;
+              doc.text(line, 10, y); y += 6;
+            });
+            doc.setFontSize(12); doc.text(`Total: ₹${(order.total_paise / 100).toFixed(2)}`, 10, y + 4);
+            doc.save(`Bill-${order.order_number}.pdf`);
+            const text = encodeURIComponent(`Hi! Your bill for Table ${order.table_label} at ${rName} — Bill ${order.order_number} Total ₹${(order.total_paise / 100).toFixed(2)} is ${order.payment_status === "paid" ? "PAID ✓" : "UNPAID — please collect at counter"}. PDF auto-generated.`);
+            window.open(`https://wa.me/${String(order.customer_phone).replace(/[^0-9]/g, "")}?text=${text}`, "_blank");
+          });
+        }, 800);
+      }
     }
   };
 
@@ -159,10 +182,11 @@ export function KitchenView({
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setCollectOrder(null)}>
           <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl border-t-4 border-amber-500" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-black text-stone-900 text-center">Collect Payment</h3>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+            <div className={`${collectOrder.payment_status === "paid" ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"} border rounded-xl p-3 text-center`}>
               <p className="text-xs text-stone-600">Table {collectOrder.table_label} • Bill {collectOrder.order_number}</p>
-              <p className="text-xl font-black text-amber-600 font-mono">₹{(collectOrder.total_paise / 100).toFixed(2)}</p>
-              <p className="text-xs font-bold text-red-600">⚠️ UNPAID — Collect now</p>
+              <p className={`text-xl font-black font-mono ${collectOrder.payment_status === "paid" ? "text-emerald-600" : "text-amber-600"}`}>₹{(collectOrder.total_paise / 100).toFixed(2)}</p>
+              <p className={`text-xs font-bold ${collectOrder.payment_status === "paid" ? "text-emerald-600" : "text-red-600"}`}>{collectOrder.payment_status === "paid" ? "✓ PAID — No collection needed" : "⚠️ UNPAID — Collect now"}</p>
+              <p className="text-[10px] text-stone-500 mt-1">{collectOrder.customer_phone ? `Bill auto-sent to WhatsApp • ${collectOrder.customer_phone}` : "No phone — enter to WhatsApp"}</p>
             </div>
             <input type="tel" placeholder="Customer WhatsApp 9876543210" value={collectPhone} onChange={(e) => setCollectPhone(e.target.value)} className="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
             <div className="flex gap-2">
