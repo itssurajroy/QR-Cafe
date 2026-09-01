@@ -274,6 +274,11 @@ export function MenuCartDrawer({
             </span>
           </div>
 
+          <div className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${paymentMethod === "counter" ? "bg-amber-950/50 border-amber-800 text-amber-300" : "bg-emerald-950/40 border-emerald-800 text-emerald-300"}`}>
+            <span>{paymentMethod === "counter" ? "⚠️" : "✓"}</span>
+            <span>{paymentMethod === "counter" ? (lang === "hi" ? "भुगतान लंबित — भोजन के बाद काउंटर पर भुगतान करें" : "Payment Pending — Pay at counter after meal. Kitchen will start now.") : (lang === "hi" ? "प्रीपेड — UPI भुगतान पूरा करें" : "Prepaid — Complete UPI payment to confirm. Order starts after payment.")}</span>
+          </div>
+
           <div className="flex gap-2 pt-1">
             <button
               type="button"

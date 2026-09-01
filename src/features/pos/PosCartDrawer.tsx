@@ -386,20 +386,25 @@ export function PosCartDrawer({
           </div>
         )}
 
+        <div className="p-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-2 bg-amber-950/30 border-amber-800/50 text-amber-300">
+          <span>⚠️</span>
+          <span>Payment Status: {`KOT = Unpaid (collect at counter) • Pay = Paid (payment ${paymentMethod === "cash" ? "cash" : paymentMethod === "upi" ? "UPI" : "card"} received)`}</span>
+        </div>
+
         <div className="flex gap-2 pt-2">
           <button
             onClick={() => handleSettle("unpaid")}
             disabled={isSettling || cart.length === 0}
             className="flex-1 py-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-amber-400 font-bold text-[11px] cursor-pointer border border-amber-500/30 disabled:opacity-50"
           >
-            KOT &amp; Bill Later
+            KOT &amp; Bill Later (Unpaid)
           </button>
           <button
             onClick={() => handleSettle("paid")}
             disabled={isSettling || cart.length === 0}
             className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] cursor-pointer shadow-lg shadow-amber-500/20 disabled:opacity-50"
           >
-            {isSettling ? "Settling..." : `Pay ${paise(finalTotalPaise)}`}
+            {isSettling ? "Settling..." : `Pay ${paise(finalTotalPaise)} (Paid)`}
           </button>
         </div>
       </div>
