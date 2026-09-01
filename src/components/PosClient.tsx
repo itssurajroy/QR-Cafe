@@ -50,6 +50,7 @@ export default function PosClient({
   const [openingFloat, setOpeningFloat] = useState<string>("2000");
   const [lastBill, setLastBill] = useState<any>(null);
   const [showBill, setShowBill] = useState(false);
+  const [billPhone, setBillPhone] = useState("");
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const supabase = getSupabaseBrowserClient();
@@ -400,8 +401,28 @@ export default function PosClient({
                   {lastBill.payment_status === "paid" ? `✓ Paid via ${lastBill.paymentMethod || "cash"} — No balance` : `⚠️ Unpaid — Please collect ₹${(lastBill.finalTotalPaise || lastBill.total_paise) / 100} at counter`}
                 </div>
               </div>
+              <input type="tel" placeholder="Customer WhatsApp 9876543210" value={billPhone} onChange={(e) => setBillPhone(e.target.value)} className="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
               <div className="flex gap-2">
-                <button onClick={() => window.print()} className="flex-1 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white font-black text-xs">Print Bill 🖨️</button>
+                <button onClick={async () => {
+                  const mod: any = await import("jspdf");
+                  const Doc = mod.jsPDF || mod.default;
+                  const doc = new Doc();
+                  doc.setFontSize(16); doc.text(restaurant.name || "QR Café", 10, 15);
+                  doc.setFontSize(10); doc.text(`${restaurant.address || ""} • ${restaurant.phone || ""}`, 10, 22);
+                  doc.text(`Bill: ${lastBill.order_number || lastBill.orderNumber} • Table: ${lastBill.table_label} • ${new Date().toLocaleString("en-IN")}`, 10, 30);
+                  doc.setFontSize(12); doc.text(lastBill.payment_status === "paid" ? "PAID" : "UNPAID — Collect at counter", 10, 38);
+                  let y = 48; doc.setFontSize(10);
+                  (lastBill.itemsSnapshot || lastBill.order_items || []).forEach((it: any) => {
+                    const line = `${it.item?.name || it.item_name} x${it.quantity} — ₹${((it.item?.price_paise || it.unit_price_paise || 0) * it.quantity / 100).toFixed(2)}`;
+                    doc.text(line, 10, y); y += 6;
+                  });
+                  doc.setFontSize(12); doc.text(`Total: ₹${(lastBill.finalTotalPaise || lastBill.total_paise) / 100}`, 10, y + 4);
+                  doc.save(`Bill-${lastBill.order_number || lastBill.orderNumber}.pdf`);
+                  const phone = billPhone || lastBill.customer_phone || "";
+                  const text = encodeURIComponent(`Your bill for Table ${lastBill.table_label} at ${restaurant.name} — Bill ${lastBill.order_number || lastBill.orderNumber} Total ₹${(lastBill.finalTotalPaise || lastBill.total_paise) / 100} is ${lastBill.payment_status === "paid" ? "PAID ✓" : "UNPAID — please pay at counter"}.`);
+                  if (phone) window.open(`https://wa.me/${String(phone).replace(/[^0-9]/g, "")}?text=${text}`, "_blank");
+                  else window.open(`https://wa.me/?text=${text}`, "_blank");
+                }} className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs">WhatsApp Bill 📱</button>
                 <button onClick={() => setShowBill(false)} className="flex-1 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-xs">Close</button>
               </div>
             </div>
