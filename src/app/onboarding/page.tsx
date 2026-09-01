@@ -132,7 +132,7 @@ export default function OnboardingPage() {
       {/* Top Header */}
       <header className="border-b border-stone-800/80 bg-stone-900/60 backdrop-blur-md px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-lg shadow-md shadow-amber-500/20">
               <CoffeeIcon className="w-5 h-5" />
             </div>
@@ -208,7 +208,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Business Name
                   </label>
                   <input
@@ -222,7 +222,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Store Link (URL)
                   </label>
                   <div className="flex items-center bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs">
@@ -240,7 +240,7 @@ export default function OnboardingPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                    <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                       Currency
                     </label>
                     <select
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                    <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                       Timezone
                     </label>
                     <select
@@ -272,7 +272,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Tagline (optional)
                   </label>
                   <input
@@ -286,10 +286,10 @@ export default function OnboardingPage() {
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block">
+                    <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block">
                       Google Business Review Link (optional)
                     </label>
-                    <span className="text-[10px] text-amber-400 font-medium">Auto-prompts 5-star guests</span>
+                    <span className="text-xs text-amber-400 font-medium">Auto-prompts 5-star guests</span>
                   </div>
                   <input
                     type="url"
@@ -298,7 +298,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setGoogleReviewUrl(e.target.value)}
                     className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
                   />
-                  <p className="text-[10px] text-stone-400 mt-1">
+                  <p className="text-xs text-stone-400 mt-1">
                     Customers who rate 4★ or 5★ on their live order tracker will be prompted to leave a review directly on your Google page.
                   </p>
                 </div>
@@ -325,7 +325,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Number of Tables to Auto-Generate (with QR Stand Tokens)
                   </label>
                   <div className="flex items-center gap-3">
@@ -344,7 +344,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-2">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-2">
                     Select Starter Menu Preset
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -352,7 +352,7 @@ export default function OnboardingPage() {
                       <div
                         key={opt.id}
                         onClick={() => setPreset(opt.id as any)}
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                        className={`p-3 rounded-2xl border cursor-pointer transition-all ${
                           preset === opt.id
                             ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500"
                             : "bg-stone-950 border-stone-800/80 hover:border-stone-700"
@@ -362,7 +362,7 @@ export default function OnboardingPage() {
                           <span className="text-lg">{opt.icon}</span>
                           <span className="font-bold text-xs text-white">{opt.title}</span>
                         </div>
-                        <p className="text-[11px] text-stone-400 leading-relaxed">{opt.desc}</p>
+                        <p className="text-xs text-stone-400 leading-relaxed">{opt.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -398,16 +398,16 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Plan Highlights Badge */}
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs">
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs">
                   <div>
                     <span className="font-black text-white block">All-in-One Plan (7 Days Free)</span>
-                    <span className="text-[11px] text-stone-400">Unlimited Tables, Real-time KDS, Full POS Billing</span>
+                    <span className="text-xs text-stone-400">Unlimited Tables, Real-time KDS, Full POS Billing</span>
                   </div>
                   <span className="text-amber-400 font-mono font-black text-xs">₹799/mo after trial</span>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Manager Email
                   </label>
                   <input
@@ -421,7 +421,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
                     Password
                   </label>
                   <input

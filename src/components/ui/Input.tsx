@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider"
+            className="block text-xs font-bold text-stone-400 uppercase tracking-wider"
           >
             {label}
           </label>
@@ -59,10 +59,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p className="text-[10px] text-red-400 font-medium">{error}</p>
+          <p className="text-xs text-red-400 font-medium">{error}</p>
         )}
         {hint && !error && (
-          <p className="text-[10px] text-stone-500">{hint}</p>
+          <p className="text-xs text-stone-500">{hint}</p>
         )}
       </div>
     );
@@ -89,7 +89,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider"
+            className="block text-xs font-bold text-stone-400 uppercase tracking-wider"
           >
             {label}
           </label>
@@ -109,8 +109,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
 
-        {error && <p className="text-[10px] text-red-400 font-medium">{error}</p>}
-        {hint && !error && <p className="text-[10px] text-stone-500">{hint}</p>}
+        {error && <p className="text-xs text-red-400 font-medium">{error}</p>}
+        {hint && !error && <p className="text-xs text-stone-500">{hint}</p>}
       </div>
     );
   },

@@ -449,7 +449,7 @@ export default function SuperClient({
             </div>
             <div>
               <h1 className="font-black text-white text-sm tracking-tight">QR Café Platform</h1>
-              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block">
                 Super Console
               </span>
             </div>
@@ -475,13 +475,13 @@ export default function SuperClient({
                     : "text-stone-400 hover:text-white hover:bg-stone-800/80"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <span className="text-sm">{item.icon}</span>
                   <span>{item.label}</span>
                 </div>
                 {item.count !== undefined && (
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-black ${
+                    className={`text-xs px-2 py-0.5 rounded-full font-mono font-black ${
                       tab === item.id ? "bg-stone-950 text-amber-400" : "bg-stone-800 text-stone-400"
                     }`}
                   >
@@ -495,13 +495,13 @@ export default function SuperClient({
 
         <div className="pt-6 border-t border-stone-800 space-y-3">
           <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 block">
               Monthly Recurring Rev
             </span>
             <div className="text-lg font-black text-amber-400 font-mono">
               ₹{kpis.mrr.toLocaleString("en-IN")}
             </div>
-            <span className="text-[10px] text-emerald-400 font-bold">
+            <span className="text-xs text-emerald-400 font-bold">
               {kpis.active} active paying subscribers
             </span>
           </div>
@@ -548,43 +548,43 @@ export default function SuperClient({
               {/* 6 Key Platform Metric Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
                 <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Total Cafés</span>
+                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">Total Cafés</span>
                   <div className="text-2xl font-black text-white font-mono">{kpis.total}</div>
-                  <span className="text-[10px] text-stone-400 font-medium">Across all regions</span>
+                  <span className="text-xs text-stone-400 font-medium">Across all regions</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-stone-900 border border-emerald-900/50 space-y-1">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Active Plan</span>
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Active Plan</span>
                   <div className="text-2xl font-black text-emerald-400 font-mono">{kpis.active}</div>
-                  <span className="text-[10px] text-emerald-400/80 font-medium">Paying monthly</span>
+                  <span className="text-xs text-emerald-400/80 font-medium">Paying monthly</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-stone-900 border border-amber-900/50 space-y-1">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Free Trials</span>
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Free Trials</span>
                   <div className="text-2xl font-black text-amber-400 font-mono">{kpis.trial}</div>
-                  <span className="text-[10px] text-amber-400/80 font-medium">7-day trial mode</span>
+                  <span className="text-xs text-amber-400/80 font-medium">7-day trial mode</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Today Revenue</span>
+                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">Today Revenue</span>
                   <div className="text-2xl font-black text-amber-400 font-mono">
                     ₹{Math.round(kpis.todayRevenue / 100).toLocaleString("en-IN")}
                   </div>
-                  <span className="text-[10px] text-stone-400 font-medium">{kpis.todayOrders} dine-in tickets</span>
+                  <span className="text-xs text-stone-400 font-medium">{kpis.todayOrders} dine-in tickets</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">MRR Total</span>
+                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">MRR Total</span>
                   <div className="text-2xl font-black text-white font-mono">
                     ₹{kpis.mrr.toLocaleString("en-IN")}
                   </div>
-                  <span className="text-[10px] text-emerald-400 font-medium">₹399 / ₹799 tiers</span>
+                  <span className="text-xs text-emerald-400 font-medium">₹399 / ₹799 tiers</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">New (7 Days)</span>
+                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">New (7 Days)</span>
                   <div className="text-2xl font-black text-white font-mono">{kpis.new7dCafes}</div>
-                  <span className="text-[10px] text-stone-400 font-medium">Signups this week</span>
+                  <span className="text-xs text-stone-400 font-medium">Signups this week</span>
                 </div>
               </div>
 
@@ -691,7 +691,7 @@ export default function SuperClient({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-[10px]">
+                      <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-xs">
                         <th className="pb-3">Rank</th>
                         <th className="pb-3">Café</th>
                         <th className="pb-3">Tier</th>
@@ -707,7 +707,7 @@ export default function SuperClient({
                             {c.name} <span className="text-stone-500 font-normal">(/c/{c.slug})</span>
                           </td>
                           <td className="py-3">
-                            <span className="px-2 py-0.5 rounded-md bg-stone-800 text-stone-300 font-bold uppercase text-[10px]">
+                            <span className="px-2 py-0.5 rounded-md bg-stone-800 text-stone-300 font-bold uppercase text-xs">
                               {c.tier}
                             </span>
                           </td>
@@ -718,7 +718,7 @@ export default function SuperClient({
                             <button
                               type="button"
                               onClick={() => openDrawer(c.id)}
-                              className="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-amber-400 font-bold text-[11px] cursor-pointer"
+                              className="px-3 py-2.5 min-h-[44px] rounded-lg bg-stone-800 hover:bg-stone-700 text-amber-400 font-bold text-xs cursor-pointer"
                             >
                               Inspect &rarr;
                             </button>
@@ -809,7 +809,7 @@ export default function SuperClient({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-stone-800 bg-stone-950/60 text-stone-400 uppercase tracking-wider text-[10px]">
+                      <tr className="border-b border-stone-800 bg-stone-950/60 text-stone-400 uppercase tracking-wider text-xs">
                         <th className="p-4">Café & Domain</th>
                         <th className="p-4">Tier</th>
                         <th className="p-4">Plan Status</th>
@@ -834,20 +834,20 @@ export default function SuperClient({
                               <div className="font-black text-white group-hover:text-amber-400 transition-colors">
                                 {c.name}
                               </div>
-                              <span className="text-[11px] font-mono text-stone-500">
+                              <span className="text-xs font-mono text-stone-500">
                                 /c/{c.slug}
                               </span>
                             </td>
 
                             <td className="p-4">
-                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-[10px] bg-stone-800 border border-stone-700 text-stone-300">
+                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-xs bg-stone-800 border border-stone-700 text-stone-300">
                                 {c.tier || "pro"}
                               </span>
                             </td>
 
                             <td className="p-4">
                               <span
-                                className={`px-2.5 py-1 rounded-full font-black uppercase text-[10px] border ${
+                                className={`px-2.5 py-1 rounded-full font-black uppercase text-xs border ${
                                   isActive
                                     ? "bg-emerald-950 border-emerald-700 text-emerald-400"
                                     : isTrial
@@ -859,7 +859,7 @@ export default function SuperClient({
                               </span>
                             </td>
 
-                            <td className="p-4 text-stone-400 font-mono text-[11px]">
+                            <td className="p-4 text-stone-400 font-mono text-xs">
                               {isActive
                                 ? c.subscription_ends_at
                                   ? new Date(c.subscription_ends_at).toLocaleDateString("en-IN")
@@ -878,7 +878,7 @@ export default function SuperClient({
                                 type="button"
                                 onClick={(e) => handleFastExtendTrial(c.id, e)}
                                 title="Add 7 Free Trial Days"
-                                className="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold text-[10px] cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold text-xs cursor-pointer"
                               >
                                 +7d Trial
                               </button>
@@ -886,7 +886,7 @@ export default function SuperClient({
                                 type="button"
                                 onClick={(e) => handleFastToggleStatus(c, e)}
                                 title="Toggle Active / Suspended"
-                                className={`px-2 py-1 rounded-lg border font-bold text-[10px] cursor-pointer ${
+                                className={`px-2 py-1 rounded-lg border font-bold text-xs cursor-pointer ${
                                   c.plan === "suspended"
                                     ? "bg-emerald-950 text-emerald-300 border-emerald-700 hover:bg-emerald-900"
                                     : "bg-red-950/70 text-red-300 border-red-800 hover:bg-red-900"
@@ -896,14 +896,14 @@ export default function SuperClient({
                               </button>
                               <Link
                                 href={`/super/cafe/${c.id}`}
-                                className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 font-bold text-[10px] inline-block transition-colors"
+                                className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 font-bold text-xs inline-block transition-colors"
                               >
                                 🕵️ Impersonate
                               </Link>
                               <Link
                                 href={`/c/${c.slug}`}
                                 target="_blank"
-                                className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 font-bold text-[10px] inline-block transition-colors"
+                                className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 font-bold text-xs inline-block transition-colors"
                               >
                                 View ↗
                               </Link>
@@ -962,7 +962,7 @@ export default function SuperClient({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-[10px]">
+                    <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-xs">
                       <th className="pb-3">Name</th>
                       <th className="pb-3">Role</th>
                       <th className="pb-3">Assigned Café</th>
@@ -976,7 +976,7 @@ export default function SuperClient({
                         <td className="py-3 font-bold text-white">{s.display_name || "Manager"}</td>
                         <td className="py-3">
                           <span
-                            className={`px-2 py-0.5 rounded-md font-bold uppercase text-[10px] ${
+                            className={`px-2 py-0.5 rounded-md font-bold uppercase text-xs ${
                               s.role === "super_admin"
                                 ? "bg-amber-500 text-stone-950"
                                 : s.role === "owner"
@@ -989,11 +989,11 @@ export default function SuperClient({
                         </td>
                         <td className="py-3 text-stone-300">{s.restaurant_name}</td>
                         <td className="py-3">
-                          <span className={`text-[11px] font-bold ${s.active ? "text-emerald-400" : "text-red-400"}`}>
+                          <span className={`text-xs font-bold ${s.active ? "text-emerald-400" : "text-red-400"}`}>
                             {s.active ? "Active ✓" : "Disabled ✕"}
                           </span>
                         </td>
-                        <td className="py-3 text-stone-500 font-mono text-[11px]">
+                        <td className="py-3 text-stone-500 font-mono text-xs">
                           {new Date(s.created_at).toLocaleDateString("en-IN")}
                         </td>
                       </tr>
@@ -1019,7 +1019,7 @@ export default function SuperClient({
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-stone-950 border border-stone-800">
                   <div>
                     <div className="font-bold text-xs text-white">Self-Serve Signups</div>
-                    <p className="text-[11px] text-stone-400">Allow new café owners to register via /onboarding</p>
+                    <p className="text-xs text-stone-400">Allow new café owners to register via /onboarding</p>
                   </div>
                   <button
                     type="button"
@@ -1042,7 +1042,7 @@ export default function SuperClient({
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-stone-950 border border-stone-800">
                   <div>
                     <div className="font-bold text-xs text-white">Default Free Trial Duration</div>
-                    <p className="text-[11px] text-stone-400">Days of full access granted upon onboarding</p>
+                    <p className="text-xs text-stone-400">Days of full access granted upon onboarding</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -1073,10 +1073,10 @@ export default function SuperClient({
                 <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
                   <div>
                     <div className="font-bold text-xs text-white">Monthly Subscription Pricing (INR)</div>
-                    <p className="text-[11px] text-stone-400">Default recurring rate displayed across the platform</p>
+                    <p className="text-xs text-stone-400">Default recurring rate displayed across the platform</p>
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-1">
                       All-in-One Plan (₹)
                     </label>
                     <input
@@ -1088,7 +1088,7 @@ export default function SuperClient({
                           prices: { ...prev.prices, pro: Number(e.target.value) },
                         }))
                       }
-                      className="w-full bg-stone-900 border border-stone-700 rounded-xl p-2.5 text-xs text-white font-mono font-bold"
+                      className="w-full bg-stone-900 border border-stone-700 rounded-xl p-2 text-xs text-white font-mono font-bold"
                     />
                   </div>
                   <button
@@ -1118,7 +1118,7 @@ export default function SuperClient({
                       key={act}
                       type="button"
                       onClick={() => loadFilteredAudit(act)}
-                      className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-colors cursor-pointer ${
+                      className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                         auditActionFilter === act
                           ? "bg-amber-500 text-stone-950 border-amber-400"
                           : "bg-stone-950 border-stone-800 text-stone-400 hover:text-white"
@@ -1133,7 +1133,7 @@ export default function SuperClient({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-[10px]">
+                    <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-xs">
                       <th className="pb-3">Timestamp</th>
                       <th className="pb-3">Entity</th>
                       <th className="pb-3">Action</th>
@@ -1141,7 +1141,7 @@ export default function SuperClient({
                       <th className="pb-3">Details / Metadata</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-800/60 font-mono text-[11px]">
+                  <tbody className="divide-y divide-stone-800/60 font-mono text-xs">
                     {auditRows.map((a) => (
                       <tr key={a.id} className="hover:bg-stone-800/30">
                         <td className="py-2.5 text-stone-500 whitespace-nowrap">
@@ -1176,7 +1176,7 @@ export default function SuperClient({
                     </p>
                   </div>
                   {broadcastMsg && (
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-black uppercase animate-pulse">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-black uppercase animate-pulse">
                       Active Broadcast
                     </span>
                   )}
@@ -1204,39 +1204,39 @@ export default function SuperClient({
               {/* Real-time Health Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Database Status</span>
+                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Database Status</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span className="text-base font-black text-white">PostgreSQL (Supabase)</span>
                   </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">Status: Connected &amp; Synced</span>
+                  <span className="text-xs text-stone-400 block font-mono">Status: Connected &amp; Synced</span>
                 </div>
 
                 <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Realtime WebSocket</span>
+                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Realtime WebSocket</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span className="text-base font-black text-white">100% Operational</span>
                   </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">Live PubSub Listeners Active</span>
+                  <span className="text-xs text-stone-400 block font-mono">Live PubSub Listeners Active</span>
                 </div>
 
                 <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Edge API Latency</span>
+                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Edge API Latency</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                     <span className="text-base font-black text-emerald-400 font-mono">~38ms</span>
                   </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">Vercel Edge Global Network</span>
+                  <span className="text-xs text-stone-400 block font-mono">Vercel Edge Global Network</span>
                 </div>
 
                 <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Storage &amp; Static</span>
+                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Storage &amp; Static</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                     <span className="text-base font-black text-white">Cloudflare R2 / CDN</span>
                   </div>
-                  <span className="text-[11px] text-stone-400 block font-mono">Media Assets Healthy</span>
+                  <span className="text-xs text-stone-400 block font-mono">Media Assets Healthy</span>
                 </div>
               </div>
 
@@ -1246,7 +1246,7 @@ export default function SuperClient({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-mono">
                     <thead>
-                      <tr className="border-b border-stone-800 text-stone-400 uppercase text-[10px]">
+                      <tr className="border-b border-stone-800 text-stone-400 uppercase text-xs">
                         <th className="pb-2.5">Endpoint</th>
                         <th className="pb-2.5">Protocol</th>
                         <th className="pb-2.5">Security</th>
@@ -1298,7 +1298,7 @@ export default function SuperClient({
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-xl font-black text-white">{drawerData.tenant.name}</h3>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-stone-800 text-amber-400">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase bg-stone-800 text-amber-400">
                         {drawerData.tenant.tier || "pro"}
                       </span>
                     </div>
@@ -1354,17 +1354,17 @@ export default function SuperClient({
                   <div className="space-y-4 text-xs">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-                        <span className="text-[10px] font-bold text-stone-500 uppercase">Plan Status</span>
+                        <span className="text-xs font-bold text-stone-500 uppercase">Plan Status</span>
                         <div className="font-bold text-white uppercase">{drawerData.tenant.plan}</div>
                       </div>
                       <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-                        <span className="text-[10px] font-bold text-stone-500 uppercase">Tier</span>
+                        <span className="text-xs font-bold text-stone-500 uppercase">Tier</span>
                         <div className="font-bold text-amber-400 uppercase">{drawerData.tenant.tier || "pro"}</div>
                       </div>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2">
-                      <div className="font-bold text-stone-300 uppercase text-[10px]">Contact & Tax Identity</div>
+                      <div className="font-bold text-stone-300 uppercase text-xs">Contact & Tax Identity</div>
                       <div className="space-y-1 text-stone-300">
                         <div>📞 Phone: {drawerData.tenant.phone || "Not set"}</div>
                         <div>📍 Address: {drawerData.tenant.address || "Not set"}</div>
@@ -1388,7 +1388,7 @@ export default function SuperClient({
                     <div className="font-bold text-stone-300">Registered Dishes ({drawerData.items?.length})</div>
                     <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
                       {drawerData.items?.map((it: any) => (
-                        <div key={it.id} className="p-2.5 rounded-xl bg-stone-950 border border-stone-800 flex justify-between items-center">
+                        <div key={it.id} className="p-2 rounded-xl bg-stone-950 border border-stone-800 flex justify-between items-center">
                           <div className="flex items-center gap-2">
                             <span>{it.is_veg ? "🥗" : "🍗"}</span>
                             <span className="font-bold text-white">{it.name}</span>
@@ -1410,7 +1410,7 @@ export default function SuperClient({
                       {drawerData.tables?.map((t: any) => (
                         <div key={t.id} className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-center">
                           <div className="font-black text-amber-400 font-mono text-sm">{t.label}</div>
-                          <div className="text-[10px] text-stone-400">{t.seats} Seats</div>
+                          <div className="text-xs text-stone-400">{t.seats} Seats</div>
                         </div>
                       ))}
                     </div>
@@ -1423,7 +1423,7 @@ export default function SuperClient({
                     <div className="font-bold text-stone-300">Recent Orders ({drawerData.orders?.length})</div>
                     <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
                       {drawerData.orders?.map((o: any) => (
-                        <div key={o.id} className="p-2.5 rounded-xl bg-stone-950 border border-stone-800 flex justify-between items-center text-[11px]">
+                        <div key={o.id} className="p-2 rounded-xl bg-stone-950 border border-stone-800 flex justify-between items-center text-xs">
                           <div>
                             <span className="font-black text-white font-mono">#{o.order_number}</span>
                             <span className="text-stone-500 ml-2">{o.status}</span>
@@ -1446,8 +1446,8 @@ export default function SuperClient({
                 {drawerTab === "billing" && (
                   <div className="space-y-4 text-xs">
                     <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
-                      <div className="font-bold text-amber-400 uppercase text-[10px]">Super Admin Billing Controls</div>
-                      <p className="text-stone-400 text-[11px]">Override tenant access immediately without Razorpay transactions.</p>
+                      <div className="font-bold text-amber-400 uppercase text-xs">Super Admin Billing Controls</div>
+                      <p className="text-stone-400 text-xs">Override tenant access immediately without Razorpay transactions.</p>
 
                       <div className="grid grid-cols-2 gap-2 pt-2">
                         <button
@@ -1490,7 +1490,7 @@ export default function SuperClient({
                 {drawerTab === "danger" && (
                   <div className="p-4 rounded-2xl bg-red-950/40 border border-red-800 space-y-3 text-xs">
                     <div className="font-black text-red-300 uppercase">Danger Zone</div>
-                    <p className="text-red-400/80 text-[11px]">
+                    <p className="text-red-400/80 text-xs">
                       Permanently delete this café tenant and all associated records. This action cannot be undone.
                     </p>
                     <button
@@ -1531,7 +1531,7 @@ export default function SuperClient({
 
             <form onSubmit={handleCreateCafeSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
                   Café Name
                 </label>
                 <input
@@ -1550,7 +1550,7 @@ export default function SuperClient({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
                   URL Slug
                 </label>
                 <input
@@ -1565,10 +1565,10 @@ export default function SuperClient({
 
               <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black text-white">All-in-One Plan</span>
+                  <span className="text-xs font-black text-white">All-in-One Plan</span>
                   <span className="text-amber-400 font-mono font-bold text-xs">₹799/mo</span>
                 </div>
-                <span className="text-[10px] text-stone-400 block">Unlimited Tables, Menu Dishes, KDS & Full POS Billing</span>
+                <span className="text-xs text-stone-400 block">Unlimited Tables, Menu Dishes, KDS & Full POS Billing</span>
               </div>
 
               <button

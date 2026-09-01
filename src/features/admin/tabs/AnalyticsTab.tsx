@@ -17,19 +17,19 @@ export function ReportSummary({ report }: AnalyticsTabProps) {
       <h2 className="text-base font-black text-white">Today Sales Summary</h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <span className="text-[10px] font-bold text-stone-400 uppercase">Today Revenue</span>
+          <span className="text-xs font-bold text-stone-400 uppercase">Today Revenue</span>
           <div className="text-2xl font-black text-amber-400 font-mono">{paise(report.revenue)}</div>
         </div>
         <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <span className="text-[10px] font-bold text-stone-400 uppercase">Paid Orders</span>
+          <span className="text-xs font-bold text-stone-400 uppercase">Paid Orders</span>
           <div className="text-2xl font-black text-emerald-400 font-mono">{report.paid}</div>
         </div>
         <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <span className="text-[10px] font-bold text-stone-400 uppercase">Total Tickets</span>
+          <span className="text-xs font-bold text-stone-400 uppercase">Total Tickets</span>
           <div className="text-2xl font-black text-white font-mono">{report.orders}</div>
         </div>
         <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-          <span className="text-[10px] font-bold text-stone-400 uppercase">Avg Ticket Size</span>
+          <span className="text-xs font-bold text-stone-400 uppercase">Avg Ticket Size</span>
           <div className="text-2xl font-black text-amber-400 font-mono">{paise(report.avg)}</div>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
               <span className="text-xs font-bold text-white uppercase tracking-wider">
                 🔥 Peak Hour Dining Rush Heatmap (8:00 AM – 11:00 PM)
               </span>
-              <span className="text-[10px] text-stone-500 font-mono">Floor Occupancy Intensity</span>
+              <span className="text-xs text-stone-500 font-mono">Floor Occupancy Intensity</span>
             </div>
 
             <div className="grid grid-cols-8 sm:grid-cols-16 gap-1 pt-1">
@@ -108,12 +108,12 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                           : "bg-emerald-600/70"
                       } group-hover:scale-105`}
                     ></div>
-                    <span className="text-[9px] font-mono text-stone-400 block mt-1">
+                    <span className="text-xs font-mono text-stone-400 block mt-1">
                       {slot.hour.replace(" ", "")}
                     </span>
 
                     {/* Tooltip on Hover */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-stone-900 border border-stone-700 text-white text-[10px] rounded-lg p-2 whitespace-nowrap shadow-xl z-20 pointer-events-none font-sans">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-stone-900 border border-stone-700 text-white text-xs rounded-lg p-2 whitespace-nowrap shadow-xl z-20 pointer-events-none font-sans">
                       <p className="font-bold text-amber-400">{slot.hour} • {slot.label}</p>
                       <p className="text-stone-300 font-mono">{slot.count} guest orders</p>
                     </div>
@@ -140,7 +140,7 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                 ]).map((it: any, idx: number) => (
                   <div key={idx} className="flex justify-between items-center text-xs border-b border-stone-800/40 pb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="w-4 text-center font-mono text-[10px] text-stone-500 font-bold">
+                      <span className="w-4 text-center font-mono text-xs text-stone-500 font-bold">
                         #{idx + 1}
                       </span>
                       <span className="text-white font-medium">{it.name}</span>
@@ -160,13 +160,13 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                   💳 Settlement Methods
                 </span>
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex justify-between items-center p-2.5 rounded-xl bg-stone-900/60 border border-stone-800">
+                  <div className="flex justify-between items-center p-2 rounded-xl bg-stone-900/60 border border-stone-800">
                     <span className="text-stone-300 font-medium">💵 Cash at Counter</span>
                     <span className="font-bold font-mono text-amber-400">
                       {analytics.cash_count || 148} orders (PAID)
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-2.5 rounded-xl bg-stone-900/60 border border-stone-800">
+                  <div className="flex justify-between items-center p-2 rounded-xl bg-stone-900/60 border border-stone-800">
                     <span className="text-stone-300 font-medium">📱 UPI / QR Channels</span>
                     <span className="font-bold font-mono text-emerald-400">
                       {analytics.upi_count || 32} orders
@@ -175,7 +175,7 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-stone-300">
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-stone-300">
                 💡 <strong>Smart Floor Tip</strong>: Peak rush occurs between <strong>7:00 PM – 9:00 PM</strong>. Prepping coffee beans and pizza dough before 6:30 PM reduces ticket dispatch times by 4.2 minutes.
               </div>
             </div>

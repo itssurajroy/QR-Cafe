@@ -92,7 +92,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                   All-in-One Unlimited Plan
                 </span>
                 <span
-                  className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                  className={`px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border ${
                     isPaidActive
                       ? "bg-emerald-950 border-emerald-700 text-emerald-400"
                       : isTrialActive
@@ -175,7 +175,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
             </div>
           </div>
 
-          <div className="bg-stone-950/70 border border-stone-800 rounded-2xl p-4 text-[11px] text-stone-400 space-y-1">
+          <div className="bg-stone-950/70 border border-stone-800 rounded-2xl p-4 text-xs text-stone-400 space-y-1">
             <p>🔒 <strong>Secure Automated Billing</strong> powered by Razorpay Subscriptions.</p>
             <p>You can cancel anytime. You will not be billed until your 7-day free trial period ends.</p>
           </div>

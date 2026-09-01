@@ -28,7 +28,7 @@ export function BrandingTab({
       <div>
         <div className="flex items-center gap-2">
           <h2 className="text-base font-black text-white">Custom Café Branding</h2>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-stone-950">
+          <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase bg-amber-500 text-stone-950">
             Pro Feature
           </span>
         </div>
@@ -39,7 +39,7 @@ export function BrandingTab({
 
       <form onSubmit={handleSaveBranding} className="space-y-4 text-xs">
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Logo Image URL
           </label>
           <input
@@ -52,7 +52,7 @@ export function BrandingTab({
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Receipt & Menu Tagline
           </label>
           <input
@@ -65,7 +65,7 @@ export function BrandingTab({
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Google Business Review Link
           </label>
           <input
@@ -75,16 +75,16 @@ export function BrandingTab({
             onChange={(e) => setBrandingGoogleReviewUrl(e.target.value)}
             className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 text-xs"
           />
-          <p className="text-[11px] text-stone-400 mt-1">
+          <p className="text-xs text-stone-400 mt-1">
             When guests rate their meal 4★ or 5★ on the live order tracker, they are directly prompted to post on this Google Review link.
           </p>
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
             Theme Accent Color
           </label>
-          <div className="flex items-center gap-3 bg-stone-950 border border-stone-800 rounded-xl p-2.5">
+          <div className="flex items-center gap-3 bg-stone-950 border border-stone-800 rounded-xl p-2">
             <input
               type="color"
               value={brandingAccentColor}

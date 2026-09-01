@@ -22,8 +22,8 @@ const VARIANTS: Record<NonNullable<BadgeProps["variant"]>, string> = {
 };
 
 const SIZES: Record<NonNullable<BadgeProps["size"]>, string> = {
-  xs: "px-1.5 py-0.5 text-[9px]",
-  sm: "px-2.5 py-1 text-[10px]",
+  xs: "px-1.5 py-0.5 text-xs",
+  sm: "px-2.5 py-1 text-xs",
 };
 
 const DOT_COLORS: Record<NonNullable<BadgeProps["variant"]>, string> = {

@@ -45,7 +45,7 @@ export default function PublicCafeClient({
               setSelectedQr(null);
               setSelectedTableLabel(null);
             }}
-            className="px-3 py-1.5 rounded-full bg-stone-900/90 hover:bg-stone-800 border border-stone-700 text-stone-300 font-bold text-[11px] backdrop-blur-md shadow-lg flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+            className="px-3 py-1.5 rounded-full bg-stone-900/90 hover:bg-stone-800 border border-stone-700 text-stone-300 font-bold text-xs backdrop-blur-md shadow-lg flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
           >
             <span>⇄ Switch Table ({selectedTableLabel})</span>
           </button>
@@ -100,10 +100,10 @@ export default function PublicCafeClient({
           </div>
 
           <div className="flex items-center justify-center gap-2 pt-1">
-            <span className="px-3 py-1 rounded-full bg-stone-800/80 border border-stone-700 text-stone-300 text-[11px] font-bold">
+            <span className="px-3 py-1 rounded-full bg-stone-800/80 border border-stone-700 text-stone-300 text-xs font-bold">
               📍 Dine-in & Digital Ordering
             </span>
-            <span className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800 text-emerald-400 text-[11px] font-bold">
+            <span className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800 text-emerald-400 text-xs font-bold">
               ⚡ Live Kitchen Active
             </span>
           </div>
@@ -117,7 +117,7 @@ export default function PublicCafeClient({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-stone-950">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-black uppercase bg-amber-500 text-stone-950">
                   Digital Menu Showcase
                 </span>
                 <span className="text-xs font-bold text-stone-300">🍽️ Browse Dishes &amp; Pricing</span>
@@ -184,7 +184,7 @@ export default function PublicCafeClient({
                             <h4 className="font-bold text-xs text-white truncate">{it.name}</h4>
                           </div>
                           {it.description && (
-                            <p className="text-[11px] text-stone-400 line-clamp-2 mt-0.5">
+                            <p className="text-xs text-stone-400 line-clamp-2 mt-0.5">
                               {it.description}
                             </p>
                           )}

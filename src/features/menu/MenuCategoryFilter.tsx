@@ -48,7 +48,7 @@ export function MenuCategoryFilter({
           <button
             type="button"
             onClick={() => onSearchChange("")}
-            className="absolute right-3 top-2.5 text-stone-400 hover:text-white text-xs bg-stone-800 px-2 py-0.5 rounded-lg cursor-pointer"
+            className="absolute right-3 top-2 text-stone-400 hover:text-white text-xs bg-stone-800 px-2 py-0.5 rounded-lg cursor-pointer"
           >
             ✕
           </button>

@@ -60,7 +60,7 @@ export function MenuCustomizationSheet({
 
         {/* Spice Level */}
         <div>
-          <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-2">
+          <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
             🌶️ Spice Level
           </label>
           <div className="flex gap-2">
@@ -84,7 +84,7 @@ export function MenuCustomizationSheet({
         {/* Size (only for items > ₹150) */}
         {item.price_paise > 15000 && (
           <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-2">
+            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
               📏 Portion Size
             </label>
             <div className="flex gap-2">
@@ -108,7 +108,7 @@ export function MenuCustomizationSheet({
 
         {/* Special Notes */}
         <div>
-          <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-2">
+          <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
             📝 Special Instructions
           </label>
           <input

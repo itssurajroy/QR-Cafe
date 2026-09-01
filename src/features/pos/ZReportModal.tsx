@@ -37,7 +37,7 @@ export function ZReportModal({
             <h3 className="text-base font-black text-white flex items-center gap-2">
               <span>📑 Shift Day-End Z-Report</span>
             </h3>
-            <p className="text-[11px] text-stone-400 font-mono">
+            <p className="text-xs text-stone-400 font-mono">
               Daily Register Reconciliation •{" "}
               {new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
             </p>
@@ -73,26 +73,26 @@ export function ZReportModal({
               return (
                 <>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                    <div className="bg-stone-950 p-2.5 rounded-2xl border border-stone-800">
-                      <span className="text-[9px] text-stone-500 uppercase font-bold block">Today Orders</span>
+                    <div className="bg-stone-950 p-2 rounded-2xl border border-stone-800">
+                      <span className="text-xs text-stone-500 uppercase font-bold block">Today Orders</span>
                       <span className="text-base font-black font-mono text-white">
                         {m.todayPaidCount ?? liveOrders.length ?? 0}
                       </span>
                     </div>
-                    <div className="bg-stone-950 p-2.5 rounded-2xl border border-stone-800">
-                      <span className="text-[9px] text-stone-500 uppercase font-bold block">Cash Collected</span>
+                    <div className="bg-stone-950 p-2 rounded-2xl border border-stone-800">
+                      <span className="text-xs text-stone-500 uppercase font-bold block">Cash Collected</span>
                       <span className="text-base font-black font-mono text-emerald-400">
                         {paise(todayCash)}
                       </span>
                     </div>
-                    <div className="bg-stone-950 p-2.5 rounded-2xl border border-stone-800">
-                      <span className="text-[9px] text-stone-500 uppercase font-bold block">UPI Payments</span>
+                    <div className="bg-stone-950 p-2 rounded-2xl border border-stone-800">
+                      <span className="text-xs text-stone-500 uppercase font-bold block">UPI Payments</span>
                       <span className="text-base font-black font-mono text-purple-400">
                         {paise(todayUpi)}
                       </span>
                     </div>
-                    <div className="bg-stone-950 p-2.5 rounded-2xl border border-stone-800">
-                      <span className="text-[9px] text-stone-500 uppercase font-bold block">Total Today Sale</span>
+                    <div className="bg-stone-950 p-2 rounded-2xl border border-stone-800">
+                      <span className="text-xs text-stone-500 uppercase font-bold block">Total Today Sale</span>
                       <span className="text-base font-black font-mono text-amber-400">
                         {paise(todayRev)}
                       </span>
@@ -100,15 +100,15 @@ export function ZReportModal({
                   </div>
 
                   {/* Cash Drawer Reconciliation */}
-                  <div className="bg-stone-950 p-3.5 rounded-2xl border border-stone-800 space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  <div className="bg-stone-950 p-3 rounded-2xl border border-stone-800 space-y-2">
+                    <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-amber-400">
                       <span>💵 Cash Drawer Reconciliation</span>
                       <span className="font-mono">Opening Float</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-1">
                       <div>
-                        <label className="text-[9px] text-stone-400 block mb-1">Opening Cash Float (₹)</label>
+                        <label className="text-xs text-stone-400 block mb-1">Opening Cash Float (₹)</label>
                         <input
                           type="number"
                           value={openingFloat}
@@ -119,7 +119,7 @@ export function ZReportModal({
                       </div>
 
                       <div className="bg-stone-900/80 p-2 rounded-xl border border-stone-800 flex flex-col justify-center">
-                        <span className="text-[9px] text-stone-400 block">Expected In Cash Drawer:</span>
+                        <span className="text-xs text-stone-400 block">Expected In Cash Drawer:</span>
                         <span className="text-sm font-black font-mono text-emerald-400">
                           ₹{expectedCashInDrawer.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                         </span>
@@ -128,7 +128,7 @@ export function ZReportModal({
                   </div>
 
                   {/* Tax Breakdown */}
-                  <div className="bg-stone-950 p-3.5 rounded-2xl border border-stone-800 space-y-1.5 font-mono text-[11px]">
+                  <div className="bg-stone-950 p-3 rounded-2xl border border-stone-800 space-y-1.5 font-mono text-xs">
                     <div className="flex justify-between text-stone-400">
                       <span>CGST @ {taxRate / 2}%:</span>
                       <span>{paise(cgst)}</span>
@@ -151,8 +151,8 @@ export function ZReportModal({
 
                   {/* Top Selling */}
                   {zReportData?.topItems && zReportData.topItems.length > 0 && (
-                    <div className="bg-stone-950 p-3.5 rounded-2xl border border-stone-800 space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                    <div className="bg-stone-950 p-3 rounded-2xl border border-stone-800 space-y-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-stone-400 block">
                         🔥 Top Selling Dishes Today
                       </span>
                       <div className="space-y-1">

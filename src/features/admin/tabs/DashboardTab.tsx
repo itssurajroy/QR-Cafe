@@ -36,7 +36,7 @@ export function DashboardTab({
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
             </div>
             <p className={`text-xl font-black font-mono ${stat.color}`}>{stat.value}</p>
-            <p className="text-[11px] text-stone-400 mt-1">{stat.label}</p>
+            <p className="text-xs text-stone-400 mt-1">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -47,7 +47,7 @@ export function DashboardTab({
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
             <h3 className="font-black text-white text-sm" style={{ fontFamily: "var(--font-heading)" }}>Live Order Feed</h3>
-            <span className="text-[10px] text-stone-500">Auto-refreshes every 30s</span>
+            <span className="text-xs text-stone-500">Auto-refreshes every 30s</span>
           </div>
           <button
             type="button"
@@ -72,7 +72,7 @@ export function DashboardTab({
                   <p className="text-xs font-bold text-stone-200">
                     Table {o.table_label} <span className="text-stone-500 font-normal">({o.customer_name})</span>
                   </p>
-                  <p className="text-[10px] text-stone-500">
+                  <p className="text-xs text-stone-500">
                     {new Date(o.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} • {o.items?.length || 0} items
                   </p>
                 </div>
@@ -80,7 +80,7 @@ export function DashboardTab({
                   <p className="text-xs font-mono font-bold text-amber-400">
                     ₹{(o.total_paise / 100).toFixed(2)}
                   </p>
-                  <p className={`text-[9px] uppercase font-black ${o.payment_status === "paid" ? "text-emerald-400" : "text-stone-500"}`}>
+                  <p className={`text-xs uppercase font-black ${o.payment_status === "paid" ? "text-emerald-400" : "text-stone-500"}`}>
                     {o.payment_status}
                   </p>
                 </div>

@@ -157,7 +157,7 @@ export default async function SuperPage({
         byPlan: [
           { name: "Active", value: activeCafes.length, color: "#10b981" },
           { name: "Free Trial", value: trialCafes.length, color: "#f59e0b" },
-          { name: "Suspended", value: suspendedCafes.length, color: "#f43f5e" },
+          { name: "Suspended", value: suspendedCafes.length, color: "#ef4444" },
         ],
         topCafes,
       }}

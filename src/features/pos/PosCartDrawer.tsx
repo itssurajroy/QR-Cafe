@@ -80,23 +80,23 @@ export function PosCartDrawer({
         mobileCartOpen ? "fixed inset-0 z-50 flex flex-col bg-stone-950 p-4" : "hidden"
       } md:flex md:static w-full md:w-80 lg:w-96 bg-stone-900 border-l border-stone-800 flex-col shrink-0 shadow-2xl overflow-y-auto`}
     >
-      <div className="p-3.5 border-b border-stone-800 flex items-center justify-between bg-stone-950/40 shrink-0">
+      <div className="p-3 border-b border-stone-800 flex items-center justify-between bg-stone-950/40 shrink-0">
         <div>
           <h2 className="font-extrabold text-sm text-white flex items-center gap-2">
             <span>🧾 Current POS Ticket</span>
             {orderType === "dine_in" && selectedTable && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
+              <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
                 {selectedTable.label}
               </span>
             )}
           </h2>
-          <p className="text-[10px] text-stone-400">{cart.length} item lines</p>
+          <p className="text-xs text-stone-400">{cart.length} item lines</p>
         </div>
         <div className="flex gap-2 items-center">
           {cart.length > 0 && (
             <button
               onClick={clearCart}
-              className="text-[11px] text-red-400 hover:text-red-300 font-bold cursor-pointer"
+              className="text-xs text-red-400 hover:text-red-300 font-bold cursor-pointer"
             >
               Clear
             </button>
@@ -117,12 +117,12 @@ export function PosCartDrawer({
         {cart.map((ci) => (
           <div
             key={ci.item.id}
-            className="bg-stone-950 border border-stone-800/80 rounded-xl p-2.5 space-y-1.5 text-xs"
+            className="bg-stone-950 border border-stone-800/80 rounded-xl p-2 space-y-1.5 text-xs"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0 pr-2">
                 <div className="font-bold text-white truncate">{ci.item.name}</div>
-                <div className="text-[10px] text-stone-400 font-mono">
+                <div className="text-xs text-stone-400 font-mono">
                   {paise(ci.item.price_paise)} × {ci.quantity} ={" "}
                   <span className="text-amber-400 font-bold">
                     {paise(ci.item.price_paise * ci.quantity)}
@@ -133,7 +133,7 @@ export function PosCartDrawer({
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={() => updateQty(ci.item.id, -1)}
-                  className="w-6 h-6 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 font-black flex items-center justify-center cursor-pointer"
+                  className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-black flex items-center justify-center cursor-pointer"
                 >
                   -
                 </button>
@@ -142,7 +142,7 @@ export function PosCartDrawer({
                 </span>
                 <button
                   onClick={() => updateQty(ci.item.id, 1)}
-                  className="w-6 h-6 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 font-black flex items-center justify-center cursor-pointer"
+                  className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-black flex items-center justify-center cursor-pointer"
                 >
                   +
                 </button>
@@ -162,7 +162,7 @@ export function PosCartDrawer({
                       : `${current} ${tag}`.trim();
                     setItemNotes(ci.item.id, next);
                   }}
-                  className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
+                  className={`px-1.5 py-0.5 rounded text-xs font-bold cursor-pointer transition-colors ${
                     ci.notes?.includes(tag)
                       ? "bg-amber-500 text-stone-950 font-black"
                       : "bg-stone-900 hover:bg-stone-800 text-stone-400"
@@ -183,25 +183,25 @@ export function PosCartDrawer({
       </div>
 
       {/* Bill Settle Area */}
-      <div className="p-3.5 bg-stone-950/80 border-t border-stone-800 space-y-3 shrink-0">
+      <div className="p-3 bg-stone-950/80 border-t border-stone-800 space-y-3 shrink-0">
         {/* Park & Recall Row */}
         <div className="flex justify-between items-center bg-stone-900/60 p-1.5 rounded-xl border border-stone-800">
           <button
             type="button"
             onClick={handleParkTab}
             disabled={cart.length === 0}
-            className="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-[10px] font-bold border border-stone-700 cursor-pointer disabled:opacity-50 flex items-center gap-1"
+            className="px-3 py-2.5 min-h-[44px] rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-bold border border-stone-700 cursor-pointer disabled:opacity-50 flex items-center gap-1"
           >
             <span>🅿️ Park Tab</span>
           </button>
           {parkedTabs.length > 0 && (
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-              <span className="text-[9px] text-amber-400 font-bold">Held ({parkedTabs.length}):</span>
+              <span className="text-xs text-amber-400 font-bold">Held ({parkedTabs.length}):</span>
               {parkedTabs.map((pt) => (
                 <button
                   key={pt.id}
                   onClick={() => handleRecallTab(pt)}
-                  className="px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 text-[9px] font-mono font-bold border border-amber-500/30 cursor-pointer whitespace-nowrap"
+                  className="px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 text-xs font-mono font-bold border border-amber-500/30 cursor-pointer whitespace-nowrap"
                 >
                   {pt.customer.slice(0, 8)} ({pt.time})
                 </button>
@@ -212,7 +212,7 @@ export function PosCartDrawer({
 
         {/* Discount Section */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[10px] font-bold text-stone-400 uppercase">
+          <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase">
             <span>Apply Discount:</span>
             {discountPaise > 0 && (
               <button
@@ -234,7 +234,7 @@ export function PosCartDrawer({
                   setFlatDiscountRupees("");
                   setDiscountPercent(pct);
                 }}
-                className={`px-2 py-1 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                className={`px-2 py-1 rounded-md text-xs font-mono font-bold cursor-pointer transition-colors ${
                   discountPercent === pct && !flatDiscountRupees
                     ? "bg-amber-500 text-stone-950"
                     : "bg-stone-900 text-stone-400 hover:text-white"
@@ -244,7 +244,7 @@ export function PosCartDrawer({
               </button>
             ))}
             <div className="flex items-center gap-1 bg-stone-900 px-1.5 py-0.5 rounded-md border border-stone-800">
-              <span className="text-[10px] text-stone-500 font-mono">₹</span>
+              <span className="text-xs text-stone-500 font-mono">₹</span>
               <input
                 type="number"
                 placeholder="Flat"
@@ -253,7 +253,7 @@ export function PosCartDrawer({
                   setDiscountPercent(0);
                   setFlatDiscountRupees(e.target.value);
                 }}
-                className="w-12 bg-transparent text-[10px] font-mono text-white focus:outline-none text-right"
+                className="w-12 bg-transparent text-xs font-mono text-white focus:outline-none text-right"
               />
             </div>
           </div>
@@ -295,7 +295,7 @@ export function PosCartDrawer({
                   setPaymentMethod(pm.id);
                   setIsSplitTender(pm.id === "mixed");
                 }}
-                className={`py-1.5 rounded-xl text-[10px] font-black border cursor-pointer transition-all ${
+                className={`py-1.5 rounded-xl text-xs font-black border cursor-pointer transition-all ${
                   paymentMethod === pm.id
                     ? "bg-amber-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/20"
                     : "bg-stone-900 border-stone-800 text-stone-300 hover:border-stone-700"
@@ -308,11 +308,11 @@ export function PosCartDrawer({
 
           {/* Mixed Tender Split Breakdown */}
           {isSplitTender && (
-            <div className="p-2.5 rounded-xl bg-stone-900 border border-amber-500/30 space-y-2 animate-in fade-in">
-              <div className="text-[10px] font-bold text-amber-400 uppercase">Mixed Tender Split:</div>
+            <div className="p-2 rounded-xl bg-stone-900 border border-amber-500/30 space-y-2 animate-in fade-in">
+              <div className="text-xs font-bold text-amber-400 uppercase">Mixed Tender Split:</div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[9px] text-stone-400 block mb-0.5">Cash Tender (₹)</label>
+                  <label className="text-xs text-stone-400 block mb-0.5">Cash Tender (₹)</label>
                   <input
                     type="number"
                     placeholder="e.g. 300"
@@ -327,7 +327,7 @@ export function PosCartDrawer({
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] text-stone-400 block mb-0.5">UPI Tender (₹)</label>
+                  <label className="text-xs text-stone-400 block mb-0.5">UPI Tender (₹)</label>
                   <input
                     type="number"
                     placeholder="e.g. 200"
@@ -344,11 +344,11 @@ export function PosCartDrawer({
         {!isSplitTender && (
           <div className="pt-1">
             <div className="flex justify-between items-center mb-1">
-              <label className="text-[10px] font-bold text-stone-400 uppercase block">
+              <label className="text-xs font-bold text-stone-400 uppercase block">
                 Amount Received (₹)
               </label>
               {amountReceived && Number(amountReceived) > finalTotalPaise / 100 && (
-                <span className="text-[10px] text-emerald-400 font-bold font-mono">
+                <span className="text-xs text-emerald-400 font-bold font-mono">
                   Change: ₹{(Number(amountReceived) - finalTotalPaise / 100).toFixed(2)}
                 </span>
               )}
@@ -377,7 +377,7 @@ export function PosCartDrawer({
                     key={val}
                     type="button"
                     onClick={() => setAmountReceived(String(val))}
-                    className="px-2 py-1 bg-stone-900 hover:bg-stone-800 border border-stone-800 rounded-lg text-[10px] font-mono font-bold text-stone-300 cursor-pointer shrink-0"
+                    className="px-2 py-1 bg-stone-900 hover:bg-stone-800 border border-stone-800 rounded-lg text-xs font-mono font-bold text-stone-300 cursor-pointer shrink-0"
                   >
                     ₹{val}
                   </button>
@@ -386,7 +386,7 @@ export function PosCartDrawer({
           </div>
         )}
 
-        <div className="p-2.5 rounded-xl border text-[11px] font-bold flex items-center gap-2 bg-amber-950/30 border-amber-800/50 text-amber-300">
+        <div className="p-2 rounded-xl border text-xs font-bold flex items-center gap-2 bg-amber-950/30 border-amber-800/50 text-amber-300">
           <span>⚠️</span>
           <span>Payment Status: {`KOT = Unpaid (collect at counter) • Pay = Paid (payment ${paymentMethod === "cash" ? "cash" : paymentMethod === "upi" ? "UPI" : "card"} received)`}</span>
         </div>
@@ -395,14 +395,14 @@ export function PosCartDrawer({
           <button
             onClick={() => handleSettle("unpaid")}
             disabled={isSettling || cart.length === 0}
-            className="flex-1 py-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-amber-400 font-bold text-[11px] cursor-pointer border border-amber-500/30 disabled:opacity-50"
+            className="flex-1 py-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-amber-400 font-bold text-xs cursor-pointer border border-amber-500/30 disabled:opacity-50"
           >
             KOT &amp; Bill Later (Unpaid)
           </button>
           <button
             onClick={() => handleSettle("paid")}
             disabled={isSettling || cart.length === 0}
-            className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] cursor-pointer shadow-lg shadow-amber-500/20 disabled:opacity-50"
+            className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs cursor-pointer shadow-lg shadow-amber-500/20 disabled:opacity-50"
           >
             {isSettling ? "Settling..." : `Pay ${paise(finalTotalPaise)} (Paid)`}
           </button>

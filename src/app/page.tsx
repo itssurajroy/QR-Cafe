@@ -117,17 +117,17 @@ export default function Home() {
     <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black antialiased relative overflow-hidden font-sans">
       {/* Background Ambient Grid & Radial Halos */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(245,158,11,0.15),rgba(255,255,255,0))] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#44403c12_1px,transparent_1px),linear-gradient(to_bottom,#44403c12_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
 
       {/* Floating Live Social Proof Toast */}
       {toastVisible && (
-        <div className="fixed bottom-6 left-6 z-50 bg-stone-900/95 border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 max-w-xs">
+        <div className="fixed bottom-6 left-6 z-50 bg-stone-900/95 border border-amber-500/40 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 max-w-xs">
           <div className="w-9 h-9 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-bold text-base shadow-md shadow-amber-500/20 shrink-0">
             ☕
           </div>
           <div className="text-xs">
             <p className="font-bold text-white leading-tight">{toastMsg.name}</p>
-            <p className="text-[11px] text-stone-400">Order placed from <span className="text-amber-400 font-semibold">{toastMsg.table}</span> • {toastMsg.time}</p>
+            <p className="text-xs text-stone-400">Order placed from <span className="text-amber-400 font-semibold">{toastMsg.table}</span> • {toastMsg.time}</p>
           </div>
           <button
             onClick={() => setToastVisible(false)}
@@ -149,7 +149,7 @@ export default function Home() {
               <span className="font-extrabold tracking-tight text-base sm:text-lg bg-gradient-to-r from-white via-stone-200 to-stone-400 bg-clip-text text-transparent block">
                 QR Café
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-amber-400 font-bold block -mt-1">
+              <span className="text-xs uppercase tracking-widest text-amber-400 font-bold block -mt-1">
                 Restaurant OS
               </span>
             </div>
@@ -249,7 +249,7 @@ export default function Home() {
                 <div className="text-2xl mb-1">{stat.icon}</div>
                 <span className="text-2xl font-black text-white font-mono">{stat.value}</span>
                 <p className="text-xs text-amber-400 font-bold mt-0.5">{stat.label}</p>
-                <p className="text-[10px] text-stone-500 mt-0.5">{stat.sub}</p>
+                <p className="text-xs text-stone-500 mt-0.5">{stat.sub}</p>
               </div>
             ))}
           </div>
@@ -293,7 +293,7 @@ export default function Home() {
               <p className="text-xs text-stone-400 leading-relaxed max-w-lg">
                 Kitchen tablets ring audio chimes and speak out loud: <em>&quot;Table 3 needs Water!&quot;</em> or <em>&quot;New Order for Table 1!&quot;</em>. Kanban columns auto-sort tickets with urgency heatmaps and flashing alerts past 15 minutes.
               </p>
-              <div className="bg-stone-950 border border-stone-800/90 rounded-2xl p-3.5 flex items-center justify-between font-mono text-xs">
+              <div className="bg-stone-950 border border-stone-800/90 rounded-2xl p-3 flex items-center justify-between font-mono text-xs">
                 <span className="text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                   KDS Line Station Live
@@ -309,7 +309,7 @@ export default function Home() {
               <p className="text-xs text-stone-400 leading-relaxed">
                 Cashiers send itemized receipts directly to customer WhatsApp in 1 click. Zero monthly Twilio or Meta API charges.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-[11px] text-stone-300 font-mono">
+              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-xs text-stone-300 font-mono">
                 🧾 Bill #POS-482 • ₹525.00 ✓
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function Home() {
               <p className="text-xs text-stone-400 leading-relaxed">
                 When meals are delivered, 4★ and 5★ ratings automatically open the café&apos;s direct Google Business Review page.
               </p>
-              <span className="text-[11px] text-amber-400 font-bold block bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl text-center">
+              <span className="text-xs text-amber-400 font-bold block bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl text-center">
                 Loved our food? Rate on Google ★★★★★
               </span>
             </div>
@@ -333,7 +333,7 @@ export default function Home() {
               <p className="text-xs text-stone-400 leading-relaxed">
                 Automatically calculates +1 Point per ₹100 spent on cash bills to drive recurring guest visits and retention.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-[11px] text-emerald-400 font-bold font-mono">
+              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-xs text-emerald-400 font-bold font-mono">
                 +6 Loyalty Points Earned Today
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function Home() {
               <p className="text-xs text-stone-400 leading-relaxed">
                 Quick tender buttons (₹100, ₹200, ₹500, ₹2000, Exact), CGST/SGST 5% splits, and standard 80mm thermal receipt printing.
               </p>
-              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-[11px] text-stone-300 font-mono">
+              <div className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-xs text-stone-300 font-mono">
                 CGST 2.5% + SGST 2.5% Tax Breakdown
               </div>
             </div>
@@ -408,7 +408,7 @@ export default function Home() {
             {activeStep === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div className="space-y-3 text-left">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
                     Step 1: Contactless Self-Ordering
                   </span>
                   <h3 className="text-xl font-black text-white">Guests Scan, Browse &amp; Place Orders in Seconds</h3>
@@ -424,7 +424,7 @@ export default function Home() {
                 <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 text-left space-y-3 font-sans">
                   <div className="flex justify-between items-center border-b border-stone-800 pb-2">
                     <span className="text-xs font-bold text-amber-400">Table #04 Dine-In</span>
-                    <span className="text-[10px] text-stone-500">Live Browser</span>
+                    <span className="text-xs text-stone-500">Live Browser</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs text-stone-200">
@@ -438,7 +438,7 @@ export default function Home() {
                   </div>
                   <div className="pt-2 border-t border-stone-800 flex justify-between items-center text-xs font-black">
                     <span>Total: ₹600</span>
-                    <span className="px-2 py-1 rounded-lg bg-amber-500 text-stone-950 text-[10px]">Order Sent ✓</span>
+                    <span className="px-2 py-1 rounded-lg bg-amber-500 text-stone-950 text-xs">Order Sent ✓</span>
                   </div>
                 </div>
               </div>
@@ -448,7 +448,7 @@ export default function Home() {
             {activeStep === 2 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div className="space-y-3 text-left">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
                     Step 2: Voice-Enabled Kitchen KDS
                   </span>
                   <h3 className="text-xl font-black text-white">Chefs Hear Voice Announcements &amp; Track Tickets</h3>
@@ -467,18 +467,18 @@ export default function Home() {
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                       KDS Line Station
                     </span>
-                    <span className="text-[10px] font-mono text-amber-400">⏱ 02m 14s</span>
+                    <span className="text-xs font-mono text-amber-400">⏱ 02m 14s</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800 space-y-1">
+                  <div className="p-2 rounded-xl bg-stone-900 border border-stone-800 space-y-1">
                     <div className="text-xs font-extrabold text-white">Ticket #A-492 • Table 4</div>
-                    <div className="text-[11px] text-stone-300">• Hazelnut Cold Brew (Less Sugar)</div>
-                    <div className="text-[11px] text-stone-300">• Artisan Truffle Pizza (Extra Crisp)</div>
+                    <div className="text-xs text-stone-300">• Hazelnut Cold Brew (Less Sugar)</div>
+                    <div className="text-xs text-stone-300">• Artisan Truffle Pizza (Extra Crisp)</div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className="flex-1 py-1.5 rounded-lg bg-amber-500 text-stone-950 font-black text-[10px]">
+                    <button className="flex-1 py-1.5 rounded-lg bg-amber-500 text-stone-950 font-black text-xs">
                       Mark Cooking 🔥
                     </button>
-                    <button className="flex-1 py-1.5 rounded-lg bg-stone-800 text-stone-300 font-bold text-[10px]">
+                    <button className="flex-1 py-1.5 rounded-lg bg-stone-800 text-stone-300 font-bold text-xs">
                       Mark Ready 🔔
                     </button>
                   </div>
@@ -490,7 +490,7 @@ export default function Home() {
             {activeStep === 3 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div className="space-y-3 text-left">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
                     Step 3: Fast Cashier Settle &amp; Reviews
                   </span>
                   <h3 className="text-xl font-black text-white">1-Click Cash Settlement, WhatsApp Bills &amp; Google Reviews</h3>
@@ -506,14 +506,14 @@ export default function Home() {
                 <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 text-left space-y-2.5">
                   <div className="flex justify-between items-center border-b border-stone-800 pb-2">
                     <span className="text-xs font-bold text-amber-400">POS Cashier Settle</span>
-                    <span className="text-[10px] text-emerald-400 font-bold">PAID IN CASH ✓</span>
+                    <span className="text-xs text-emerald-400 font-bold">PAID IN CASH ✓</span>
                   </div>
                   <div className="text-xs text-stone-300 space-y-1 font-mono">
                     <div className="flex justify-between">
                       <span>Total:</span>
                       <span className="font-bold text-white">₹630.00</span>
                     </div>
-                    <div className="flex justify-between text-stone-400 text-[11px]">
+                    <div className="flex justify-between text-stone-400 text-xs">
                       <span>Loyalty Points:</span>
                       <span className="text-amber-400 font-bold">+6 pts</span>
                     </div>
@@ -581,7 +581,7 @@ export default function Home() {
                 />
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-stone-950/80 border border-stone-800 text-[11px] text-stone-400 leading-relaxed">
+              <div className="p-3 rounded-2xl bg-stone-950/80 border border-stone-800 text-xs text-stone-400 leading-relaxed">
                 💡 <em>Based on hospitality benchmark studies, digital QR menus increase average ticket size by 12% and accelerate table turns by 6 minutes.</em>
               </div>
             </div>
@@ -589,13 +589,13 @@ export default function Home() {
             {/* Output Projection */}
             <div className="bg-stone-950 border border-amber-500/40 rounded-2xl p-6 flex flex-col justify-between text-center space-y-4 shadow-inner">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                <span className="text-xs font-black uppercase tracking-wider text-stone-400">
                   Estimated Monthly Revenue Lift
                 </span>
                 <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono mt-1">
                   +₹{monthlyRevenueLift.toLocaleString("en-IN")}
                 </div>
-                <span className="text-[11px] text-emerald-400 font-bold block mt-0.5">
+                <span className="text-xs text-emerald-400 font-bold block mt-0.5">
                   (+₹{annualGains.toLocaleString("en-IN")} / year in added profit)
                 </span>
               </div>
@@ -640,7 +640,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white">{t.author}</h4>
-                    <p className="text-[10px] text-stone-400">{t.role} • {t.tables}</p>
+                    <p className="text-xs text-stone-400">{t.role} • {t.tables}</p>
                   </div>
                 </div>
               </div>
@@ -663,7 +663,7 @@ export default function Home() {
           </div>
 
           <div className="bg-gradient-to-br from-amber-500/15 via-stone-900 to-stone-900 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 space-y-6 text-left relative overflow-hidden backdrop-blur-xl shadow-2xl">
-            <div className="absolute top-0 right-0 bg-amber-500 text-stone-950 font-black text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+            <div className="absolute top-0 right-0 bg-amber-500 text-stone-950 font-black text-xs px-3 py-1 rounded-bl-xl uppercase tracking-wider">
               Unlimited Access
             </div>
 

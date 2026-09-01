@@ -105,7 +105,7 @@ export function MenuTab({
               <div className="flex justify-between items-center border-b border-stone-800/80 pb-3">
                 <div className="flex items-center gap-2">
                   <h3 className="font-black text-sm text-amber-400 uppercase tracking-wider">{cat.name}</h3>
-                  <span className="text-[10px] font-mono text-stone-500">({catItems.length} items)</span>
+                  <span className="text-xs font-mono text-stone-500">({catItems.length} items)</span>
                 </div>
                 <button
                   onClick={() => handleDeleteCategory(cat.id)}
@@ -123,7 +123,7 @@ export function MenuTab({
                     onDragStart={() => handleDragStart(item.id)}
                     onDragEnd={handleDragEnd}
                     onDragOver={(e) => handleDragOver(e, item.id)}
-                    className={`p-3.5 rounded-2xl border flex items-center justify-between transition-colors cursor-grab active:cursor-grabbing ${
+                    className={`p-3 rounded-2xl border flex items-center justify-between transition-colors cursor-grab active:cursor-grabbing ${
                       selectedItems.has(item.id)
                         ? "bg-amber-950/20 border-amber-500/50"
                         : item.available
@@ -155,7 +155,7 @@ export function MenuTab({
                       <button
                         type="button"
                         onClick={() => handleToggleAvailable(item.id, item.available)}
-                        className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition-colors cursor-pointer ${
+                        className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                           item.available
                             ? "bg-emerald-950 border-emerald-800 text-emerald-400"
                             : "bg-stone-900 border-stone-800 text-stone-500"

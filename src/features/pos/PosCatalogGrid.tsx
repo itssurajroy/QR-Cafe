@@ -48,7 +48,7 @@ export function PosCatalogGrid({
     <section className="flex-1 flex flex-col bg-stone-950 p-3 sm:p-4 overflow-hidden pb-20 md:pb-4">
       {msg && (
         <div
-          className={`p-2.5 mb-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border shadow-lg animate-in fade-in duration-150 ${
+          className={`p-2 mb-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border shadow-lg animate-in fade-in duration-150 ${
             msg.kind === "ok"
               ? "bg-emerald-950 border-emerald-800 text-emerald-300"
               : "bg-red-950 border-red-800 text-red-300"
@@ -116,7 +116,7 @@ export function PosCatalogGrid({
       </div>
 
       {/* Grid of Dishes */}
-      <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 pr-1 pb-16 md:pb-0">
+      <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 pr-1 pb-16 md:pb-0">
         {filteredItems.map((it) => (
           <div
             key={it.id}

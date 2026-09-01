@@ -32,11 +32,11 @@ export function MenuHeader({
                 {restaurantName}
               </h1>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500/15 text-amber-400 border border-amber-500/30">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
                   Table {tableLabel}
                 </span>
-                <span className="text-[10px] text-stone-500 font-medium">
+                <span className="text-xs text-stone-500 font-medium">
                   • {t.dineIn}
                 </span>
               </div>

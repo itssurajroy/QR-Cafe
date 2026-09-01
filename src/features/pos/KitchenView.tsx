@@ -117,7 +117,7 @@ export function KitchenView({
           <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
             <span>🔥 Kitchen Cooking Queue & Expediting</span>
           </h2>
-          <p className="text-[11px] text-stone-400">
+          <p className="text-xs text-stone-400">
             Live tickets routed from table QR scans & counter POS. Advance status with 1
             click.
           </p>
@@ -144,12 +144,12 @@ export function KitchenView({
           return (
             <div
               key={col.status}
-              className="bg-stone-900/90 border border-stone-800 rounded-3xl p-3.5 flex flex-col justify-between overflow-hidden shadow-lg"
+              className="bg-stone-900/90 border border-stone-800 rounded-3xl p-3 flex flex-col justify-between overflow-hidden shadow-lg"
             >
               <div className="flex justify-between items-center pb-2.5 mb-2 border-b border-stone-800">
                 <span className="font-extrabold text-xs text-white">{col.title}</span>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-black border ${col.color}`}
+                  className={`px-2 py-0.5 rounded-full text-xs font-mono font-black border ${col.color}`}
                 >
                   {colOrders.length}
                 </span>
@@ -168,7 +168,7 @@ export function KitchenView({
                 ))}
 
                 {colOrders.length === 0 && (
-                  <div className="py-12 text-center text-[11px] text-stone-600">
+                  <div className="py-12 text-center text-xs text-stone-600">
                     No orders in this stage
                   </div>
                 )}
@@ -186,7 +186,7 @@ export function KitchenView({
               <p className="text-xs text-stone-600">Table {collectOrder.table_label} • Bill {collectOrder.order_number}</p>
               <p className={`text-xl font-black font-mono ${collectOrder.payment_status === "paid" ? "text-emerald-600" : "text-amber-600"}`}>₹{(collectOrder.total_paise / 100).toFixed(2)}</p>
               <p className={`text-xs font-bold ${collectOrder.payment_status === "paid" ? "text-emerald-600" : "text-red-600"}`}>{collectOrder.payment_status === "paid" ? "✓ PAID — No collection needed" : "⚠️ UNPAID — Collect now"}</p>
-              <p className="text-[10px] text-stone-500 mt-1">{collectOrder.customer_phone ? `Bill auto-sent to WhatsApp • ${collectOrder.customer_phone}` : "No phone — enter to WhatsApp"}</p>
+              <p className="text-xs text-stone-500 mt-1">{collectOrder.customer_phone ? `Bill auto-sent to WhatsApp • ${collectOrder.customer_phone}` : "No phone — enter to WhatsApp"}</p>
             </div>
             <input type="tel" placeholder="Customer WhatsApp 9876543210" value={collectPhone} onChange={(e) => setCollectPhone(e.target.value)} className="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
             <div className="flex gap-2">
@@ -194,7 +194,7 @@ export function KitchenView({
               <button onClick={generatePdfAndWhatsApp} className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs">WhatsApp Bill PDF 📄</button>
             </div>
             <button onClick={() => setCollectOrder(null)} className="w-full py-2 text-xs text-stone-500">Close</button>
-            <p className="text-[10px] text-stone-500 text-center">PDF generated free via jsPDF — no paid API. WhatsApp opens via wa.me.</p>
+            <p className="text-xs text-stone-500 text-center">PDF generated free via jsPDF — no paid API. WhatsApp opens via wa.me.</p>
           </div>
         </div>
       )}

@@ -235,7 +235,7 @@ export default function KdsClient({
                 Kitchen Display System (KDS)
               </h1>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 ${
+                className={`px-2.5 py-0.5 rounded-full text-xs font-black border flex items-center gap-1 ${
                   online
                     ? "bg-emerald-950/80 border-emerald-700 text-emerald-400"
                     : "bg-red-950/80 border-red-700 text-red-400 animate-pulse"
@@ -245,7 +245,7 @@ export default function KdsClient({
                 {online ? "REALTIME LIVE" : "CONNECTING..."}
               </span>
             </div>
-            <p className="text-[11px] text-stone-400">
+            <p className="text-xs text-stone-400">
               Live ticket stream • Auto-refreshing every 2s
             </p>
           </div>
@@ -291,12 +291,12 @@ export default function KdsClient({
           <div className="flex items-center gap-2">
             <span className="text-base animate-bounce">📢</span>
             <span>{activeServiceAlert.text}</span>
-            <span className="opacity-75 font-mono text-[10px]">({activeServiceAlert.time})</span>
+            <span className="opacity-75 font-mono text-xs">({activeServiceAlert.time})</span>
           </div>
           <button
             type="button"
             onClick={() => setActiveServiceAlert(null)}
-            className="px-2.5 py-0.5 rounded-lg bg-stone-950 text-amber-400 font-black text-[10px] uppercase hover:bg-stone-900 cursor-pointer"
+            className="px-2.5 py-0.5 rounded-lg bg-stone-950 text-amber-400 font-black text-xs uppercase hover:bg-stone-900 cursor-pointer"
           >
             Dismiss ✕
           </button>
@@ -340,7 +340,7 @@ export default function KdsClient({
                           <div className="font-black text-white text-base">
                             #{o.order_number}
                           </div>
-                          <div className="text-[11px] text-amber-400 font-bold">
+                          <div className="text-xs text-amber-400 font-bold">
                             {o.table_label ? `Table: ${o.table_label}` : "Takeaway / Counter"}
                           </div>
                         </div>
@@ -349,7 +349,7 @@ export default function KdsClient({
                           <span className="font-mono text-xs text-stone-300 font-bold bg-stone-950 px-2 py-1 rounded-lg border border-stone-800">
                             ⏱️ {time}
                           </span>
-                          <div className="text-[10px] text-stone-500 uppercase mt-0.5 font-semibold">
+                          <div className="text-xs text-stone-500 uppercase mt-0.5 font-semibold">
                             {o.payment_status === "paid" ? "PAID ✓" : "UNPAID"}
                           </div>
                         </div>
@@ -367,7 +367,7 @@ export default function KdsClient({
                                 </span>
                               </div>
                               {it.notes && (
-                                <p className="text-[10px] text-amber-300/80 italic pl-1">
+                                <p className="text-xs text-amber-300/80 italic pl-1">
                                   Note: {it.notes}
                                 </p>
                               )}

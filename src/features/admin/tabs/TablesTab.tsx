@@ -68,7 +68,7 @@ export function TablesTab({
               <button
                 type="button"
                 onClick={() => handleDeleteTable(t.id)}
-                className="text-[11px] text-stone-500 hover:text-red-400 font-bold"
+                className="text-xs text-stone-500 hover:text-red-400 font-bold"
               >
                 Delete Table
               </button>
@@ -84,7 +84,7 @@ export function TablesTab({
           placeholder="Table Label (e.g. T07)"
           value={newTableLabel}
           onChange={(e) => setNewTableLabel(e.target.value)}
-          className="bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs text-white flex-1 focus:outline-none focus:border-amber-500"
+          className="bg-stone-950 border border-stone-800 rounded-xl p-2 text-xs text-white flex-1 focus:outline-none focus:border-amber-500"
         />
         <input
           type="number"
@@ -92,7 +92,7 @@ export function TablesTab({
           max={20}
           value={newTableSeats}
           onChange={(e) => setNewTableSeats(Number(e.target.value))}
-          className="w-24 bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs text-white text-center"
+          className="w-24 bg-stone-950 border border-stone-800 rounded-xl p-2 text-xs text-white text-center"
         />
         <button
           type="submit"

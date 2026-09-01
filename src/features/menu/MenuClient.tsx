@@ -302,9 +302,9 @@ export function MenuClient({
                 className="w-12 h-12 rounded-xl object-cover border border-stone-700 shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Customers also ordered</p>
+                <p className="text-xs text-amber-400 font-bold uppercase tracking-wider">Customers also ordered</p>
                 <p className="text-xs font-bold text-white truncate">{upsellItem.name}</p>
-                <p className="text-[11px] text-amber-400 font-mono font-bold">{paise(upsellItem.price_paise)}</p>
+                <p className="text-xs text-amber-400 font-mono font-bold">{paise(upsellItem.price_paise)}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button

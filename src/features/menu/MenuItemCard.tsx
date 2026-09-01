@@ -32,11 +32,11 @@ export function MenuItemCard({
 
   return (
     <div
-      className="bg-stone-900/80 border border-stone-800/90 hover:border-stone-700/60 rounded-3xl p-3.5 flex gap-3.5 shadow-lg transition-all active:scale-[0.99] group relative backdrop-blur-md animate-fade-in-up"
+      className="bg-stone-900/80 border border-stone-800/90 hover:border-stone-700/60 rounded-3xl p-3 flex gap-3 shadow-lg transition-all active:scale-[0.99] group relative backdrop-blur-md animate-fade-in-up"
       style={{ animationDelay: `${idx * 30}ms`, animationFillMode: "both" }}
     >
       {isFeatured && (
-        <div className="absolute -top-2 left-4 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-[9px] font-black uppercase tracking-wider shadow-lg shadow-amber-500/30 z-10 flex items-center gap-1">
+        <div className="absolute -top-2 left-4 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/30 z-10 flex items-center gap-1">
           <span aria-hidden="true"><SparklesIcon className="w-3 h-3" /></span>
           Chef's Pick
         </div>
@@ -54,7 +54,7 @@ export function MenuItemCard({
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <span
-          className={`absolute top-2 left-2 w-4 h-4 rounded-md border flex items-center justify-center text-[9px] font-black backdrop-blur-md shadow-md ${
+          className={`absolute top-2 left-2 w-4 h-4 rounded-md border flex items-center justify-center text-xs font-black backdrop-blur-md shadow-md ${
             item.is_veg
               ? "border-emerald-500 bg-emerald-950/80 text-emerald-400"
               : "border-red-500 bg-red-950/80 text-red-400"
@@ -62,7 +62,7 @@ export function MenuItemCard({
         >
           ●
         </span>
-        <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md text-[9px] font-bold text-stone-300">
+        <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md text-xs font-bold text-stone-300">
           ⏱ {prepTime}
         </span>
       </div>
@@ -75,11 +75,11 @@ export function MenuItemCard({
           </h3>
 
           <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-amber-400 text-[11px]">
+            <span className="text-amber-400 text-xs">
               {"★".repeat(Math.floor(stars))}
               {"☆".repeat(5 - Math.floor(stars))}
             </span>
-            <span className="text-[10px] text-stone-500 font-mono">
+            <span className="text-xs text-stone-500 font-mono">
               {stars.toFixed(1)}
             </span>
           </div>

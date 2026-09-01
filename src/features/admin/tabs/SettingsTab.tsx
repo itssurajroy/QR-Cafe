@@ -135,7 +135,7 @@ export function SettingsTab(props: SettingsTabProps) {
               value={props.settingsUpiId}
               onChange={(e) => props.setSettingsUpiId(e.target.value)}
             />
-            <p className="text-[10px] text-stone-500">
+            <p className="text-xs text-stone-500">
               Payments sent directly to your bank. QR Café takes 0% cut.
             </p>
           </div>
@@ -154,12 +154,12 @@ export function SettingsTab(props: SettingsTabProps) {
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={uploadingImage}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2 text-xs font-bold text-stone-300 focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-stone-800 file:text-amber-400 hover:file:bg-stone-700 transition-colors cursor-pointer"
+                  className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2 text-xs font-bold text-stone-300 focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-stone-800 file:text-amber-400 hover:file:bg-stone-700 transition-colors cursor-pointer"
                 />
-                {uploadingImage && <p className="text-[10px] text-amber-500 mt-1">Uploading...</p>}
+                {uploadingImage && <p className="text-xs text-amber-500 mt-1">Uploading...</p>}
               </div>
             </div>
-            <p className="text-[10px] text-stone-500">
+            <p className="text-xs text-stone-500">
               Upload your shop's official BharatPe / Paytm / PhonePe static QR code image to display to customers for accurate scanning.
             </p>
           </div>

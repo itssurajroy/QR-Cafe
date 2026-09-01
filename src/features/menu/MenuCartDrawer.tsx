@@ -77,7 +77,7 @@ export function MenuCartDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-stone-800 hover:bg-stone-700 flex items-center justify-center text-stone-400 hover:text-white text-xs cursor-pointer touch-manipulation"
+            className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-stone-800 hover:bg-stone-700 flex items-center justify-center text-stone-400 hover:text-white text-xs cursor-pointer touch-manipulation"
           >
             ✕
           </button>
@@ -98,7 +98,7 @@ export function MenuCartDrawer({
                     {paise(l.item.price_paise * l.quantity)}
                   </span>
                   {(l.spiceLevel || l.sizeVariant) && (
-                    <div className="text-[10px] text-stone-500 mt-0.5 flex gap-1.5">
+                    <div className="text-xs text-stone-500 mt-0.5 flex gap-1.5">
                       {l.spiceLevel && <span>🌶️ {l.spiceLevel}</span>}
                       {l.sizeVariant && <span>📏 {l.sizeVariant}</span>}
                     </div>
@@ -107,7 +107,7 @@ export function MenuCartDrawer({
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-black text-sm flex items-center justify-center cursor-pointer touch-manipulation"
+                    className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-black text-sm flex items-center justify-center cursor-pointer touch-manipulation"
                     onClick={() => onDecrease(l.item.id)}
                   >
                     −
@@ -117,7 +117,7 @@ export function MenuCartDrawer({
                   </span>
                   <button
                     type="button"
-                    className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-black text-sm flex items-center justify-center cursor-pointer touch-manipulation"
+                    className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-black text-sm flex items-center justify-center cursor-pointer touch-manipulation"
                     onClick={() => onIncrease(l.item.id)}
                   >
                     +
@@ -130,7 +130,7 @@ export function MenuCartDrawer({
                 value={l.notes || ""}
                 maxLength={200}
                 onChange={(e) => onUpdateNote(l.item.id, e.target.value)}
-                className="text-xs bg-stone-900 border border-stone-800 rounded-xl w-full p-2.5 text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                className="text-xs bg-stone-900 border border-stone-800 rounded-xl w-full p-2 text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
               />
             </div>
           ))}
@@ -139,7 +139,7 @@ export function MenuCartDrawer({
         <div className="border-t border-stone-800 pt-3 space-y-2.5">
           {/* Loyalty Points Preview */}
           {loyaltyPoints > 0 && (
-            <div className="p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/50 flex items-center justify-between">
+            <div className="p-2 rounded-xl bg-amber-950/40 border border-amber-800/50 flex items-center justify-between">
               <span className="text-xs text-amber-300 font-bold">
                 🏆 Loyalty Points Earned
               </span>
@@ -165,7 +165,7 @@ export function MenuCartDrawer({
                   "Pay at Counter"
                 </span>
               </div>
-              <span className="text-[10px] text-stone-400 block leading-tight">
+              <span className="text-xs text-stone-400 block leading-tight">
                 Settle cash/card after meal
               </span>
             </button>
@@ -185,7 +185,7 @@ export function MenuCartDrawer({
                   "Scan UPI QR"
                 </span>
               </div>
-              <span className="text-[10px] text-stone-400 block leading-tight">
+              <span className="text-xs text-stone-400 block leading-tight">
                 GPay, PhonePe, Paytm QR
               </span>
             </button>
@@ -198,7 +198,7 @@ export function MenuCartDrawer({
                 "Scan to Pay"
               </span>
               <img src={upiQrUrl} alt="Store UPI QR" className="w-32 h-32 rounded-xl bg-white p-2" />
-              <span className="text-[10px] text-stone-500 mt-2 text-center">
+              <span className="text-xs text-stone-500 mt-2 text-center">
                 Please pay exact amount ₹{(totalPaise / 100).toFixed(2)}
               </span>
             </div>
@@ -207,17 +207,17 @@ export function MenuCartDrawer({
           {/* Guest Details */}
           <div className="bg-stone-950/90 border border-stone-800 rounded-2xl p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                 <span>💬 WhatsApp Bill &amp; Loyalty Points</span>
               </span>
-              <span className="text-[10px] text-stone-400 font-mono">
+              <span className="text-xs text-stone-400 font-mono">
                 +1 pt / ₹100
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold text-stone-400 block mb-1">
+                <label className="text-xs font-bold text-stone-400 block mb-1">
                   "Your Name"
                 </label>
                 <input
@@ -225,11 +225,11 @@ export function MenuCartDrawer({
                   value={name}
                   maxLength={50}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-stone-900 border border-stone-800 rounded-xl p-2.5 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-900 border border-stone-800 rounded-xl p-2 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-stone-400 block mb-1">
+                <label className="text-xs font-bold text-stone-400 block mb-1">
                   "WhatsApp Phone (For Bill)"
                 </label>
                 <input
@@ -238,17 +238,17 @@ export function MenuCartDrawer({
                   value={phone}
                   maxLength={15}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-stone-900 border border-stone-800 rounded-xl p-2.5 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500 font-mono"
+                  className="w-full bg-stone-900 border border-stone-800 rounded-xl p-2 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500 font-mono"
                 />
               </div>
             </div>
-            <p className="text-[10px] text-stone-400">
+            <p className="text-xs text-stone-400">
               Enter your phone number to receive your digital bill & earned loyalty points directly on WhatsApp.
             </p>
           </div>
 
           {error && (
-            <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs font-medium">
+            <div className="p-2 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs font-medium">
               ⚠️ {error}
             </div>
           )}
@@ -262,7 +262,7 @@ export function MenuCartDrawer({
             </span>
           </div>
 
-          <div className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${paymentMethod === "counter" ? "bg-amber-950/50 border-amber-800 text-amber-300" : "bg-emerald-950/40 border-emerald-800 text-emerald-300"}`}>
+          <div className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-2 ${paymentMethod === "counter" ? "bg-amber-950/50 border-amber-800 text-amber-300" : "bg-emerald-950/40 border-emerald-800 text-emerald-300"}`}>
             <span>{paymentMethod === "counter" ? "⚠️" : "✓"}</span>
             <span>{paymentMethod === "counter" ? ("Payment Pending — Pay at counter after meal. Kitchen will start now.") : ("Prepaid — Complete UPI payment to confirm. Order starts after payment.")}</span>
           </div>

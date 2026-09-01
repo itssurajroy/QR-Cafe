@@ -30,7 +30,7 @@ export function MenuFloatingCartButton({
             cartPulse ? "animate-scale-bounce" : "animate-glow-pulse"
           }`}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div className="bg-stone-950 text-amber-400 p-1.5 rounded-xl flex items-center justify-center">
               <ShoppingBagIcon className="w-4 h-4" />
             </div>
@@ -38,7 +38,7 @@ export function MenuFloatingCartButton({
               <span className="text-xs font-black uppercase tracking-wider block">
                 {tViewCart}
               </span>
-              <span className="text-[11px] font-bold opacity-80">
+              <span className="text-xs font-bold opacity-80">
                 {totalQty} items selected
               </span>
             </div>

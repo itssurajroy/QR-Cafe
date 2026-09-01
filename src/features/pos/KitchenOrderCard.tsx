@@ -27,14 +27,14 @@ export function KitchenOrderCard({
   onUpdateStatus,
 }: KitchenOrderCardProps) {
   return (
-    <div className="bg-stone-950 border border-stone-800/90 rounded-2xl p-3.5 space-y-2.5 shadow-md flex flex-col justify-between">
+    <div className="bg-stone-950 border border-stone-800/90 rounded-2xl p-3 space-y-2.5 shadow-md flex flex-col justify-between">
       <div>
         <div className="flex justify-between items-center border-b border-stone-800/80 pb-2">
           <div>
             <span className="font-black text-sm text-white block">
               Table {order.table_label}
             </span>
-            <span className="text-[10px] font-mono text-stone-500">
+            <span className="text-xs font-mono text-stone-500">
               #{order.order_number} •{" "}
               {new Date(order.created_at).toLocaleTimeString("en-IN", {
                 hour: "2-digit",
@@ -43,7 +43,7 @@ export function KitchenOrderCard({
             </span>
           </div>
           <span
-            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 border ${
+            className={`px-2.5 py-1 rounded-full text-xs font-black uppercase flex items-center gap-1 border ${
               order.payment_status === "paid"
                 ? "bg-emerald-500 text-white border-emerald-600"
                 : "bg-red-500 text-white border-red-600 animate-pulse"
@@ -64,7 +64,7 @@ export function KitchenOrderCard({
               <div className="flex flex-col">
                 <span>{it.item_name}</span>
                 {(it.spice_level || it.size_variant || it.notes) && (
-                  <span className="text-[9px] text-stone-400">
+                  <span className="text-xs text-stone-400">
                     {[it.spice_level, it.size_variant, it.notes].filter(Boolean).join(" • ")}
                   </span>
                 )}

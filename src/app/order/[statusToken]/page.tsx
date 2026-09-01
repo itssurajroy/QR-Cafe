@@ -214,10 +214,10 @@ export default function OrderStatusPage({
         <div className="flex items-start justify-between border-b border-stone-800 pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-black text-amber-400 uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
                 Live Kitchen Sync
               </span>
-              <span className="text-[10px] text-stone-400 font-mono">
+              <span className="text-xs text-stone-400 font-mono">
                 ⏱ {formatElapsed(elapsedSeconds)}
               </span>
             </div>
@@ -239,7 +239,7 @@ export default function OrderStatusPage({
             >
               {data.payment_status === "paid" ? "Paid in Cash ✓" : "Cash at Counter"}
             </span>
-            <div className="text-[10px] font-mono text-stone-500">
+            <div className="text-xs font-mono text-stone-500">
               {new Date(data.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
             </div>
           </div>
@@ -269,7 +269,7 @@ export default function OrderStatusPage({
               {currentStep.icon}
             </div>
             <div>
-              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
                 Current Status
               </span>
               <h3 className="text-base font-black text-white">{currentStep.label}</h3>
@@ -304,7 +304,7 @@ export default function OrderStatusPage({
                   }`}>
                     {isCompleted ? "✓" : s.icon}
                   </div>
-                  <span className={`text-[9px] font-bold text-center max-w-12 leading-tight ${
+                  <span className={`text-xs font-bold text-center max-w-12 leading-tight ${
                     isCurrent ? "text-amber-400" : isCompleted ? "text-emerald-400" : "text-stone-600"
                   }`}>
                     {s.label}
@@ -340,7 +340,7 @@ export default function OrderStatusPage({
                 <span className="text-xl">🏆</span>
                 <div>
                   <p className="text-xs font-black text-white">Loyalty Points Earned!</p>
-                  <p className="text-[10px] text-stone-400">Redeemable on your next visit</p>
+                  <p className="text-xs text-stone-400">Redeemable on your next visit</p>
                 </div>
               </div>
               <span className="text-lg font-black text-amber-400 font-mono">+{Math.floor((data.total_paise || 0) / 10000)} pts</span>
@@ -362,7 +362,7 @@ export default function OrderStatusPage({
         {/* Itemized Order Recap */}
         {data.items && data.items.length > 0 && (
           <div className="bg-stone-950/80 border border-stone-800 rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-stone-400">
               <span>Itemized Order</span>
               <span>{data.items.length} dishes</span>
             </div>
@@ -385,14 +385,14 @@ export default function OrderStatusPage({
 
         {/* Re-Open Feedback CTA Banner when Order Complete */}
         {isOrderServed && (
-          <div className="bg-gradient-to-r from-amber-500/15 via-stone-900 to-amber-500/15 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+          <div className="bg-gradient-to-r from-amber-500/15 via-stone-900 to-amber-500/15 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <span className="text-xl">🌟</span>
               <div>
                 <span className="text-xs font-black text-white block">
                   {submittedFeedback ? "Feedback Submitted ✓" : "Enjoyed your meal?"}
                 </span>
-                <span className="text-[10px] text-stone-400">
+                <span className="text-xs text-stone-400">
                   {submittedFeedback ? "Thank you! Rate us on Google Reviews." : "Tap to rate and review your experience."}
                 </span>
               </div>
@@ -418,7 +418,7 @@ export default function OrderStatusPage({
             </Link>
           )}
 
-          <p className="text-[11px] text-stone-400">
+          <p className="text-xs text-stone-400">
             Live kitchen status updates automatically as your order is prepared.
           </p>
         </div>
@@ -490,7 +490,7 @@ export default function OrderStatusPage({
                         type="button"
                         key={tag}
                         onClick={() => toggleCompliment(tag)}
-                        className={`text-[11px] font-bold px-3 py-1 rounded-full border transition-all cursor-pointer ${
+                        className={`text-xs font-bold px-3 py-1 rounded-full border transition-all cursor-pointer ${
                           isSelected
                             ? "bg-amber-500 text-stone-950 border-amber-400 font-extrabold shadow-sm scale-105"
                             : "bg-stone-950 border-stone-800 text-stone-300 hover:border-stone-700"
@@ -513,7 +513,7 @@ export default function OrderStatusPage({
                 {/* Direct Google Reviews Callout if 4 or 5 stars */}
                 {rating >= 4 && (
                   <div className="bg-stone-950/80 border border-amber-500/30 rounded-2xl p-3 text-center space-y-1.5">
-                    <p className="text-[11px] text-amber-300 font-bold">
+                    <p className="text-xs text-amber-300 font-bold">
                       Loved our food & service?
                     </p>
                     <a

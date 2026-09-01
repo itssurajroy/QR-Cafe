@@ -92,7 +92,7 @@ export function RegisterView(props: RegisterViewProps) {
       <aside className="hidden md:flex w-52 lg:w-56 bg-stone-900/60 border-r border-stone-800 flex-col shrink-0 overflow-y-auto p-3 space-y-3">
         {props.orderType === "dine_in" && (
           <div>
-            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2 px-1">
+            <span className="text-xs font-black text-amber-400 uppercase tracking-widest block mb-2 px-1">
               Active Tables
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -102,20 +102,20 @@ export function RegisterView(props: RegisterViewProps) {
                   <button
                     key={t.id}
                     onClick={() => props.setSelectedTable(t)}
-                    className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all relative ${
+                    className={`p-2 rounded-xl border text-left cursor-pointer transition-all relative ${
                       props.selectedTable?.id === t.id
                         ? "bg-amber-500 border-amber-400 text-stone-950 font-black shadow-md shadow-amber-500/20"
                         : "bg-stone-950/80 border-stone-800 text-stone-300 hover:border-stone-700"
                     }`}
                   >
                     {activeCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center shadow-md animate-pulse">
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-xs font-black flex items-center justify-center shadow-md animate-pulse">
                         {activeCount}
                       </span>
                     )}
                     <div className="text-xs font-extrabold">{t.label}</div>
                     <div
-                      className={`text-[10px] ${
+                      className={`text-xs ${
                         props.selectedTable?.id === t.id ? "text-stone-900" : "text-stone-500"
                       }`}
                     >
@@ -129,7 +129,7 @@ export function RegisterView(props: RegisterViewProps) {
         )}
 
         <div>
-          <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2 px-1">
+          <span className="text-xs font-black text-amber-400 uppercase tracking-widest block mb-2 px-1">
             Categories
           </span>
           <div className="space-y-1.5">
@@ -142,7 +142,7 @@ export function RegisterView(props: RegisterViewProps) {
               }`}
             >
               <span>🔥 All Items</span>
-              <span className="text-[10px] font-mono opacity-60">({props.items.length})</span>
+              <span className="text-xs font-mono opacity-60">({props.items.length})</span>
             </button>
             {props.categories.map((c) => {
               const count = props.items.filter((i) => i.category_id === c.id).length;
@@ -157,7 +157,7 @@ export function RegisterView(props: RegisterViewProps) {
                   }`}
                 >
                   <span className="truncate">{c.name}</span>
-                  <span className="text-[10px] font-mono opacity-60">({count})</span>
+                  <span className="text-xs font-mono opacity-60">({count})</span>
                 </button>
               );
             })}

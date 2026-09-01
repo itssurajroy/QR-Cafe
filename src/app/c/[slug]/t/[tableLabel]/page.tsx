@@ -71,7 +71,7 @@ export default async function NamedCafeTablePage({
           <h1 className="text-xl font-extrabold text-white">{tenant.name}</h1>
           <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 text-xs text-stone-300">
             🚫 <strong>Ordering Temporarily Paused</strong>
-            <p className="text-[11px] text-stone-400 mt-1">
+            <p className="text-xs text-stone-400 mt-1">
               The café subscription is currently being renewed. Please order directly with your server.
             </p>
           </div>

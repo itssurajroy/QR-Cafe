@@ -272,16 +272,16 @@ export default function PosClient({
           <div className="hidden sm:block leading-tight">
             <h1 className="font-black text-[13px] text-white tracking-wide flex items-center gap-1.5">
               <span>{restaurant.name}</span>
-              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 text-[9px] uppercase tracking-wider">POS</span>
+              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 text-xs uppercase tracking-wider">POS</span>
             </h1>
-            <p className="text-[10px] text-stone-400 font-mono">Terminal 1</p>
+            <p className="text-xs text-stone-400 font-mono">Terminal 1</p>
           </div>
         </div>
 
         <div className="flex bg-stone-950 p-1 rounded-xl border border-stone-800">
           <button
             onClick={() => setViewMode("catalog")}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
               viewMode === "catalog" ? "bg-stone-800 text-white shadow-md" : "text-stone-400 hover:text-stone-200"
             }`}
           >
@@ -289,7 +289,7 @@ export default function PosClient({
           </button>
           <button
             onClick={() => setViewMode("kitchen")}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
               viewMode === "kitchen" ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md" : "text-stone-400 hover:text-purple-300"
             }`}
           >
@@ -298,7 +298,7 @@ export default function PosClient({
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button onClick={handleOpenZReport} className="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-[11px] font-bold border border-stone-700 transition-colors cursor-pointer flex items-center gap-1">
+          <button onClick={handleOpenZReport} className="px-3 py-2.5 min-h-[44px] rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-bold border border-stone-700 transition-colors cursor-pointer flex items-center gap-1">
             📑 Z-Report
           </button>
         </div>

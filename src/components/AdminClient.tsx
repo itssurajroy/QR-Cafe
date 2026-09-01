@@ -531,7 +531,7 @@ export default function AdminClient({
       errorCorrectionLevel: "H",
       color: {
         dark: "#1c1917",
-        light: "#ffffff",
+        light: "#f5f5f4",
       },
     });
     return { dataUrl, url };
@@ -580,7 +580,7 @@ export default function AdminClient({
 
           <Link
             href="/admin/billing"
-            className={`px-3 py-1 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-xl font-black text-xs transition-all cursor-pointer ${
               isSuspended
                 ? "bg-red-600 hover:bg-red-500 text-white"
                 : isTrial
@@ -601,19 +601,19 @@ export default function AdminClient({
             </div>
             <div>
               <h1 className="font-extrabold text-white text-base" style={{ fontFamily: "var(--font-heading)" }}>{restaurant?.name || "Café Admin"}</h1>
-              <p className="text-[11px] text-stone-400">Operations &amp; Setup Hub</p>
+              <p className="text-xs text-stone-400">Operations &amp; Setup Hub</p>
             </div>
           </div>
 
           {/* Live Revenue Ticker */}
           <div className="hidden md:flex items-center gap-4 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2">
             <div className="text-center">
-              <p className="text-[10px] text-stone-500 uppercase tracking-wider">Today's Revenue</p>
+              <p className="text-xs text-stone-500 uppercase tracking-wider">Today's Revenue</p>
               <p className="text-sm font-black text-amber-400 font-mono">₹{(liveRevenue / 100).toLocaleString("en-IN")}</p>
             </div>
             <div className="w-px h-6 bg-stone-800"></div>
             <div className="text-center">
-              <p className="text-[10px] text-stone-500 uppercase tracking-wider">Orders</p>
+              <p className="text-xs text-stone-500 uppercase tracking-wider">Orders</p>
               <p className="text-sm font-black text-emerald-400 font-mono">{liveOrders}</p>
             </div>
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
@@ -635,26 +635,26 @@ export default function AdminClient({
               <button
                 type="button"
                 onClick={() => setDismissChecklist(true)}
-                className="text-[11px] text-stone-500 hover:text-stone-300 font-bold"
+                className="text-xs text-stone-500 hover:text-stone-300 font-bold"
               >
                 Dismiss ✕
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-950 border border-stone-800">
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-950 border border-stone-800">
                 <span className={itemList.length > 0 ? "text-emerald-400 font-bold" : "text-stone-600"}>
                   {itemList.length > 0 ? "✓" : "○"}
                 </span>
                 <span className="text-stone-300">Add Menu Dishes ({itemList.length})</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-950 border border-stone-800">
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-950 border border-stone-800">
                 <span className={tableList.length > 0 ? "text-emerald-400 font-bold" : "text-stone-600"}>
                   {tableList.length > 0 ? "✓" : "○"}
                 </span>
                 <span className="text-stone-300">Generate Tables & QRs ({tableList.length})</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-stone-950 border border-stone-800">
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-950 border border-stone-800">
                 <span className="text-amber-400 font-bold">★</span>
                 <Link href={restaurant?.slug ? `/c/${restaurant.slug}` : "/"} className="text-amber-400 hover:underline">
                   Test Guest Menu ↗
@@ -667,7 +667,7 @@ export default function AdminClient({
         {/* Flash Message */}
         {msg && (
           <div
-            className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 border shadow-lg animate-in fade-in duration-200 ${
+            className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 border shadow-lg animate-in fade-in duration-200 ${
               msg.kind === "ok"
                 ? "bg-emerald-950/80 border-emerald-800 text-emerald-300"
                 : "bg-red-950/80 border-red-800 text-red-300"
@@ -783,7 +783,7 @@ export default function AdminClient({
                   Subscription controls, multi-tenant governance, Google Review setup &amp; hardware diagnostics
                 </p>
               </div>
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-amber-500 text-stone-950">
+              <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-amber-500 text-stone-950">
                 Operational Runbook
               </span>
             </div>
@@ -794,7 +794,7 @@ export default function AdminClient({
                 <h3 className="text-sm font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
                   <span>🛠️ Live Floor &amp; Hardware Self-Diagnostics</span>
                 </h3>
-                <p className="text-[11px] text-stone-400 mt-0.5">
+                <p className="text-xs text-stone-400 mt-0.5">
                   Test your browser audio, WhatsApp URL encoding, and tax calculations before operating live.
                 </p>
               </div>
@@ -814,11 +814,11 @@ export default function AdminClient({
                       flash("err", "Web Speech API not supported on this browser.");
                     }
                   }}
-                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">🔊</span>
                   <div className="text-xs font-bold text-white">Test Voice Call Bell</div>
-                  <div className="text-[10px] text-stone-500 font-mono">Speak: Table 01 Call</div>
+                  <div className="text-xs text-stone-500 font-mono">Speak: Table 01 Call</div>
                 </button>
 
                 {/* Test 2: WhatsApp Link Test */}
@@ -839,11 +839,11 @@ export default function AdminClient({
                     window.open(`https://wa.me/?text=${encodeURIComponent(sampleMsg)}`, "_blank");
                     flash("ok", "💬 WhatsApp Test Receipt Dispatched!");
                   }}
-                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">💬</span>
                   <div className="text-xs font-bold text-emerald-400">Test WhatsApp Bill</div>
-                  <div className="text-[10px] text-stone-500 font-mono">Launch pre-formatted text</div>
+                  <div className="text-xs text-stone-500 font-mono">Launch pre-formatted text</div>
                 </button>
 
                 {/* Test 3: GST Tax Calculation */}
@@ -858,11 +858,11 @@ export default function AdminClient({
                     const sgst = (gstTotal / 2).toFixed(2);
                     flash("ok", `🧮 GST Test (₹1,000 Bill): Taxable=₹${taxable}, CGST (${taxRate / 2}%)=₹${cgst}, SGST (${taxRate / 2}%)=₹${sgst}`);
                   }}
-                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">🧮</span>
                   <div className="text-xs font-bold text-amber-400">Verify GST Math</div>
-                  <div className="text-[10px] text-stone-500 font-mono">Compute 2.5% CGST/SGST</div>
+                  <div className="text-xs text-stone-500 font-mono">Compute 2.5% CGST/SGST</div>
                 </button>
 
                 {/* Test 4: Realtime WebSocket Ping */}
@@ -882,11 +882,11 @@ export default function AdminClient({
                       flash("err", "Server unreachable");
                     }
                   }}
-                  className="p-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">⚡</span>
                   <div className="text-xs font-bold text-stone-200">Ping Server Latency</div>
-                  <div className="text-[10px] text-stone-500 font-mono">Verify Edge connection</div>
+                  <div className="text-xs text-stone-500 font-mono">Verify Edge connection</div>
                 </button>
               </div>
             </div>
@@ -904,12 +904,12 @@ export default function AdminClient({
                 <p>
                   QR Café operates on a unified flat plan at <strong>₹799/month</strong> with unlimited tables, dishes, KDS screens, and cash POS registers.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-[11px]">
-                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-xs">
+                  <div className="p-2 rounded-xl bg-stone-900 border border-stone-800">
                     <span className="text-stone-500 block">Subscription Status:</span>
                     <span className="text-emerald-400 font-bold uppercase">{plan}</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800">
+                  <div className="p-2 rounded-xl bg-stone-900 border border-stone-800">
                     <span className="text-stone-500 block">Trial Expiry / Renewal:</span>
                     <span className="text-amber-400 font-bold">{trialEnds ? trialEnds.toLocaleDateString("en-IN") : "Active"}</span>
                   </div>
@@ -959,7 +959,7 @@ export default function AdminClient({
                 <p>
                   To maximize your restaurant&apos;s local Google Maps ranking, set your Google Place Review URL in the <strong>Branding Tab</strong>.
                 </p>
-                <div className="p-3 rounded-xl bg-stone-900 border border-stone-800 font-mono text-[11px] text-amber-400">
+                <div className="p-3 rounded-xl bg-stone-900 border border-stone-800 font-mono text-xs text-amber-400">
                   Current Review URL: {restaurant?.google_review_url || "Not configured yet (Add in Branding tab)"}
                 </div>
                 <p className="text-stone-400">
@@ -1014,7 +1014,7 @@ export default function AdminClient({
               <img src={qrModal.url} alt={`QR for Table ${qrModal.label}`} className="w-56 h-56 mx-auto" />
             </div>
 
-            <p className="text-[11px] text-stone-400">
+            <p className="text-xs text-stone-400">
               Scan with any mobile camera to launch digital ordering for Table {qrModal.label}
             </p>
 
@@ -1048,7 +1048,7 @@ export default function AdminClient({
 
             <form onSubmit={handleCreateItem} className="space-y-3">
               <div>
-                <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Dish Name</label>
+                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Dish Name</label>
                 <input
                   className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                   placeholder="e.g. Hazelnut Iced Latte"
@@ -1060,7 +1060,7 @@ export default function AdminClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Price (₹)</label>
+                  <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Price (₹)</label>
                   <input
                     className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                     placeholder="e.g. 240"
@@ -1072,7 +1072,7 @@ export default function AdminClient({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Category</label>
+                  <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Category</label>
                   <select
                     className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                     value={newItemCatId}
@@ -1088,7 +1088,7 @@ export default function AdminClient({
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Description (Optional)</label>
+                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Description (Optional)</label>
                 <input
                   className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                   placeholder="Freshly brewed espresso with toasted hazelnut syrup"
@@ -1146,7 +1146,7 @@ export default function AdminClient({
 
             <form onSubmit={handleCreateCategory} className="space-y-3">
               <div>
-                <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Category Name</label>
+                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Category Name</label>
                 <input
                   className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
                   placeholder="e.g. Artisanal Breads & Toasts"
@@ -1189,7 +1189,7 @@ export default function AdminClient({
             <div className="flex justify-between items-center border-b border-stone-800 pb-3">
               <div>
                 <h3 className="text-base font-black text-white">📥 Bulk Import Menu Dishes</h3>
-                <p className="text-[11px] text-stone-400">
+                <p className="text-xs text-stone-400">
                   Paste raw spreadsheet text or CSV (Format: <code>Dish Name, Price, Category, Veg/Non-Veg, Description</code>)
                 </p>
               </div>
@@ -1201,7 +1201,7 @@ export default function AdminClient({
             <div className="space-y-3">
               {/* Sample Preset Shortcut */}
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">
                   Raw CSV / Spreadsheet Text
                 </label>
                 <button
@@ -1216,7 +1216,7 @@ Avocado Sourdough Toast, 240, Breakfast, Veg, Smashed hass avocado on artisan so
 Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with ganache`;
                     handleBulkParse(sample);
                   }}
-                  className="text-[10px] text-amber-400 font-bold hover:underline cursor-pointer"
+                  className="text-xs text-amber-400 font-bold hover:underline cursor-pointer"
                 >
                   ⚡ Load 6 Sample Dishes
                 </button>
@@ -1233,7 +1233,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
               {/* Live Parsed Preview Table */}
               {parsedBulkItems.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
                     ✓ Validated {parsedBulkItems.length} Dishes Ready to Import:
                   </span>
                   <div className="max-h-40 overflow-y-auto rounded-xl border border-stone-800 bg-stone-950/80 p-2 space-y-1">
@@ -1242,7 +1242,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${item.isVeg ? "bg-emerald-400" : "bg-red-400"}`}></span>
                           <span className="font-bold text-white">{item.name}</span>
-                          <span className="text-[10px] text-stone-500 font-mono">({item.category})</span>
+                          <span className="text-xs text-stone-500 font-mono">({item.category})</span>
                         </div>
                         <span className="text-amber-400 font-mono font-bold">₹{item.price}</span>
                       </div>
@@ -1312,7 +1312,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                   className="bg-white text-stone-950 rounded-3xl p-5 border-2 border-dashed border-stone-300 text-center space-y-3 shadow-lg flex flex-col justify-between"
                 >
                   <div className="border-b border-stone-200 pb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 block">
+                    <span className="text-xs font-black uppercase tracking-widest text-amber-600 block">
                       {restaurant?.name || "QR Café"}
                     </span>
                     <h4 className="text-2xl font-black tracking-tight text-stone-900 mt-0.5">
@@ -1326,11 +1326,11 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
 
                   <div className="space-y-1.5 text-xs text-stone-700">
                     <p className="font-extrabold text-stone-900">📱 Scan with Camera to Order</p>
-                    <p className="text-[10px] text-stone-500">1. Scan QR • 2. Select Food • 3. Pay Cash at Counter</p>
+                    <p className="text-xs text-stone-500">1. Scan QR • 2. Select Food • 3. Pay Cash at Counter</p>
                   </div>
 
                   {/* WiFi Badge */}
-                  <div className="p-2 rounded-xl bg-stone-100 border border-stone-200 text-[10px] font-mono text-stone-800">
+                  <div className="p-2 rounded-xl bg-stone-100 border border-stone-200 text-xs font-mono text-stone-800">
                     📶 WiFi: <strong>{wifiSsid}</strong> | Pass: <strong>{wifiPassword}</strong>
                   </div>
                 </div>
