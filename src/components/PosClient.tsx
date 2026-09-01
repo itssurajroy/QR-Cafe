@@ -180,39 +180,22 @@ export default function PosClient({
   const handleSettle = async (status: "paid" | "unpaid") => {
     if (cart.length === 0 || isSettling) return;
     setIsSettling(true);
-
     try {
-      const orderNumber = Math.floor(1000 + Math.random() * 9000).toString();
-      const { data: order, error } = await supabase
-        .from("orders")
-        .insert({
-          restaurant_id: restaurant.id,
+      const res = await fetch("/api/pos/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           table_id: selectedTable?.id || null,
+          order_type: selectedTable ? "dine_in" : "takeaway",
           customer_name: "Walk-in",
-          subtotal_paise: subtotalPaise,
-          total_paise: finalTotalPaise,
-          status: status === "paid" ? "served" : "pending",
-          payment_status: status,
+          items: cart.map((c) => ({ id: c.item.id, quantity: c.quantity, notes: c.notes || "" })),
+          discount_paise: discountPaise || 0,
           payment_method: paymentMethod || "cash",
-          order_number: orderNumber,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const orderItems = cart.map((c) => ({
-        order_id: order.id,
-        item_id: c.item.id,
-        item_name: c.item.name,
-        quantity: c.quantity,
-        line_total_paise: c.item.price_paise * c.quantity,
-        notes: c.notes,
-      }));
-
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-      if (itemsError) throw itemsError;
-
+          payment_status: status,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Order failed");
       flash("ok", status === "paid" ? "Bill Settled ✓" : "KOT Sent to Kitchen 🔥");
       if (status === "unpaid") speakVoice(`K O T sent to kitchen for table ${selectedTable?.label || "Counter"}`);
       clearCart();

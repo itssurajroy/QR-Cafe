@@ -82,12 +82,27 @@ export async function POST(req: NextRequest) {
   const orderNumber = `POS-${Math.floor(Math.random() * 9000) + 1000}`;
   const validUuid = crypto.randomUUID();
 
+  let resolvedTableId = table_id || null;
+  if (!resolvedTableId) {
+    const { data: fallbackTable } = await admin
+      .from("restaurant_tables")
+      .select("id")
+      .eq("restaurant_id", user.restaurantId)
+      .eq("active", true)
+      .limit(1)
+      .maybeSingle();
+    resolvedTableId = fallbackTable?.id || null;
+  }
+  if (!resolvedTableId) {
+    return NextResponse.json({ error: "No active table found for this café. Create a table first." }, { status: 400 });
+  }
+
   // Insert Order
   const { data: order, error: oErr } = await admin
     .from("orders")
     .insert({
       restaurant_id: user.restaurantId,
-      table_id: table_id || null,
+      table_id: resolvedTableId,
       order_number: orderNumber,
       subtotal_paise: subtotal,
       total_paise: totalPaise,
