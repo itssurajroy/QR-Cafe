@@ -44,29 +44,6 @@ const I18N = {
     serviceSent: "Staff has been notified for Table",
     emptyMenu: "No items available in this section.",
   },
-  hi: {
-    dineIn: "डाइन-इन मेनू",
-    vegOnly: "केवल शाकाहारी",
-    all: "सभी व्यंजन",
-    search: "कॉफ़ी, स्नैक्स, पिज़्ज़ा खोजें…",
-    add: "+ जोड़ें",
-    viewCart: "कार्ट देखें",
-    orderSummary: "आपका ऑर्डर सारांश",
-    payAtCounter: "काउंटर पर भुगतान",
-    payOnline: "UPI / QR भुगतान",
-    customNotes: "विशेष निर्देश (जैसे कम तीखा, अतिरिक्त चीज़)...",
-    namePlaceholder: "आपका नाम (वैकल्पिक)",
-    phonePlaceholder: "फ़ोन नंबर (वैकल्पिक)",
-    totalBill: "कुल राशि:",
-    keepBrowsing: "और देखें",
-    placeOrder: "ऑर्डर दें →",
-    submitting: "ऑर्डर भेजा जा रहा है…",
-    callWaiter: "वेटर बुलाएं",
-    needWater: "पानी चाहिए",
-    cleanTable: "टेबल साफ़ करें",
-    serviceSent: "स्टाफ को सूचना भेज दी गई है टेबल",
-    emptyMenu: "इस श्रेणी में कोई व्यंजन उपलब्ध नहीं है।",
-  },
 };
 
 export function MenuClient({
@@ -87,8 +64,7 @@ export function MenuClient({
   upiQrUrl?: string;
 }) {
   const router = useRouter();
-  const [lang, setLang] = useState<"en" | "hi">("en");
-  const t = I18N[lang];
+  const t = I18N.en;
 
   // Apply per-café accent color
   useEffect(() => {
@@ -272,8 +248,6 @@ export function MenuClient({
       <MenuHeader
         restaurantName={restaurantName}
         tableLabel={tableLabel}
-        lang={lang}
-        onLangToggle={() => setLang(lang === "en" ? "hi" : "en")}
         onHelpClick={() => setServiceModal(true)}
         vegOnly={vegOnly}
         onVegToggle={() => setVegOnly(!vegOnly)}
@@ -411,7 +385,6 @@ export function MenuClient({
         onIncrease={handleIncrease}
         onDecrease={decreaseQty}
         onUpdateNote={updateNotes}
-        lang={lang}
         t={t}
         upiQrUrl={upiQrUrl}
       />

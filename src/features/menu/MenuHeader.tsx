@@ -5,8 +5,6 @@ import { CoffeeIcon, BellIcon } from "@/components/Icons";
 interface MenuHeaderProps {
   restaurantName: string;
   tableLabel: string;
-  lang: "en" | "hi";
-  onLangToggle: () => void;
   onHelpClick: () => void;
   vegOnly: boolean;
   onVegToggle: () => void;
@@ -16,8 +14,6 @@ interface MenuHeaderProps {
 export function MenuHeader({
   restaurantName,
   tableLabel,
-  lang,
-  onLangToggle,
   onHelpClick,
   vegOnly,
   onVegToggle,
@@ -55,14 +51,6 @@ export function MenuHeader({
             >
               <BellIcon className="w-3.5 h-3.5 animate-bounce" />
               <span className="hidden sm:inline">Help</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onLangToggle}
-              className="px-2.5 py-1.5 rounded-xl bg-stone-800/90 hover:bg-stone-700 text-stone-200 text-xs font-black border border-stone-700/80 cursor-pointer touch-manipulation font-mono transition-all active:scale-95 shadow-sm"
-            >
-              {lang === "en" ? "🇮🇳 HI" : "🇬🇧 EN"}
             </button>
 
             <button

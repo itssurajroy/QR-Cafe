@@ -25,7 +25,6 @@ interface MenuCartDrawerProps {
   onIncrease: (id: string) => void;
   onDecrease: (id: string) => void;
   onUpdateNote: (id: string, note: string) => void;
-  lang: "en" | "hi";
   t: Record<string, string>;
   upiQrUrl?: string;
 }
@@ -51,7 +50,6 @@ export function MenuCartDrawer({
   onIncrease,
   onDecrease,
   onUpdateNote,
-  lang,
   t,
   upiQrUrl,
 }: MenuCartDrawerProps) {
@@ -164,13 +162,11 @@ export function MenuCartDrawer({
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">💵</span>
                 <span className="text-xs font-black text-white">
-                  {lang === "hi" ? "काउंटर पर नकद" : "Pay at Counter"}
+                  "Pay at Counter"
                 </span>
               </div>
               <span className="text-[10px] text-stone-400 block leading-tight">
-                {lang === "hi"
-                  ? "भोजन के बाद काउंटर पर नकद दें"
-                  : "Settle cash/card after meal"}
+                Settle cash/card after meal
               </span>
             </button>
 
@@ -186,13 +182,11 @@ export function MenuCartDrawer({
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">📱</span>
                 <span className="text-xs font-black text-purple-300">
-                  {lang === "hi" ? "UPI द्वारा भुगतान" : "Scan UPI QR"}
+                  "Scan UPI QR"
                 </span>
               </div>
               <span className="text-[10px] text-stone-400 block leading-tight">
-                {lang === "hi"
-                  ? "GPay / PhonePe / Paytm से QR स्कैन करें"
-                  : "GPay, PhonePe, Paytm QR"}
+                GPay, PhonePe, Paytm QR
               </span>
             </button>
           </div>
@@ -201,11 +195,11 @@ export function MenuCartDrawer({
           {paymentMethod === "online" && upiQrUrl && (
             <div className="flex flex-col items-center p-4 bg-stone-900 border border-stone-800 rounded-2xl animate-fade-in-up">
               <span className="text-xs font-black text-white mb-2 uppercase tracking-widest text-center">
-                {lang === "hi" ? "स्कैन करके भुगतान करें" : "Scan to Pay"}
+                "Scan to Pay"
               </span>
               <img src={upiQrUrl} alt="Store UPI QR" className="w-32 h-32 rounded-xl bg-white p-2" />
               <span className="text-[10px] text-stone-500 mt-2 text-center">
-                {lang === "hi" ? "कृपया कुल राशि ₹" + (totalPaise / 100).toFixed(2) + " का भुगतान करें" : "Please pay exact amount ₹" + (totalPaise / 100).toFixed(2)}
+                Please pay exact amount ₹{(totalPaise / 100).toFixed(2)}
               </span>
             </div>
           )}
@@ -224,12 +218,10 @@ export function MenuCartDrawer({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <label className="text-[10px] font-bold text-stone-400 block mb-1">
-                  {lang === "hi" ? "आपका नाम" : "Your Name"}
+                  "Your Name"
                 </label>
                 <input
-                  placeholder={
-                    lang === "hi" ? "उदा. राहुल शर्मा" : "e.g. Alex Smith"
-                  }
+                  placeholder="e.g. Alex Smith"
                   value={name}
                   maxLength={50}
                   onChange={(e) => setName(e.target.value)}
@@ -238,9 +230,7 @@ export function MenuCartDrawer({
               </div>
               <div>
                 <label className="text-[10px] font-bold text-stone-400 block mb-1">
-                  {lang === "hi"
-                    ? "व्हाट्सएप नंबर (बिल के लिए)"
-                    : "WhatsApp Phone (For Bill)"}
+                  "WhatsApp Phone (For Bill)"
                 </label>
                 <input
                   type="tel"
@@ -253,9 +243,7 @@ export function MenuCartDrawer({
               </div>
             </div>
             <p className="text-[10px] text-stone-400">
-              {lang === "hi"
-                ? "भोजन के बाद आपके व्हाट्सएप पर डिजिटल रसीद और लॉयल्टी रिवार्ड भेजे जाएंगे।"
-                : "Enter your phone number to receive your digital bill & earned loyalty points directly on WhatsApp."}
+              Enter your phone number to receive your digital bill & earned loyalty points directly on WhatsApp.
             </p>
           </div>
 
@@ -276,7 +264,7 @@ export function MenuCartDrawer({
 
           <div className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${paymentMethod === "counter" ? "bg-amber-950/50 border-amber-800 text-amber-300" : "bg-emerald-950/40 border-emerald-800 text-emerald-300"}`}>
             <span>{paymentMethod === "counter" ? "⚠️" : "✓"}</span>
-            <span>{paymentMethod === "counter" ? (lang === "hi" ? "भुगतान लंबित — भोजन के बाद काउंटर पर भुगतान करें" : "Payment Pending — Pay at counter after meal. Kitchen will start now.") : (lang === "hi" ? "प्रीपेड — UPI भुगतान पूरा करें" : "Prepaid — Complete UPI payment to confirm. Order starts after payment.")}</span>
+            <span>{paymentMethod === "counter" ? ("Payment Pending — Pay at counter after meal. Kitchen will start now.") : ("Prepaid — Complete UPI payment to confirm. Order starts after payment.")}</span>
           </div>
 
           <div className="flex gap-2 pt-1">
