@@ -357,6 +357,7 @@ export default function PosClient({
           liveOrders={liveOrders}
           fetchLiveOrders={fetchLiveOrders}
           handleUpdateOrderStatus={handleUpdateOrderStatus}
+          restaurant={restaurant}
         />
       )}
 

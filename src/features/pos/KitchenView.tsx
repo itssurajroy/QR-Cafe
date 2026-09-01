@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { KitchenOrderCard } from "./KitchenOrderCard";
 
 interface KitchenViewProps {
@@ -9,13 +10,52 @@ interface KitchenViewProps {
     orderNumber: string,
     tableLabel: string
   ) => void;
+  restaurant?: any;
 }
 
 export function KitchenView({
   liveOrders,
   fetchLiveOrders,
   handleUpdateOrderStatus,
+  restaurant,
 }: KitchenViewProps) {
+  const [collectOrder, setCollectOrder] = useState<any>(null);
+  const [collectPhone, setCollectPhone] = useState("");
+
+  const handleServe = (id: string, status: string, orderNumber: string, tableLabel: string) => {
+    const order = liveOrders.find((o) => o.id === id);
+    handleUpdateOrderStatus(id, status, orderNumber, tableLabel);
+    if (status === "served" && order?.payment_status !== "paid") {
+      setTimeout(() => setCollectOrder(order), 400);
+      setCollectPhone(order?.customer_phone || "");
+    }
+  };
+
+  const generatePdfAndWhatsApp = async () => {
+    if (!collectOrder) return;
+    const mod: any = await import("jspdf");
+    const Doc = mod.jsPDF || mod.default;
+    const doc = new Doc();
+    const rName = restaurant?.name || "QR Café";
+    doc.setFontSize(16); doc.text(rName, 10, 15);
+    doc.setFontSize(10); doc.text(`${restaurant?.address || ""} • ${restaurant?.phone || ""}`, 10, 22);
+    doc.text(`Bill: ${collectOrder.order_number} • Table: ${collectOrder.table_label} • ${new Date().toLocaleString("en-IN")}`, 10, 30);
+    doc.setFontSize(12); doc.text(collectOrder.payment_status === "paid" ? "PAID" : "UNPAID — Collect at counter", 10, 38);
+    let y = 48; doc.setFontSize(10);
+    (collectOrder.items || []).forEach((it: any, i: number) => {
+      const line = `${it.item_name} x${it.quantity} — ₹${((it.unit_price_paise || it.price_paise || 0) * it.quantity / 100).toFixed(2)}`;
+      doc.text(line, 10, y); y += 6;
+    });
+    doc.setFontSize(12); doc.text(`Total: ₹${(collectOrder.total_paise / 100).toFixed(2)}`, 10, y + 4);
+    doc.save(`Bill-${collectOrder.order_number}.pdf`);
+    if (collectPhone) {
+      const text = encodeURIComponent(`Your bill for Table ${collectOrder.table_label} at ${rName} — Bill ${collectOrder.order_number} Total ₹${(collectOrder.total_paise / 100).toFixed(2)} is ${collectOrder.payment_status === "paid" ? "PAID ✓" : "PENDING — please pay at counter"}. PDF downloaded.`);
+      window.open(`https://wa.me/${collectPhone.replace(/[^0-9]/g, "")}?text=${text}`, "_blank");
+    } else {
+      const text = encodeURIComponent(`Bill ${collectOrder.order_number} Table ${collectOrder.table_label} Total ₹${(collectOrder.total_paise / 100).toFixed(2)}`);
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
+  };
   const columns = [
     {
       status: "pending",
@@ -100,7 +140,7 @@ export function KitchenView({
                     order={order}
                     nextStatus={col.nextStatus}
                     nextLabel={col.nextLabel}
-                    onUpdateStatus={handleUpdateOrderStatus}
+                    onUpdateStatus={handleServe}
                   />
                 ))}
 
@@ -114,6 +154,26 @@ export function KitchenView({
           );
         })}
       </div>
+
+      {collectOrder && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setCollectOrder(null)}>
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl border-t-4 border-amber-500" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-black text-stone-900 text-center">Collect Payment</h3>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+              <p className="text-xs text-stone-600">Table {collectOrder.table_label} • Bill {collectOrder.order_number}</p>
+              <p className="text-xl font-black text-amber-600 font-mono">₹{(collectOrder.total_paise / 100).toFixed(2)}</p>
+              <p className="text-xs font-bold text-red-600">⚠️ UNPAID — Collect now</p>
+            </div>
+            <input type="tel" placeholder="Customer WhatsApp 9876543210" value={collectPhone} onChange={(e) => setCollectPhone(e.target.value)} className="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
+            <div className="flex gap-2">
+              <button onClick={() => { setCollectOrder(null); }} className="flex-1 py-2.5 rounded-xl bg-stone-900 text-white font-bold text-xs">Mark Collected ✓</button>
+              <button onClick={generatePdfAndWhatsApp} className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs">WhatsApp Bill PDF 📄</button>
+            </div>
+            <button onClick={() => setCollectOrder(null)} className="w-full py-2 text-xs text-stone-500">Close</button>
+            <p className="text-[10px] text-stone-500 text-center">PDF generated free via jsPDF — no paid API. WhatsApp opens via wa.me.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
