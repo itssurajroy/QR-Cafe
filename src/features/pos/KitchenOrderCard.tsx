@@ -43,14 +43,18 @@ export function KitchenOrderCard({
             </span>
           </div>
           <span
-            className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
+            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 border ${
               order.payment_status === "paid"
-                ? "bg-emerald-950 text-emerald-400"
-                : "bg-amber-950 text-amber-400"
+                ? "bg-emerald-500 text-white border-emerald-600"
+                : "bg-red-500 text-white border-red-600 animate-pulse"
             }`}
           >
-            {order.payment_status}
+            {order.payment_status === "paid" ? "✓ PAID" : "⚠️ UNPAID"}
           </span>
+        </div>
+        <div className={`mt-2 p-2 rounded-xl border text-xs font-bold flex items-center gap-2 ${order.payment_status === "paid" ? "bg-emerald-950/40 border-emerald-800 text-emerald-300" : "bg-red-950/40 border-red-800 text-red-300"}`}>
+          <span>{order.payment_status === "paid" ? "✓" : "⚠️"}</span>
+          <span>{order.payment_status === "paid" ? "Payment Received — Serve & close" : "Payment Pending — Collect at counter before serve"}</span>
         </div>
 
         {/* Items List */}

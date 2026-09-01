@@ -48,6 +48,8 @@ export default function PosClient({
   const [zReportData, setZReportData] = useState<any | null>(null);
   const [loadingZReport, setLoadingZReport] = useState(false);
   const [openingFloat, setOpeningFloat] = useState<string>("2000");
+  const [lastBill, setLastBill] = useState<any>(null);
+  const [showBill, setShowBill] = useState(false);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const supabase = getSupabaseBrowserClient();
@@ -199,7 +201,10 @@ export default function PosClient({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Order failed");
-      flash("ok", status === "paid" ? "Bill Settled ✓" : "KOT Sent to Kitchen 🔥");
+      const billData = json.order || { order_number: `POS-${Date.now()}`, total_paise: finalTotalPaise, subtotal_paise: subtotalPaise, discount_paise: discountPaise, items: cart, payment_status: status, payment_method: paymentMethod, table_label: selectedTable?.label || "Counter" };
+      setLastBill({ ...billData, payment_status: status, table_label: selectedTable?.label || "Counter", itemsSnapshot: [...cart], finalTotalPaise, subtotalPaise, discountPaise, paymentMethod });
+      setShowBill(true);
+      flash("ok", status === "paid" ? "Bill Generated ✓ — PAID" : "KOT Generated — UNPAID (Collect at counter)");
       if (status === "unpaid") speakVoice(`K O T sent to kitchen for table ${selectedTable?.label || "Counter"}`);
       clearCart();
     } catch (err: any) {
@@ -365,6 +370,43 @@ export default function PosClient({
         openingFloat={openingFloat}
         setOpeningFloat={setOpeningFloat}
       />
+
+      {showBill && lastBill && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowBill(false)}>
+          <div className="bg-white text-stone-900 rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden border-t-4 border-t-amber-500" onClick={(e) => e.stopPropagation()}>
+            <div className={`p-3 text-center font-black text-sm ${lastBill.payment_status === "paid" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
+              {lastBill.payment_status === "paid" ? "✓ PAID — Payment Received" : "⚠️ UNPAID — Collect at Counter"}
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="text-center border-b border-stone-200 pb-3">
+                <h3 className="font-black text-lg">{restaurant.name}</h3>
+                <p className="text-xs text-stone-500">{restaurant.address || ""} • {restaurant.phone || ""}</p>
+                <p className="text-xs font-mono mt-1">Bill: {lastBill.order_number || lastBill.orderNumber} • Table: {lastBill.table_label} • {new Date().toLocaleString("en-IN")}</p>
+              </div>
+              <div className="space-y-1 text-sm">
+                {(lastBill.itemsSnapshot || lastBill.order_items || []).map((it: any, idx: number) => (
+                  <div key={idx} className="flex justify-between">
+                    <span>{it.item?.name || it.item_name} × {it.quantity}</span>
+                    <span className="font-mono font-bold">₹{((it.item?.price_paise || it.unit_price_paise || 0) * it.quantity / 100).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-stone-200 pt-2 space-y-1 text-sm">
+                <div className="flex justify-between text-stone-600"><span>Subtotal</span><span className="font-mono">₹{(lastBill.subtotalPaise || lastBill.subtotal_paise || 0) / 100}</span></div>
+                {(lastBill.discountPaise || lastBill.discount_paise) > 0 && <div className="flex justify-between text-emerald-600"><span>Discount</span><span className="font-mono">-₹{(lastBill.discountPaise || lastBill.discount_paise) / 100}</span></div>}
+                <div className="flex justify-between font-black text-base"><span>Total</span><span className="font-mono">₹{(lastBill.finalTotalPaise || lastBill.total_paise) / 100}</span></div>
+                <div className={`p-2 rounded-xl text-center text-xs font-bold ${lastBill.payment_status === "paid" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>
+                  {lastBill.payment_status === "paid" ? `✓ Paid via ${lastBill.paymentMethod || "cash"} — No balance` : `⚠️ Unpaid — Please collect ₹${(lastBill.finalTotalPaise || lastBill.total_paise) / 100} at counter`}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => window.print()} className="flex-1 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white font-black text-xs">Print Bill 🖨️</button>
+                <button onClick={() => setShowBill(false)} className="flex-1 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-700 font-bold text-xs">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
