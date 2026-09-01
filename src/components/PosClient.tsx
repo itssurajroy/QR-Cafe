@@ -106,7 +106,10 @@ export default function PosClient({
       )
       .subscribe();
 
+    const poll = setInterval(fetchLiveOrders, 5000);
+
     return () => {
+      clearInterval(poll);
       supabase.removeChannel(channel);
     };
   }, [restaurant.id, supabase]);
