@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { RegisterView } from "@/features/pos/RegisterView";
 import { KitchenView } from "@/features/pos/KitchenView";
 import { ZReportModal } from "@/features/pos/ZReportModal";
+import { generateBeautifulBillPdf } from "@/lib/bill-pdf";
 import type { Category, MenuItem as Item, CartLine, Table } from "@/types";
 
 export default function PosClient({
@@ -404,19 +405,7 @@ export default function PosClient({
               <input type="tel" placeholder="Customer WhatsApp 9876543210" value={billPhone} onChange={(e) => setBillPhone(e.target.value)} className="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500" />
               <div className="flex gap-2">
                 <button onClick={async () => {
-                  const mod: any = await import("jspdf");
-                  const Doc = mod.jsPDF || mod.default;
-                  const doc = new Doc();
-                  doc.setFontSize(16); doc.text(restaurant.name || "QR Café", 10, 15);
-                  doc.setFontSize(10); doc.text(`${restaurant.address || ""} • ${restaurant.phone || ""}`, 10, 22);
-                  doc.text(`Bill: ${lastBill.order_number || lastBill.orderNumber} • Table: ${lastBill.table_label} • ${new Date().toLocaleString("en-IN")}`, 10, 30);
-                  doc.setFontSize(12); doc.text(lastBill.payment_status === "paid" ? "PAID" : "UNPAID — Collect at counter", 10, 38);
-                  let y = 48; doc.setFontSize(10);
-                  (lastBill.itemsSnapshot || lastBill.order_items || []).forEach((it: any) => {
-                    const line = `${it.item?.name || it.item_name} x${it.quantity} — ₹${((it.item?.price_paise || it.unit_price_paise || 0) * it.quantity / 100).toFixed(2)}`;
-                    doc.text(line, 10, y); y += 6;
-                  });
-                  doc.setFontSize(12); doc.text(`Total: ₹${(lastBill.finalTotalPaise || lastBill.total_paise) / 100}`, 10, y + 4);
+                  const doc = await generateBeautifulBillPdf({ restaurant, order: { order_number: lastBill.order_number || lastBill.orderNumber, table_label: lastBill.table_label, total_paise: lastBill.finalTotalPaise || lastBill.total_paise, subtotal_paise: lastBill.subtotalPaise || lastBill.subtotal_paise, discount_paise: lastBill.discountPaise || lastBill.discount_paise, payment_status: lastBill.payment_status, payment_method: lastBill.paymentMethod, created_at: new Date().toISOString() }, items: (lastBill.itemsSnapshot || lastBill.order_items || []).map((it: any) => ({ item_name: it.item?.name || it.item_name, quantity: it.quantity, unit_price_paise: it.item?.price_paise || it.unit_price_paise || 0 })) });
                   doc.save(`Bill-${lastBill.order_number || lastBill.orderNumber}.pdf`);
                   const phone = billPhone || lastBill.customer_phone || "";
                   const text = encodeURIComponent(`Your bill for Table ${lastBill.table_label} at ${restaurant.name} — Bill ${lastBill.order_number || lastBill.orderNumber} Total ₹${(lastBill.finalTotalPaise || lastBill.total_paise) / 100} is ${lastBill.payment_status === "paid" ? "PAID ✓" : "UNPAID — please pay at counter"}.`);

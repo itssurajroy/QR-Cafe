@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { KitchenOrderCard } from "./KitchenOrderCard";
+import { generateBeautifulBillPdf } from "@/lib/bill-pdf";
 
 interface KitchenViewProps {
   liveOrders: any[];
@@ -29,26 +30,12 @@ export function KitchenView({
       setCollectOrder(order);
       setCollectPhone(order?.customer_phone || "");
       if (order?.customer_phone) {
-        setTimeout(() => {
-          const modPromise = import("jspdf") as any;
-          modPromise.then((mod: any) => {
-            const Doc = mod.jsPDF || mod.default;
-            const doc = new Doc();
-            const rName = restaurant?.name || "QR Café";
-            doc.setFontSize(16); doc.text(rName, 10, 15);
-            doc.setFontSize(10); doc.text(`${restaurant?.address || ""} • ${restaurant?.phone || ""}`, 10, 22);
-            doc.text(`Bill: ${order.order_number} • Table: ${order.table_label} • ${new Date().toLocaleString("en-IN")}`, 10, 30);
-            doc.setFontSize(12); doc.text(order.payment_status === "paid" ? "PAID" : "UNPAID — Collect at counter", 10, 38);
-            let y = 48; doc.setFontSize(10);
-            (order.items || []).forEach((it: any) => {
-              const line = `${it.item_name} x${it.quantity} — ₹${((it.unit_price_paise || 0) * it.quantity / 100).toFixed(2)}`;
-              doc.text(line, 10, y); y += 6;
-            });
-            doc.setFontSize(12); doc.text(`Total: ₹${(order.total_paise / 100).toFixed(2)}`, 10, y + 4);
-            doc.save(`Bill-${order.order_number}.pdf`);
-            const text = encodeURIComponent(`Hi! Your bill for Table ${order.table_label} at ${rName} — Bill ${order.order_number} Total ₹${(order.total_paise / 100).toFixed(2)} is ${order.payment_status === "paid" ? "PAID ✓" : "UNPAID — please collect at counter"}. PDF auto-generated.`);
-            window.open(`https://wa.me/${String(order.customer_phone).replace(/[^0-9]/g, "")}?text=${text}`, "_blank");
-          });
+        setTimeout(async () => {
+          const doc = await generateBeautifulBillPdf({ restaurant: restaurant || { name: "QR Café" }, order: { ...order, created_at: new Date().toISOString() }, items: order.items || [] });
+          doc.save(`Bill-${order.order_number}.pdf`);
+          const rName = restaurant?.name || "QR Café";
+          const text = encodeURIComponent(`Hi! Your bill for Table ${order.table_label} at ${rName} — Bill ${order.order_number} Total ₹${(order.total_paise / 100).toFixed(2)} is ${order.payment_status === "paid" ? "PAID ✓" : "UNPAID — please collect at counter"}. PDF auto-generated.`);
+          window.open(`https://wa.me/${String(order.customer_phone).replace(/[^0-9]/g, "")}?text=${text}`, "_blank");
         }, 800);
       }
     }
@@ -56,20 +43,8 @@ export function KitchenView({
 
   const generatePdfAndWhatsApp = async () => {
     if (!collectOrder) return;
-    const mod: any = await import("jspdf");
-    const Doc = mod.jsPDF || mod.default;
-    const doc = new Doc();
     const rName = restaurant?.name || "QR Café";
-    doc.setFontSize(16); doc.text(rName, 10, 15);
-    doc.setFontSize(10); doc.text(`${restaurant?.address || ""} • ${restaurant?.phone || ""}`, 10, 22);
-    doc.text(`Bill: ${collectOrder.order_number} • Table: ${collectOrder.table_label} • ${new Date().toLocaleString("en-IN")}`, 10, 30);
-    doc.setFontSize(12); doc.text(collectOrder.payment_status === "paid" ? "PAID" : "UNPAID — Collect at counter", 10, 38);
-    let y = 48; doc.setFontSize(10);
-    (collectOrder.items || []).forEach((it: any, i: number) => {
-      const line = `${it.item_name} x${it.quantity} — ₹${((it.unit_price_paise || it.price_paise || 0) * it.quantity / 100).toFixed(2)}`;
-      doc.text(line, 10, y); y += 6;
-    });
-    doc.setFontSize(12); doc.text(`Total: ₹${(collectOrder.total_paise / 100).toFixed(2)}`, 10, y + 4);
+    const doc = await generateBeautifulBillPdf({ restaurant: restaurant || { name: "QR Café" }, order: { ...collectOrder, created_at: new Date().toISOString() }, items: collectOrder.items || [] });
     doc.save(`Bill-${collectOrder.order_number}.pdf`);
     if (collectPhone) {
       const text = encodeURIComponent(`Your bill for Table ${collectOrder.table_label} at ${rName} — Bill ${collectOrder.order_number} Total ₹${(collectOrder.total_paise / 100).toFixed(2)} is ${collectOrder.payment_status === "paid" ? "PAID ✓" : "PENDING — please pay at counter"}. PDF downloaded.`);
