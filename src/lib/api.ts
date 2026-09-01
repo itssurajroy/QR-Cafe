@@ -69,8 +69,21 @@ export const api = {
     customerName?: string;
     customerPhone?: string;
     paymentMethod?: string;
-  }): Promise<ApiResponse<{ statusToken: string; orderNumber: string }>> {
-    return post("/api/place-order", payload);
+  }): Promise<ApiResponse<{ statusToken: string; orderNumber: string; order_id: string; status_token: string }>> {
+    const body = {
+      qr_token: payload.qrToken,
+      customer_name: payload.customerName,
+      customer_phone: payload.customerPhone,
+      payment_method: (payload.paymentMethod as "counter" | "online") ?? "counter",
+      items: payload.items.map((it) => {
+        const mods: Array<{ option_name: string; price_delta_paise: number }> = [];
+        if (it.spiceLevel && it.spiceLevel !== "Medium") mods.push({ option_name: `Spice: ${it.spiceLevel}`, price_delta_paise: 0 });
+        if (it.sizeVariant && it.sizeVariant !== "Regular") mods.push({ option_name: `Size: ${it.sizeVariant}`, price_delta_paise: 0 });
+        const notes = [it.notes, it.spiceLevel ? `Spice:${it.spiceLevel}` : "", it.sizeVariant ? `Size:${it.sizeVariant}` : ""].filter(Boolean).join(" | ").slice(0, 500);
+        return { menu_item_id: it.itemId, quantity: it.quantity, notes, modifiers: mods };
+      }),
+    };
+    return post("/api/orders", body);
   },
 
   // ── POS / Admin Order Management ────────────────────────────────────────────

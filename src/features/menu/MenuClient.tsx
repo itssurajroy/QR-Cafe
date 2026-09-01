@@ -239,15 +239,18 @@ export function MenuClient({
 
       const res = await api.placeOrder(payload);
       if (res.error) {
-        setError(res.error);
+        setError(res.error + (res.details ? ` ${JSON.stringify(res.details).slice(0,120)}` : ""));
         return;
       }
 
       playAudioTone("order");
       clearCart();
-      if (res.data?.statusToken) {
-        sessionStorage.setItem(`status:${qrToken}`, res.data.statusToken);
-        router.push(`/order/${res.data.statusToken}`);
+      const token = (res.data as any)?.status_token || (res.data as any)?.statusToken;
+      if (token) {
+        sessionStorage.setItem(`status:${qrToken}`, token);
+        router.push(`/order/${token}`);
+      } else if ((res.data as any)?.order_id) {
+        router.push(`/order/${(res.data as any).order_id}`);
       }
     } catch (err: any) {
       setError(err?.message ? `Failed: ${err.message}` : "Network connection error.");
