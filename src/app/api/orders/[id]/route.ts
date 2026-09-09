@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
+import { emitWhatsAppNotification } from "@/wa/notifications";
 
 const TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "rejected", "cancelled"],
@@ -124,6 +125,12 @@ export async function PATCH(
       ip,
     },
   });
+
+  if (updates.status) {
+    emitWhatsAppNotification(id, updates.status as string).catch((err) =>
+      console.error("[WA] Notification error:", err)
+    );
+  }
 
   return NextResponse.json({ ok: true, updates });
 }
