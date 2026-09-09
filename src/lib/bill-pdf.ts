@@ -74,3 +74,12 @@ export async function generateBeautifulBillPdf(opts: {
 
   return doc;
 }
+
+export async function generateBillPdfBuffer(opts: {
+  restaurant: { name: string; address?: string; phone?: string; gstin?: string };
+  order: { order_number: string; table_label: string; created_at?: string; total_paise: number; subtotal_paise?: number; discount_paise?: number; payment_status: string; payment_method?: string };
+  items: Array<{ item_name: string; quantity: number; unit_price_paise: number }>;
+}): Promise<Buffer> {
+  const doc = await generateBeautifulBillPdf(opts);
+  return Buffer.from(doc.output("arraybuffer"));
+}
