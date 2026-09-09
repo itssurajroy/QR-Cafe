@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
 
 :root {
   --background: #0c0a09;
@@ -219,6 +219,25 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================
+   LANDING PAGE — Light Theme Utilities
+   ============================================ */
+.landing-page {
+  --landing-bg: #f8fafc;
+  --landing-surface: #ffffff;
+  --landing-text: #0f172a;
+  --landing-text-secondary: #64748b;
+  --landing-primary: #4f46e5;
+  --landing-primary-hover: #4338ca;
+  --landing-border: #e2e8f0;
+  --landing-success: #10b981;
+}
+
+.landing-page body {
+  background-color: var(--landing-bg);
+  color: var(--landing-text);
+}
 
 /* ============================================
    PRINT STYLES
