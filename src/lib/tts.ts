@@ -1,5 +1,5 @@
 /**
- * Human-Tone Web Text-To-Speech (TTS) Engine for QR Café
+ * Human-Tone Web Text-To-Speech (TTS) Engine for QRslice
  * Enhances standard Web Speech API with natural voice selection,
  * warm pitch/cadence tuning, and humanized announcement phrasing.
  */

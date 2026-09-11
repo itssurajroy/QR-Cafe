@@ -1,5 +1,5 @@
 /**
- * QR Café UI Library — Card
+ * QRslice UI Library — Card
  * Light theme container used throughout the app.
  */
 

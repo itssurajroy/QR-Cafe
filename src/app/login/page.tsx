@@ -44,7 +44,7 @@ export default function LoginPage() {
             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-indigo-600/20 group-hover:scale-105 transition-transform">
               ☕
             </div>
-            <span className="text-2xl font-black tracking-tight text-slate-900">QR Café</span>
+            <span className="text-2xl font-black tracking-tight text-slate-900">QRslice</span>
           </Link>
           <p className="text-slate-500 text-sm mt-2">Sign in to your staff or admin terminal</p>
         </div>
@@ -58,7 +58,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 required
-                placeholder="admin@qrcafe.com"
+                placeholder="admin@qrslice.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"

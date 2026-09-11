@@ -1,5 +1,5 @@
 {
-  "name": "qr-cafe",
+  "name": "qrslice",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,9 @@
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "jspdf": "^4.2.1",
+    "lucide-react": "^1.45.0",
     "next": "16.3.3",
+    "next-themes": "^0.4.6",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",

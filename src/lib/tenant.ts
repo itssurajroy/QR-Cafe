@@ -27,7 +27,7 @@ export type TierLimits = {
   multiLocation: boolean;
 };
 
-// Single unified QR Café plan (Unlimited Everything, ₹999/mo, ₹9,999/yr)
+// Single unified QRslice plan (Unlimited Everything, ₹999/mo, ₹9,999/yr)
 export function getTierLimits(_tier?: string): TierLimits {
   return {
     maxTables: null,

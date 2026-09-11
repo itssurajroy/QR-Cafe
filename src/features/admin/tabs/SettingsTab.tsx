@@ -132,7 +132,7 @@ export function SettingsTab(props: SettingsTabProps) {
               onChange={(e) => props.setSettingsUpiId(e.target.value)}
             />
             <p className="text-xs text-slate-400">
-              Payments sent directly to your bank. QR Café takes 0% cut.
+              Payments sent directly to your bank. QRslice takes 0% cut.
             </p>
           </div>
 

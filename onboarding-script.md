@@ -1,4 +1,4 @@
-# QR Café — Café Owner Onboarding Script
+# QRslice — Café Owner Onboarding Script
 
 > Use this when talking to a restaurant/café owner (in person, phone, or WhatsApp).
 > Keep it simple. Speak their language. Don't sound like software.
@@ -27,9 +27,9 @@ kitchen screen** milta hai. Suniye 2 minute, free hai try karne ka."
 
 ---
 
-## 3. The Solution — what QR Café does
+## 3. The Solution — what QRslice does
 
-"Hamara naam hai **QR Café** — ekdum self-serve SaaS. Aap khud 2 minute mein
+"Hamara naam hai **QRslice** — ekdum self-serve SaaS. Aap khud 2 minute mein
 apni café bana lete hain, humare paas account banana padta hai.
 
 1. **Customer QR Order** — Har table par QR. Customer scan kare, menu dikhai de,
@@ -46,7 +46,7 @@ Matlab: **order fast, galti kam, bill clean.**"
 ## 4. How it works for THEM (super simple, self-serve)
 
 "Bhaut easy hai — aap khud kar lenge:
-- `qrcafe.app/onboarding` kholein → café name + GST details bharein
+- `qrslice.app/onboarding` kholein → café name + GST details bharein
 - Plan chunein (Basic ya Pro) + email/password
 - Menu starter template milta hai, table ka QR auto-generate ho jata hai
 - 10 minute ka setup, phir QR print kar frame rakh dijiye"
@@ -82,14 +82,14 @@ Matlab risk humara, faida aapka."
 | "Internet chala gaya toh?" | "Order local save hota hai, wapas aane par sync ho jata hai." |
 | "₹799 zyada hai" | "Wo Pro hai. Basic sirf ₹399 hai. Ek din ki 2-3 galat order ya 1 ghante waiter bachti se nikal aata hai. Upar se 30 din free." |
 | "KDS chahiye?" | "Wo Pro ₹799 mein hai. Basic mein counter POS + QR order milta hai. Badme upgrade kar lenge." |
-| "Puranai machine se kaam chal raha" | "Wahi rakhiye. QR Café upar se add hota hai, replace nahi karta." |
+| "Puranai machine se kaam chal raha" | "Wahi rakhiye. QRslice upar se add hota hai, replace nahi karta." |
 | "30 din baad kya?" | "Trial khatam par order band ho jayega, lekin admin khula rahega. ₹399/₹799 bharo toh chalta rahega, nahi toh chhod do." |
 
 ---
 
 ## 7. Close (soft, with a next step)
 
-"Toh karte hain aise — aap khud `qrcafe.app/onboarding` kholiye, café banaiye,
+"Toh karte hain aise — aap khud `qrslice.app/onboarding` kholiye, café banaiye,
 30 din free try kariye. Customer khush hone lage toh Basic ya Pro continue karna,
 nahi toh koi baat nahi.
 
@@ -99,7 +99,7 @@ Chalo phone mein abhi shuru karte hain? 2 minute."
 
 ## One-line pitch (for WhatsApp / poster)
 
-"📱 **QR Café** — Customer QR se order kare, aapko bill + kitchen screen mile.
+"📱 **QRslice** — Customer QR se order kare, aapko bill + kitchen screen mile.
 Do plan: **Basic ₹399** / **Pro ₹799** per month. **Pehla 30 din FREE**, phir
 Razorpay se monthly. Na chaha toh chhod dijiye, koi jhook nahi. Khud sign-up:
-qrcafe.app/onboarding"
+qrslice.app/onboarding"

@@ -46,7 +46,7 @@ export async function generateBeautifulBillPdf(opts: BillPdfOptions) {
   const W = 80;
   let y = 0;
 
-  const rName = opts.restaurant.name || "QR CAFE";
+  const rName = opts.restaurant.name || "QRslice";
   const isPaid = opts.order.payment_status === "paid";
 
   // 1. Header Banner
@@ -263,7 +263,7 @@ export async function generateBeautifulBillPdf(opts: BillPdfOptions) {
   doc.setTextColor(100, 116, 139);
   doc.text("Goods once sold will not be returned or exchanged.", W / 2, y, { align: "center" });
   y += 3;
-  doc.text("Powered by QR Cafe | www.qrcafe.app", W / 2, y, { align: "center" });
+  doc.text("Powered by QRslice | www.qrslice.app", W / 2, y, { align: "center" });
 
   return doc;
 }

@@ -1,10 +1,10 @@
-# QR Café — Dine-in Ordering Platform
+# QRslice — Dine-in Ordering Platform
 
 Secure, multi-tenant (super-admin managed) QR table-ordering system for small cafés.
 Built with Next.js 16 (App Router) + TypeScript + Tailwind + Supabase.
 
 ## Features (full SaaS)
-- **Multi-tenant by subdomain:** each café gets its own address `<slug>.qrcafe.app`
+- **Multi-tenant by subdomain:** each café gets its own address `<slug>.qrslice.app`
   (locally `<slug>.localhost`). Customer menu is served at the café subdomain root.
 - **Customer:** open the café subdomain (or scan a table QR) → pick a table → browse menu
   → cart → place order (pay at counter) → live status page.
@@ -61,8 +61,8 @@ the `x-cafe-slug` request header; Server Components read it to scope data.
 - `POST|PATCH|DELETE /api/super/staff` — super-admin staff lifecycle (service-role Auth admin)
 
 ## Demo credentials
-- `super@qrcafe.test` / `QrCafeDev123!` → super-admin (`/super`)
-- `owner@curryleaf.test` / `QrCafeDev123!` → Curry Leaf owner (`/admin`, `/kds`)
+- `super@qrslice.test` / `QrSliceDev123!` → super-admin (`/super`)
+- `owner@curryleaf.test` / `QrSliceDev123!` → Curry Leaf owner (`/admin`, `/kds`)
 - Staff logins can be created from the super-admin console; the temp password is shown once.
 
 ## Notes
@@ -74,7 +74,7 @@ the `x-cafe-slug` request header; Server Components read it to scope data.
 This app is deployed against a Supabase project that also hosts a separate,
 unrelated application. To avoid colliding with that app's schema, the migration:
 - names our staff table `cafe_profiles` (instead of `profiles`), and
-- prefixes our RLS helper functions `qrcafe_auth_role()` / `qrcafe_auth_restaurant_id()`
+- prefixes our RLS helper functions `qrslice_auth_role()` / `qrslice_auth_restaurant_id()`
   (instead of `auth_role()` / `auth_restaurant_id()`).
 
 Keep these names if you edit the migration or the app code

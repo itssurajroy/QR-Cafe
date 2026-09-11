@@ -1,5 +1,5 @@
 /**
- * QR Café UI Library — Input
+ * QRslice UI Library — Input
  * Standard light-themed form input with error and hint states.
  */
 

@@ -1,5 +1,5 @@
 /**
- * QR Café — Utility Functions Unit Tests
+ * QRslice — Utility Functions Unit Tests
  * Run with: npx vitest run
  */
 

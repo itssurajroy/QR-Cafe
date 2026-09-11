@@ -9,7 +9,7 @@ export function WebhooksTab({
   restaurant: { api_key?: string; webhook_url?: string };
   flash: (kind: "ok" | "err", msg: string) => void;
 }) {
-  const [apiKey, setApiKey] = useState<string>(restaurant?.api_key || "qrcafe_live_pk_8892f309a1e0b");
+  const [apiKey, setApiKey] = useState<string>(restaurant?.api_key || "qrslice_live_pk_8892f309a1e0b");
   const [webhookUrl, setWebhookUrl] = useState<string>(restaurant?.webhook_url || "");
   const [webhookSecret] = useState<string>("whsec_993a01b92049e");
   const [isSaving, setIsSaving] = useState(false);
@@ -49,7 +49,7 @@ export function WebhooksTab({
   }
 
   function handleGenerateApiKey() {
-    const newKey = `qrcafe_live_pk_${Math.random().toString(36).substring(2, 15)}`;
+    const newKey = `qrslice_live_pk_${Math.random().toString(36).substring(2, 15)}`;
     setApiKey(newKey);
     flash("ok", "New API Secret Key generated! Make sure to save settings.");
   }
@@ -115,7 +115,7 @@ export function WebhooksTab({
               Outgoing Webhook Endpoint URL
             </label>
             <input
-              placeholder="https://your-server.com/api/qr-cafe-webhook"
+              placeholder="https://your-server.com/api/qrslice-webhook"
               className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}

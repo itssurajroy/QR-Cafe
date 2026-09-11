@@ -1,13 +1,25 @@
 import Link from "next/link";
+import { getContent } from "@/lib/content";
 
-const PILLS = [
-  "Instant QR Menu",
-  "Multi-station KDS",
-  "Stock & Recipes",
-  "Bluetooth KOT",
-];
+const DEFAULTS = {
+  eyebrow: "Next-Gen QR Ordering & Kitchen OS",
+  headlineA: "Run your café from one system.",
+  headlineB: "QR ordering. Live kitchen. Real stock.",
+  sub: "Customers scan, order, and pay from the table. Kitchen gets tickets instantly. You control menu, stock, and billing — all in one place.",
+  primaryCta: "Start 14-day free trial",
+  secondaryCta: "Watch live demo",
+  trustLine: "No credit card required · Live in 30 minutes · Cancel anytime",
+  pills: [
+    "Instant QR Menu",
+    "Multi-station KDS",
+    "Stock & Recipes",
+    "Bluetooth KOT",
+  ],
+};
 
-export function Hero() {
+export async function Hero() {
+  const c = await getContent("cms.hero", DEFAULTS);
+  const pills = c.pills?.length ? c.pills : DEFAULTS.pills;
   return (
     <section className="relative overflow-hidden bg-slate-50 pt-12 pb-14 sm:pt-16 sm:pb-20">
       {/* Light ambient mesh background */}
@@ -20,23 +32,21 @@ export function Hero() {
         {/* Eyebrow */}
         <p className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-indigo-700">
           <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
-          Next-Gen QR Ordering &amp; Kitchen OS
+          {c.eyebrow}
         </p>
 
         {/* Headline */}
         <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-6xl leading-[1.1]">
-          Run your café from one system.
+          {c.headlineA}
           <br />
           <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-amber-600 bg-clip-text text-transparent">
-            QR ordering. Live kitchen. Real stock.
+            {c.headlineB}
           </span>
         </h1>
 
         {/* Sub-headline */}
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-xl">
-          Customers scan, order, and pay from the table.
-          Kitchen gets tickets instantly. You control menu, stock, and
-          billing — all in one place.
+          {c.sub}
         </p>
 
         {/* CTAs */}
@@ -45,25 +55,25 @@ export function Hero() {
             href="/onboarding"
             className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-8 py-4 text-base font-black text-white shadow-xl shadow-indigo-600/25 transition-all hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 cursor-pointer"
           >
-            <span>Start 14-day free trial</span>
+            <span>{c.primaryCta}</span>
             <span className="transition-transform group-hover:translate-x-1">→</span>
           </Link>
           <Link
             href="#demo"
             className="inline-flex w-full sm:w-auto items-center justify-center rounded-2xl border border-slate-300 bg-white px-8 py-4 text-base font-bold text-slate-700 shadow-sm transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
           >
-            Watch live demo
+            {c.secondaryCta}
           </Link>
         </div>
 
         {/* Trust line */}
         <p className="mt-4 text-xs font-medium text-slate-500">
-          No credit card required · Live in 30 minutes · Cancel anytime
+          {c.trustLine}
         </p>
 
         {/* Micro feature pills */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {PILLS.map((pill) => (
+          {pills.map((pill) => (
             <span
               key={pill}
               className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm"

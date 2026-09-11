@@ -23,7 +23,7 @@ export function PWAInstall() {
                 Install as an app
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-slate-400">
-                Add QR Cafe to your home screen for a native app experience.
+                Add QRslice to your home screen for a native app experience.
                 Fast, installable, always one tap away.
               </p>
 
@@ -34,7 +34,7 @@ export function PWAInstall() {
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
-                Install QR Cafe
+                Install QRslice
               </Link>
             </div>
           </div>

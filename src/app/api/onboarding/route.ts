@@ -19,6 +19,7 @@ const onboardingSchema = z.object({
   phone: z.string().max(20).optional(),
   googleReviewUrl: z.string().url("Please enter a valid Google review URL").optional().or(z.literal("")),
   taxRate: z.number().min(0).max(100).optional(),
+  ownerName: z.string().min(2),
   ownerEmail: z.string().email(),
   ownerPassword: z.string().min(6),
   tableCount: z.number().int().min(1).max(50).default(6),
@@ -198,7 +199,7 @@ export async function POST(req: NextRequest) {
     id: user.id,
     restaurant_id: restaurant.id,
     role: "owner",
-    display_name: input.cafeName + " Owner",
+    display_name: input.ownerName,
     active: true,
   });
 

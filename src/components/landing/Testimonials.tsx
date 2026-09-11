@@ -38,7 +38,7 @@ export function Testimonials() {
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
             From Mumbai street food to Bangalore brew houses — here&apos;s what
-            cafe owners say about QR Cafe.
+            cafe owners say about QRslice.
           </p>
         </div>
 

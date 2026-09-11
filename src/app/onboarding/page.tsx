@@ -51,6 +51,7 @@ export default function OnboardingPage() {
   const [tableCount, setTableCount] = useState(6);
   const [preset, setPreset] = useState<"coffee" | "bistro" | "fastfood" | "custom">("coffee");
 
+  const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPassword, setOwnerPassword] = useState("");
 
@@ -91,6 +92,7 @@ export default function OnboardingPage() {
           accentColor,
           tableCount,
           preset,
+          ownerName: ownerName.trim(),
           ownerEmail: ownerEmail.trim(),
           ownerPassword,
         }),
@@ -132,7 +134,7 @@ export default function OnboardingPage() {
             <div className="w-9 h-9 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-600/20">
               <CoffeeIcon className="w-5 h-5" />
             </div>
-            <span className="font-extrabold text-slate-900 text-base tracking-tight">QR Café</span>
+            <span className="font-extrabold text-slate-900 text-base tracking-tight">QRslice</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -403,6 +405,20 @@ export default function OnboardingPage() {
 
                 <div>
                   <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Jane Doe"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Manager Email
                   </label>
                   <input
@@ -445,7 +461,7 @@ export default function OnboardingPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading || !ownerEmail || !ownerPassword}
+                    disabled={loading || !ownerName || !ownerEmail || !ownerPassword}
                     className="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 cursor-pointer"
                   >
                     {loading ? "Creating your account…" : "Launch My Store 🚀"}
@@ -459,7 +475,7 @@ export default function OnboardingPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-400">
-        QR Café &middot; Digital Menu &amp; Point of Sale
+        QRslice &middot; Digital Menu &amp; Point of Sale
       </footer>
     </div>
   );

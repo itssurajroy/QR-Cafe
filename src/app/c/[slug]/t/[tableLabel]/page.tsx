@@ -16,7 +16,7 @@ export async function generateMetadata({
   const { slug, tableLabel } = await params;
   const { tenant } = await getTenantBySlugAndTableLabel(slug, tableLabel);
   const cleanLabel = decodeURIComponent(tableLabel);
-  const cafeName = tenant?.name || 'QR Café';
+  const cafeName = tenant?.name || 'QRslice';
 
   return {
     title: cafeName + ' — Table ' + cleanLabel + ' Menu & Ordering',

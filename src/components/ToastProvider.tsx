@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QR Café — Global Toast Notification System
+ * QRslice — Global Toast Notification System
  * Replaces the per-component `setMsg()` flash state in AdminClient.
  *
  * Usage:

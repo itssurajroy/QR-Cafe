@@ -11,7 +11,7 @@ const FAQS = [
   {
     question: "Can I use my existing printer or tablet?",
     answer:
-      "Yes. QR Cafe works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+      "Yes. QRslice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
   },
   {
     question: "What plans are available?",
@@ -49,9 +49,9 @@ const FAQS = [
       "No. Customers scan the QR code with their phone camera and the menu opens directly in their browser. Works on Android, iOS, and any phone with a camera.",
   },
   {
-    question: "Can I use QR Cafe alongside my existing POS?",
+      question: "Can I use QRslice alongside my existing POS?",
     answer:
-      "Yes. Many cafes use QR Cafe for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
+      "Yes. Many cafes use QRslice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
   },
   {
     question: "What happens to my data if I cancel?",
@@ -60,8 +60,12 @@ const FAQS = [
   },
 ];
 
-export function FAQ() {
+export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const faqs =
+    items && items.length > 0
+      ? items.map((f) => ({ question: f.q, answer: f.a }))
+      : FAQS;
 
   function toggle(index: number) {
     setOpenIndex(openIndex === index ? null : index);
@@ -80,7 +84,7 @@ export function FAQ() {
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
             Can&apos;t find what you&apos;re looking for?{" "}
             <a
-              href="mailto:support@qrcafe.app"
+              href="mailto:support@qrslice.app"
               className="font-medium text-indigo-600 underline decoration-indigo-200 underline-offset-2 transition-colors hover:text-indigo-700 hover:decoration-indigo-400"
             >
               Contact our support team
@@ -90,7 +94,7 @@ export function FAQ() {
         </div>
 
         <div className="mt-12 divide-y divide-slate-200 border-t border-slate-200">
-          {FAQS.map((faq, index) => {
+          {faqs.map((faq, index) => {
             const panelId = `faq-panel-${index}`;
             const buttonId = `faq-button-${index}`;
             return (

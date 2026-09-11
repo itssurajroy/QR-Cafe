@@ -1,6 +1,6 @@
-# 📖 QR Café: Comprehensive Operations & User Manual
+# 📖 QRslice: Comprehensive Operations & User Manual
 
-Welcome to **QR Café**, the cloud-native contactless dining and kitchen operating system built for modern restaurants, cafés, and bistros.
+Welcome to **QRslice**, the cloud-native contactless dining and kitchen operating system built for modern restaurants, cafés, and bistros.
 
 ---
 
@@ -23,8 +23,8 @@ Smartphone Camera                 Next.js 16 + Supabase               Kitchen & 
 ## 🚀 Daily Operations Checklist
 
 ### 1. 🌅 Morning Opening Checklist (Manager / Cashier)
-1. **Power On Terminal**: Open Google Chrome / Edge on the Cashier tablet or desktop at **[`/pos`](https://qr-cafe-blond.vercel.app/pos)**.
-2. **Launch Kitchen Display**: Open tablet or kitchen wall-mount screen at **[`/kds`](https://qr-cafe-blond.vercel.app/kds)**.
+1. **Power On Terminal**: Open Google Chrome / Edge on the Cashier tablet or desktop at **[`/pos`](https://qrslice-blond.vercel.app/pos)**.
+2. **Launch Kitchen Display**: Open tablet or kitchen wall-mount screen at **[`/kds`](https://qrslice-blond.vercel.app/kds)**.
 3. **Verify Audio Synth**: Tap anywhere on the KDS screen once to enable the browser Web Speech audio engine.
 4. **Self-Diagnostic Test**: Navigate to `/admin` $\to$ **Help & Governance** and run the 1-click self-tests (*Voice Synth, WhatsApp, GST Math, Latency*).
 

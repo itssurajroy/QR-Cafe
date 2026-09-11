@@ -9,7 +9,7 @@ function AdminHeader({ title }: { title: string }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
           <Link href="/" className="text-xl font-bold text-indigo-600">
-            QR Cafe
+            QRslice
           </Link>
           <span className="text-slate-300">/</span>
           <Link href="/admin" className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900">

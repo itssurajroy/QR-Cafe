@@ -1,5 +1,5 @@
 /**
- * QR Café — Shared Domain Types
+ * QRslice — Shared Domain Types
  * Single source of truth for all data shapes used across the app.
  * Import from "@/types" in any component, hook, or API route.
  */

@@ -75,7 +75,7 @@ export default function AdminClient({
   tables: Table[];
   report: Report;
 }) {
-  const activeRestaurant: RestaurantProps = restaurant || { id: restaurantId, name: "QR Cafe", slug: "cafe" };
+  const activeRestaurant: RestaurantProps = restaurant || { id: restaurantId, name: "QRslice", slug: "cafe" };
 
   const [tab, setTab] = useState<AdminTabId>("dashboard");
   const [showMultiOutletModal, setShowMultiOutletModal] = useState(false);
@@ -889,7 +889,7 @@ export default function AdminClient({
                 <button
                   type="button"
                   onClick={() => {
-                    const sampleMsg = `🧾 *TEST RECEIPT: ${restaurant?.name || "QR Café"}*\n` +
+                    const sampleMsg = `🧾 *TEST RECEIPT: ${restaurant?.name || "QRslice"}*\n` +
                       `Bill: #POS-TEST | Date: ${new Date().toLocaleDateString("en-IN")}\n` +
                       `• Hazelnut Cold Brew x1 = ₹220.00\n` +
                       `• Truffle Pizza x1 = ₹380.00\n` +
@@ -966,7 +966,7 @@ export default function AdminClient({
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-slate-600 leading-relaxed">
                 <p>
-                  QR Café operates on a unified flat plan at <strong>₹999/month</strong> (₹9,999/year) with unlimited tables, dishes, KDS screens, and cash POS registers.
+                  QRslice operates on a unified flat plan at <strong>₹999/month</strong> (₹9,999/year) with unlimited tables, dishes, KDS screens, and cash POS registers.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-xs">
                   <div className="p-2 rounded-xl bg-white border border-slate-200">
@@ -1377,7 +1377,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 >
                   <div className="border-b border-stone-200 pb-2">
                     <span className="text-xs font-black uppercase tracking-widest text-amber-600 block">
-                      {restaurant?.name || "QR Café"}
+                      {restaurant?.name || "QRslice"}
                     </span>
                     <h4 className="text-2xl font-black tracking-tight text-stone-900 mt-0.5">
                       TABLE {t.label}

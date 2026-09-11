@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QR Café UI Library — Modal
+ * QRslice UI Library — Modal
  * Two variants: dialog (centered overlay) and bottom-sheet (slides up from bottom)
  * Uses React portal for proper z-index stacking.
  */

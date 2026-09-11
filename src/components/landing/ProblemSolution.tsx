@@ -11,7 +11,7 @@ export function ProblemSolution() {
           rush hours.
         </p>
         <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-          QR Café replaces them with one fast, unified system built for 5–30
+          QRslice replaces them with one fast, unified system built for 5–30
           table outlets.
         </p>
       </div>

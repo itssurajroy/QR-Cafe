@@ -1,4 +1,4 @@
-# Design System — QR Café
+# Design System — QRslice
 
 ## Product Context
 - **What this is:** QR dine-in ordering, table reservations, live KDS, fast POS billing, and café management for independent restaurants.
@@ -71,7 +71,7 @@
 ## Decisions Log
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-09-01 | Initial design system created | Created by /design-consultation based on QR Café hospitality research, luxury dark fast memorable thing |
+| 2026-09-01 | Initial design system created | Created by /design-consultation based on QRslice hospitality research, luxury dark fast memorable thing |
 | 2026-09-10 | Light-first rewrite: indigo primary, slate surfaces app-wide | Dark-on-dark failed legibility on guest phones and daytime counters; amber demoted to status meaning |
 | 2026-09-10 | Dark exception scoped to `/kds` wall display only; KDS toggle deleted | Kitchens want glare-proof walls; everywhere else stays light with no toggle |
 | 2026-09-10 | `/order/[statusToken]` logged as dark-theme debt | Customer-facing but unconverted; convert before calling migration done |

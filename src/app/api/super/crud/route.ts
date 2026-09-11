@@ -2,8 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "@/lib/auth";
 import { getTierLimits } from "@/lib/tenant";
+import { planToSubscriptionStatus } from "@/lib/subscription";
 
-async function verifySuperAdmin(req: NextRequest) {
+async function audit(
+  admin: ReturnType<typeof createSupabaseAdmin>,
+  actorId: string,
+  restaurantId: string | null,
+  entity: string,
+  entityId: string,
+  action: string,
+  metadata: Record<string, unknown> = {},
+) {
+  await admin.from("audit_events").insert({
+    actor_id: actorId,
+    restaurant_id: restaurantId,
+    entity,
+    entity_id: entityId,
+    action,
+    metadata,
+  });
+}
+
+async function verifySuperAdmin(req: NextRequest): Promise<{ ok: true; userId: string } | { ok: false; userId?: undefined }> {
   const sessionUser = await requireSuperAdmin();
   if (sessionUser) {
     return { ok: true, userId: sessionUser.userId };
@@ -44,6 +64,7 @@ export async function POST(req: NextRequest) {
 
   // --- CAFES ---
   if (action === "create_cafe") {
+    const plan = data.plan || "trial";
     const { data: cafe, error } = await admin
       .from("restaurants")
       .insert({
@@ -58,50 +79,78 @@ export async function POST(req: NextRequest) {
         tax_rate: data.tax_rate !== undefined && data.tax_rate !== "" ? Number(data.tax_rate) : 5,
         tagline: data.tagline ? String(data.tagline).trim() : null,
         accent_color: data.accent_color || "#f59e0b",
-        plan: data.plan || "trial",
+        plan,
+        subscription_status: planToSubscriptionStatus(plan, null),
         tier: data.tier || "pro",
+        created_by: auth.userId,
       })
       .select()
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await audit(admin, auth.userId, cafe.id, "tenant", cafe.id, "super_create_cafe", { name: cafe.name, slug: cafe.slug });
     return NextResponse.json({ ok: true, cafe });
   }
 
   if (action === "update_cafe") {
     const { id, ...updates } = data;
+    const clean: Record<string, unknown> = {
+      name: updates.name ? String(updates.name).trim() : undefined,
+      slug: updates.slug ? String(updates.slug).toLowerCase().replace(/\s+/g, "-").trim() : undefined,
+      currency: updates.currency ? String(updates.currency).trim() : undefined,
+      timezone: updates.timezone ? String(updates.timezone).trim() : undefined,
+      logo_url: updates.logo_url !== undefined ? (updates.logo_url || null) : undefined,
+      tagline: updates.tagline !== undefined ? (String(updates.tagline || "").trim() || null) : undefined,
+      accent_color: updates.accent_color !== undefined ? String(updates.accent_color || "#f59e0b") : undefined,
+      address: updates.address !== undefined ? String(updates.address || "").trim() || null : undefined,
+      gstin: updates.gstin !== undefined ? String(updates.gstin || "").trim().toUpperCase() || null : undefined,
+      phone: updates.phone !== undefined ? String(updates.phone || "").trim() || null : undefined,
+      tax_rate: updates.tax_rate !== undefined && updates.tax_rate !== "" ? Number(updates.tax_rate) : undefined,
+      plan: updates.plan !== undefined ? updates.plan : undefined,
+      tier: updates.tier !== undefined ? updates.tier : undefined,
+    };
+    if (updates.plan !== undefined) {
+      const { data: current } = await admin.from("restaurants").select("trial_ends_at").eq("id", id).maybeSingle();
+      clean.subscription_status = planToSubscriptionStatus(updates.plan, current?.trial_ends_at ?? null);
+      if (updates.plan !== "suspended") {
+        clean.is_suspended = false;
+        clean.suspended_at = null;
+        clean.suspended_reason = null;
+      }
+    }
     const { error } = await admin
       .from("restaurants")
-      .update({
-        name: updates.name ? String(updates.name).trim() : undefined,
-        slug: updates.slug ? String(updates.slug).toLowerCase().replace(/\s+/g, "-").trim() : undefined,
-        currency: updates.currency ? String(updates.currency).trim() : undefined,
-        timezone: updates.timezone ? String(updates.timezone).trim() : undefined,
-        logo_url: updates.logo_url !== undefined ? (updates.logo_url || null) : undefined,
-        tagline: updates.tagline !== undefined ? (String(updates.tagline || "").trim() || null) : undefined,
-        accent_color: updates.accent_color !== undefined ? String(updates.accent_color || "#f59e0b") : undefined,
-        address: updates.address !== undefined ? String(updates.address || "").trim() || null : undefined,
-        gstin: updates.gstin !== undefined ? String(updates.gstin || "").trim().toUpperCase() || null : undefined,
-        phone: updates.phone !== undefined ? String(updates.phone || "").trim() || null : undefined,
-        tax_rate: updates.tax_rate !== undefined && updates.tax_rate !== "" ? Number(updates.tax_rate) : undefined,
-        plan: updates.plan !== undefined ? updates.plan : undefined,
-        tier: updates.tier !== undefined ? updates.tier : undefined,
-      })
+      .update(clean)
       .eq("id", id);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await audit(admin, auth.userId, id, "tenant", id, "super_update_cafe", { updates: Object.keys(clean) });
     return NextResponse.json({ ok: true });
   }
 
   if (action === "set_plan") {
     const { id, plan, tier } = data;
     const updates: Record<string, unknown> = {};
-    if (plan) updates.plan = plan;
+    if (plan) {
+      updates.plan = plan;
+      const { data: current } = await admin.from("restaurants").select("trial_ends_at").eq("id", id).maybeSingle();
+      updates.subscription_status = planToSubscriptionStatus(plan, current?.trial_ends_at ?? null);
+      if (plan === "active") {
+        updates.subscription_ends_at = new Date(Date.now() + 30 * 864e5).toISOString();
+        updates.is_suspended = false;
+        updates.suspended_at = null;
+        updates.suspended_reason = null;
+      }
+      if (plan === "suspended") {
+        updates.is_suspended = true;
+        updates.suspended_at = new Date().toISOString();
+      }
+    }
     if (tier) updates.tier = tier;
-    if (plan === "active") updates.subscription_ends_at = new Date(Date.now() + 30 * 864e5).toISOString();
 
     const { error } = await admin.from("restaurants").update(updates).eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await audit(admin, auth.userId, id, "tenant", id, "super_set_plan", { plan: plan ?? null, tier: tier ?? null });
     return NextResponse.json({ ok: true });
   }
 
@@ -113,17 +162,17 @@ export async function POST(req: NextRequest) {
       ? new Date(r.trial_ends_at).getTime()
       : Date.now();
     const next = new Date(base + Number(days || 7) * 864e5).toISOString();
-    const { error } = await admin.from("restaurants").update({ trial_ends_at: next, plan: "trial" }).eq("id", id);
+    const { error } = await admin.from("restaurants").update({ trial_ends_at: next, plan: "trial", subscription_status: "trial", is_suspended: false, suspended_at: null, suspended_reason: null }).eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    await admin.from("audit_events").insert({ restaurant_id: id, entity: "tenant", entity_id: id, action: "super_extend_trial", metadata: { days, until: next } });
+    await admin.from("audit_events").insert({ actor_id: auth.userId, restaurant_id: id, entity: "tenant", entity_id: id, action: "super_extend_trial", metadata: { days, until: next } });
     return NextResponse.json({ ok: true, trial_ends_at: next });
   }
 
   if (action === "mark_paid") {
     const { id } = data;
-    const { error } = await admin.from("restaurants").update({ plan: "active", billing_status: "paid", subscription_ends_at: new Date(Date.now() + 365 * 864e5).toISOString() }).eq("id", id);
+    const { error } = await admin.from("restaurants").update({ plan: "active", subscription_status: "active", billing_status: "paid", subscription_ends_at: new Date(Date.now() + 365 * 864e5).toISOString(), is_suspended: false, suspended_at: null, suspended_reason: null }).eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    await admin.from("audit_events").insert({ restaurant_id: id, entity: "tenant", entity_id: id, action: "super_mark_paid" });
+    await admin.from("audit_events").insert({ actor_id: auth.userId, restaurant_id: id, entity: "tenant", entity_id: id, action: "super_mark_paid" });
     return NextResponse.json({ ok: true });
   }
 
@@ -134,7 +183,7 @@ export async function POST(req: NextRequest) {
     const merged = [...(r?.admin_notes ? [r.admin_notes] : []), `[${new Date().toISOString()}] ${String(note).slice(0, 500)}`].join("\n");
     const { error } = await admin.from("restaurants").update({ admin_notes: merged }).eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    await admin.from("audit_events").insert({ restaurant_id: id, entity: "tenant", entity_id: id, action: "super_refund_note", metadata: { note } });
+    await admin.from("audit_events").insert({ actor_id: auth.userId, restaurant_id: id, entity: "tenant", entity_id: id, action: "super_refund_note", metadata: { note } });
     return NextResponse.json({ ok: true });
   }
 
@@ -142,6 +191,7 @@ export async function POST(req: NextRequest) {
     const { key, value } = data;
     const { error } = await admin.from("platform_config").update({ value, updated_at: new Date().toISOString() }).eq("key", key);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await audit(admin, auth.userId, null, "platform", key, "super_update_config", { key });
     return NextResponse.json({ ok: true });
   }
 
@@ -149,6 +199,7 @@ export async function POST(req: NextRequest) {
     const { id } = data;
     const { error } = await admin.from("restaurants").delete().eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await audit(admin, auth.userId, null, "tenant", id, "super_delete_cafe", {});
     return NextResponse.json({ ok: true });
   }
 

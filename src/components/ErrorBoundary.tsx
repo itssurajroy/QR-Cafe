@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QR Café — Global Error Boundary
+ * QRslice — Global Error Boundary
  * Catches unhandled React errors and shows a friendly recovery screen.
  * Wrap around <children> in layout.tsx to provide app-wide coverage.
  */

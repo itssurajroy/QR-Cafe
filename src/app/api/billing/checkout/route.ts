@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   let customerId = rest.razorpay_customer_id;
   if (!customerId) {
     const { data: authUser } = await db.auth.admin.getUserById(user.userId);
-    const email = authUser?.user?.email || "owner@qrcafe.com";
+    const email = authUser?.user?.email || "owner@qrslice.com";
     const customer = await razorpay.createCustomer(email, rest.name);
     if (customer?.id) {
       customerId = customer.id;
@@ -42,14 +42,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 2. Single Plan ID (₹999/month QR Café, ₹9,999/year)
-  const planId = process.env.RAZORPAY_PLAN_ID_PRO || process.env.RAZORPAY_PLAN_ID || "plan_qrcafe_999";
+  // 2. Single Plan ID (₹999/month QRslice, ₹9,999/year)
+  const planId = process.env.RAZORPAY_PLAN_ID_PRO || process.env.RAZORPAY_PLAN_ID || "plan_qrslice_999";
 
   // 3. Create Subscription
   const sub = await razorpay.createSubscription(customerId || "cust_guest", planId, {
     restaurant_id: rest.id,
     slug: rest.slug,
-    plan_name: "QR Café (₹999/mo)",
+    plan_name: "QRslice (₹999/mo)",
   });
 
   if (!sub || !sub.id) {

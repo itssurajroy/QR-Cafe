@@ -1,5 +1,5 @@
 /**
- * QR Café — Typed API Client
+ * QRslice — Typed API Client
  * All fetch() calls go through named, typed functions here.
  * No component should call fetch() directly.
  *

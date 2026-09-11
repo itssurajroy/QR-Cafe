@@ -132,7 +132,7 @@ export function SupportTab({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-200">
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
             <span className="text-xs font-bold text-slate-500 block">Direct Email Support</span>
-            <span className="text-sm font-mono font-bold text-indigo-600 block">support@qrcafe.app</span>
+            <span className="text-sm font-mono font-bold text-indigo-600 block">support@qrslice.app</span>
             <span className="text-[11px] text-slate-400 block">Response time: &lt; 1 hour</span>
           </div>
 

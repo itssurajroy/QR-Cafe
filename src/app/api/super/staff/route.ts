@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Café not found" }, { status: 404 });
 
   // Use custom password if provided by super admin, otherwise auto-generate
-  const finalPassword = customPassword.length >= 6 ? customPassword : `QrCafe${crypto.randomUUID().slice(0, 8)}`;
+  const finalPassword = customPassword.length >= 6 ? customPassword : `QrSlice${crypto.randomUUID().slice(0, 8)}`;
 
   // Check if user already exists
   const { data: userList } = await admin.auth.admin.listUsers();

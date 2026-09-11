@@ -1,5 +1,5 @@
 /**
- * QR Café UI Component Library — Barrel Export
+ * QRslice UI Component Library — Barrel Export
  * Import any UI primitive from "@/components/ui"
  *
  * Example:

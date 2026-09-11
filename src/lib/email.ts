@@ -11,16 +11,16 @@ interface TrialEmailContext {
 }
 
 const SUBJECTS: Record<TrialEmailDay, string> = {
-  0: "Welcome to QR Café — your 14-day trial has started 🎉",
-  7: "You're halfway through your QR Café trial",
+  0: "Welcome to QRslice — your 14-day trial has started 🎉",
+  7: "You're halfway through your QRslice trial",
   12: "2 days left — keep your kitchen running",
-  14: "Your QR Café trial has ended — upgrade to restore ordering",
+  14: "Your QRslice trial has ended — upgrade to restore ordering",
 };
 
 function template(day: TrialEmailDay, ctx: TrialEmailContext): string {
-  const head = `<h1 style="font-family:sans-serif;color:#0f172a;">${ctx.cafeName} × QR Café</h1>`;
+  const head = `<h1 style="font-family:sans-serif;color:#0f172a;">${ctx.cafeName} × QRslice</h1>`;
   const cta = `<a href="${ctx.billingUrl}" style="display:inline-block;background:#4f46e5;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:bold;">${day === 14 ? "Restore full access" : "Upgrade now"}</a>`;
-  const foot = `<p style="color:#64748b;font-size:12px;">QR Café · ₹999/month per outlet · GST extra · Cancel anytime</p>`;
+  const foot = `<p style="color:#64748b;font-size:12px;">QRslice · ₹999/month per outlet · GST extra · Cancel anytime</p>`;
 
   switch (day) {
     case 0:
@@ -28,7 +28,7 @@ function template(day: TrialEmailDay, ctx: TrialEmailContext): string {
     case 7: {
       const stats =
         ctx.ordersCount !== undefined
-          ? `<p>So far: <strong>${ctx.ordersCount} orders</strong>${ctx.revenuePaise !== undefined ? ` · <strong>₹${(ctx.revenuePaise / 100).toLocaleString("en-IN")}</strong> revenue` : ""} through QR Café.</p>`
+          ? `<p>So far: <strong>${ctx.ordersCount} orders</strong>${ctx.revenuePaise !== undefined ? ` · <strong>₹${(ctx.revenuePaise / 100).toLocaleString("en-IN")}</strong> revenue` : ""} through QRslice.</p>`
           : "";
       return `${head}<p>You're halfway through your trial — <strong>7 days left</strong>.</p>${stats}<p>Everything stays unlocked until day 14.</p>${cta}${foot}`;
     }

@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Refund Policy",
   description:
-    "QR Cafe refund policy for subscriptions and payments.",
+    "QRslice refund policy for subscriptions and payments.",
   alternates: { canonical: "/legal/refund" },
 };
 
@@ -14,7 +14,7 @@ export default function RefundPolicyPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="text-lg font-bold text-indigo-600">
-            QR Cafe
+            QRslice
           </Link>
           <Link
             href="/"
@@ -37,7 +37,7 @@ export default function RefundPolicyPage() {
               1. Overview
             </h2>
             <p>
-              At QR Cafe, we want you to be satisfied with our service. This
+              At QRslice, we want you to be satisfied with our service. This
               Refund Policy explains when and how you can request a refund for
               payments made through our platform.
             </p>
@@ -48,7 +48,7 @@ export default function RefundPolicyPage() {
               2. New Subscriptions
             </h2>
             <p>
-              QR Cafe offers paid subscription plans. If you are not satisfied,
+              QRslice offers paid subscription plans. If you are not satisfied,
               you may request a full refund within <strong>7 days</strong> of
               your initial subscription date. After 7 days, refunds are not
               available for the current billing period.
@@ -82,10 +82,10 @@ export default function RefundPolicyPage() {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:billing@qrcafe.app"
+                  href="mailto:billing@qrslice.app"
                   className="text-indigo-600 hover:underline"
                 >
-                  billing@qrcafe.app
+                  billing@qrslice.app
                 </a>
               </li>
               <li>
@@ -171,19 +171,19 @@ export default function RefundPolicyPage() {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:billing@qrcafe.app"
+                  href="mailto:billing@qrslice.app"
                   className="text-indigo-600 hover:underline"
                 >
-                  billing@qrcafe.app
+                  billing@qrslice.app
                 </a>
               </li>
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:support@qrcafe.app"
+                  href="mailto:support@qrslice.app"
                   className="text-indigo-600 hover:underline"
                 >
-                  support@qrcafe.app
+                  support@qrslice.app
                 </a>
               </li>
             </ul>

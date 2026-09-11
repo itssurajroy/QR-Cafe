@@ -11,32 +11,32 @@ import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://qrcafe.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
 
 const JSON_LD = [
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "QR Cafe",
+    name: "QRslice",
     url: APP_URL,
     logo: `${APP_URL}/icon-512.png`,
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
-      email: "support@qrcafe.app",
+      email: "support@qrslice.app",
     },
   },
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "QR Cafe",
+    name: "QRslice",
     url: APP_URL,
   },
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "QR Cafe",
+    name: "QRslice",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
@@ -46,7 +46,7 @@ const JSON_LD = [
       "@type": "Offer",
       price: "999",
       priceCurrency: "INR",
-      description: "QR Café single plan, per outlet per month. Annual option ₹9,999.",
+      description: "QRslice single plan, per outlet per month. Annual option ₹9,999.",
     },
 
   },
@@ -67,7 +67,7 @@ const JSON_LD = [
         name: "Can I use my existing printer or tablet?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. QR Cafe works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+          text: "Yes. QRslice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
         },
       },
       {
@@ -104,10 +104,10 @@ const JSON_LD = [
       },
       {
         "@type": "Question",
-        name: "Can I use QR Cafe alongside my existing POS?",
+        name: "Can I use QRslice alongside my existing POS?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. Many cafes use QR Cafe for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
+          text: "Yes. Many cafes use QRslice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
         },
       },
       {
@@ -122,7 +122,9 @@ const JSON_LD = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { getContent } = await import("@/lib/content");
+  const faq = await getContent<{ q: string; a: string }[]>("cms.faq", []);
   return (
     <div className="landing-page min-h-screen">
       <a
@@ -145,7 +147,7 @@ export default function LandingPage() {
         <DemoPitch />
         <Pricing />
         <Differentiation />
-        <FAQ />
+        <FAQ items={faq} />
         <CTA />
       </main>
       <Footer />

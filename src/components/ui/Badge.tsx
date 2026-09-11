@@ -1,5 +1,5 @@
 /**
- * QR Café UI Library — Badge
+ * QRslice UI Library — Badge
  * Status pills used throughout POS, Admin, and Order Tracking.
  */
 

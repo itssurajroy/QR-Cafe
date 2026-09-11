@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const CRYPTO_SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY || "qr-cafe-cryptographic-salt-2026";
+const CRYPTO_SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY || "qrcafe-cryptographic-salt-2026";
 
 /**
  * Generates an HMAC-SHA256 signature for a table token or session

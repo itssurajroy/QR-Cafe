@@ -5,6 +5,7 @@ import OfflineBanner from "@/components/OfflineBanner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +25,11 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://qrcafe.app",
+    process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app",
   ),
   title: {
-    default: "QR Cafe — QR Menu Ordering & POS for Restaurants",
-    template: "%s | QR Cafe",
+    default: "QRslice — QR Menu Ordering & POS for Restaurants",
+    template: "%s | QRslice",
   },
   description:
     "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes. Setup in 30 minutes.",
@@ -45,9 +46,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "QR Cafe",
+    siteName: "QRslice",
     url: "/",
-    title: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+    title: "QRslice — QR Menu Ordering & POS for Restaurants",
     description:
       "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes. Setup in 30 minutes.",
     images: [
@@ -55,13 +56,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+        alt: "QRslice — QR Menu Ordering & POS for Restaurants",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+    title: "QRslice — QR Menu Ordering & POS for Restaurants",
     description:
       "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes. Setup in 30 minutes.",
     images: ["/og-image.png"],
@@ -77,7 +78,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "QR Cafe",
+    title: "QRslice",
   },
   icons: {
     icon: "/favicon.ico",
@@ -100,16 +101,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-stone-950 text-stone-100">
-        <ErrorBoundary>
-          <ToastProvider>
-            <OfflineBanner />
-            {children}
-            <CookieConsent />
-          </ToastProvider>
-        </ErrorBoundary>
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-stone-950 text-slate-900 dark:text-stone-100 transition-colors duration-300">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ErrorBoundary>
+            <ToastProvider>
+              <OfflineBanner />
+              {children}
+              <CookieConsent />
+            </ToastProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   );

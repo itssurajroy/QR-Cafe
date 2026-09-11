@@ -277,7 +277,7 @@ export default function PublicCafeClient({
       {/* 8. Footer (minimal) */}
       <footer className="mt-10 border-t border-slate-200 py-8 px-4 text-center">
         <p className="text-sm font-extrabold text-slate-900">{restaurant.name}</p>
-        <p className="text-xs text-slate-500 mt-1">Powered by QR Café</p>
+        <p className="text-xs text-slate-500 mt-1">Powered by QRslice</p>
         {restaurant.google_review_url && (
           <a
             href={restaurant.google_review_url}

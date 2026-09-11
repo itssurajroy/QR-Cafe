@@ -1,5 +1,5 @@
 /**
- * QR Café UI Library — Spinner & EmptyState
+ * QRslice UI Library — Spinner & EmptyState
  */
 
 // ─── Spinner ──────────────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Terms and Conditions",
   description:
-    "Terms and conditions governing use of the QR Cafe platform.",
+    "Terms and conditions governing use of the QRslice platform.",
   alternates: { canonical: "/legal/terms" },
 };
 
@@ -14,7 +14,7 @@ export default function TermsPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="text-lg font-bold text-indigo-600">
-            QR Cafe
+            QRslice
           </Link>
           <Link
             href="/"
@@ -39,7 +39,7 @@ export default function TermsPage() {
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing or using QR Cafe (&quot;the Service&quot;), you agree
+              By accessing or using QRslice (&quot;the Service&quot;), you agree
               to be bound by these Terms and Conditions (&quot;Terms&quot;). If
               you do not agree to these Terms, please do not use the Service.
             </p>
@@ -55,7 +55,7 @@ export default function TermsPage() {
               2. Description of Service
             </h2>
             <p>
-              QR Cafe provides a cloud-based restaurant management platform
+              QRslice provides a cloud-based restaurant management platform
               including QR code menu ordering, point of sale (POS), kitchen
               display system (KDS), inventory management, staff management, and
               related features for cafes and restaurants in India.
@@ -175,7 +175,7 @@ export default function TermsPage() {
             </h2>
             <p>
               The Service, including its design, code, features, and branding,
-              is owned by QR Cafe and protected by Indian and international
+              is owned by QRslice and protected by Indian and international
               intellectual property laws. You may not copy, modify, distribute,
               or reverse-engineer any part of the Service without our written
               consent.
@@ -199,7 +199,7 @@ export default function TermsPage() {
               9. Limitation of Liability
             </h2>
             <p>
-              To the maximum extent permitted by Indian law, QR Cafe shall not
+              To the maximum extent permitted by Indian law, QRslice shall not
               be liable for any indirect, incidental, special, consequential, or
               punitive damages arising from your use of the Service, including
               but not limited to loss of profits, data, or business
@@ -216,7 +216,7 @@ export default function TermsPage() {
               10. Indemnification
             </h2>
             <p>
-              You agree to indemnify and hold QR Cafe harmless from any claims,
+              You agree to indemnify and hold QRslice harmless from any claims,
               losses, or damages (including legal fees) arising from your use of
               the Service, violation of these Terms, or infringement of any
               third-party rights.
@@ -284,10 +284,10 @@ export default function TermsPage() {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:support@qrcafe.app"
+                  href="mailto:support@qrslice.app"
                   className="text-indigo-600 hover:underline"
                 >
-                  support@qrcafe.app
+                  support@qrslice.app
                 </a>
               </li>
             </ul>

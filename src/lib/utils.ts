@@ -1,5 +1,5 @@
 /**
- * QR Café — Shared Utility Functions
+ * QRslice — Shared Utility Functions
  * All pure helper functions used across the app.
  * Previously duplicated inline in MenuClient, PosClient, AdminClient, etc.
  */

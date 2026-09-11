@@ -1,13 +1,21 @@
 import Link from "next/link";
+import { getContent } from "@/lib/content";
 
-const INCLUDED = [
-  "QR ordering + live guest tracking",
-  "Multi-station Kitchen Display",
-  "Stock control & recipe auto-deduction",
-  "Full POS + Bluetooth KOT printing",
-  "Analytics, API & Webhooks",
-  "Priority support",
-];
+const DEFAULTS = {
+  name: "QRslice",
+  monthly: 999,
+  yearly: 9999,
+  bullets: [
+    "QR ordering + live guest tracking",
+    "Multi-station Kitchen Display",
+    "Stock control & recipe auto-deduction",
+    "Full POS + Bluetooth KOT printing",
+    "Analytics, API & Webhooks",
+    "Priority support",
+  ],
+  trialText: "Start 14-day free trial",
+  fineprint: "All prices per outlet · GST extra · Cancel anytime · No credit card for trial",
+};
 
 function CheckIcon({ className }: { className?: string }) {
   return (
@@ -21,7 +29,9 @@ function CheckIcon({ className }: { className?: string }) {
   );
 }
 
-export function Pricing() {
+export async function Pricing() {
+  const c = await getContent("cms.pricing", DEFAULTS);
+  const bullets = c.bullets?.length ? c.bullets : DEFAULTS.bullets;
   return (
     <section id="pricing" className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
@@ -44,7 +54,7 @@ export function Pricing() {
               Every feature included
             </span>
 
-            <h3 className="text-xl font-bold">QR Café</h3>
+            <h3 className="text-xl font-bold">{c.name}</h3>
             <p className="mt-1 text-sm text-slate-400">
               Full QR ordering, multi-station KDS, stock control, recipes,
               POS, and analytics for independent cafés and restaurants.
@@ -52,21 +62,21 @@ export function Pricing() {
 
             <div className="mt-6 flex flex-wrap items-end gap-x-3 gap-y-1">
               <span className="text-5xl font-black tracking-tight">
-                {"\u20B9"}999
+                {"\u20B9"}{c.monthly.toLocaleString("en-IN")}
               </span>
               <span className="pb-1.5 text-sm text-slate-400">
                 / month per outlet
               </span>
             </div>
             <p className="mt-2 text-sm font-medium text-amber-300">
-              Or {"\u20B9"}9,999 / year <span className="text-slate-400">(save {"\u20B9"}1,989)</span>
+              Or {"\u20B9"}{c.yearly.toLocaleString("en-IN")} / year <span className="text-slate-400">(save {"\u20B9"}{(c.monthly * 12 - c.yearly).toLocaleString("en-IN")})</span>
             </p>
 
             <Link
               href="/onboarding"
               className="mt-8 block w-full rounded-xl bg-amber-400 px-4 py-3.5 text-center text-base font-bold text-slate-950 transition-all duration-200 hover:bg-amber-300 hover:shadow-lg active:scale-[0.98]"
             >
-              Start 14-day free trial
+              {c.trialText}
             </Link>
             <p className="mt-3 text-center text-xs text-slate-400">
               No credit card required · Cancel anytime · GST extra
@@ -76,7 +86,7 @@ export function Pricing() {
 
         {/* What's included */}
         <ul className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
-          {INCLUDED.map((feature) => (
+          {bullets.map((feature) => (
             <li
               key={feature}
               className="flex items-start gap-2.5 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm"
@@ -88,8 +98,7 @@ export function Pricing() {
         </ul>
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-500">
-          All prices per outlet · GST extra · Cancel anytime · No credit card
-          for trial
+          {c.fineprint}
         </p>
       </div>
     </section>

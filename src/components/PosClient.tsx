@@ -933,7 +933,7 @@ export default function PosClient({
                   onClick={async () => {
                     const doc = await generateBeautifulBillPdf({
                       restaurant: {
-                        name: restaurant.name || "QR Cafe",
+                        name: restaurant.name || "QRslice",
                         address: restaurant.address || "",
                         phone: restaurant.phone || "",
                         email: restaurant.email || "",

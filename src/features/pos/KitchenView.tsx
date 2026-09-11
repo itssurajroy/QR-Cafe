@@ -67,11 +67,11 @@ export function KitchenView({
   // Sound & Voice Alert state (persisted across reloads for wall tablets)
   const [soundMuted, setSoundMuted] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("qrcafe_kds_sound") === "muted";
+    return localStorage.getItem("qrslice_kds_sound") === "muted";
   });
   const [voiceEnabled, setVoiceEnabled] = useState(() => {
     if (typeof window === "undefined") return true;
-    return localStorage.getItem("qrcafe_kds_voice") !== "off";
+    return localStorage.getItem("qrslice_kds_voice") !== "off";
   });
 
   // Fresh-ticket tracking for the Awake indicator (green < 90s)
@@ -101,8 +101,8 @@ export function KitchenView({
     setSoundMuted((m) => {
       const next = !m;
       try {
-        if (next) localStorage.setItem("qrcafe_kds_sound", "muted");
-        else localStorage.removeItem("qrcafe_kds_sound");
+        if (next) localStorage.setItem("qrslice_kds_sound", "muted");
+        else localStorage.removeItem("qrslice_kds_sound");
       } catch { /* storage unavailable */ }
       return next;
     });
@@ -112,8 +112,8 @@ export function KitchenView({
     setVoiceEnabled((v) => {
       const next = !v;
       try {
-        if (!next) localStorage.setItem("qrcafe_kds_voice", "off");
-        else localStorage.removeItem("qrcafe_kds_voice");
+        if (!next) localStorage.setItem("qrslice_kds_voice", "off");
+        else localStorage.removeItem("qrslice_kds_voice");
       } catch { /* storage unavailable */ }
       return next;
     });

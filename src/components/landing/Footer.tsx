@@ -8,7 +8,7 @@ export function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="text-lg font-bold text-indigo-600">
-              QR Cafe
+              QRslice
             </Link>
             <p className="mt-2 text-sm text-slate-500">
               Cafe management made effortless. As easy as a cup of tea.
@@ -64,7 +64,12 @@ export function Footer() {
             <h4 className="text-sm font-bold text-slate-900">Company</h4>
             <ul className="mt-4 space-y-3">
               <li>
-                <a href="mailto:support@qrcafe.app" className="text-sm text-slate-500 transition-colors hover:text-slate-900">
+                <Link href="/about" className="text-sm text-slate-500 transition-colors hover:text-slate-900">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:support@qrslice.app" className="text-sm text-slate-500 transition-colors hover:text-slate-900">
                   Contact
                 </a>
               </li>
@@ -106,15 +111,15 @@ export function Footer() {
 
         <div className="mt-12 border-t border-slate-200 pt-8 text-center">
           <p className="text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} QR Cafe. All rights reserved. Made
+            &copy; {new Date().getFullYear()} QRslice. All rights reserved. Made
             with <span className="text-indigo-600">&hearts;</span> in India
           </p>
           <p className="mt-2 text-xs text-slate-500">
             Contact:{" "}
-            <a href="mailto:support@qrcafe.app" className="text-slate-600 hover:text-slate-900">
-              support@qrcafe.app
+            <a href="mailto:support@qrslice.app" className="text-slate-600 hover:text-slate-900">
+              support@qrslice.app
             </a>
-            {" · "}Powered by QR Café
+            {" · "}Powered by QRslice
           </p>
         </div>
       </div>

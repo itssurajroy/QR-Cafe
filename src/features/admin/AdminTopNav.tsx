@@ -15,6 +15,7 @@ import {
   GearIcon,
   LifebuoyIcon,
   ManualIcon,
+  UsersIcon,
 } from "@/components/Icons";
 
 export type AdminTabId =
@@ -29,6 +30,7 @@ export type AdminTabId =
   | "webhooks"
   | "branding"
   | "settings"
+  | "staff"
   | "support"
   | "report"
   | "help";
@@ -65,6 +67,7 @@ const GROUPS: { label: string; tabs: TabDef[] }[] = [
     tabs: [
       { id: "branding", label: "Branding", Icon: PaletteIcon },
       { id: "settings", label: "Settings & BT", Icon: GearIcon },
+      { id: "staff", label: "Team & Staff", Icon: UsersIcon },
       { id: "support", label: "Priority Support", Icon: LifebuoyIcon },
       { id: "help", label: "Manual", Icon: ManualIcon },
     ],

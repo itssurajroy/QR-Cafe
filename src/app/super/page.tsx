@@ -47,6 +47,7 @@ export default async function SuperPage({
     { data: past14dOrders },
     { data: platformConfigRows },
     { data: recentAudit },
+    { data: authUsersData },
   ] = await Promise.all([
     query.range(fromIdx, toIdx),
     db.from("restaurants").select("id, name, slug, plan, tier, trial_ends_at, subscription_ends_at, billing_status, created_at"),
@@ -55,6 +56,7 @@ export default async function SuperPage({
     db.from("orders").select("id, total_paise, payment_status, created_at, restaurant_id").gte("created_at", new Date(Date.now() - 14 * 864e5).toISOString()),
     db.from("platform_config").select("*"),
     db.from("audit_events").select("*, restaurants(name, slug)").order("created_at", { ascending: false }).limit(50),
+    db.auth.admin.listUsers(),
   ]);
 
   // Aggregate Metrics
@@ -63,7 +65,7 @@ export default async function SuperPage({
   const trialCafes = all.filter((c) => c.plan === "trial");
   const suspendedCafes = all.filter((c) => c.plan === "suspended" || c.plan === "cancelled");
 
-  // MRR: Single QR Café Plan (₹999/mo)
+  // MRR: Single QRslice Plan (₹999/mo)
   const mrr = activeCafes.length * 999;
 
   // Today Orders & Revenue
@@ -129,10 +131,12 @@ export default async function SuperPage({
   }
 
   // Format staff for list
+  const usersMap = new Map(authUsersData?.users.map((u) => [u.id, u.email]) || []);
   const staffList = (staffProfiles || []).map((s: any) => ({
     id: s.id,
     role: s.role,
     display_name: s.display_name,
+    email: usersMap.get(s.id) || "Unknown Email",
     active: s.active,
     restaurant_id: s.restaurant_id,
     restaurant_name: s.restaurants?.name || "Global / System",

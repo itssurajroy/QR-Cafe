@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const COOKIE_CONSENT_KEY = "qr-cafe-cookie-consent";
+const COOKIE_CONSENT_KEY = "qrslice-cookie-consent";
 
 // Operational screens never show the banner (kitchen displays, POS
 // terminals, staff/admin consoles).
@@ -95,7 +95,7 @@ export function CookieConsent() {
           We use cookies
         </h2>
         <p className="mt-2 text-sm text-slate-600">
-          QR Cafe uses cookies to provide essential functionality, remember your
+          QRslice uses cookies to provide essential functionality, remember your
           preferences, and understand how the service is used. You can choose
           which cookies to accept.
         </p>

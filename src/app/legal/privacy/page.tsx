@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How QR Cafe collects, uses, and protects your personal information.",
+    "How QRslice collects, uses, and protects your personal information.",
   alternates: { canonical: "/legal/privacy" },
 };
 
@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="text-lg font-bold text-indigo-600">
-            QR Cafe
+            QRslice
           </Link>
           <Link
             href="/"
@@ -37,8 +37,8 @@ export default function PrivacyPolicyPage() {
               1. Introduction
             </h2>
             <p>
-              QR Cafe (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;)
-              operates the QR Cafe platform, including our website, mobile
+              QRslice (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;)
+              operates the QRslice platform, including our website, mobile
               application, and related services (collectively, the
               &quot;Service&quot;). This Privacy Policy explains how we collect,
               use, disclose, and safeguard your information when you use our
@@ -216,10 +216,10 @@ export default function PrivacyPolicyPage() {
             <p>
               To exercise these rights, contact us at{" "}
               <a
-                href="mailto:privacy@qrcafe.app"
+                href="mailto:privacy@qrslice.app"
                 className="text-indigo-600 hover:underline"
               >
-                privacy@qrcafe.app
+                privacy@qrslice.app
               </a>
               .
             </p>
@@ -284,19 +284,19 @@ export default function PrivacyPolicyPage() {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:privacy@qrcafe.app"
+                  href="mailto:privacy@qrslice.app"
                   className="text-indigo-600 hover:underline"
                 >
-                  privacy@qrcafe.app
+                  privacy@qrslice.app
                 </a>
               </li>
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:support@qrcafe.app"
+                  href="mailto:support@qrslice.app"
                   className="text-indigo-600 hover:underline"
                 >
-                  support@qrcafe.app
+                  support@qrslice.app
                 </a>
               </li>
             </ul>

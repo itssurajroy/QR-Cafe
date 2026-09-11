@@ -1,5 +1,5 @@
 /**
- * QR Café UI Library — Button
+ * QRslice UI Library — Button
  * Reusable button replacing all inline indigo/slate button Tailwind classes.
  */
 
