@@ -16,6 +16,7 @@ export type Tenant = {
   subscription_ends_at: string | null;
   billing_status: string | null;
   upi_qr_url: string | null;
+  upi_id?: string | null;
 };
 
 export type TierLimits = {
@@ -79,7 +80,7 @@ export async function getRestaurantBySlug(slug: string): Promise<Tenant | null> 
   const { data, error } = await db
     .from("restaurants")
     .select(
-      "id,name,slug,currency,logo_url,accent_color,tagline,plan,tier,trial_starts_at,trial_ends_at,subscription_ends_at,billing_status,upi_qr_url,google_review_url",
+      "id,name,slug,currency,logo_url,accent_color,tagline,plan,tier,trial_starts_at,trial_ends_at,subscription_ends_at,billing_status,upi_qr_url,upi_id,google_review_url",
     )
     .eq("slug", slug)
     .maybeSingle();
