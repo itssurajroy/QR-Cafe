@@ -11,7 +11,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   const router = useRouter();
   
   // Destructure initialData to match what hooks expect
-  const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit } = initialData;
+  const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit } = initialData as any;
 
   const [tab, setTab] = useState<"dashboard" | "cafes" | "config" | "audit" | "staff" | "health">("dashboard");
 
@@ -175,17 +175,17 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
       return;
     }
     const headers = ["ID", "Name", "Slug", "Plan", "Tier", "Tax Rate (%)", "Created At", "Subscription Ends"];
-    const rows = cafes.map((c) => [
+    const rows = (cafes as any[]).map((c: any) => [
       c.id,
       `"${c.name.replace(/"/g, '""')}"`,
       c.slug,
       c.plan,
       c.tier || "pro",
-      c.tax_rate ?? 5,
+      (c as any).tax_rate ?? 5,
       c.created_at,
       c.subscription_ends_at || c.trial_ends_at || "N/A",
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e: any) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);

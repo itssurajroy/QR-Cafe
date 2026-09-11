@@ -26,20 +26,20 @@ export function MenuFloatingCartButton({
         <button
           type="button"
           onClick={onOpenCart}
-          className={`w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-400 text-white font-black rounded-2xl p-4 shadow-2xl shadow-indigo-600/40 flex items-center justify-between transition-all active:scale-95 cursor-pointer border border-indigo-300/50 touch-manipulation ${
+          className={`w-full bg-gradient-to-r from-[#5738F5] to-[#4328D9] hover:from-[#4328D9] hover:to-[#5738F5] text-white font-black rounded-2xl p-4 shadow-xl shadow-[#5738F5]/30 flex items-center justify-between transition-all active:scale-95 cursor-pointer touch-manipulation ${
             cartPulse ? "animate-scale-bounce" : "animate-glow-pulse"
           }`}
         >
-          <div className="flex items-center gap-2">
-            <div className="bg-white/20 text-white p-1.5 rounded-xl flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-white/20 text-white p-2 rounded-xl flex items-center justify-center">
               <ShoppingBagIcon className="w-4 h-4" />
             </div>
             <div className="text-left">
               <span className="text-xs font-black uppercase tracking-wider block">
-                {tViewCart}
+                Review Order · {totalQty} {totalQty === 1 ? "item" : "items"}
               </span>
-              <span className="text-xs font-bold opacity-80">
-                {totalQty} items selected
+              <span className="text-[11px] text-white/80 font-medium">
+                Tap to customize or checkout
               </span>
             </div>
           </div>

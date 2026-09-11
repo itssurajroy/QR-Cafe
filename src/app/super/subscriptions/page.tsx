@@ -30,6 +30,16 @@ export default async function SuperSubscriptionsPage({
   const filterHref = (s: string) =>
     `/super/subscriptions${s ? `?status=${s}` : ""}`;
 
+  const STATUS_STYLE: Record<string, string> = {
+    confirmed: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    trial: "bg-amber-50 border-amber-200 text-amber-700",
+    expired: "bg-red-50 border-red-200 text-red-700",
+    suspended: "bg-slate-800 text-white",
+    cancelled: "bg-slate-50 border-slate-200 text-slate-600",
+    paid: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    unpaid: "bg-amber-50 border-amber-200 text-amber-700",
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -49,14 +59,14 @@ export default async function SuperSubscriptionsPage({
         </div>
 
         <div className="flex gap-2">
-          {["", "trial", "active", "expired"].map((s) => (
+          {["", "trial", "active", "expired", "suspended", "cancelled"].map((s) => (
             <Link
               key={s || "all"}
-              href={filterHref(s)}
-              className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors ${
+              href={`/super/subscriptions${status === s ? "" : `?status=${s}`}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-colors ${
                 status === s
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white border-slate-200 text-slate-500 hover:text-slate-900"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                  : "bg-white text-slate-600 hover:bg-slate-200 border border-slate-200"
               }`}
             >
               {s || "All"}

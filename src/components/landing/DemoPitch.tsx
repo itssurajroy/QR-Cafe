@@ -33,60 +33,49 @@ function PhoneMockup({ step }: { step: string }) {
   return (
     <div className="relative mx-auto w-64 sm:w-72">
       {/* Phone frame */}
-      <div className="relative rounded-[2.5rem] bg-slate-800 p-2 shadow-2xl">
+      <div className="relative rounded-[2.5rem] bg-[#17142B] p-2 shadow-[0_20px_60px_rgba(23,20,43,0.15)]">
         <div className="overflow-hidden rounded-[2rem] bg-white">
           {/* Notch */}
           <div className="flex justify-center bg-white pt-2">
-            <div className="h-5 w-24 rounded-full bg-slate-800" />
+            <div className="h-5 w-24 rounded-full bg-[#17142B]" />
           </div>
 
           {/* Screen content */}
-          <div className="h-80 overflow-hidden bg-slate-50 p-4">
+          <div className="h-80 overflow-hidden bg-white p-4">
             {step === "scan" && (
               <div className="flex h-full flex-col items-center justify-center">
-                <div className="mb-4 h-32 w-32 rounded-2xl border-4 border-dashed border-indigo-300 bg-indigo-50" />
-                <p className="text-center text-sm font-medium text-slate-600">
+                <div className="mb-4 h-32 w-32 rounded-[20px] border-2 border-dashed border-[#E7E4F0] bg-[#EEEAFE] flex items-center justify-center">
+                  <svg className="h-12 w-12 text-[#5738F5]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                  </svg>
+                </div>
+                <p className="text-center text-sm font-medium text-[#6F7185]">
                   Point camera at QR code
                 </p>
-                <div className="mt-4 flex gap-2">
-                  <div className="h-2 w-2 rounded-full bg-indigo-400" />
-                  <div className="h-2 w-2 rounded-full bg-indigo-400" />
-                  <div className="h-2 w-2 rounded-full bg-indigo-400" />
-                </div>
               </div>
             )}
 
             {step === "menu" && (
               <div className="h-full overflow-hidden">
-                <div className="mb-3 text-center font-bold text-slate-800">
-                  Chai & Snacks
+                <div className="mb-3 text-center font-bold text-[#17142B]">
+                  Chai &amp; Snacks
                 </div>
                 <div className="space-y-2">
                   {[
                     { name: "Masala Chai", price: "₹40", veg: true },
-                    { name: "Sandwich", price: "₹120", veg: true },
+                    { name: "Paneer Sandwich", price: "₹120", veg: true },
                     { name: "Samosa", price: "₹30", veg: true },
                     { name: "Cold Coffee", price: "₹80", veg: true },
                   ].map((item) => (
                     <div
                       key={item.name}
-                      className="flex items-center justify-between rounded-lg bg-white p-2 shadow-sm"
+                      className="flex items-center justify-between rounded-[10px] bg-white border border-[#E7E4F0] p-2.5"
                     >
                       <div className="flex items-center gap-2">
-                        <div
-                          className={`h-3 w-3 rounded-sm border ${
-                            item.veg
-                              ? "border-green-500"
-                              : "border-red-500"
-                          }`}
-                        />
-                        <span className="text-sm font-medium text-slate-700">
-                          {item.name}
-                        </span>
+                        <div className={`h-3 w-3 rounded-sm border-2 ${item.veg ? "border-green-500" : "border-red-500"}`} />
+                        <span className="text-sm font-medium text-[#17142B]">{item.name}</span>
                       </div>
-                      <span className="text-sm font-bold text-slate-900">
-                        {item.price}
-                      </span>
+                      <span className="text-sm font-bold text-[#17142B]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>{item.price}</span>
                     </div>
                   ))}
                 </div>
@@ -95,20 +84,18 @@ function PhoneMockup({ step }: { step: string }) {
 
             {step === "order" && (
               <div className="h-full overflow-hidden">
-                <div className="mb-3 text-center font-bold text-slate-800">
-                  Your Order
-                </div>
+                <div className="mb-3 text-center font-bold text-[#17142B]">Your Order</div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
-                    <span className="text-sm text-slate-700">Masala Chai × 2</span>
-                    <span className="text-sm font-bold text-slate-900">₹80</span>
+                  <div className="flex items-center justify-between rounded-[10px] bg-[#EEEAFE] p-3">
+                    <span className="text-sm text-[#17142B]">Masala Chai × 2</span>
+                    <span className="text-sm font-bold text-[#17142B]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>₹80</span>
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
-                    <span className="text-sm text-slate-700">Samosa × 1</span>
-                    <span className="text-sm font-bold text-slate-900">₹30</span>
+                  <div className="flex items-center justify-between rounded-[10px] bg-[#EEEAFE] p-3">
+                    <span className="text-sm text-[#17142B]">Samosa × 1</span>
+                    <span className="text-sm font-bold text-[#17142B]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>₹30</span>
                   </div>
                 </div>
-                <div className="mt-4 rounded-lg bg-indigo-600 p-3 text-center text-sm font-semibold text-white">
+                <div className="mt-4 rounded-[12px] bg-[#5738F5] p-3.5 text-center text-sm font-semibold text-white">
                   Place Order — ₹110
                 </div>
               </div>
@@ -116,34 +103,19 @@ function PhoneMockup({ step }: { step: string }) {
 
             {step === "kitchen" && (
               <div className="h-full overflow-hidden">
-                <div className="mb-3 text-center font-bold text-slate-800">
-                  Kitchen Display
-                </div>
-                <div className="rounded-lg border-l-4 border-amber-500 bg-amber-50 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-800">
-                      Table 3
-                    </span>
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                      New
-                    </span>
+                <div className="mb-3 text-center font-bold text-[#17142B]">Kitchen Display</div>
+                <div className="rounded-[12px] border border-[#E7E4F0] bg-white p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold text-[#17142B]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>TABLE 03</span>
+                    <span className="rounded-[999px] bg-[#EEEAFE] px-2.5 py-0.5 text-xs font-bold text-[#5738F5]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>NEW</span>
                   </div>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-sm text-slate-600">Masala Chai × 2</p>
-                    <p className="text-sm text-slate-600">Samosa × 1</p>
+                  <div className="space-y-1.5">
+                    <p className="text-sm text-[#6F7185]">Masala Chai × 2</p>
+                    <p className="text-sm text-[#6F7185]">Samosa × 1</p>
                   </div>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      type="button"
-                      className="rounded bg-green-500 px-3 py-1 text-xs font-medium text-white"
-                    >
+                  <div className="mt-4 flex gap-2">
+                    <button type="button" className="flex-1 rounded-[10px] bg-[#5738F5] px-3 py-2 text-xs font-semibold text-white">
                       Accept
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded bg-slate-200 px-3 py-1 text-xs font-medium text-slate-600"
-                    >
-                      5 min
                     </button>
                   </div>
                 </div>
@@ -153,33 +125,10 @@ function PhoneMockup({ step }: { step: string }) {
 
           {/* Home indicator */}
           <div className="flex justify-center bg-white pb-2">
-            <div className="h-1 w-16 rounded-full bg-slate-300" />
+            <div className="h-1 w-16 rounded-full bg-[#E7E4F0]" />
           </div>
         </div>
       </div>
-
-      {/* QR code on table (only for scan step) */}
-      {step === "scan" && (
-        <div className="absolute -right-8 top-1/2 -translate-y-1/2 rotate-12">
-          <div className="rounded-lg bg-white p-2 shadow-lg">
-            <div className="grid grid-cols-5 gap-0.5">
-              {Array.from({ length: 25 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-3 w-3 ${
-                    [0, 1, 2, 4, 5, 6, 10, 12, 14, 18, 20, 22, 23, 24].includes(i)
-                      ? "bg-slate-800"
-                      : "bg-white"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          <p className="mt-1 text-center text-[10px] text-slate-400">
-            Table 3
-          </p>
-        </div>
-      )}
     </div>
   );
 }
@@ -189,48 +138,45 @@ export function DemoPitch() {
 
   return (
     <section id="demo" className="bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="text-center">
-          <p className="text-sm font-medium tracking-wide text-indigo-600 uppercase">
-            See it in action
+      <div className="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+        <div className="text-center mb-16">
+          <p className="text-sm font-bold uppercase tracking-widest text-[#5738F5] mb-3">
+            Guest Experience
           </p>
-          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
-            How your customers will order
+          <h2 className="text-[30px] font-extrabold text-[#17142B] sm:text-[42px] leading-[1.1]">
+            Your menu. On their phone.
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
-            Scan. Browse. Order. That&apos;s it. No app download, no waiting
-            for a waiter, no confusion.
+          <p className="mx-auto mt-4 max-w-2xl text-base text-[#6F7185] sm:text-lg">
+            Scan. Browse. Order. That&apos;s it. No app download, no waiting for a waiter.
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Steps */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {STEPS.map((step, index) => (
               <button
                 key={step.number}
                 type="button"
                 onClick={() => setActiveStep(index)}
-                className={`flex w-full items-start gap-4 rounded-xl p-4 text-left transition-all ${
+                className={`flex w-full items-start gap-4 rounded-[16px] p-4 text-left transition-all duration-200 ${
                   activeStep === index
-                    ? "bg-indigo-50 ring-1 ring-indigo-200"
-                    : "hover:bg-slate-50"
+                    ? "bg-[#EEEAFE] border border-[#5738F5]/20"
+                    : "hover:bg-[#EEEAFE]/50 border border-transparent"
                 }`}
               >
                 <div
-                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] text-sm font-bold ${
                     activeStep === index
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-200 text-slate-600"
+                      ? "bg-[#5738F5] text-white"
+                      : "bg-[#E7E4F0] text-[#6F7185]"
                   }`}
                 >
                   {step.number}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">{step.title}</h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {step.description}
-                  </p>
+                  <h3 className="font-bold text-[#17142B]">{step.title}</h3>
+                  <p className="mt-1 text-sm text-[#6F7185]">{step.description}</p>
                 </div>
               </button>
             ))}
@@ -246,24 +192,12 @@ export function DemoPitch() {
         <div className="mt-16 text-center">
           <a
             href="/onboarding"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-600/30 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-[12px] bg-[#5738F5] px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_30px_rgba(87,56,245,0.25)] transition-all duration-150 hover:bg-[#4328D9] active:scale-[0.98]"
           >
-            Set Up Your Menu — Free
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-              />
-            </svg>
+            Start free
+            <span>→</span>
           </a>
-          <p className="mt-3 text-sm text-slate-500">
+          <p className="mt-3 text-sm text-[#6F7185]">
             Live in 30 minutes &middot; No credit card needed
           </p>
         </div>

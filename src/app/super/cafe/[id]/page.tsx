@@ -3,6 +3,7 @@ import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import AdminClient from "@/components/AdminClient";
 import Link from "next/link";
+import { ImpersonationBanner } from "@/features/super-admin/ImpersonationBar";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,12 @@ export default async function ImpersonateCafePage({
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col">
+      {/* Impersonation Banner */}
+      <ImpersonationBanner
+        tenantName={tenant.name}
+        tenantSlug={tenant.slug}
+        onExit={() => window.location.href = "/super"}
+      />
       {/* Super Admin Impersonation Top Exit Banner */}
       <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-stone-950 px-6 py-2.5 flex items-center justify-between shadow-xl sticky top-0 z-50">
         <div className="flex items-center gap-2 text-xs font-black">

@@ -2,9 +2,10 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { TrustBar } from "@/components/landing/TrustBar";
 import { ProblemSolution } from "@/components/landing/ProblemSolution";
-import { Features } from "@/components/landing/Features";
-import { HowItWorks } from "@/components/landing/HowItWorks";
+import { ProductFlow } from "@/components/landing/ProductFlow";
 import { DemoPitch } from "@/components/landing/DemoPitch";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Features } from "@/components/landing/Features";
 import { Pricing } from "@/components/landing/Pricing";
 import { Differentiation } from "@/components/landing/Differentiation";
 import { FAQ } from "@/components/landing/FAQ";
@@ -17,9 +18,9 @@ const JSON_LD = [
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "QRslice",
+    name: "QrSlice",
     url: APP_URL,
-    logo: `${APP_URL}/icon-512.png`,
+    logo: `${APP_URL}/favicon.png`,
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
@@ -30,25 +31,24 @@ const JSON_LD = [
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "QRslice",
+    name: "QrSlice",
     url: APP_URL,
   },
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "QRslice",
+    name: "QrSlice",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes.",
+      "QrSlice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
     url: APP_URL,
     offers: {
       "@type": "Offer",
       price: "999",
       priceCurrency: "INR",
-      description: "QRslice single plan, per outlet per month. Annual option ₹9,999.",
+      description: "QrSlice complete plan, per outlet per month. Annual option ₹9,999.",
     },
-
   },
   {
     "@context": "https://schema.org",
@@ -67,7 +67,7 @@ const JSON_LD = [
         name: "Can I use my existing printer or tablet?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. QRslice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+          text: "Yes. QrSlice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
         },
       },
       {
@@ -104,10 +104,10 @@ const JSON_LD = [
       },
       {
         "@type": "Question",
-        name: "Can I use QRslice alongside my existing POS?",
+        name: "Can I use QrSlice alongside my existing POS?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. Many cafes use QRslice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
+          text: "Yes. Many cafes use QrSlice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
         },
       },
       {
@@ -129,7 +129,7 @@ export default async function LandingPage() {
     <div className="landing-page min-h-screen">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-white focus:ring-2 focus:ring-indigo-300"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-[#5738F5] focus:px-4 focus:py-2 focus:text-white focus:ring-2 focus:ring-[#EEEAFE]"
       >
         Skip to main content
       </a>
@@ -142,9 +142,10 @@ export default async function LandingPage() {
         <Hero />
         <TrustBar />
         <ProblemSolution />
-        <Features />
-        <HowItWorks />
+        <ProductFlow />
         <DemoPitch />
+        <HowItWorks />
+        <Features />
         <Pricing />
         <Differentiation />
         <FAQ items={faq} />

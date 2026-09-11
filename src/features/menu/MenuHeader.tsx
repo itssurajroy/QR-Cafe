@@ -24,19 +24,22 @@ export function MenuHeader({
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0 transition-transform active:scale-95">
+            <div className="w-10 h-10 rounded-2xl bg-[#5738F5] flex items-center justify-center text-white shadow-md shadow-[#5738F5]/20 shrink-0 transition-transform active:scale-95">
               <CoffeeIcon className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
+              <h1 className="text-sm sm:text-base font-extrabold text-[#17142B] tracking-tight truncate" style={{ fontFamily: "var(--font-heading)" }}>
                 {restaurantName}
               </h1>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
-                  Table {tableLabel}
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#EEEAFE] text-[#5738F5] border border-[#5738F5]/20 font-mono"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5738F5] animate-ping" />
+                  TABLE {tableLabel.padStart(2, "0")}
                 </span>
-                <span className="text-xs text-slate-500 font-medium">
+                <span className="text-xs text-[#6F7185] font-medium">
                   • {t.dineIn}
                 </span>
               </div>

@@ -1,14 +1,40 @@
 @import "tailwindcss";
 
+/* ============================================
+   QRSLICE DESIGN TOKENS
+   ============================================ */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --accent: #f59e0b;
-  --accent-rgb: 245, 158, 11;
+  /* Brand Colors */
+  --color-primary: #5738F5;
+  --color-primary-dark: #4328D9;
+  --color-lavender: #EEEAFE;
+  --color-ink: #17142B;
+  --color-muted: #6F7185;
+  --color-border: #E7E4F0;
+  --color-white: #FFFFFF;
+
+  /* Legacy tokens (preserved for dashboard/admin) */
+  --background: #ffffff;
+  --foreground: #17142B;
+  --color-primary-hover: #4328D9;
+  --accent: #5738F5;
+  --accent-rgb: 87, 56, 245;
   --accent-amber: #f59e0b;
-  --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Typography */
+  --font-heading: 'Plus Jakarta Sans', var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: 'DM Mono', var(--font-geist-mono), monospace;
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 30px rgba(23, 20, 43, 0.06);
+  --shadow-large: 0 20px 60px rgba(23, 20, 43, 0.08);
 }
 
 body {
@@ -22,27 +48,29 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Custom sleek scrollbar */
+/* ============================================
+   SCROLLBAR
+   ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1c1917;
+  background: var(--color-lavender);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #44403c;
+  background: var(--color-muted);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: var(--color-primary);
 }
 
 /* ============================================
-   GLASSMORPHISM UTILITIES
+   GLASSMORPHISM UTILITIES (preserved for admin)
    ============================================ */
 .glass {
   background: rgba(28, 25, 23, 0.65);
@@ -75,7 +103,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================
-   GRADIENT MESH BACKGROUNDS
+   GRADIENT MESH BACKGROUNDS (preserved for admin)
    ============================================ */
 .gradient-mesh {
   background-color: #0c0a09;
@@ -177,9 +205,13 @@ h1, h2, h3, h4, h5, h6 {
     transition-duration: 0.01ms !important;
   }
 }
-:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
 
-.accent-btn { background-color: var(--accent); color: #0c0a09; }
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.accent-btn { background-color: var(--accent); color: #ffffff; }
 .accent-btn:hover { filter: brightness(1.1); }
 .accent-text { color: var(--accent); }
 .accent-border { border-color: var(--accent); }
@@ -222,19 +254,19 @@ h1, h2, h3, h4, h5, h6 {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ============================================
-   LANDING PAGE — Light Theme
+   LANDING PAGE
    ============================================ */
 .landing-page {
-  background-color: #f8fafc;
-  color: #0f172a;
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  background-color: var(--color-white);
+  color: var(--color-ink);
+  font-family: var(--font-heading);
 }
 
-.landing-page h1, .landing-page h2, .landing-page h3 {
-  font-family: var(--font-heading), system-ui, sans-serif;
+.landing-page h1, .landing-page h2, .landing-page h3, .landing-page h4 {
+  font-family: var(--font-heading);
+  color: var(--color-ink);
 }
 
-/* Smooth scroll for anchor links */
 .landing-page {
   scroll-behavior: smooth;
 }

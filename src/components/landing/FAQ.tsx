@@ -11,7 +11,7 @@ const FAQS = [
   {
     question: "Can I use my existing printer or tablet?",
     answer:
-      "Yes. QRslice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+      "Yes. QrSlice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
   },
   {
     question: "What plans are available?",
@@ -49,9 +49,9 @@ const FAQS = [
       "No. Customers scan the QR code with their phone camera and the menu opens directly in their browser. Works on Android, iOS, and any phone with a camera.",
   },
   {
-      question: "Can I use QRslice alongside my existing POS?",
+    question: "Can I use QrSlice alongside my existing POS?",
     answer:
-      "Yes. Many cafes use QRslice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
+      "Yes. Many cafes use QrSlice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
   },
   {
     question: "What happens to my data if I cancel?",
@@ -73,27 +73,25 @@ export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
 
   return (
     <section id="faq" className="bg-white">
-      <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="text-center">
-          <p className="text-sm font-medium tracking-wide text-indigo-600 uppercase">
-            FAQ
-          </p>
-          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
+      <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+        <div className="text-center mb-12">
+          <p className="text-sm font-bold uppercase tracking-widest text-[#5738F5] mb-3">FAQ</p>
+          <h2 className="text-[30px] font-extrabold text-[#17142B] sm:text-[42px] leading-[1.1]">
             Questions? Answered.
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-[#6F7185] sm:text-lg">
             Can&apos;t find what you&apos;re looking for?{" "}
             <a
               href="mailto:support@qrslice.app"
-              className="font-medium text-indigo-600 underline decoration-indigo-200 underline-offset-2 transition-colors hover:text-indigo-700 hover:decoration-indigo-400"
+              className="font-semibold text-[#5738F5] underline decoration-[#EEEAFE] underline-offset-2 transition-colors hover:text-[#4328D9] hover:decoration-[#5738F5]"
             >
-              Contact our support team
+              Talk to us
             </a>
             .
           </p>
         </div>
 
-        <div className="mt-12 divide-y divide-slate-200 border-t border-slate-200">
+        <div className="divide-y divide-[#E7E4F0] border-t border-[#E7E4F0]">
           {faqs.map((faq, index) => {
             const panelId = `faq-panel-${index}`;
             const buttonId = `faq-button-${index}`;
@@ -102,16 +100,16 @@ export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
                 <button
                   type="button"
                   id={buttonId}
-                  className="flex w-full items-center justify-between py-5 text-left transition-colors hover:text-indigo-600"
+                  className="flex w-full items-center justify-between py-5 text-left transition-colors duration-150 hover:text-[#5738F5]"
                   onClick={() => toggle(index)}
                   aria-expanded={openIndex === index}
                   aria-controls={panelId}
                 >
-                  <span className="text-base font-medium text-slate-900">
+                  <span className="text-base font-semibold text-[#17142B]">
                     {faq.question}
                   </span>
                   <svg
-                    className={`h-5 w-5 flex-shrink-0 text-slate-400 transition-transform duration-200 ${
+                    className={`h-5 w-5 flex-shrink-0 text-[#6F7185] transition-transform duration-200 ${
                       openIndex === index ? "rotate-180" : ""
                     }`}
                     fill="none"
@@ -137,7 +135,7 @@ export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <p className="pb-5 text-sm leading-relaxed text-slate-600">
+                  <p className="pb-5 text-sm leading-relaxed text-[#6F7185]">
                     {faq.answer}
                   </p>
                 </div>

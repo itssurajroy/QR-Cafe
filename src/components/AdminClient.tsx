@@ -16,6 +16,10 @@ import { RecipesTab } from "@/features/admin/tabs/RecipesTab";
 import { KdsTab } from "@/features/admin/tabs/KdsTab";
 import { WebhooksTab } from "@/features/admin/tabs/WebhooksTab";
 import { SupportTab } from "@/features/admin/tabs/SupportTab";
+import { OrdersTab } from "@/features/admin/tabs/OrdersTab";
+import { ModifiersTab } from "@/features/admin/tabs/ModifiersTab";
+import { StaffTab } from "@/features/admin/tabs/StaffTab";
+import { AdminAppShell, type AdminSectionId } from "@/components/shell/AdminAppShell";
 import { MultiOutletModal } from "@/features/admin/MultiOutletModal";
 import { AdminTopNav, type AdminTabId } from "@/features/admin/AdminTopNav";
 import type { Category, MenuItem as Item, Table } from "@/types";
@@ -77,7 +81,7 @@ export default function AdminClient({
 }) {
   const activeRestaurant: RestaurantProps = restaurant || { id: restaurantId, name: "QRslice", slug: "cafe" };
 
-  const [tab, setTab] = useState<AdminTabId>("dashboard");
+  const [tab, setTab] = useState<AdminSectionId | AdminTabId>("dashboard");
   const [showMultiOutletModal, setShowMultiOutletModal] = useState(false);
   const [categoryList, setCategoryList] = useState<Category[]>(categories);
   const [itemList, setItemList] = useState<Item[]>(items);
@@ -564,11 +568,46 @@ export default function AdminClient({
 
   const [hideTrialBanner, setHideTrialBanner] = useState(false);
 
+  async function handleUpdateOrderStatus(orderId: string, status: string) {
+    const res = await fetch(`/api/orders/${orderId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to update order status");
+    }
+    flash("ok", "Order status updated");
+    // Refresh live feed
+    try {
+      const aRes = await fetch("/api/analytics");
+      if (aRes.ok) {
+        const d = await aRes.json();
+        if (d.recentOrders) setRecentOrders(d.recentOrders);
+        if (d.today) {
+          setLiveRevenue(d.today.revenue ?? liveRevenue);
+          setLiveOrders(d.today.orders ?? liveOrders);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-600 selection:text-black flex flex-col">
+    <AdminAppShell
+      currentSection={tab as AdminSectionId}
+      onSelectSection={(sec) => setTab(sec as any)}
+      restaurantName={activeRestaurant.name || "QrSlice Cafe"}
+      restaurantSlug={activeRestaurant.slug || "cafe"}
+      liveRevenue={liveRevenue}
+      liveOrders={liveOrders}
+      onOpenSearch={() => setTab("orders")}
+    >
       {/* Trial countdown — trial state only, dismissible per session */}
       {isTrial && !isSuspended && !hideTrialBanner && (
-        <div className="bg-indigo-600 text-white no-print">
+        <div className="bg-[#5738F5] text-white no-print rounded-2xl mb-4">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-center gap-3 text-xs font-bold">
             <span>
               {daysLeft > 0
@@ -577,7 +616,7 @@ export default function AdminClient({
             </span>
             <Link
               href="/admin/billing"
-              className="px-2.5 py-1 rounded-lg bg-white text-indigo-700 font-black hover:bg-indigo-50 transition-colors shrink-0"
+              className="px-2.5 py-1 rounded-lg bg-white text-[#5738F5] font-black hover:bg-slate-50 transition-colors shrink-0"
             >
               Upgrade now
             </Link>
@@ -585,71 +624,13 @@ export default function AdminClient({
               type="button"
               onClick={() => setHideTrialBanner(true)}
               aria-label="Dismiss trial banner"
-              className="text-indigo-200 hover:text-white font-bold shrink-0"
+              className="text-purple-200 hover:text-white font-bold shrink-0"
             >
               ✕
             </button>
           </div>
         </div>
       )}
-
-      <header className="bg-white/90 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-20 no-print shadow-[0_1px_12px_rgba(15,23,42,0.06)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Top row: Brand + Live Stats */}
-          <div className="min-h-16 py-2.5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-base shadow-md shadow-indigo-600/30 shrink-0">
-                {restaurant?.name?.charAt(0) || "C"}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="font-extrabold text-[15px] text-slate-900 truncate" style={{ fontFamily: "var(--font-heading)" }}>{restaurant?.name || "Café Admin"}</h1>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    isSuspended
-                      ? "bg-red-100 text-red-700"
-                      : isTrial
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-emerald-100 text-emerald-700"
-                  }`}>
-                    {isSuspended ? "Suspended" : isTrial ? `Trial · ${daysLeft}d left` : "Active"}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 font-medium">
-                  Operations Hub · {new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
-                </p>
-              </div>
-            </div>
-
-            {/* Live Stats + Multi-Outlet Switcher */}
-            <div className="hidden sm:flex items-center gap-2.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowMultiOutletModal(true)}
-                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-              >
-                <span>🏢 Outlets</span>
-              </button>
-              <div className="flex items-center gap-1.5 text-xs bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2">
-                <span className="text-slate-500 font-medium">Revenue</span>
-                <span className="font-extrabold text-indigo-700 font-mono">₹{(liveRevenue / 100).toLocaleString("en-IN")}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
-                <span className="text-slate-500 font-medium">Orders</span>
-                <span className="font-extrabold text-emerald-700 font-mono">{liveOrders}</span>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom row: Tabs */}
-          <div className="border-t border-slate-100">
-            <AdminTopNav tab={tab} setTab={setTab} />
-          </div>
-        </div>
-      </header>
 
       <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-5 no-print flex-1 w-full">
         {/* Onboarding Starter Checklist (Dismissible) */}
@@ -730,6 +711,25 @@ export default function AdminClient({
             setTab={setTab}
             restaurant={restaurant}
           />
+        )}
+
+        {/* TAB: ORDERS MANAGEMENT */}
+        {tab === "orders" && (
+          <OrdersTab
+            orders={recentOrders as any}
+            onUpdateStatus={handleUpdateOrderStatus}
+            flash={flash}
+          />
+        )}
+
+        {/* TAB: MODIFIERS */}
+        {tab === "modifiers" && (
+          <ModifiersTab flash={flash} />
+        )}
+
+        {/* TAB: STAFF MANAGEMENT */}
+        {tab === "staff" && (
+          <StaffTab restaurantId={restaurantId} />
         )}
 
         {/* TAB 1: MENU & CATEGORY MANAGEMENT */}
@@ -820,8 +820,73 @@ export default function AdminClient({
         )}
 
         {/* TAB: KITCHEN DISPLAY SYSTEM */}
-        {tab === "kds" && (
+        {(tab === "kds" || tab === "kitchen") && (
           <KdsTab restaurantId={restaurantId} flash={flash} />
+        )}
+
+        {/* TAB: BILLING & SUBSCRIPTION */}
+        {tab === "billing" && (
+          <div className="animate-fade-in-up bg-white border border-[#E7E4F0] rounded-3xl p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-[#E7E4F0] pb-4">
+              <div>
+                <h3 className="text-xl font-black text-[#17142B]">Restaurant Billing & Subscription</h3>
+                <p className="text-xs text-[#6F7185] mt-0.5">Manage your platform plan, invoice history, and settlement methods.</p>
+              </div>
+              <span className="font-mono font-bold text-xs uppercase px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                Plan: {plan.toUpperCase()}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="text-xs font-bold text-[#6F7185] uppercase">Plan Tier</div>
+                <div className="text-lg font-black text-[#17142B] mt-1 capitalize">{tier} All-in-One</div>
+                <div className="text-[11px] text-[#6F7185] mt-1">Unlimited QR scans & KDS screens</div>
+              </div>
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="text-xs font-bold text-[#6F7185] uppercase">Trial Days Left</div>
+                <div className="text-lg font-black text-[#5738F5] mt-1">{daysLeft} Days</div>
+                <div className="text-[11px] text-[#6F7185] mt-1">Full access active</div>
+              </div>
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="text-xs font-bold text-[#6F7185] uppercase">Platform Fee</div>
+                <div className="text-lg font-black text-emerald-700 mt-1">0% Commission</div>
+                <div className="text-[11px] text-[#6F7185] mt-1">Flat SaaS subscription</div>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Link
+                href="/admin/billing"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs shadow-md shadow-[#5738F5]/25 transition-all"
+              >
+                <span>Open Full Billing Portal & Invoices →</span>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: ACCOUNT */}
+        {tab === "account" && (
+          <div className="animate-fade-in-up">
+            <BrandingTab
+              brandingLogoUrl={brandingLogoUrl}
+              brandingTagline={brandingTagline}
+              brandingGoogleReviewUrl={brandingGoogleReviewUrl}
+              brandingAccentColor={brandingAccentColor}
+              savingBranding={savingBranding}
+              setBrandingLogoUrl={setBrandingLogoUrl}
+              setBrandingTagline={setBrandingTagline}
+              setBrandingGoogleReviewUrl={setBrandingGoogleReviewUrl}
+              setBrandingAccentColor={setBrandingAccentColor}
+              handleSaveBranding={handleSaveBranding}
+            />
+          </div>
+        )}
+
+        {/* TAB: INTEGRATIONS */}
+        {tab === "integrations" && (
+          <WebhooksTab restaurant={activeRestaurant} flash={flash} />
         )}
 
         {/* TAB: STOCK CONTROL & ALERTS */}
@@ -1412,7 +1477,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
           onClose={() => setShowMultiOutletModal(false)}
         />
       )}
-    </main>
+    </AdminAppShell>
   );
 }
 

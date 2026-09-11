@@ -9,8 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-select": "^2.3.7",
+    "@radix-ui/react-tabs": "^1.1.21",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.45.0",
     "next": "16.3.3",
@@ -20,6 +25,7 @@
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
     "resend": "^6.27.0",
+    "tailwind-merge": "^3.6.0",
     "zod": "^4.5.2"
   },
   "devDependencies": {

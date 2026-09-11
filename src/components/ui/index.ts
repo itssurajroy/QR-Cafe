@@ -21,5 +21,9 @@ export type { ModalProps } from "./Modal";
 export { Input, Textarea } from "./Input";
 export type { InputProps, TextareaProps } from "./Input";
 
-export { Spinner, EmptyState, LoadingPage } from "./Spinner";
-export type { SpinnerProps, EmptyStateProps } from "./Spinner";
+export { Spinner, LoadingPage } from "./Spinner";
+export type { SpinnerProps } from "./Spinner";
+
+export { Skeleton, DashboardSkeleton } from "./Skeleton";
+export { EmptyState } from "./EmptyState";
+export { ErrorState } from "./ErrorState";
