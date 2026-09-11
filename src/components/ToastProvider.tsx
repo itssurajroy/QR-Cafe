@@ -82,10 +82,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 // ─── Single Toast Item ────────────────────────────────────────────────────────
 
 const TOAST_STYLES: Record<ToastVariant, string> = {
-  success: "bg-emerald-950/95 border-emerald-700 text-emerald-300",
-  error:   "bg-red-950/95 border-red-700 text-red-300",
-  info:    "bg-stone-900/95 border-stone-700 text-stone-200",
-  warning: "bg-amber-950/95 border-amber-700 text-amber-300",
+  success: "bg-emerald-50 border-emerald-200 text-emerald-700",
+  error:   "bg-red-50 border-red-200 text-red-700",
+  info:    "bg-slate-100 border-slate-200 text-slate-700",
+  warning: "bg-amber-50 border-amber-200 text-amber-700",
 };
 
 const TOAST_ICONS: Record<ToastVariant, string> = {
@@ -106,7 +106,7 @@ function ToastItem({
     <div
       className={`
         pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border
-        shadow-2xl backdrop-blur-xl text-xs font-bold min-w-64 max-w-xs
+        shadow-xl backdrop-blur-xl text-xs font-bold min-w-64 max-w-xs
         animate-slide-in-bottom
         ${TOAST_STYLES[toast.variant]}
       `}

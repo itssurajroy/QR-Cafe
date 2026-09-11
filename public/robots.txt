@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /pos/
+Disallow: /kds/
+Disallow: /super/
+Disallow: /login/
+Disallow: /api/
+
+Sitemap: https://qrcafe.app/sitemap.xml

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
-import { emitWhatsAppNotification } from "@/wa/notifications";
 
 const TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "rejected", "cancelled"],
@@ -49,9 +48,9 @@ export async function PATCH(
     );
   }
 
-  const { status, payment_status } = parsed.data;
+  const { status, payment_status, delay_minutes, delay_reason } = parsed.data;
 
-  // Staff may only advance kitchen status, never touch payments.
+  // Staff may only advance kitchen status and set delays, never touch payments.
   if (user.role === "staff" && payment_status) {
     return NextResponse.json(
       { error: "Staff cannot change payment status" },
@@ -71,6 +70,21 @@ export async function PATCH(
 
   if (error || !order) {
     return NextResponse.json({ error: "Order not found or access denied" }, { status: 404 });
+  }
+
+  // Safe lookup of delay_minutes if present
+  let currentDelay = 0;
+  try {
+    const { data: delayData } = await admin
+      .from("orders")
+      .select("delay_minutes")
+      .eq("id", id)
+      .maybeSingle();
+    if (delayData) {
+      currentDelay = (delayData as any).delay_minutes || 0;
+    }
+  } catch {
+    /* ignore */
   }
 
   const updates: Record<string, unknown> = {};
@@ -93,6 +107,14 @@ export async function PATCH(
       );
     }
     updates.payment_status = payment_status;
+  }
+
+  if (typeof delay_minutes === "number") {
+    const newTotalDelay = currentDelay + delay_minutes;
+    updates.delay_minutes = newTotalDelay;
+    if (delay_reason) {
+      updates.delay_reason = delay_reason;
+    }
   }
 
   if (Object.keys(updates).length === 0) {
@@ -127,10 +149,13 @@ export async function PATCH(
   });
 
   if (updates.status) {
-    emitWhatsAppNotification(id, updates.status as string).catch((err) =>
-      console.error("[WA] Notification error:", err)
-    );
+    // TODO: Send status notification to customer via SMS or email
+  }
+
+  if (typeof delay_minutes === "number" && delay_minutes > 0) {
+    // TODO: Send delay notification to customer via SMS or email
   }
 
   return NextResponse.json({ ok: true, updates });
 }
+

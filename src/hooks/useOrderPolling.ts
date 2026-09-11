@@ -23,7 +23,7 @@ export function useOrderPolling(
 ): UseOrderPollingReturn {
   const [data, setData] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const retryCount = useRef(0);
   const prevStatus = useRef<string | null>(null);
   const { playAudioTone } = useAudioTone();
@@ -58,7 +58,7 @@ export function useOrderPolling(
 
   useEffect(() => {
     if (!token) return;
-    setLoading(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     poll().finally(() => setLoading(false));
     const id = setInterval(poll, intervalMs);
     return () => clearInterval(id);

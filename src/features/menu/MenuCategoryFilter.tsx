@@ -39,16 +39,16 @@ export function MenuCategoryFilter({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           aria-label="Search menu"
-          className="w-full bg-stone-950 border border-stone-800 rounded-2xl px-4 py-3 pl-10 text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner min-h-[44px]"
+          className="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 pl-10 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm min-h-[44px]"
         />
-        <div className="absolute left-3.5 top-3 text-stone-500 pointer-events-none">
+        <div className="absolute left-3.5 top-3 text-slate-400 pointer-events-none">
           <SearchIcon className="w-4 h-4" />
         </div>
         {search && (
           <button
             type="button"
             onClick={() => onSearchChange("")}
-            className="absolute right-3 top-2 text-stone-400 hover:text-white text-xs bg-stone-800 px-2 py-0.5 rounded-lg cursor-pointer"
+            className="absolute right-3 top-2 text-slate-400 hover:text-slate-600 text-xs bg-slate-100 px-2 py-0.5 rounded-lg cursor-pointer"
           >
             ✕
           </button>
@@ -62,10 +62,10 @@ export function MenuCategoryFilter({
             type="button"
             onClick={() => onCatChange("all")}
             aria-pressed={activeCat === "all"}
-            className={`px-4 py-2.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-amber-500/30 ${
+            className={`px-4 py-2.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 ${
               activeCat === "all"
-                ? "bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 shadow-md shadow-amber-500/30 font-black"
-                : "bg-stone-900 text-stone-300 hover:bg-stone-800 border border-stone-800"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-black"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
             <span aria-hidden="true"><FlameIcon className="w-3.5 h-3.5" /></span>
@@ -77,10 +77,10 @@ export function MenuCategoryFilter({
               key={c.id}
               onClick={() => onCatChange(c.id)}
               aria-pressed={c.id === activeCat}
-              className={`px-4 py-2.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-amber-500/30 ${
+              className={`px-4 py-2.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-95 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 ${
                 c.id === activeCat
-                  ? "bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 shadow-md shadow-amber-500/30 font-black"
-                  : "bg-stone-900 text-stone-300 hover:bg-stone-800 border border-stone-800"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-black"
+                  : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <span aria-hidden="true"><CategoryIcon name={c.name} /></span>

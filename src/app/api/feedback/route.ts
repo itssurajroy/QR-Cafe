@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-
 export async function POST(req: NextRequest) {
   let body: any;
   try {
@@ -39,6 +38,7 @@ export async function POST(req: NextRequest) {
       feedback: feedback?.trim() || "",
       compliments,
       submitted_at: new Date().toISOString(),
+      requires_manager_attention: rating <= 3,
     },
   });
 
@@ -46,5 +46,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: aErr.message }, { status: 500 });
   }
 
+  // Smart alert: 1-3 stars send private alert to manager
+  if (rating <= 3) {
+    // TODO: Send low rating alert via email or dashboard notification instead of WhatsApp
+  }
+
   return NextResponse.json({ ok: true, message: "Thank you for your feedback!" });
 }
+

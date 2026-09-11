@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "update_settings") {
-    const { name, currency, taxRate, address, phone } = data;
+    const { name, currency, taxRate, address, phone, upiId, upiQrUrl } = data;
     const updates: Record<string, any> = {};
 
     if (name !== undefined) updates.name = String(name).trim();
@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
     if (taxRate !== undefined) updates.tax_rate = Number(taxRate);
     if (address !== undefined) updates.address = String(address).trim() || null;
     if (phone !== undefined) updates.phone = String(phone).trim() || null;
+    if (upiId !== undefined) updates.upi_id = String(upiId).trim() || null;
+    if (upiQrUrl !== undefined) updates.upi_qr_url = String(upiQrUrl).trim() || null;
 
     const { error } = await admin
       .from("restaurants")
@@ -203,6 +205,8 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true, count: inserted?.length || 0, items: inserted });
   }
+
+
 
   return NextResponse.json({ error: "Unknown operation type" }, { status: 400 });
 }

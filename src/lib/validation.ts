@@ -31,6 +31,7 @@ export const createOrderSchema = z.object({
     .optional(),
   items: z.array(cartItemSchema).min(1, "Cart cannot be empty").max(50),
   payment_method: z.enum(["counter", "online"]).default("counter"),
+  reservation_code: z.string().regex(/^[A-Za-z0-9]{6}$/).optional(),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
@@ -50,4 +51,6 @@ export const paymentStatusEnum = z.enum(["unpaid", "paid", "refunded"]);
 export const patchOrderSchema = z.object({
   status: orderStatusEnum.optional(),
   payment_status: paymentStatusEnum.optional(),
+  delay_minutes: z.number().int().min(0).max(120).optional(),
+  delay_reason: sanitizedString(200).optional(),
 });

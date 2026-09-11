@@ -1,124 +1,76 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 
-const STATS = [
-  { value: 500, suffix: "+", label: "Cafés" },
-  { value: 2, suffix: "M+", label: "Orders Processed" },
-  { value: 10, prefix: "₹", suffix: "Cr+", label: "Revenue Tracked" },
-  { value: 4.9, suffix: "★", label: "Merchant Rating", decimals: 1 },
+const PILLS = [
+  "Instant QR Menu",
+  "Multi-station KDS",
+  "Stock & Recipes",
+  "Bluetooth KOT",
 ];
-
-function useAnimatedCounter(target: number, duration = 1500, decimals = 0) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-
-          const start = performance.now();
-          const animate = (now: number) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Number((eased * target).toFixed(decimals)));
-
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            }
-          };
-
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [target, duration, decimals]);
-
-  return { ref, count };
-}
-
-function Stat({
-  value,
-  prefix,
-  suffix,
-  label,
-  decimals,
-}: {
-  value: number;
-  prefix?: string;
-  suffix?: string;
-  label: string;
-  decimals?: number;
-}) {
-  const { ref, count } = useAnimatedCounter(value, 1500, decimals);
-
-  return (
-    <div ref={ref} className="text-center">
-      <p className="text-2xl font-bold text-white">
-        {prefix}
-        {count}
-        {suffix}
-      </p>
-      <p className="mt-1 text-sm text-slate-400">{label}</p>
-    </div>
-  );
-}
 
 export function Hero() {
   return (
-    <section className="bg-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="text-center">
-          <p className="text-sm text-slate-400">Trusted by 500+ cafés across India</p>
+    <section className="relative overflow-hidden bg-slate-50 pt-12 pb-14 sm:pt-16 sm:pb-20">
+      {/* Light ambient mesh background */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="absolute -top-40 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-indigo-200/40 via-violet-200/30 to-amber-200/20 blur-[120px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:32px_32px] opacity-40" />
+      </div>
 
-          <h1 className="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-            QR ordering for restaurants
-          </h1>
+      <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
+        {/* Eyebrow */}
+        <p className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-indigo-700">
+          <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
+          Next-Gen QR Ordering &amp; Kitchen OS
+        </p>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300">
-            One QR code. Your customers scan, browse the menu, and order. No app
-            downloads. No waiters needed.
-          </p>
+        {/* Headline */}
+        <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-6xl leading-[1.1]">
+          Run your café from one system.
+          <br />
+          <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-amber-600 bg-clip-text text-transparent">
+            QR ordering. Live kitchen. Real stock.
+          </span>
+        </h1>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/onboarding"
-              className="rounded-lg bg-indigo-600 px-6 py-3 font-medium text-white transition-colors hover:bg-indigo-700"
-            >
-              Start Free Trial
-            </Link>
-            <Link
-              href="/c/curry-leaf/t/T1"
-              className="rounded-lg border border-slate-600 px-6 py-3 font-medium text-slate-300 transition-colors hover:border-slate-400 hover:text-white"
-            >
-              See Live Demo
-            </Link>
-          </div>
+        {/* Sub-headline */}
+        <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-xl">
+          Customers scan, order, and pay from the table.
+          Kitchen gets tickets instantly. You control menu, stock, and
+          billing — all in one place.
+        </p>
+
+        {/* CTAs */}
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link
+            href="/onboarding"
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-8 py-4 text-base font-black text-white shadow-xl shadow-indigo-600/25 transition-all hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 cursor-pointer"
+          >
+            <span>Start 14-day free trial</span>
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+          <Link
+            href="#demo"
+            className="inline-flex w-full sm:w-auto items-center justify-center rounded-2xl border border-slate-300 bg-white px-8 py-4 text-base font-bold text-slate-700 shadow-sm transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
+          >
+            Watch live demo
+          </Link>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-8 sm:grid-cols-4">
-          {STATS.map((stat) => (
-            <Stat key={stat.label} {...stat} />
+        {/* Trust line */}
+        <p className="mt-4 text-xs font-medium text-slate-500">
+          No credit card required · Live in 30 minutes · Cancel anytime
+        </p>
+
+        {/* Micro feature pills */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          {PILLS.map((pill) => (
+            <span
+              key={pill}
+              className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm"
+            >
+              {pill}
+            </span>
           ))}
-        </div>
-
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500">
-          <span>GST Compliant</span>
-          <span>Made in India</span>
-          <span>UPI Payments</span>
-          <span>24/7 Support</span>
         </div>
       </div>
     </section>

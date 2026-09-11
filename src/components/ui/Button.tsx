@@ -1,6 +1,6 @@
 /**
  * QR Café UI Library — Button
- * Reusable button replacing all inline amber/stone button Tailwind classes.
+ * Reusable button replacing all inline indigo/slate button Tailwind classes.
  */
 
 import { forwardRef } from "react";
@@ -15,19 +15,19 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 font-black rounded-xl transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950";
+  "inline-flex items-center justify-center gap-2 font-black rounded-xl transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
 const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
-    "bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 shadow-md shadow-amber-500/25",
+    "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-md shadow-indigo-600/25",
   ghost:
-    "bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700",
+    "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200",
   danger:
-    "bg-red-950 hover:bg-red-900 text-red-300 border border-red-800",
+    "bg-red-50 hover:bg-red-100 text-red-700 border border-red-200",
   outline:
-    "bg-transparent hover:bg-stone-900 text-stone-300 border border-stone-700",
+    "bg-transparent hover:bg-slate-100 text-slate-700 border border-slate-300",
   success:
-    "bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800",
+    "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200",
 };
 
 const SIZES: Record<NonNullable<ButtonProps["size"]>, string> = {

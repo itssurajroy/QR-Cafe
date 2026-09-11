@@ -5,7 +5,7 @@ Built with Next.js 16 (App Router) + TypeScript + Tailwind + Supabase.
 
 ## Features (full SaaS)
 - **Multi-tenant by subdomain:** each café gets its own address `<slug>.qrcafe.app`
-  (locally `<slug>.lvh.me`). Customer menu is served at the café subdomain root.
+  (locally `<slug>.localhost`). Customer menu is served at the café subdomain root.
 - **Customer:** open the café subdomain (or scan a table QR) → pick a table → browse menu
   → cart → place order (pay at counter) → live status page.
 - **KDS:** real-time kitchen board (realtime + offline cache), status transitions, UNPAID badge.
@@ -35,13 +35,13 @@ Built with Next.js 16 (App Router) + TypeScript + Tailwind + Supabase.
     - owner/staff: `role`, `restaurant_id` = one of the seeded cafés
   4. `npm install && npm run dev` → open `http://localhost:3000`.
 
-### Local subdomain dev (lvh.me)
-Subdomains need DNS to resolve in production, but for local development use **`lvh.me`**
-(or `*.localhost`), which resolves to `127.0.0.1` with zero configuration:
-- Apex / super-admin console: `http://lvh.me:3000/` (or `http://localhost:3000/`)
-- Curry Leaf menu: `http://curry-leaf.lvh.me:3000/`
-- Brews & Bytes menu: `http://brews-bytes.lvh.me:3000/`
-- Table deep-link still works: `http://curry-leaf.lvh.me:3000/t/<qr_token>`
+### Local subdomain dev (localhost)
+Subdomains need DNS to resolve in production, but for local development use
+**`*.localhost`**, which resolves to `127.0.0.1` with zero configuration:
+- Apex / super-admin console: `http://localhost:3000/`
+- Curry Leaf menu: `http://curry-leaf.localhost:3000/`
+- Brews & Bytes menu: `http://brews-bytes.localhost:3000/`
+- Table deep-link still works: `http://curry-leaf.localhost:3000/t/<qr_token>`
 
 The host is parsed in `src/proxy.ts` (Next 16 renamed `middleware` → `proxy`) which sets
 the `x-cafe-slug` request header; Server Components read it to scope data.

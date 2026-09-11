@@ -29,7 +29,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Hard redirect to dashboard
       window.location.href = data.destination || "/admin";
     } catch {
       setError("Network error occurred during login. Please retry.");
@@ -38,24 +37,22 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 text-stone-100 flex items-center justify-center p-6 selection:bg-amber-500 selection:text-black">
+    <div className="landing-page min-h-screen bg-slate-50 flex items-center justify-center p-6 selection:bg-indigo-600 selection:text-white">
       <div className="w-full max-w-md">
-        {/* Logo / Branding */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-2xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-indigo-600/20 group-hover:scale-105 transition-transform">
               ☕
             </div>
-            <span className="text-2xl font-black tracking-tight text-white">QR Café</span>
+            <span className="text-2xl font-black tracking-tight text-slate-900">QR Café</span>
           </Link>
-          <p className="text-stone-400 text-sm mt-2">Sign in to your staff or admin terminal</p>
+          <p className="text-slate-500 text-sm mt-2">Sign in to your staff or admin terminal</p>
         </div>
 
-        {/* Login Glassmorphism Box */}
-        <div className="bg-stone-900/80 backdrop-blur-xl border border-stone-800/90 rounded-3xl p-8 shadow-2xl space-y-5">
+        <div className="bg-white backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-lg space-y-5">
           <form onSubmit={login} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                 Email Address
               </label>
               <input
@@ -64,12 +61,12 @@ export default function LoginPage() {
                 placeholder="admin@qrcafe.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-stone-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                 Password
               </label>
               <input
@@ -78,13 +75,12 @@ export default function LoginPage() {
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-sm text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
               />
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-800/80 text-red-300 text-xs font-medium flex items-center gap-2">
-                <span>⚠️</span>
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
                 <span>{error}</span>
               </div>
             )}
@@ -92,20 +88,19 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black text-sm transition-all disabled:opacity-50 shadow-lg shadow-amber-500/20 active:scale-[0.99] cursor-pointer mt-2"
+              className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm transition-all disabled:opacity-50 shadow-lg shadow-indigo-600/20 active:scale-[0.99] cursor-pointer mt-2"
             >
-              {loading ? "Authenticating…" : "Sign In to Terminal &rarr;"}
+              {loading ? "Authenticating…" : "Sign In →"}
             </button>
           </form>
 
-          {/* Back link */}
-          <div className="pt-3 border-t border-stone-800/80 text-center">
-            <Link href="/" className="text-xs font-medium text-amber-400 hover:text-amber-300 underline underline-offset-4 transition-colors">
-              &larr; Back to Home
+          <div className="pt-3 border-t border-slate-200 text-center">
+            <Link href="/" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline underline-offset-4 transition-colors">
+              ← Back to Home
             </Link>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -14,7 +14,7 @@ export default async function PosPage() {
   }
 
   const db = createSupabaseAdmin();
-  const [{ data: restaurant }, { data: categories }, { data: items }, { data: tables }] =
+  const [{ data: restaurant }, { data: categories }, { data: items }, { data: tables }, { data: reservations }] =
     await Promise.all([
       db.from("restaurants").select("*").eq("id", user.restaurantId).single(),
       db
@@ -32,6 +32,12 @@ export default async function PosPage() {
         .select("id, restaurant_id, label, seats, qr_token, active")
         .eq("restaurant_id", user.restaurantId)
         .order("label", { ascending: true }),
+      db
+        .from("table_reservations")
+        .select("table_ids, starts_at, ends_at, status")
+        .eq("restaurant_id", user.restaurantId)
+        .in("status", ["confirmed", "pending"])
+        .gte("starts_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
     ]);
 
   if (!canOrder(restaurant as any)) {
@@ -64,6 +70,7 @@ export default async function PosPage() {
       categories={categories ?? []}
       items={items ?? []}
       tables={tables ?? []}
+      reservations={reservations ?? []}
     />
   );
 }

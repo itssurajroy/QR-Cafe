@@ -20,7 +20,7 @@ export function MenuLightbox({
 
   return (
     <div
-      className="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-4"
       onClick={onClose}
     >
       <div
@@ -30,14 +30,14 @@ export function MenuLightbox({
         <img
           src={item.image_url || getItemImage(item.name, item.is_veg)}
           alt={item.name}
-          className="w-full rounded-3xl object-cover shadow-2xl border border-stone-800"
+          className="w-full rounded-3xl object-cover shadow-2xl border border-slate-200"
           style={{ maxHeight: "60vh" }}
         />
         <div className="space-y-2">
           <div className="flex items-start justify-between">
             <div>
               <h3
-                className="text-lg font-black text-white"
+                className="text-lg font-black text-slate-900"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 {item.name}
@@ -46,24 +46,24 @@ export function MenuLightbox({
                 <span
                   className={`w-3 h-3 rounded-sm border-2 ${
                     item.is_veg
-                      ? "border-emerald-500 bg-emerald-950"
-                      : "border-red-500 bg-red-950"
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-red-500 bg-red-50"
                   }`}
                 ></span>
-                <span className="text-xs text-stone-400">
+                <span className="text-xs text-slate-600">
                   {item.is_veg ? "Pure Veg" : "Non-Veg"}
                 </span>
-                <span className="text-xs text-stone-500">
+                <span className="text-xs text-slate-500">
                   • ⏱ {getPrepTime(item.name)}
                 </span>
               </div>
               {item.description && (
-                <p className="text-sm text-stone-400 mt-1.5 leading-relaxed">
+                <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">
                   {item.description}
                 </p>
               )}
             </div>
-            <span className="text-xl font-black text-amber-400 font-mono">
+            <span className="text-xl font-black text-indigo-600 font-mono">
               {paise(item.price_paise)}
             </span>
           </div>
@@ -71,14 +71,14 @@ export function MenuLightbox({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border border-stone-700 bg-stone-800 text-stone-300 font-bold text-sm cursor-pointer"
+              className="flex-1 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold text-sm cursor-pointer"
             >
               Close
             </button>
             <button
               type="button"
               onClick={() => onAddClick(item)}
-              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 font-black text-sm cursor-pointer shadow-lg shadow-amber-500/30"
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-black text-sm cursor-pointer shadow-lg shadow-indigo-600/30"
             >
               {tAdd} to Cart
             </button>

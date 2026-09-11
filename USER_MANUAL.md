@@ -41,14 +41,15 @@ Smartphone Camera                 Next.js 16 + Supabase               Kitchen & 
 
 ---
 
-## 👨‍🍳 Kitchen Display (KDS) Operating Procedures (`/kds`)
+## 👨‍🍳 Kitchen Display (KDS) Operating Procedures (`/pos` → Kitchen Tab)
 
+- **Access**: Open `/pos` and switch to the **🔥 Kitchen** tab (or navigate to `/kds` which automatically redirects to `/pos`).
 - **New Ticket**: Appears instantly with audio announcement (*"New Order at Table 03!"*).
 - **Urgency Visuals**:
-  - `🟢 Green`: Ordered < 8 mins ago.
-  - `🟡 Amber`: Ordered 8–15 mins ago (High priority).
+  - `🟢 Green`: Ordered < 5 mins ago.
+  - `🟡 Amber`: Ordered 5–15 mins ago (High priority).
   - `🔴 Red`: Ordered > 15 mins ago (Urgent expediting).
-- **Status Progression**: Tap **"Start Cooking"** $\to$ Tap **"Mark Ready"** $\to$ Tap **"Served"**.
+- **Status Progression**: Tap **"Accept Order"** $\to$ Tap **"Start Cooking"** $\to$ Tap **"Mark Ready"** $\to$ Tap **"Served"**.
 
 ---
 

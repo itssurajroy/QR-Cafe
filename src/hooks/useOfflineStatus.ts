@@ -8,14 +8,11 @@
 import { useState, useEffect } from "react";
 
 export function useOfflineStatus(): boolean {
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(() =>
+    typeof navigator !== "undefined" ? !navigator.onLine : false
+  );
 
   useEffect(() => {
-    // Set initial state (safe for SSR — navigator may not be defined)
-    if (typeof navigator !== "undefined") {
-      setIsOffline(!navigator.onLine);
-    }
-
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
 

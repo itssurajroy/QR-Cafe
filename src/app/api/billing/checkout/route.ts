@@ -42,14 +42,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 2. Single Plan ID (₹799/month All-in-One Unlimited)
-  const planId = process.env.RAZORPAY_PLAN_ID_PRO || process.env.RAZORPAY_PLAN_ID || "plan_qrcafe_799";
+  // 2. Single Plan ID (₹999/month QR Café, ₹9,999/year)
+  const planId = process.env.RAZORPAY_PLAN_ID_PRO || process.env.RAZORPAY_PLAN_ID || "plan_qrcafe_999";
 
   // 3. Create Subscription
   const sub = await razorpay.createSubscription(customerId || "cust_guest", planId, {
     restaurant_id: rest.id,
     slug: rest.slug,
-    plan_name: "All-in-One Pro (₹799/mo)",
+    plan_name: "QR Café (₹999/mo)",
   });
 
   if (!sub || !sub.id) {

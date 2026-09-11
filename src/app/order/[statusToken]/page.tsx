@@ -2,14 +2,53 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircleIcon, SparklesIcon, CoffeeIcon } from "@/components/Icons";
+import {
+  CheckCircleIcon,
+  SparklesIcon,
+  CoffeeIcon,
+  ClipboardListIcon,
+  ChefHatIcon,
+  FlameIcon,
+  BellIcon,
+  CreditCardIcon,
+  ClockIcon,
+  TrophyIcon,
+  StarIcon,
+  ArrowRightIcon,
+  MessageCircleIcon,
+} from "@/components/Icons";
 
 const STEPS = [
-  { key: "pending", label: "Order Placed", desc: "Ticket sent to kitchen", icon: "📝" },
-  { key: "confirmed", label: "Accepted", desc: "Chef reviewed & queued", icon: "👨‍🍳" },
-  { key: "preparing", label: "Cooking / Brewing", desc: "Freshly preparing at line", icon: "🔥" },
-  { key: "ready", label: "Ready to Serve", desc: "Plated & ready for pickup", icon: "🔔" },
-  { key: "served", label: "Delivered", desc: "Served at your table", icon: "✨" },
+  {
+    key: "pending",
+    label: "Order Placed",
+    desc: "Ticket sent to kitchen",
+    renderIcon: (cls: string) => <ClipboardListIcon className={cls} />,
+  },
+  {
+    key: "confirmed",
+    label: "Accepted",
+    desc: "Chef reviewed & queued",
+    renderIcon: (cls: string) => <ChefHatIcon className={cls} />,
+  },
+  {
+    key: "preparing",
+    label: "Cooking",
+    desc: "Freshly preparing at line",
+    renderIcon: (cls: string) => <FlameIcon className={cls} />,
+  },
+  {
+    key: "ready",
+    label: "Ready",
+    desc: "Plated & ready for pickup",
+    renderIcon: (cls: string) => <BellIcon className={cls} />,
+  },
+  {
+    key: "served",
+    label: "Served",
+    desc: "Served at your table",
+    renderIcon: (cls: string) => <SparklesIcon className={cls} />,
+  },
 ] as const;
 
 function paise(n: number) {
@@ -81,6 +120,7 @@ export default function OrderStatusPage({
 
   // Status change sound notification
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!data?.status || !prevStatus || data.status === prevStatus) {
       if (data?.status) setPrevStatus(data.status);
       return;
@@ -101,7 +141,7 @@ export default function OrderStatusPage({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.status]);
 
-  // Countdown timer based on status
+  // Countdown timer based on status + kitchen delay
   useEffect(() => {
     if (!data?.status || !data?.created_at) return;
     const statusCountdowns: Record<string, number> = {
@@ -111,7 +151,8 @@ export default function OrderStatusPage({
       ready: 0,
       served: 0,
     };
-    const base = statusCountdowns[data.status] ?? 0;
+    const delayExtra = (data.delay_minutes || 0) * 60;
+    const base = (statusCountdowns[data.status] ?? 0) + delayExtra;
     if (base === 0) { setCountdownSeconds(null); return; }
     const startTime = new Date(data.created_at).getTime();
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -119,7 +160,7 @@ export default function OrderStatusPage({
     setCountdownSeconds(remaining);
     const iv = setInterval(() => setCountdownSeconds(prev => prev !== null && prev > 0 ? prev - 1 : 0), 1000);
     return () => clearInterval(iv);
-  }, [data?.status, data?.created_at]);
+  }, [data?.status, data?.created_at, data?.delay_minutes]);
 
   // Live Timer based on created_at
   useEffect(() => {
@@ -173,16 +214,19 @@ export default function OrderStatusPage({
 
   if (error) {
     return (
-      <main className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6 text-center">
-        <div className="max-w-md bg-stone-900 border border-stone-800 rounded-3xl p-8 shadow-2xl space-y-4">
-          <p className="text-4xl">🔍</p>
-          <h2 className="text-xl font-bold text-white">Order Not Found</h2>
-          <p className="text-sm text-stone-400">{error}</p>
+      <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-6 text-center">
+        <div className="max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+            <CoffeeIcon className="w-7 h-7" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900">Order Not Found</h2>
+          <p className="text-xs text-slate-600 leading-relaxed">{error}</p>
           <Link
             href="/"
-            className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs inline-block shadow-md shadow-amber-500/20"
+            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-black text-xs inline-flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer min-h-[44px]"
           >
-            Return to Home
+            <span>Return to Home</span>
+            <ArrowRightIcon className="w-4 h-4" />
           </Link>
         </div>
       </main>
@@ -191,10 +235,10 @@ export default function OrderStatusPage({
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6">
+      <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-6">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-xs text-stone-400 font-mono">Syncing live order status…</p>
+          <p className="text-xs text-slate-500 font-mono">Syncing live order status…</p>
         </div>
       </main>
     );
@@ -206,26 +250,26 @@ export default function OrderStatusPage({
   const progressPercent = Math.min(100, Math.round(((currentIdx + 1) / STEPS.length) * 100));
 
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 p-4 sm:p-6 flex flex-col items-center justify-center font-sans antialiased selection:bg-amber-500 selection:text-black">
-      <div className="max-w-md w-full bg-stone-900/90 border border-stone-800/90 rounded-3xl p-6 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur-xl">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 flex flex-col items-center justify-start overflow-y-auto font-sans antialiased selection:bg-indigo-600 selection:text-white">
+      <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-5 my-auto relative overflow-hidden backdrop-blur-xl">
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600"></div>
 
         {/* Top Header with Table Badge & Payment Pill */}
-        <div className="flex items-start justify-between border-b border-stone-800 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-200 pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-black text-amber-400 uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
                 Live Kitchen Sync
               </span>
-              <span className="text-xs text-stone-400 font-mono">
+              <span className="text-xs text-slate-500 font-mono">
                 ⏱ {formatElapsed(elapsedSeconds)}
               </span>
             </div>
-            <h1 className="text-2xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-2xl font-black text-slate-900 font-mono tracking-tight">
               Order #{data.order_number}
             </h1>
-            <p className="text-xs text-stone-400 mt-0.5">
-              Table <span className="text-amber-400 font-bold font-mono">{data.table}</span>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Table <span className="text-indigo-600 font-bold font-mono">{data.table}</span>
             </p>
           </div>
 
@@ -233,13 +277,13 @@ export default function OrderStatusPage({
             <span
               className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider inline-block border ${
                 data.payment_status === "paid"
-                  ? "bg-emerald-950/80 border-emerald-700 text-emerald-400"
-                  : "bg-amber-950/80 border-amber-700 text-amber-400"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  : "bg-amber-50 border-amber-200 text-amber-700"
               }`}
             >
               {data.payment_status === "paid" ? "Paid in Cash ✓" : "Cash at Counter"}
             </span>
-            <div className="text-xs font-mono text-stone-500">
+            <div className="text-xs font-mono text-slate-400">
               {new Date(data.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
             </div>
           </div>
@@ -248,8 +292,8 @@ export default function OrderStatusPage({
         {/* Customer Payment Required Alert Banner (When Food Served & Unpaid) */}
         {data.status === "served" && data.payment_status === "unpaid" && (
           <div className="p-4 rounded-3xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 text-white shadow-2xl space-y-2 text-center animate-pulse border-2 border-amber-300">
-            <div className="w-10 h-10 rounded-2xl bg-white text-stone-950 flex items-center justify-center text-xl font-black mx-auto shadow-md">
-              💳
+            <div className="w-10 h-10 rounded-2xl bg-white text-slate-900 flex items-center justify-center mx-auto shadow-md">
+              <CreditCardIcon className="w-5 h-5 text-red-600" />
             </div>
             <div>
               <h3 className="text-base font-black uppercase tracking-tight">
@@ -262,28 +306,43 @@ export default function OrderStatusPage({
           </div>
         )}
 
+        {/* Kitchen Preparation Delay Alert Banner */}
+        {data.delay_minutes > 0 && !isOrderServed && (
+          <div className="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 text-slate-900 shadow-xl space-y-1 text-left animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-5 h-5 text-amber-600 animate-bounce" />
+              <h3 className="text-sm font-black text-amber-700 uppercase tracking-wider">
+                Kitchen Delay: +{data.delay_minutes} Minutes
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 pl-7 leading-relaxed">
+              {data.delay_reason ? `Notice: ${data.delay_reason}.` : "Chef requested extra time to ensure fresh quality preparation."}
+            </p>
+          </div>
+        )}
+
         {/* Current State Highlight Banner */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-stone-950 to-stone-950 border border-amber-500/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 via-white to-white border border-indigo-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500 text-stone-950 flex items-center justify-center text-xl shadow-lg shadow-amber-500/20 font-black animate-pulse">
-              {currentStep.icon}
+            <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 font-black animate-pulse">
+              {currentStep.renderIcon("w-6 h-6")}
             </div>
             <div>
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider block">
                 Current Status
               </span>
-              <h3 className="text-base font-black text-white">{currentStep.label}</h3>
-              <p className="text-xs text-stone-400">{currentStep.desc}</p>
+              <h3 className="text-base font-black text-slate-900">{currentStep.label}</h3>
+              <p className="text-xs text-slate-600">{currentStep.desc}</p>
             </div>
           </div>
         </div>
 
-        {/* 4-Step Animated Progress Stepper */}
+        {/* 5-Step Animated Progress Stepper */}
         <div className="space-y-4">
           {/* Step circles with connecting line */}
           <div className="flex items-center justify-between relative">
             {/* Background connecting line */}
-            <div className="absolute top-5 left-5 right-5 h-0.5 bg-stone-800 z-0"></div>
+            <div className="absolute top-5 left-5 right-5 h-0.5 bg-slate-200 z-0"></div>
             {/* Active progress line */}
             <div
               className="absolute top-5 left-5 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400 z-0 transition-all duration-700"
@@ -295,17 +354,17 @@ export default function OrderStatusPage({
               const isCurrent = idx === currentIdx;
               return (
                 <div key={s.key} className="flex flex-col items-center gap-1.5 relative z-10">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-base transition-all duration-300 ${
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isCompleted
-                      ? "bg-emerald-500 text-stone-950 shadow-lg shadow-emerald-500/30"
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
                       : isCurrent
-                      ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/30 animate-glow-pulse scale-110"
-                      : "bg-stone-900 border-2 border-stone-700 text-stone-600"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 animate-glow-pulse scale-110"
+                      : "bg-slate-100 border-2 border-slate-300 text-slate-400"
                   }`}>
-                    {isCompleted ? "✓" : s.icon}
+                    {isCompleted ? <CheckCircleIcon className="w-5 h-5" /> : s.renderIcon("w-5 h-5")}
                   </div>
-                  <span className={`text-xs font-bold text-center max-w-12 leading-tight ${
-                    isCurrent ? "text-amber-400" : isCompleted ? "text-emerald-400" : "text-stone-600"
+                  <span className={`text-[11px] font-bold text-center max-w-12 leading-tight ${
+                    isCurrent ? "text-indigo-600" : isCompleted ? "text-emerald-500" : "text-slate-500"
                   }`}>
                     {s.label}
                   </span>
@@ -316,10 +375,10 @@ export default function OrderStatusPage({
 
           {/* Countdown timer */}
           {countdownSeconds !== null && countdownSeconds > 0 && (
-            <div className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-amber-950/30 border border-amber-800/50">
-              <span className="text-amber-400 text-sm">⏳</span>
-              <span className="text-xs text-stone-400">Est. ready in</span>
-              <span className="text-sm font-black text-amber-400 font-mono">
+            <div className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-amber-50 border border-amber-200">
+              <span className="text-amber-600 text-sm">⏳</span>
+              <span className="text-xs text-slate-500">Est. ready in</span>
+              <span className="text-sm font-black text-amber-600 font-mono">
                 {Math.floor(countdownSeconds / 60)}:{String(countdownSeconds % 60).padStart(2, "0")}
               </span>
             </div>
@@ -331,68 +390,58 @@ export default function OrderStatusPage({
           )}
         </div>
 
-        {/* WhatsApp Share + Loyalty Points (when served) */}
+        {/* Loyalty Points (when served) */}
         {isOrderServed && (
           <div className="space-y-3">
             {/* Loyalty Points Earned */}
-            <div className="p-3 rounded-2xl bg-amber-950/40 border border-amber-800/50 flex items-center justify-between animate-fade-in-up">
+            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between animate-fade-in-up">
               <div className="flex items-center gap-2">
                 <span className="text-xl">🏆</span>
                 <div>
-                  <p className="text-xs font-black text-white">Loyalty Points Earned!</p>
-                  <p className="text-xs text-stone-400">Redeemable on your next visit</p>
+                  <p className="text-xs font-black text-slate-900">Loyalty Points Earned!</p>
+                  <p className="text-xs text-slate-500">Redeemable on your next visit</p>
                 </div>
               </div>
-              <span className="text-lg font-black text-amber-400 font-mono">+{Math.floor((data.total_paise || 0) / 10000)} pts</span>
+              <span className="text-lg font-black text-amber-600 font-mono">+{Math.floor((data.total_paise || 0) / 10000)} pts</span>
             </div>
 
-            {/* WhatsApp Share */}
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(`🍽️ My Order Status\nOrder #${data.order_number} at Table ${data.table}\nStatus: Served ✅\nTotal: ₹${((data.total_paise||0)/100).toFixed(0)}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 rounded-2xl bg-[#25d366] hover:bg-[#1aab52] text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shadow-lg"
-            >
-              <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-              Share Order Status on WhatsApp
-            </a>
           </div>
         )}
 
         {/* Itemized Order Recap */}
         {data.items && data.items.length > 0 && (
-          <div className="bg-stone-950/80 border border-stone-800 rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-stone-400">
+          <div className="bg-slate-100 border border-slate-200 rounded-2xl p-4 space-y-2">
+            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-500">
               <span>Itemized Order</span>
               <span>{data.items.length} dishes</span>
             </div>
-            <div className="space-y-1.5 pt-1">
+            <div className="space-y-1.5 pt-1 max-h-48 overflow-y-auto pr-1">
               {data.items.map((it: any) => (
                 <div key={it.id} className="flex justify-between items-center text-xs">
-                  <span className="text-stone-200 font-medium">
-                    {it.item_name} <span className="text-amber-400 font-bold font-mono">×{it.quantity}</span>
+                  <span className="text-slate-700 font-medium">
+                    {it.item_name} <span className="text-indigo-600 font-bold font-mono">×{it.quantity}</span>
                   </span>
-                  <span className="text-stone-400 font-mono">{paise(it.line_total_paise)}</span>
+                  <span className="text-slate-500 font-mono">{paise(it.line_total_paise)}</span>
                 </div>
               ))}
             </div>
-            <div className="border-t border-stone-800 pt-2 flex justify-between items-center text-xs font-black">
-              <span className="text-stone-300">Total</span>
-              <span className="text-amber-400 font-mono text-sm">{paise(data.total_paise)}</span>
+            <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-xs font-black">
+              <span className="text-slate-600">Total</span>
+              <span className="text-indigo-600 font-mono text-sm">{paise(data.total_paise)}</span>
             </div>
           </div>
         )}
 
         {/* Re-Open Feedback CTA Banner when Order Complete */}
         {isOrderServed && (
-          <div className="bg-gradient-to-r from-amber-500/15 via-stone-900 to-amber-500/15 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-indigo-50 via-white to-indigo-50 border border-indigo-200 rounded-2xl p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xl">🌟</span>
               <div>
                 <span className="text-xs font-black text-white block">
                   {submittedFeedback ? "Feedback Submitted ✓" : "Enjoyed your meal?"}
                 </span>
-                <span className="text-xs text-stone-400">
+                <span className="text-xs text-slate-500">
                   {submittedFeedback ? "Thank you! Rate us on Google Reviews." : "Tap to rate and review your experience."}
                 </span>
               </div>
@@ -400,7 +449,7 @@ export default function OrderStatusPage({
             <button
               type="button"
               onClick={() => setShowFeedbackModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs cursor-pointer active:scale-95 transition-all shadow-sm"
+              className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs cursor-pointer active:scale-95 transition-all shadow-sm min-h-[44px]"
             >
               {submittedFeedback ? "Google Review" : "Rate ★"}
             </button>
@@ -408,17 +457,17 @@ export default function OrderStatusPage({
         )}
 
         {/* Bottom Actions */}
-        <div className="border-t border-stone-800 pt-4 space-y-3 text-center">
+        <div className="border-t border-slate-200 pt-4 space-y-3 text-center">
           {data.qr_token && (
             <Link
               href={`/t/${data.qr_token}`}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs inline-block shadow-lg shadow-amber-500/20 transition-all active:scale-95 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-black text-xs flex items-center justify-center shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer min-h-[44px]"
             >
               + Add More Dishes to Table {data.table} &rarr;
             </Link>
           )}
 
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-slate-500">
             Live kitchen status updates automatically as your order is prepared.
           </p>
         </div>
@@ -434,7 +483,7 @@ export default function OrderStatusPage({
           }}
         >
           <div
-            className="w-full max-w-sm bg-stone-900 border-2 border-amber-500/40 rounded-3xl p-6 space-y-4 shadow-2xl relative text-center animate-in zoom-in-95 duration-300"
+            className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white border-2 border-indigo-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl relative text-center animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Close Cross */}
@@ -444,19 +493,19 @@ export default function OrderStatusPage({
                 setShowFeedbackModal(false);
                 setDismissedModal(true);
               }}
-              className="absolute top-4 right-4 w-7 h-7 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white text-xs flex items-center justify-center cursor-pointer transition-colors"
+              className="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-white text-xs flex items-center justify-center cursor-pointer transition-colors"
             >
               ✕
             </button>
 
             {!submittedFeedback ? (
               <form onSubmit={handleFeedbackSubmit} className="space-y-4 pt-1">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-stone-950 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/25">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-indigo-600/25">
                   <SparklesIcon className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-white">How was your meal?</h3>
-                  <p className="text-xs text-stone-400 mt-0.5">Order #{data.order_number} is completed!</p>
+                  <h3 className="text-lg font-black text-slate-900">How was your meal?</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Order #{data.order_number} is completed!</p>
                 </div>
 
                 {/* 5-Star Rating Buttons */}
@@ -467,7 +516,7 @@ export default function OrderStatusPage({
                       key={star}
                       onClick={() => setRating(star)}
                       className={`text-3xl transition-transform active:scale-125 cursor-pointer ${
-                        star <= rating ? "text-amber-400 scale-110" : "text-stone-700 hover:text-stone-500"
+                        star <= rating ? "text-amber-400 scale-110" : "text-slate-300 hover:text-slate-400"
                       }`}
                     >
                       ★
@@ -492,8 +541,8 @@ export default function OrderStatusPage({
                         onClick={() => toggleCompliment(tag)}
                         className={`text-xs font-bold px-3 py-1 rounded-full border transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-amber-500 text-stone-950 border-amber-400 font-extrabold shadow-sm scale-105"
-                            : "bg-stone-950 border-stone-800 text-stone-300 hover:border-stone-700"
+                            ? "bg-indigo-600 text-white border-indigo-500 font-extrabold shadow-sm scale-105"
+                            : "bg-slate-100 border-slate-200 text-slate-600 hover:border-slate-300"
                         }`}
                       >
                         {tag}
@@ -507,12 +556,12 @@ export default function OrderStatusPage({
                   value={feedbackText}
                   maxLength={300}
                   onChange={(e) => setFeedbackText(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 min-h-[65px] resize-none"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 min-h-[65px] resize-none"
                 />
 
                 {/* Direct Google Reviews Callout if 4 or 5 stars */}
                 {rating >= 4 && (
-                  <div className="bg-stone-950/80 border border-amber-500/30 rounded-2xl p-3 text-center space-y-1.5">
+                  <div className="bg-slate-100 border border-amber-200 rounded-2xl p-3 text-center space-y-1.5">
                     <p className="text-xs text-amber-300 font-bold">
                       Loved our food & service?
                     </p>
@@ -520,7 +569,7 @@ export default function OrderStatusPage({
                       href={data.google_review_url || `https://www.google.com/search?q=${encodeURIComponent((data.restaurant_name || "Cafe") + " reviews")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-white text-stone-900 font-black text-xs hover:bg-stone-100 transition-all shadow-md cursor-pointer"
+                      className="inline-flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-white text-slate-900 font-black text-xs hover:bg-slate-50 transition-all shadow-md cursor-pointer"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -540,14 +589,14 @@ export default function OrderStatusPage({
                       setShowFeedbackModal(false);
                       setDismissedModal(true);
                     }}
-                    className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer border border-slate-300"
                   >
                     Maybe Later
                   </button>
                   <button
                     type="submit"
                     disabled={submittingFeedback}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs transition-all shadow-md shadow-amber-500/25 active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-black text-xs transition-all shadow-md shadow-indigo-600/25 active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {submittingFeedback ? "Submitting…" : "Submit Review →"}
                   </button>
@@ -557,14 +606,14 @@ export default function OrderStatusPage({
               <div className="py-6 space-y-4">
                 <CheckCircleIcon className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
                 <div>
-                  <h3 className="text-lg font-black text-white">Thank You for Dining With Us!</h3>
-                  <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                  <h3 className="text-lg font-black text-slate-900">Thank You for Dining With Us!</h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Your review has been shared with the kitchen team.
                   </p>
                 </div>
 
                 {/* Google Reviews CTA Banner after submitting */}
-                <div className="bg-stone-950 border border-stone-800 rounded-2xl p-4 space-y-2">
+                <div className="bg-slate-100 border border-slate-200 rounded-2xl p-4 space-y-2">
                   <p className="text-xs font-bold text-amber-300">
                     Help other food lovers find {data.restaurant_name || "us"}!
                   </p>
@@ -572,7 +621,7 @@ export default function OrderStatusPage({
                     href={data.google_review_url || `https://www.google.com/search?q=${encodeURIComponent((data.restaurant_name || "Cafe") + " reviews")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-stone-950 font-black text-xs hover:bg-stone-100 transition-all shadow-md"
+                    className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-slate-900 font-black text-xs hover:bg-slate-50 transition-all shadow-md"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -587,7 +636,7 @@ export default function OrderStatusPage({
                 <button
                   type="button"
                   onClick={() => setShowFeedbackModal(false)}
-                  className="text-xs text-stone-500 hover:text-stone-300 font-bold pt-2 cursor-pointer"
+                  className="text-xs text-slate-400 hover:text-slate-600 font-bold pt-2 cursor-pointer"
                 >
                   Close
                 </button>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CoffeeIcon, SparklesIcon, CheckCircleIcon, QrCodeIcon, UtensilsIcon } from "@/components/Icons";
+import { CoffeeIcon } from "@/components/Icons";
 
 const PRESET_OPTIONS = [
   {
@@ -36,7 +36,6 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  // Step 1: Café Identity & Business Details
   const [cafeName, setCafeName] = useState("");
   const [slug, setSlug] = useState("");
   const [currency, setCurrency] = useState("INR");
@@ -49,11 +48,9 @@ export default function OnboardingPage() {
   const [taxRate, setTaxRate] = useState<number>(5);
   const [accentColor, setAccentColor] = useState("#f59e0b");
 
-  // Step 2: Seating & Starter Menu
   const [tableCount, setTableCount] = useState(6);
   const [preset, setPreset] = useState<"coffee" | "bistro" | "fastfood" | "custom">("coffee");
 
-  // Step 3: Owner Auth & Launch
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPassword, setOwnerPassword] = useState("");
 
@@ -106,7 +103,6 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Auto-login manager
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,22 +124,22 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between font-sans selection:bg-amber-500 selection:text-black">
-      {/* Top Header */}
-      <header className="border-b border-stone-800/80 bg-stone-900/60 backdrop-blur-md px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+    <div className="landing-page min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-600 selection:text-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur-md">
+        <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-lg shadow-md shadow-amber-500/20">
+            <div className="w-9 h-9 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-600/20">
               <CoffeeIcon className="w-5 h-5" />
             </div>
-            <span className="font-extrabold text-white text-base tracking-tight">QR Café Platform</span>
+            <span className="font-extrabold text-slate-900 text-base tracking-tight">QR Café</span>
           </Link>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs text-stone-400 hidden sm:inline">Already registered?</span>
+            <span className="text-xs text-slate-500 hidden sm:inline">Already registered?</span>
             <Link
               href="/login"
-              className="text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl bg-amber-500/10"
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl bg-indigo-50"
             >
               Log In
             </Link>
@@ -157,58 +153,58 @@ export default function OnboardingPage() {
           <div className="flex items-center gap-2">
             <span
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                step >= 1 ? "bg-amber-500 text-stone-950" : "bg-stone-800 text-stone-500"
+                step >= 1 ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"
               }`}
             >
               1
             </span>
-            <span className={`text-xs font-bold ${step >= 1 ? "text-white" : "text-stone-500"}`}>
+            <span className={`text-xs font-bold ${step >= 1 ? "text-slate-900" : "text-slate-400"}`}>
               Café Setup
             </span>
           </div>
-          <div className="w-8 h-0.5 bg-stone-800"></div>
+          <div className="w-8 h-0.5 bg-slate-200"></div>
           <div className="flex items-center gap-2">
             <span
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                step >= 2 ? "bg-amber-500 text-stone-950" : "bg-stone-800 text-stone-500"
+                step >= 2 ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"
               }`}
             >
               2
             </span>
-            <span className={`text-xs font-bold ${step >= 2 ? "text-white" : "text-stone-500"}`}>
+            <span className={`text-xs font-bold ${step >= 2 ? "text-slate-900" : "text-slate-400"}`}>
               Tables & Menu
             </span>
           </div>
-          <div className="w-8 h-0.5 bg-stone-800"></div>
+          <div className="w-8 h-0.5 bg-slate-200"></div>
           <div className="flex items-center gap-2">
             <span
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                step >= 3 ? "bg-amber-500 text-stone-950" : "bg-stone-800 text-stone-500"
+                step >= 3 ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-500"
               }`}
             >
               3
             </span>
-            <span className={`text-xs font-bold ${step >= 3 ? "text-white" : "text-stone-500"}`}>
+            <span className={`text-xs font-bold ${step >= 3 ? "text-slate-900" : "text-slate-400"}`}>
               Account & Launch
             </span>
           </div>
         </div>
 
         {/* Wizard Container */}
-        <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-lg">
           <form onSubmit={handleOnboard}>
-            {/* Step 1: Café Identity */}
+            {/* Step 1 */}
             {step === 1 && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-xl font-extrabold text-white">Create Your Café Space</h2>
-                  <p className="text-xs text-stone-400 mt-1">
+                  <h2 className="text-xl font-extrabold text-slate-900">Create Your Café Space</h2>
+                  <p className="text-xs text-slate-500 mt-1">
                     Set up your business name and custom ordering domain.
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Business Name
                   </label>
                   <input
@@ -217,36 +213,36 @@ export default function OnboardingPage() {
                     placeholder="e.g. Blue Lagoon Specialty Coffee"
                     value={cafeName}
                     onChange={(e) => autoSlug(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Store Link (URL)
                   </label>
-                  <div className="flex items-center bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs">
-                    <span className="text-stone-500 font-mono">yourdomain.com/c/</span>
+                  <div className="flex items-center bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs">
+                    <span className="text-slate-400 font-mono">yourdomain.com/c/</span>
                     <input
                       type="text"
                       required
                       placeholder="blue-lagoon"
                       value={slug}
                       onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
-                      className="bg-transparent text-amber-400 font-mono font-bold flex-1 focus:outline-none ml-1"
+                      className="bg-transparent text-indigo-600 font-mono font-bold flex-1 focus:outline-none ml-1"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                       Currency
                     </label>
                     <select
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     >
                       <option value="INR">INR (₹)</option>
                       <option value="USD">USD ($)</option>
@@ -257,13 +253,13 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                       Timezone
                     </label>
                     <select
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
-                      className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2.5 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     >
                       <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
                       <option value="America/New_York">America/New_York (EST)</option>
@@ -272,7 +268,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Tagline (optional)
                   </label>
                   <input
@@ -280,26 +276,26 @@ export default function OnboardingPage() {
                     placeholder="e.g. Handcrafted brews & artisanal bites"
                     value={tagline}
                     onChange={(e) => setTagline(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block">
+                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
                       Google Business Review Link (optional)
                     </label>
-                    <span className="text-xs text-amber-400 font-medium">Auto-prompts 5-star guests</span>
+                    <span className="text-xs text-indigo-600 font-medium">Auto-prompts 5-star guests</span>
                   </div>
                   <input
                     type="url"
-                    placeholder="e.g. https://g.page/r/your-cafe/review or https://search.google.com/..."
+                    placeholder="e.g. https://g.page/r/your-cafe/review"
                     value={googleReviewUrl}
                     onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                   />
-                  <p className="text-xs text-stone-400 mt-1">
-                    Customers who rate 4★ or 5★ on their live order tracker will be prompted to leave a review directly on your Google page.
+                  <p className="text-xs text-slate-500 mt-1">
+                    Customers who rate 4+ stars will be prompted to leave a review on your Google page.
                   </p>
                 </div>
 
@@ -307,25 +303,25 @@ export default function OnboardingPage() {
                   type="button"
                   disabled={!cafeName || !slug}
                   onClick={() => setStep(2)}
-                  className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs transition-all shadow-md shadow-amber-500/20 disabled:opacity-50 cursor-pointer mt-4"
+                  className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer mt-4"
                 >
                   Continue to Tables & Menu &rarr;
                 </button>
               </div>
             )}
 
-            {/* Step 2: Seating & Starter Menu Preset */}
+            {/* Step 2 */}
             {step === 2 && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-xl font-extrabold text-white">Tables & Starter Menu</h2>
-                  <p className="text-xs text-stone-400 mt-1">
+                  <h2 className="text-xl font-extrabold text-slate-900">Tables & Starter Menu</h2>
+                  <p className="text-xs text-slate-500 mt-1">
                     Choose your seating setup and starter menu template to launch fast.
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Number of Tables to Auto-Generate (with QR Stand Tokens)
                   </label>
                   <div className="flex items-center gap-3">
@@ -335,16 +331,16 @@ export default function OnboardingPage() {
                       max={30}
                       value={tableCount}
                       onChange={(e) => setTableCount(Number(e.target.value))}
-                      className="flex-1 accent-amber-500 cursor-pointer"
+                      className="flex-1 accent-indigo-600 cursor-pointer"
                     />
-                    <span className="font-mono font-bold text-amber-400 bg-stone-950 px-3 py-1.5 rounded-xl border border-stone-800 text-xs">
+                    <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200 text-xs">
                       {tableCount} Tables (T01 - T{tableCount < 10 ? "0" + tableCount : tableCount})
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-2">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-2">
                     Select Starter Menu Preset
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -354,15 +350,15 @@ export default function OnboardingPage() {
                         onClick={() => setPreset(opt.id as any)}
                         className={`p-3 rounded-2xl border cursor-pointer transition-all ${
                           preset === opt.id
-                            ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500"
-                            : "bg-stone-950 border-stone-800/80 hover:border-stone-700"
+                            ? "bg-indigo-50 border-indigo-500 ring-1 ring-indigo-500"
+                            : "bg-white border-slate-200 hover:border-slate-300"
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-lg">{opt.icon}</span>
-                          <span className="font-bold text-xs text-white">{opt.title}</span>
+                          <span className="font-bold text-xs text-slate-900">{opt.title}</span>
                         </div>
-                        <p className="text-xs text-stone-400 leading-relaxed">{opt.desc}</p>
+                        <p className="text-xs text-slate-500 leading-relaxed">{opt.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -372,14 +368,14 @@ export default function OnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-3.5 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs transition-colors cursor-pointer"
+                    className="flex-1 py-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-bold text-xs transition-colors cursor-pointer"
                   >
                     &larr; Back
                   </button>
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="flex-1 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+                    className="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
                   >
                     Continue to Account &rarr;
                   </button>
@@ -387,27 +383,26 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Step 3: Owner Credentials & Launch */}
+            {/* Step 3 */}
             {step === 3 && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-xl font-extrabold text-white">Owner Account & Security</h2>
-                  <p className="text-xs text-stone-400 mt-1">
-                    Your café will be provisioned with a <strong>7-Day Free Trial</strong> (All-in-One Plan: Unlimited Tables, KDS & Billing).
+                  <h2 className="text-xl font-extrabold text-slate-900">Owner Account & Security</h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Your café gets a <strong>14-Day Free Trial</strong> to explore all features.
                   </p>
                 </div>
 
-                {/* Plan Highlights Badge */}
-                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs">
+                <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-black text-white block">All-in-One Plan (7 Days Free)</span>
-                    <span className="text-xs text-stone-400">Unlimited Tables, Real-time KDS, Full POS Billing</span>
+                    <span className="font-black text-slate-900 block">Basic Plan</span>
+                    <span className="text-xs text-slate-500">QR Menu, Orders, Billing, Inventory</span>
                   </div>
-                  <span className="text-amber-400 font-mono font-black text-xs">₹799/mo after trial</span>
+                  <span className="text-indigo-600 font-mono font-black text-xs">₹699/mo</span>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Manager Email
                   </label>
                   <input
@@ -416,12 +411,12 @@ export default function OnboardingPage() {
                     placeholder="manager@yourcafe.com"
                     value={ownerEmail}
                     onChange={(e) => setOwnerEmail(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
                     Password
                   </label>
                   <input
@@ -430,13 +425,13 @@ export default function OnboardingPage() {
                     placeholder="••••••••••••"
                     value={ownerPassword}
                     onChange={(e) => setOwnerPassword(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-xs text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
 
                 {error && (
-                  <div className="p-3 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs font-medium">
-                    ⚠️ {error}
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+                    {error}
                   </div>
                 )}
 
@@ -444,14 +439,14 @@ export default function OnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="flex-1 py-3.5 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs transition-colors cursor-pointer"
+                    className="flex-1 py-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-bold text-xs transition-colors cursor-pointer"
                   >
                     &larr; Back
                   </button>
                   <button
                     type="submit"
                     disabled={loading || !ownerEmail || !ownerPassword}
-                    className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black text-xs transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
+                    className="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 cursor-pointer"
                   >
                     {loading ? "Creating your account…" : "Launch My Store 🚀"}
                   </button>
@@ -463,9 +458,9 @@ export default function OnboardingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-stone-800/60 py-4 text-center text-xs text-stone-500">
-        QR Café • Next-Gen Point of Sale & Dine-In Ordering
+      <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        QR Café &middot; Digital Menu &amp; Point of Sale
       </footer>
-    </main>
+    </div>
   );
 }

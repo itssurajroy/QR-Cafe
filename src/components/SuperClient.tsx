@@ -59,6 +59,8 @@ type KPIs = {
   trialToPaid: number;
   failedPayments: number;
   new7dCafes: number;
+  trialsEnding7d: number;
+  new7d: number;
 };
 
 type SuperClientProps = {
@@ -288,17 +290,17 @@ export default function SuperClient({
     }
   }
 
-  // Handle Fast Row Actions (+7d Trial, Toggle Active/Suspend)
+  // Handle Fast Row Actions (+14d Trial, Toggle Active/Suspend)
   async function handleFastExtendTrial(cafeId: string, e: React.MouseEvent) {
     e.stopPropagation();
     try {
       const res = await fetch("/api/super/crud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "extend_trial", id: cafeId, days: 7 }),
+        body: JSON.stringify({ action: "extend_trial", id: cafeId, days: 14 }),
       });
       if (res.ok) {
-        flash("ok", "Added +7 Days Trial!");
+        flash("ok", "Added +14 Days Trial!");
         router.refresh();
       } else {
         flash("err", "Failed to extend trial");
@@ -425,14 +427,14 @@ export default function SuperClient({
   const totalPages = Math.ceil(totalCafes / pageSize) || 1;
 
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col md:flex-row font-sans selection:bg-amber-500 selection:text-black">
+    <main className="min-h-screen bg-slate-50 text-slate-900 flex flex-col md:flex-row font-sans selection:bg-indigo-600 selection:text-black">
       {/* Toast Notification */}
       {toast && (
         <div
           className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-2xl text-xs font-black flex items-center gap-2 shadow-2xl border backdrop-blur-xl animate-in slide-in-from-bottom duration-300 ${
             toast.kind === "ok"
-              ? "bg-emerald-950/90 border-emerald-700 text-emerald-300"
-              : "bg-red-950/90 border-red-700 text-red-300"
+              ? "bg-emerald-50/90 border-emerald-700 text-emerald-700"
+              : "bg-red-50/90 border-red-700 text-red-700"
           }`}
         >
           <span>{toast.kind === "ok" ? "✓" : "⚠️"}</span>
@@ -441,15 +443,15 @@ export default function SuperClient({
       )}
 
       {/* Left Sidebar */}
-      <aside className="w-full md:w-64 bg-stone-900 border-r border-stone-800 p-5 flex flex-col justify-between flex-shrink-0">
+      <aside className="w-full md:w-64 bg-white border-r border-slate-200 p-5 flex flex-col justify-between flex-shrink-0">
         <div className="space-y-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-xl shadow-lg shadow-amber-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-slate-900 font-black text-xl shadow-lg shadow-indigo-600/20">
               ⚡
             </div>
             <div>
               <h1 className="font-black text-white text-sm tracking-tight">QR Café Platform</h1>
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block">
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest block">
                 Super Console
               </span>
             </div>
@@ -471,8 +473,8 @@ export default function SuperClient({
                 onClick={() => setTab(item.id as any)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   tab === item.id
-                    ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20 font-black"
-                    : "text-stone-400 hover:text-white hover:bg-stone-800/80"
+                    ? "bg-indigo-600 text-slate-900 shadow-md shadow-indigo-600/20 font-black"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/80"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -482,7 +484,7 @@ export default function SuperClient({
                 {item.count !== undefined && (
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-mono font-black ${
-                      tab === item.id ? "bg-stone-950 text-amber-400" : "bg-stone-800 text-stone-400"
+                      tab === item.id ? "bg-slate-50 text-indigo-600" : "bg-slate-100 text-slate-500"
                     }`}
                   >
                     {item.count}
@@ -493,22 +495,22 @@ export default function SuperClient({
           </nav>
         </div>
 
-        <div className="pt-6 border-t border-stone-800 space-y-3">
-          <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 block">
+        <div className="pt-6 border-t border-slate-200 space-y-3">
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
               Monthly Recurring Rev
             </span>
-            <div className="text-lg font-black text-amber-400 font-mono">
+            <div className="text-lg font-black text-indigo-600 font-mono">
               ₹{kpis.mrr.toLocaleString("en-IN")}
             </div>
-            <span className="text-xs text-emerald-400 font-bold">
+            <span className="text-xs text-emerald-600 font-bold">
               {kpis.active} active paying subscribers
             </span>
           </div>
 
           <Link
             href="/"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white text-xs font-bold transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 text-xs font-bold transition-colors"
           >
             <span>🌐 View Public Site</span>
           </Link>
@@ -518,9 +520,9 @@ export default function SuperClient({
       {/* Main Panel Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-stone-800 bg-stone-900/60 backdrop-blur-md px-6 flex items-center justify-between">
+        <header className="h-16 border-b border-slate-200 bg-white/60 backdrop-blur-md px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-stone-400">Section:</span>
+            <span className="text-xs font-bold text-slate-500">Section:</span>
             <h2 className="text-sm font-black text-white capitalize">{tab} Management</h2>
           </div>
 
@@ -528,13 +530,13 @@ export default function SuperClient({
             <button
               type="button"
               onClick={() => setShowNewCafeModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-900 font-black text-xs transition-all shadow-md shadow-indigo-600/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
             >
               <span>＋ New Café Tenant</span>
             </button>
             <Link
               href="/login"
-              className="text-xs text-stone-400 hover:text-stone-200 border border-stone-800 px-3 py-1.5 rounded-xl hover:bg-stone-800 transition-colors"
+              className="text-xs text-slate-500 hover:text-stone-200 border border-slate-200 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
             >
               Sign Out
             </Link>
@@ -547,57 +549,69 @@ export default function SuperClient({
             <div className="space-y-6">
               {/* 6 Key Platform Metric Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
-                <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">Total Cafés</span>
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Total Cafés</span>
                   <div className="text-2xl font-black text-white font-mono">{kpis.total}</div>
-                  <span className="text-xs text-stone-400 font-medium">Across all regions</span>
+                  <span className="text-xs text-slate-500 font-medium">Across all regions</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-900 border border-emerald-900/50 space-y-1">
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Active Plan</span>
-                  <div className="text-2xl font-black text-emerald-400 font-mono">{kpis.active}</div>
-                  <span className="text-xs text-emerald-400/80 font-medium">Paying monthly</span>
+                <div className="p-4 rounded-2xl bg-white border border-emerald-200 space-y-1">
+                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">Active Plan</span>
+                  <div className="text-2xl font-black text-emerald-600 font-mono">{kpis.active}</div>
+                  <span className="text-xs text-emerald-600/80 font-medium">Paying monthly</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-900 border border-amber-900/50 space-y-1">
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Free Trials</span>
-                  <div className="text-2xl font-black text-amber-400 font-mono">{kpis.trial}</div>
-                  <span className="text-xs text-amber-400/80 font-medium">7-day trial mode</span>
+                <div className="p-4 rounded-2xl bg-white border border-amber-900/50 space-y-1">
+                  <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider block">Free Trials</span>
+                  <div className="text-2xl font-black text-indigo-600 font-mono">{kpis.trial}</div>
+                  <span className="text-xs text-indigo-600/80 font-medium">14-day trial mode</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">Today Revenue</span>
-                  <div className="text-2xl font-black text-amber-400 font-mono">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Today Revenue</span>
+                  <div className="text-2xl font-black text-indigo-600 font-mono">
                     ₹{Math.round(kpis.todayRevenue / 100).toLocaleString("en-IN")}
                   </div>
-                  <span className="text-xs text-stone-400 font-medium">{kpis.todayOrders} dine-in tickets</span>
+                  <span className="text-xs text-slate-500 font-medium">{kpis.todayOrders} dine-in tickets</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">MRR Total</span>
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">MRR Total</span>
                   <div className="text-2xl font-black text-white font-mono">
                     ₹{kpis.mrr.toLocaleString("en-IN")}
                   </div>
-                  <span className="text-xs text-emerald-400 font-medium">₹399 / ₹799 tiers</span>
+                  <span className="text-xs text-emerald-600 font-medium">Single ₹999 plan</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-1">
-                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block">New (7 Days)</span>
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">New (7 Days)</span>
                   <div className="text-2xl font-black text-white font-mono">{kpis.new7dCafes}</div>
-                  <span className="text-xs text-stone-400 font-medium">Signups this week</span>
+                  <span className="text-xs text-slate-500 font-medium">Signups this week</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Trials Ending 7d</span>
+                  <div className="text-2xl font-black text-white font-mono">{kpis.trialsEnding7d}</div>
+                  <span className="text-xs text-slate-500 font-medium">Trials expiring this week</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">New Sign-ups (7d)</span>
+                  <div className="text-2xl font-black text-white font-mono">{kpis.new7d}</div>
+                  <span className="text-xs text-slate-500 font-medium">Signups this week</span>
                 </div>
               </div>
 
               {/* Recharts Analytics Row */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* 14-Day Platform Revenue Area Chart */}
-                <div className="lg:col-span-2 p-6 rounded-3xl bg-stone-900 border border-stone-800 space-y-4 shadow-xl">
+                <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-xl">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-black text-white">14-Day Platform Dine-In Revenue</h3>
-                      <p className="text-xs text-stone-400">Total volume across all café tenants in INR</p>
+                      <p className="text-xs text-slate-500">Total volume across all café tenants in INR</p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-amber-400">Last 14 Days</span>
+                    <span className="text-xs font-mono font-bold text-indigo-600">Last 14 Days</span>
                   </div>
 
                   <div className="h-64 w-full">
@@ -633,10 +647,10 @@ export default function SuperClient({
                 </div>
 
                 {/* Subscription Plan Distribution Donut */}
-                <div className="p-6 rounded-3xl bg-stone-900 border border-stone-800 space-y-4 shadow-xl">
+                <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-xl">
                   <div>
                     <h3 className="text-sm font-black text-white">Café Subscription Mix</h3>
-                    <p className="text-xs text-stone-400">Distribution by plan status</p>
+                    <p className="text-xs text-slate-500">Distribution by plan status</p>
                   </div>
 
                   <div className="h-48 w-full">
@@ -665,12 +679,12 @@ export default function SuperClient({
                     </ResponsiveContainer>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t border-stone-800">
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200">
                     {charts.byPlan.map((p) => (
                       <div key={p.name} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }}></span>
-                          <span className="text-stone-300 font-medium">{p.name}</span>
+                          <span className="text-slate-600 font-medium">{p.name}</span>
                         </div>
                         <span className="font-mono font-bold text-white">{p.value}</span>
                       </div>
@@ -680,18 +694,18 @@ export default function SuperClient({
               </div>
 
               {/* Top 10 Cafés by Volume */}
-              <div className="p-6 rounded-3xl bg-stone-900 border border-stone-800 space-y-4 shadow-xl">
+              <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-black text-white">Top Performing Cafés (14 Days)</h3>
-                    <p className="text-xs text-stone-400">Ranked by gross customer dine-in volume</p>
+                    <p className="text-xs text-slate-500">Ranked by gross customer dine-in volume</p>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-xs">
+                      <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs">
                         <th className="pb-3">Rank</th>
                         <th className="pb-3">Café</th>
                         <th className="pb-3">Tier</th>
@@ -701,24 +715,24 @@ export default function SuperClient({
                     </thead>
                     <tbody className="divide-y divide-stone-800/60">
                       {charts.topCafes.map((c, idx) => (
-                        <tr key={c.id} className="hover:bg-stone-800/30 transition-colors">
-                          <td className="py-3 font-mono font-bold text-amber-400">#{idx + 1}</td>
+                        <tr key={c.id} className="hover:bg-slate-100/30 transition-colors">
+                          <td className="py-3 font-mono font-bold text-indigo-600">#{idx + 1}</td>
                           <td className="py-3 font-bold text-white">
-                            {c.name} <span className="text-stone-500 font-normal">(/c/{c.slug})</span>
+                            {c.name} <span className="text-slate-400 font-normal">(/c/{c.slug})</span>
                           </td>
                           <td className="py-3">
-                            <span className="px-2 py-0.5 rounded-md bg-stone-800 text-stone-300 font-bold uppercase text-xs">
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold uppercase text-xs">
                               {c.tier}
                             </span>
                           </td>
-                          <td className="py-3 font-mono font-black text-emerald-400">
+                          <td className="py-3 font-mono font-black text-emerald-600">
                             ₹{Math.round(c.revenue_paise / 100).toLocaleString("en-IN")}
                           </td>
                           <td className="py-3 text-right">
                             <button
                               type="button"
                               onClick={() => openDrawer(c.id)}
-                              className="px-3 py-2.5 min-h-[44px] rounded-lg bg-stone-800 hover:bg-stone-700 text-amber-400 font-bold text-xs cursor-pointer"
+                              className="px-3 py-2.5 min-h-[44px] rounded-lg bg-slate-100 hover:bg-slate-200 text-indigo-600 font-bold text-xs cursor-pointer"
                             >
                               Inspect &rarr;
                             </button>
@@ -727,7 +741,7 @@ export default function SuperClient({
                       ))}
                       {charts.topCafes.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="py-6 text-center text-stone-500">
+                          <td colSpan={5} className="py-6 text-center text-slate-400">
                             No orders recorded in the past 14 days yet.
                           </td>
                         </tr>
@@ -743,8 +757,8 @@ export default function SuperClient({
           {tab === "cafes" && (
             <div className="space-y-4">
               {/* Search & Filter Toolbar */}
-              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-stone-900 border border-stone-800 p-4 rounded-2xl">
-                <div className="flex-1 w-full sm:w-auto flex items-center gap-2 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs">
+              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white border border-slate-200 p-4 rounded-2xl">
+                <div className="flex-1 w-full sm:w-auto flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
                   <span>🔍</span>
                   <input
                     type="text"
@@ -763,7 +777,7 @@ export default function SuperClient({
                         setSearchQuery("");
                         applyFilter("", selectedPlan);
                       }}
-                      className="text-stone-500 hover:text-white"
+                      className="text-slate-400 hover:text-slate-900"
                     >
                       ✕
                     </button>
@@ -777,7 +791,7 @@ export default function SuperClient({
                       setSelectedPlan(e.target.value);
                       applyFilter(searchQuery, e.target.value);
                     }}
-                    className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-300 focus:outline-none"
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-600 focus:outline-none"
                   >
                     <option value="">All Plans (All)</option>
                     <option value="active">Active Paying</option>
@@ -788,7 +802,7 @@ export default function SuperClient({
                   <button
                     type="button"
                     onClick={() => applyFilter(searchQuery, selectedPlan)}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-bold text-xs cursor-pointer"
                   >
                     Search
                   </button>
@@ -796,7 +810,7 @@ export default function SuperClient({
                   <button
                     type="button"
                     onClick={handleExportCSV}
-                    className="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-stone-700"
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-300"
                     title="Export filtered records to CSV"
                   >
                     <span>📥 Export CSV</span>
@@ -805,11 +819,11 @@ export default function SuperClient({
               </div>
 
               {/* Tenants Table */}
-              <div className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-stone-800 bg-stone-950/60 text-stone-400 uppercase tracking-wider text-xs">
+                      <tr className="border-b border-slate-200 bg-slate-50/60 text-slate-500 uppercase tracking-wider text-xs">
                         <th className="p-4">Café & Domain</th>
                         <th className="p-4">Tier</th>
                         <th className="p-4">Plan Status</th>
@@ -828,19 +842,19 @@ export default function SuperClient({
                           <tr
                             key={c.id}
                             onClick={() => openDrawer(c.id)}
-                            className="hover:bg-stone-800/40 transition-colors cursor-pointer group"
+                            className="hover:bg-slate-100/40 transition-colors cursor-pointer group"
                           >
                             <td className="p-4">
-                              <div className="font-black text-white group-hover:text-amber-400 transition-colors">
+                              <div className="font-black text-white group-hover:text-indigo-600 transition-colors">
                                 {c.name}
                               </div>
-                              <span className="text-xs font-mono text-stone-500">
+                              <span className="text-xs font-mono text-slate-400">
                                 /c/{c.slug}
                               </span>
                             </td>
 
                             <td className="p-4">
-                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-xs bg-stone-800 border border-stone-700 text-stone-300">
+                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-xs bg-slate-100 border border-slate-300 text-slate-600">
                                 {c.tier || "pro"}
                               </span>
                             </td>
@@ -849,17 +863,17 @@ export default function SuperClient({
                               <span
                                 className={`px-2.5 py-1 rounded-full font-black uppercase text-xs border ${
                                   isActive
-                                    ? "bg-emerald-950 border-emerald-700 text-emerald-400"
+                                    ? "bg-emerald-50 border-emerald-700 text-emerald-600"
                                     : isTrial
-                                    ? "bg-amber-950 border-amber-700 text-amber-400"
-                                    : "bg-red-950 border-red-800 text-red-400"
+                                    ? "bg-amber-50 border-amber-200 text-indigo-600"
+                                    : "bg-red-50 border-red-200 text-red-600"
                                 }`}
                               >
                                 {c.plan}
                               </span>
                             </td>
 
-                            <td className="p-4 text-stone-400 font-mono text-xs">
+                            <td className="p-4 text-slate-500 font-mono text-xs">
                               {isActive
                                 ? c.subscription_ends_at
                                   ? new Date(c.subscription_ends_at).toLocaleDateString("en-IN")
@@ -870,7 +884,7 @@ export default function SuperClient({
                             </td>
 
                             <td className="p-4 font-mono font-bold text-white">
-                              {c.tier === "basic" ? "₹399/mo" : "₹799/mo"}
+                              ₹999/mo
                             </td>
 
                             <td className="p-4 text-right space-x-1.5" onClick={(e) => e.stopPropagation()}>
@@ -878,7 +892,7 @@ export default function SuperClient({
                                 type="button"
                                 onClick={(e) => handleFastExtendTrial(c.id, e)}
                                 title="Add 7 Free Trial Days"
-                                className="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold text-xs cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/25 text-indigo-700 border border-indigo-200 font-bold text-xs cursor-pointer"
                               >
                                 +7d Trial
                               </button>
@@ -888,22 +902,22 @@ export default function SuperClient({
                                 title="Toggle Active / Suspended"
                                 className={`px-2 py-1 rounded-lg border font-bold text-xs cursor-pointer ${
                                   c.plan === "suspended"
-                                    ? "bg-emerald-950 text-emerald-300 border-emerald-700 hover:bg-emerald-900"
-                                    : "bg-red-950/70 text-red-300 border-red-800 hover:bg-red-900"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-700 hover:bg-emerald-100"
+                                    : "bg-red-50/70 text-red-700 border-red-200 hover:bg-red-100"
                                 }`}
                               >
                                 {c.plan === "suspended" ? "Activate" : "Suspend"}
                               </button>
                               <Link
                                 href={`/super/cafe/${c.id}`}
-                                className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 font-bold text-xs inline-block transition-colors"
+                                className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-stone-200 border border-slate-300 font-bold text-xs inline-block transition-colors"
                               >
                                 🕵️ Impersonate
                               </Link>
                               <Link
                                 href={`/c/${c.slug}`}
                                 target="_blank"
-                                className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-200 font-bold text-xs inline-block transition-colors"
+                                className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-stone-200 font-bold text-xs inline-block transition-colors"
                               >
                                 View ↗
                               </Link>
@@ -913,7 +927,7 @@ export default function SuperClient({
                       })}
                       {cafes.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-stone-500">
+                          <td colSpan={6} className="p-8 text-center text-slate-400">
                             No cafés match the selected filter query.
                           </td>
                         </tr>
@@ -923,8 +937,8 @@ export default function SuperClient({
                 </div>
 
                 {/* Pagination Controls */}
-                <div className="p-4 border-t border-stone-800 bg-stone-950/40 flex items-center justify-between text-xs">
-                  <span className="text-stone-400">
+                <div className="p-4 border-t border-slate-200 bg-slate-50/40 flex items-center justify-between text-xs">
+                  <span className="text-slate-500">
                     Showing <strong>{cafes.length}</strong> of <strong>{totalCafes}</strong> cafés (Page {page} of {totalPages})
                   </span>
 
@@ -933,7 +947,7 @@ export default function SuperClient({
                       type="button"
                       disabled={page <= 1}
                       onClick={() => applyFilter(searchQuery, selectedPlan, page - 1)}
-                      className="px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 text-stone-300 hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
                     >
                       &larr; Previous
                     </button>
@@ -941,7 +955,7 @@ export default function SuperClient({
                       type="button"
                       disabled={page >= totalPages}
                       onClick={() => applyFilter(searchQuery, selectedPlan, page + 1)}
-                      className="px-3 py-1.5 rounded-xl border border-stone-800 bg-stone-900 text-stone-300 hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
                     >
                       Next &rarr;
                     </button>
@@ -953,16 +967,16 @@ export default function SuperClient({
 
           {/* TAB 3: STAFF DIRECTORY */}
           {tab === "staff" && (
-            <div className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl p-6 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl p-6 space-y-4">
               <div>
                 <h3 className="text-sm font-black text-white">Platform Staff & Roles Directory</h3>
-                <p className="text-xs text-stone-400">Staff members mapped to café tenants</p>
+                <p className="text-xs text-slate-500">Staff members mapped to café tenants</p>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-xs">
+                    <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs">
                       <th className="pb-3">Name</th>
                       <th className="pb-3">Role</th>
                       <th className="pb-3">Assigned Café</th>
@@ -972,28 +986,28 @@ export default function SuperClient({
                   </thead>
                   <tbody className="divide-y divide-stone-800/60">
                     {staff.map((s) => (
-                      <tr key={s.id} className="hover:bg-stone-800/30">
+                      <tr key={s.id} className="hover:bg-slate-100/30">
                         <td className="py-3 font-bold text-white">{s.display_name || "Manager"}</td>
                         <td className="py-3">
                           <span
                             className={`px-2 py-0.5 rounded-md font-bold uppercase text-xs ${
                               s.role === "super_admin"
-                                ? "bg-amber-500 text-stone-950"
+                                ? "bg-indigo-600 text-slate-900"
                                 : s.role === "owner"
-                                ? "bg-purple-950 border border-purple-800 text-purple-400"
-                                : "bg-stone-800 text-stone-300"
+                                ? "bg-purple-50 border border-purple-200 text-purple-600"
+                                : "bg-slate-100 text-slate-600"
                             }`}
                           >
                             {s.role}
                           </span>
                         </td>
-                        <td className="py-3 text-stone-300">{s.restaurant_name}</td>
+                        <td className="py-3 text-slate-600">{s.restaurant_name}</td>
                         <td className="py-3">
-                          <span className={`text-xs font-bold ${s.active ? "text-emerald-400" : "text-red-400"}`}>
+                          <span className={`text-xs font-bold ${s.active ? "text-emerald-600" : "text-red-600"}`}>
                             {s.active ? "Active ✓" : "Disabled ✕"}
                           </span>
                         </td>
-                        <td className="py-3 text-stone-500 font-mono text-xs">
+                        <td className="py-3 text-slate-400 font-mono text-xs">
                           {new Date(s.created_at).toLocaleDateString("en-IN")}
                         </td>
                       </tr>
@@ -1007,19 +1021,19 @@ export default function SuperClient({
           {/* TAB 4: PLATFORM CONFIGURATION */}
           {tab === "config" && (
             <div className="max-w-3xl space-y-6">
-              <div className="p-6 rounded-3xl bg-stone-900 border border-stone-800 space-y-6 shadow-xl">
+              <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-6 shadow-xl">
                 <div>
                   <h3 className="text-base font-black text-white">Global SaaS Platform Configuration</h3>
-                  <p className="text-xs text-stone-400 mt-0.5">
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Live system flags and pricing defaults stored in `platform_config`.
                   </p>
                 </div>
 
                 {/* Signups Toggle */}
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-stone-950 border border-stone-800">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <div>
                     <div className="font-bold text-xs text-white">Self-Serve Signups</div>
-                    <p className="text-xs text-stone-400">Allow new café owners to register via /onboarding</p>
+                    <p className="text-xs text-slate-500">Allow new café owners to register via /onboarding</p>
                   </div>
                   <button
                     type="button"
@@ -1030,8 +1044,8 @@ export default function SuperClient({
                     }
                     className={`px-4 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
                       platformConfig?.signups_open?.enabled
-                        ? "bg-emerald-500 text-stone-950"
-                        : "bg-stone-800 text-stone-400"
+                        ? "bg-emerald-500 text-slate-900"
+                        : "bg-slate-100 text-slate-500"
                     }`}
                   >
                     {platformConfig?.signups_open?.enabled ? "Enabled ✓" : "Disabled ✕"}
@@ -1039,10 +1053,10 @@ export default function SuperClient({
                 </div>
 
                 {/* Trial Length */}
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-stone-950 border border-stone-800">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <div>
                     <div className="font-bold text-xs text-white">Default Free Trial Duration</div>
-                    <p className="text-xs text-stone-400">Days of full access granted upon onboarding</p>
+                    <p className="text-xs text-slate-500">Days of full access granted upon onboarding</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -1056,13 +1070,13 @@ export default function SuperClient({
                           trial_days: { days: Number(e.target.value) },
                         }))
                       }
-                      className="w-16 bg-stone-900 border border-stone-700 rounded-xl px-2.5 py-1 text-xs text-white text-center font-mono font-bold"
+                      className="w-16 bg-white border border-slate-300 rounded-xl px-2.5 py-1 text-xs text-white text-center font-mono font-bold"
                     />
                     <button
                       type="button"
                       onClick={() => handleSaveConfig("trial_days", platformConfig?.trial_days)}
                       disabled={savingConfigKey === "trial_days"}
-                      className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer"
+                      className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-bold text-xs cursor-pointer"
                     >
                       Save
                     </button>
@@ -1070,31 +1084,31 @@ export default function SuperClient({
                 </div>
 
                 {/* Pricing Defaults */}
-                <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div>
                     <div className="font-bold text-xs text-white">Monthly Subscription Pricing (INR)</div>
-                    <p className="text-xs text-stone-400">Default recurring rate displayed across the platform</p>
+                    <p className="text-xs text-slate-500">Default recurring rate displayed across the platform</p>
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
                       All-in-One Plan (₹)
                     </label>
                     <input
                       type="number"
-                      value={platformConfig?.prices?.pro ?? 799}
+                      value={platformConfig?.prices?.pro ?? 999}
                       onChange={(e) =>
                         setPlatformConfig((prev: any) => ({
                           ...prev,
                           prices: { ...prev.prices, pro: Number(e.target.value) },
                         }))
                       }
-                      className="w-full bg-stone-900 border border-stone-700 rounded-xl p-2 text-xs text-white font-mono font-bold"
+                      className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs text-white font-mono font-bold"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => handleSaveConfig("prices", platformConfig?.prices)}
-                    className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs cursor-pointer"
+                    className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-bold text-xs cursor-pointer"
                   >
                     Update Plan Rate
                   </button>
@@ -1105,11 +1119,11 @@ export default function SuperClient({
 
           {/* TAB 5: AUDIT LOGS */}
           {tab === "audit" && (
-            <div className="bg-stone-900 border border-stone-800 rounded-3xl overflow-hidden shadow-xl p-6 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl p-6 space-y-4">
               <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div>
                   <h3 className="text-sm font-black text-white">Platform Audit Event Stream</h3>
-                  <p className="text-xs text-stone-400">Tamper-evident logs of billing, impersonation, and orders</p>
+                  <p className="text-xs text-slate-500">Tamper-evident logs of billing, impersonation, and orders</p>
                 </div>
 
                 <div className="flex gap-2">
@@ -1120,8 +1134,8 @@ export default function SuperClient({
                       onClick={() => loadFilteredAudit(act)}
                       className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                         auditActionFilter === act
-                          ? "bg-amber-500 text-stone-950 border-amber-400"
-                          : "bg-stone-950 border-stone-800 text-stone-400 hover:text-white"
+                          ? "bg-indigo-600 text-slate-900 border-amber-400"
+                          : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900"
                       }`}
                     >
                       {act ? act.replace("super_", "") : "All Events"}
@@ -1133,7 +1147,7 @@ export default function SuperClient({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-stone-800 text-stone-400 uppercase tracking-wider text-xs">
+                    <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs">
                       <th className="pb-3">Timestamp</th>
                       <th className="pb-3">Entity</th>
                       <th className="pb-3">Action</th>
@@ -1143,14 +1157,14 @@ export default function SuperClient({
                   </thead>
                   <tbody className="divide-y divide-stone-800/60 font-mono text-xs">
                     {auditRows.map((a) => (
-                      <tr key={a.id} className="hover:bg-stone-800/30">
-                        <td className="py-2.5 text-stone-500 whitespace-nowrap">
+                      <tr key={a.id} className="hover:bg-slate-100/30">
+                        <td className="py-2.5 text-slate-400 whitespace-nowrap">
                           {new Date(a.created_at).toLocaleTimeString("en-IN")} • {new Date(a.created_at).toLocaleDateString("en-IN")}
                         </td>
-                        <td className="py-2.5 font-bold text-amber-400">{a.entity}</td>
+                        <td className="py-2.5 font-bold text-indigo-600">{a.entity}</td>
                         <td className="py-2.5 font-bold text-white">{a.action}</td>
-                        <td className="py-2.5 text-stone-300">{a.restaurants?.name || a.restaurant_id || "System"}</td>
-                        <td className="py-2.5 text-stone-400 truncate max-w-xs">
+                        <td className="py-2.5 text-slate-600">{a.restaurants?.name || a.restaurant_id || "System"}</td>
+                        <td className="py-2.5 text-slate-500 truncate max-w-xs">
                           {JSON.stringify(a.metadata || {})}
                         </td>
                       </tr>
@@ -1165,18 +1179,18 @@ export default function SuperClient({
           {tab === "health" && (
             <div className="space-y-6">
               {/* Broadcast Announcement Control Card */}
-              <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-xl space-y-4">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-black text-white flex items-center gap-2">
                       <span>📢 Global Platform Broadcast Announcement</span>
                     </h3>
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-slate-500">
                       Instantly publish an alert banner across all live café POS registers and customer screens
                     </p>
                   </div>
                   {broadcastMsg && (
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-black uppercase animate-pulse">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-black uppercase animate-pulse">
                       Active Broadcast
                     </span>
                   )}
@@ -1188,13 +1202,13 @@ export default function SuperClient({
                     placeholder="e.g. 🛠️ Scheduled cloud maintenance tonight at 2:00 AM IST (15 mins)"
                     value={broadcastInput}
                     onChange={(e) => setBroadcastInput(e.target.value)}
-                    className="flex-1 bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-amber-500 font-mono"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-indigo-500 font-mono"
                   />
                   <button
                     type="button"
                     onClick={handleSaveBroadcast}
                     disabled={isBroadcasting}
-                    className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs cursor-pointer shadow-md shadow-amber-500/20"
+                    className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs cursor-pointer shadow-md shadow-indigo-600/20"
                   >
                     {broadcastInput.trim() ? "Publish 📢" : "Clear ✕"}
                   </button>
@@ -1203,50 +1217,50 @@ export default function SuperClient({
 
               {/* Real-time Health Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Database Status</span>
+                <div className="bg-white border border-slate-200 p-5 rounded-3xl space-y-2">
+                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Database Status</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span className="text-base font-black text-white">PostgreSQL (Supabase)</span>
                   </div>
-                  <span className="text-xs text-stone-400 block font-mono">Status: Connected &amp; Synced</span>
+                  <span className="text-xs text-slate-500 block font-mono">Status: Connected &amp; Synced</span>
                 </div>
 
-                <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Realtime WebSocket</span>
+                <div className="bg-white border border-slate-200 p-5 rounded-3xl space-y-2">
+                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Realtime WebSocket</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span className="text-base font-black text-white">100% Operational</span>
                   </div>
-                  <span className="text-xs text-stone-400 block font-mono">Live PubSub Listeners Active</span>
+                  <span className="text-xs text-slate-500 block font-mono">Live PubSub Listeners Active</span>
                 </div>
 
-                <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Edge API Latency</span>
+                <div className="bg-white border border-slate-200 p-5 rounded-3xl space-y-2">
+                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Edge API Latency</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    <span className="text-base font-black text-emerald-400 font-mono">~38ms</span>
+                    <span className="text-base font-black text-emerald-600 font-mono">~38ms</span>
                   </div>
-                  <span className="text-xs text-stone-400 block font-mono">Vercel Edge Global Network</span>
+                  <span className="text-xs text-slate-500 block font-mono">Vercel Edge Global Network</span>
                 </div>
 
-                <div className="bg-stone-900 border border-stone-800 p-5 rounded-3xl space-y-2">
-                  <span className="text-xs text-stone-500 uppercase font-bold tracking-wider">Storage &amp; Static</span>
+                <div className="bg-white border border-slate-200 p-5 rounded-3xl space-y-2">
+                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Storage &amp; Static</span>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                     <span className="text-base font-black text-white">Cloudflare R2 / CDN</span>
                   </div>
-                  <span className="text-xs text-stone-400 block font-mono">Media Assets Healthy</span>
+                  <span className="text-xs text-slate-500 block font-mono">Media Assets Healthy</span>
                 </div>
               </div>
 
               {/* Diagnostics Summary Table */}
-              <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-xl space-y-4">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
                 <h3 className="text-sm font-black text-white">System Service Endpoints &amp; Routes</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-mono">
                     <thead>
-                      <tr className="border-b border-stone-800 text-stone-400 uppercase text-xs">
+                      <tr className="border-b border-slate-200 text-slate-500 uppercase text-xs">
                         <th className="pb-2.5">Endpoint</th>
                         <th className="pb-2.5">Protocol</th>
                         <th className="pb-2.5">Security</th>
@@ -1261,11 +1275,11 @@ export default function SuperClient({
                         { route: "/api/super/tenant", proto: "HTTPS / REST", sec: "Super Admin Role", status: "HEALTHY 🟢" },
                         { route: "/api/billing/webhook", proto: "Webhook", sec: "HMAC Signature", status: "STANDBY 🟡" },
                       ].map((s, idx) => (
-                        <tr key={idx} className="hover:bg-stone-800/30">
+                        <tr key={idx} className="hover:bg-slate-100/30">
                           <td className="py-2.5 text-white font-bold">{s.route}</td>
-                          <td className="py-2.5 text-stone-400">{s.proto}</td>
-                          <td className="py-2.5 text-stone-400">{s.sec}</td>
-                          <td className="py-2.5 text-right font-black text-emerald-400">{s.status}</td>
+                          <td className="py-2.5 text-slate-500">{s.proto}</td>
+                          <td className="py-2.5 text-slate-500">{s.sec}</td>
+                          <td className="py-2.5 text-right font-black text-emerald-600">{s.status}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1284,7 +1298,7 @@ export default function SuperClient({
           onClick={() => setDrawerCafeId(null)}
         >
           <div
-            className="w-full max-w-xl bg-stone-900 border-l border-stone-800 h-full p-6 flex flex-col justify-between space-y-6 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300"
+            className="w-full max-w-xl bg-white border-l border-slate-200 h-full p-6 flex flex-col justify-between space-y-6 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {loadingDrawer ? (
@@ -1294,22 +1308,22 @@ export default function SuperClient({
             ) : drawerData?.tenant ? (
               <div className="space-y-6 flex-1">
                 {/* Top Drawer Bar */}
-                <div className="flex items-center justify-between border-b border-stone-800 pb-4">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-xl font-black text-white">{drawerData.tenant.name}</h3>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase bg-stone-800 text-amber-400">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase bg-slate-100 text-indigo-600">
                         {drawerData.tenant.tier || "pro"}
                       </span>
                     </div>
-                    <span className="text-xs text-stone-500 font-mono">/c/{drawerData.tenant.slug}</span>
+                    <span className="text-xs text-slate-400 font-mono">/c/{drawerData.tenant.slug}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => openDrawer(drawerCafeId)}
-                      className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-bold cursor-pointer"
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold cursor-pointer"
                       title="Refresh snapshot"
                     >
                       🔄
@@ -1317,7 +1331,7 @@ export default function SuperClient({
                     <button
                       type="button"
                       onClick={() => setDrawerCafeId(null)}
-                      className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-bold cursor-pointer"
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold cursor-pointer"
                     >
                       ✕
                     </button>
@@ -1325,7 +1339,7 @@ export default function SuperClient({
                 </div>
 
                 {/* Drawer Tabs */}
-                <div className="flex gap-1 overflow-x-auto pb-1 border-b border-stone-800">
+                <div className="flex gap-1 overflow-x-auto pb-1 border-b border-slate-200">
                   {[
                     { id: "overview", label: "Overview" },
                     { id: "menu", label: `Menu (${drawerData.items?.length || 0})` },
@@ -1340,8 +1354,8 @@ export default function SuperClient({
                       onClick={() => setDrawerTab(t.id as any)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
                         drawerTab === t.id
-                          ? "bg-amber-500 text-stone-950 font-black"
-                          : "text-stone-400 hover:text-white"
+                          ? "bg-indigo-600 text-slate-900 font-black"
+                          : "text-slate-500 hover:text-slate-900"
                       }`}
                     >
                       {t.label}
@@ -1353,19 +1367,19 @@ export default function SuperClient({
                 {drawerTab === "overview" && (
                   <div className="space-y-4 text-xs">
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-                        <span className="text-xs font-bold text-stone-500 uppercase">Plan Status</span>
+                      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                        <span className="text-xs font-bold text-slate-400 uppercase">Plan Status</span>
                         <div className="font-bold text-white uppercase">{drawerData.tenant.plan}</div>
                       </div>
-                      <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
-                        <span className="text-xs font-bold text-stone-500 uppercase">Tier</span>
-                        <div className="font-bold text-amber-400 uppercase">{drawerData.tenant.tier || "pro"}</div>
+                      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                        <span className="text-xs font-bold text-slate-400 uppercase">Tier</span>
+                        <div className="font-bold text-indigo-600 uppercase">{drawerData.tenant.tier || "pro"}</div>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2">
-                      <div className="font-bold text-stone-300 uppercase text-xs">Contact & Tax Identity</div>
-                      <div className="space-y-1 text-stone-300">
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                      <div className="font-bold text-slate-600 uppercase text-xs">Contact & Tax Identity</div>
+                      <div className="space-y-1 text-slate-600">
                         <div>📞 Phone: {drawerData.tenant.phone || "Not set"}</div>
                         <div>📍 Address: {drawerData.tenant.address || "Not set"}</div>
                         <div>🧾 GSTIN: {drawerData.tenant.gstin || "Not set"} ({drawerData.tenant.tax_rate ?? 5}% Tax)</div>
@@ -1375,7 +1389,7 @@ export default function SuperClient({
 
                     <Link
                       href={`/super/cafe/${drawerData.tenant.id}`}
-                      className="block w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-center text-xs shadow-md"
+                      className="block w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-center text-xs shadow-md"
                     >
                       🕵️‍♂️ Launch Impersonation View &rarr;
                     </Link>
@@ -1385,15 +1399,15 @@ export default function SuperClient({
                 {/* DRAWER TAB 2: MENU */}
                 {drawerTab === "menu" && (
                   <div className="space-y-3 text-xs">
-                    <div className="font-bold text-stone-300">Registered Dishes ({drawerData.items?.length})</div>
+                    <div className="font-bold text-slate-600">Registered Dishes ({drawerData.items?.length})</div>
                     <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
                       {drawerData.items?.map((it: any) => (
-                        <div key={it.id} className="p-2 rounded-xl bg-stone-950 border border-stone-800 flex justify-between items-center">
+                        <div key={it.id} className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
                           <div className="flex items-center gap-2">
                             <span>{it.is_veg ? "🥗" : "🍗"}</span>
                             <span className="font-bold text-white">{it.name}</span>
                           </div>
-                          <span className="font-mono text-amber-400 font-bold">
+                          <span className="font-mono text-indigo-600 font-bold">
                             ₹{(it.price_paise / 100).toLocaleString("en-IN")}
                           </span>
                         </div>
@@ -1405,12 +1419,12 @@ export default function SuperClient({
                 {/* DRAWER TAB 3: TABLES */}
                 {drawerTab === "tables" && (
                   <div className="space-y-3 text-xs">
-                    <div className="font-bold text-stone-300">Tables ({drawerData.tables?.length})</div>
+                    <div className="font-bold text-slate-600">Tables ({drawerData.tables?.length})</div>
                     <div className="grid grid-cols-3 gap-2">
                       {drawerData.tables?.map((t: any) => (
-                        <div key={t.id} className="p-3 rounded-xl bg-stone-950 border border-stone-800 text-center">
-                          <div className="font-black text-amber-400 font-mono text-sm">{t.label}</div>
-                          <div className="text-xs text-stone-400">{t.seats} Seats</div>
+                        <div key={t.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                          <div className="font-black text-indigo-600 font-mono text-sm">{t.label}</div>
+                          <div className="text-xs text-slate-500">{t.seats} Seats</div>
                         </div>
                       ))}
                     </div>
@@ -1420,16 +1434,16 @@ export default function SuperClient({
                 {/* DRAWER TAB 4: ORDERS */}
                 {drawerTab === "orders" && (
                   <div className="space-y-2 text-xs">
-                    <div className="font-bold text-stone-300">Recent Orders ({drawerData.orders?.length})</div>
+                    <div className="font-bold text-slate-600">Recent Orders ({drawerData.orders?.length})</div>
                     <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
                       {drawerData.orders?.map((o: any) => (
-                        <div key={o.id} className="p-2 rounded-xl bg-stone-950 border border-stone-800 flex justify-between items-center text-xs">
+                        <div key={o.id} className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center text-xs">
                           <div>
                             <span className="font-black text-white font-mono">#{o.order_number}</span>
-                            <span className="text-stone-500 ml-2">{o.status}</span>
+                            <span className="text-slate-400 ml-2">{o.status}</span>
                           </div>
                           <div className="flex items-center gap-2 font-mono">
-                            <span className={o.payment_status === "paid" ? "text-emerald-400" : "text-amber-400"}>
+                            <span className={o.payment_status === "paid" ? "text-emerald-600" : "text-indigo-600"}>
                               {o.payment_status}
                             </span>
                             <span className="font-bold text-white">
@@ -1445,22 +1459,22 @@ export default function SuperClient({
                 {/* DRAWER TAB 5: BILLING OVERRIDES */}
                 {drawerTab === "billing" && (
                   <div className="space-y-4 text-xs">
-                    <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
-                      <div className="font-bold text-amber-400 uppercase text-xs">Super Admin Billing Controls</div>
-                      <p className="text-stone-400 text-xs">Override tenant access immediately without Razorpay transactions.</p>
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                      <div className="font-bold text-indigo-600 uppercase text-xs">Super Admin Billing Controls</div>
+                      <p className="text-slate-500 text-xs">Override tenant access immediately without Razorpay transactions.</p>
 
                       <div className="grid grid-cols-2 gap-2 pt-2">
                         <button
                           type="button"
                           onClick={() => handleExtendTrial(7)}
-                          className="py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs hover:bg-amber-500/30 cursor-pointer"
+                          className="py-2.5 rounded-xl bg-indigo-600/20 border border-indigo-200 text-indigo-700 font-bold text-xs hover:bg-indigo-600/30 cursor-pointer"
                         >
                           +7 Days Trial
                         </button>
                         <button
                           type="button"
                           onClick={() => handleExtendTrial(30)}
-                          className="py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs hover:bg-amber-500/30 cursor-pointer"
+                          className="py-2.5 rounded-xl bg-indigo-600/20 border border-indigo-200 text-indigo-700 font-bold text-xs hover:bg-indigo-600/30 cursor-pointer"
                         >
                           +30 Days Trial
                         </button>
@@ -1470,14 +1484,14 @@ export default function SuperClient({
                         <button
                           type="button"
                           onClick={handleMarkPaid}
-                          className="py-2.5 rounded-xl bg-emerald-950 border border-emerald-700 text-emerald-400 font-bold text-xs hover:bg-emerald-900 cursor-pointer"
+                          className="py-2.5 rounded-xl bg-emerald-50 border border-emerald-700 text-emerald-600 font-bold text-xs hover:bg-emerald-100 cursor-pointer"
                         >
                           Mark Paid (1 Year)
                         </button>
                         <button
                           type="button"
                           onClick={() => handleSetPlan("suspended")}
-                          className="py-2.5 rounded-xl bg-red-950 border border-red-800 text-red-400 font-bold text-xs hover:bg-red-900 cursor-pointer"
+                          className="py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 font-bold text-xs hover:bg-red-100 cursor-pointer"
                         >
                           Force Suspend
                         </button>
@@ -1488,9 +1502,9 @@ export default function SuperClient({
 
                 {/* DRAWER TAB 6: DANGER */}
                 {drawerTab === "danger" && (
-                  <div className="p-4 rounded-2xl bg-red-950/40 border border-red-800 space-y-3 text-xs">
-                    <div className="font-black text-red-300 uppercase">Danger Zone</div>
-                    <p className="text-red-400/80 text-xs">
+                  <div className="p-4 rounded-2xl bg-red-50/40 border border-red-200 space-y-3 text-xs">
+                    <div className="font-black text-red-700 uppercase">Danger Zone</div>
+                    <p className="text-red-600/80 text-xs">
                       Permanently delete this café tenant and all associated records. This action cannot be undone.
                     </p>
                     <button
@@ -1515,15 +1529,15 @@ export default function SuperClient({
           onClick={() => setShowNewCafeModal(false)}
         >
           <div
-            className="w-full max-w-md bg-stone-900 border border-stone-800 rounded-3xl p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200"
+            className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-stone-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="font-black text-white text-base">Provision New Café Tenant</h3>
               <button
                 type="button"
                 onClick={() => setShowNewCafeModal(false)}
-                className="text-stone-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 ✕
               </button>
@@ -1531,7 +1545,7 @@ export default function SuperClient({
 
             <form onSubmit={handleCreateCafeSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
                   Café Name
                 </label>
                 <input
@@ -1545,12 +1559,12 @@ export default function SuperClient({
                       e.target.value.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-"),
                     );
                   }}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
                   URL Slug
                 </label>
                 <input
@@ -1559,22 +1573,22 @@ export default function SuperClient({
                   placeholder="amber-coffee"
                   value={newCafeSlug}
                   onChange={(e) => setNewCafeSlug(e.target.value.toLowerCase())}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-amber-400 font-mono focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-indigo-600 font-mono focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
-              <div className="p-3 rounded-2xl bg-stone-950 border border-stone-800 space-y-1">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-white">All-in-One Plan</span>
-                  <span className="text-amber-400 font-mono font-bold text-xs">₹799/mo</span>
+                  <span className="text-xs font-black text-white">Basic Plan</span>
+                  <span className="text-indigo-600 font-mono font-bold text-xs">₹699/mo</span>
                 </div>
-                <span className="text-xs text-stone-400 block">Unlimited Tables, Menu Dishes, KDS & Full POS Billing</span>
+                <span className="text-xs text-slate-500 block">QR Menu, Orders, Billing, Inventory</span>
               </div>
 
               <button
                 type="submit"
                 disabled={creatingCafe || !newCafeName || !newCafeSlug}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer mt-2"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-900 font-black text-xs shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-50 cursor-pointer mt-2"
               >
                 {creatingCafe ? "Provisioning…" : "Create Café Tenant →"}
               </button>

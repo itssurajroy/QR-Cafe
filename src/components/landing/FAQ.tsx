@@ -4,29 +4,59 @@ import { useState } from "react";
 
 const FAQS = [
   {
+    question: "What hardware do I need?",
+    answer:
+      "Any phone, tablet, or laptop with a browser works. For KOT/bill printing, a Bluetooth thermal printer (58mm or 80mm). For KDS, a tablet or TV in the kitchen. No expensive POS hardware required.",
+  },
+  {
+    question: "Can I use my existing printer or tablet?",
+    answer:
+      "Yes. QR Cafe works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+  },
+  {
+    question: "What plans are available?",
+    answer:
+      "One complete plan: ₹999/month per outlet (or ₹9,999/year), with QR ordering, KDS, stock and recipes, full POS, analytics, API access, and priority support. All prices per outlet, GST extra. Every trial is the full system — no feature gates.",
+  },
+  {
+    question: "How does the 14-day free trial work?",
+    answer:
+      "Every new café gets 14 days of the full system — QR ordering, KDS, stock, POS, everything. No credit card required to start. You'll see a countdown in your admin, and we'll email reminders before it ends.",
+  },
+  {
+    question: "Do I need a credit card for the trial?",
+    answer:
+      "No. Start with just your email. You only pay when you choose to upgrade to the ₹999/month plan (or ₹9,999/year) after trying everything.",
+  },
+  {
+    question: "What happens when my trial ends?",
+    answer:
+      "Ordering pauses until you subscribe, but nothing is deleted — your menu, tables, and history stay safe. Upgrade from the billing page and you're live again instantly.",
+  },
+  {
+    question: "How do customers pay?",
+    answer:
+      "Cash at counter, UPI QR codes, and online payments via Razorpay. Customers choose their preferred method at checkout.",
+  },
+  {
     question: "How long does setup take?",
     answer:
-      "Most cafés are up and running in under 30 minutes. Simply add your menu, print the QR codes, and you're ready to take orders.",
+      "Most cafes are live within 30 minutes. Add your menu items, print the QR codes for each table, and you're ready. No developer or technical knowledge required.",
   },
   {
-    question: "Do my customers need to download an app?",
+    question: "Do customers need to download an app?",
     answer:
-      "No. Customers simply scan the QR code with their phone's camera and the menu opens directly in their browser. No app download required.",
+      "No. Customers scan the QR code with their phone camera and the menu opens directly in their browser. Works on Android, iOS, and any phone with a camera.",
   },
   {
-    question: "Can I use my existing POS system alongside QR Café?",
+    question: "Can I use QR Cafe alongside my existing POS?",
     answer:
-      "Yes. QR Café works independently or alongside your existing POS. Many owners use it for dine-in QR ordering while keeping their POS for other operations.",
+      "Yes. Many cafes use QR Cafe for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
   },
   {
-    question: "What payment methods are supported?",
+    question: "What happens to my data if I cancel?",
     answer:
-      "We support cash at counter, UPI QR codes, and online payments via Razorpay. Customers can pay however they prefer.",
-  },
-  {
-    question: "Is there a free trial?",
-    answer:
-      "Yes. Every new café gets a 7-day free trial with full access to all features. No credit card required to start.",
+      "Your data is yours. Export your menu, orders, and customer data anytime. We don't hold your data hostage.",
   },
 ];
 
@@ -39,51 +69,77 @@ export function FAQ() {
 
   return (
     <section id="faq" className="bg-white">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+      <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Frequently asked questions
+          <p className="text-sm font-medium tracking-wide text-indigo-600 uppercase">
+            FAQ
+          </p>
+          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
+            Questions? Answered.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
-            Can&apos;t find what you&apos;re looking for? Contact our support
-            team.
+            Can&apos;t find what you&apos;re looking for?{" "}
+            <a
+              href="mailto:support@qrcafe.app"
+              className="font-medium text-indigo-600 underline decoration-indigo-200 underline-offset-2 transition-colors hover:text-indigo-700 hover:decoration-indigo-400"
+            >
+              Contact our support team
+            </a>
+            .
           </p>
         </div>
 
         <div className="mt-12 divide-y divide-slate-200 border-t border-slate-200">
-          {FAQS.map((faq, index) => (
-            <div key={faq.question}>
-              <button
-                type="button"
-                className="flex w-full items-center justify-between py-4 text-left"
-                onClick={() => toggle(index)}
-              >
-                <span className="text-base font-medium text-slate-900">
-                  {faq.question}
-                </span>
-                <svg
-                  className={`h-5 w-5 flex-shrink-0 text-slate-500 transition-transform duration-200 ${
-                    openIndex === index ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
+          {FAQS.map((faq, index) => {
+            const panelId = `faq-panel-${index}`;
+            const buttonId = `faq-button-${index}`;
+            return (
+              <div key={faq.question}>
+                <button
+                  type="button"
+                  id={buttonId}
+                  className="flex w-full items-center justify-between py-5 text-left transition-colors hover:text-indigo-600"
+                  onClick={() => toggle(index)}
+                  aria-expanded={openIndex === index}
+                  aria-controls={panelId}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                  />
-                </svg>
-              </button>
-              {openIndex === index && (
-                <div className="pb-4">
-                  <p className="text-sm text-slate-500">{faq.answer}</p>
+                  <span className="text-base font-medium text-slate-900">
+                    {faq.question}
+                  </span>
+                  <svg
+                    className={`h-5 w-5 flex-shrink-0 text-slate-400 transition-transform duration-200 ${
+                      openIndex === index ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </button>
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  className={`overflow-hidden transition-[max-height,opacity] duration-200 ease-in-out ${
+                    openIndex === index
+                      ? "max-h-[500px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <p className="pb-5 text-sm leading-relaxed text-slate-600">
+                    {faq.answer}
+                  </p>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

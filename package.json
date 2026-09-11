@@ -6,21 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "wa": "npx tsx src/wa/index.ts"
+    "lint": "eslint"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
-    "@whiskeysockets/baileys": "^7.0.0-rc14",
-    "jimp": "^1.6.1",
     "jspdf": "^4.2.1",
-    "link-preview-js": "^3.2.0",
     "next": "16.3.3",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
+    "resend": "^6.27.0",
     "zod": "^4.5.2"
   },
   "devDependencies": {

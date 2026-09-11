@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
+import { deductInventoryIngredients } from "@/lib/inventory";
 
 // orders.payment_method is constrained to ('counter','online'): the channel
-// category. POS methods cash/upi/card map to it; the exact method is kept in
+// category. POS methods cash/upi/card/mixed map to it; the exact method is kept in
 // payments.provider.
 function normalizePaymentMethod(pm: string): "counter" | "online" {
   const p = String(pm || "").toLowerCase();
@@ -33,6 +34,8 @@ export async function POST(req: NextRequest) {
     discount_paise = 0,
     payment_method = "cash",
     payment_status = "paid", // POS orders can be immediately settled
+    split_cash_paise = 0,
+    split_upi_paise = 0,
     notes = "",
   } = body;
 
@@ -97,7 +100,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No active table found for this café. Create a table first." }, { status: 400 });
   }
 
-  // Insert Order
+  // Insert Order (order_type validated: selector is source of truth)
+  const validOrderType =
+    order_type === "takeaway" || order_type === "delivery" ? order_type : "dine_in";
   const { data: order, error: oErr } = await admin
     .from("orders")
     .insert({
@@ -110,9 +115,17 @@ export async function POST(req: NextRequest) {
       payment_method: normalizePaymentMethod(payment_method),
       payment_status,
       status: payment_status === "paid" ? "preparing" : "pending",
-      customer_name: customer_name || (order_type === "takeaway" ? "Takeaway Guest" : "Walk-in Guest"),
-      customer_phone: customer_phone || null,
+      order_type: validOrderType,
+      customer_name:
+        customer_name ||
+        (validOrderType === "takeaway"
+          ? "Takeaway Guest"
+          : validOrderType === "delivery"
+            ? "Delivery Guest"
+            : "Walk-in Guest"),
+      customer_phone: customer_phone || "",
       idempotency_key: validUuid,
+      status_token: validUuid,
     })
     .select()
     .single();
@@ -134,15 +147,41 @@ export async function POST(req: NextRequest) {
   }));
   await admin.from("order_items").insert(itemsToInsert);
 
-  // Insert Payment record if paid
+  // Insert Payment records if paid
   if (payment_status === "paid") {
-    await admin.from("payments").insert({
-      order_id: order.id,
-      provider: payment_method === "upi" ? "upi_qr" : payment_method === "card" ? "card_pos" : "cash",
-      amount_paise: totalPaise,
-      status: "success",
-    });
+    if (payment_method === "mixed") {
+      // Split payment
+      const cashAmount = split_cash_paise > 0 ? split_cash_paise : Math.floor(totalPaise / 2);
+      const upiAmount = split_upi_paise > 0 ? split_upi_paise : totalPaise - cashAmount;
+
+      await admin.from("payments").insert([
+        {
+          order_id: order.id,
+          provider: "cash",
+          amount_paise: cashAmount,
+          status: "success",
+        },
+        {
+          order_id: order.id,
+          provider: "upi_qr",
+          amount_paise: upiAmount,
+          status: "success",
+        },
+      ]);
+    } else {
+      await admin.from("payments").insert({
+        order_id: order.id,
+        provider: payment_method === "upi" ? "upi_qr" : payment_method === "card" ? "card_pos" : "cash",
+        amount_paise: totalPaise,
+        status: "success",
+      });
+    }
   }
+
+  // Auto-deduct raw ingredient stock
+  deductInventoryIngredients(admin, user.restaurantId, orderItemsData).catch((err) =>
+    console.error("[POS] Inventory auto-deduction error:", err)
+  );
 
   // Audit event
   await admin.from("audit_events").insert({
@@ -151,12 +190,12 @@ export async function POST(req: NextRequest) {
     entity: "order",
     entity_id: order.id,
     action: "pos_billing",
-    metadata: {
-      order_number: orderNumber,
-      order_type,
-      payment_method,
-      total_paise: totalPaise,
-    },
+      metadata: {
+        order_number: orderNumber,
+        order_type: validOrderType,
+        payment_method,
+        total_paise: totalPaise,
+      },
   });
 
   return NextResponse.json({
@@ -167,3 +206,4 @@ export async function POST(req: NextRequest) {
     },
   });
 }
+

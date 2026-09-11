@@ -6,7 +6,7 @@ import { CoffeeIcon } from "@/components/Icons";
 import { useCart } from "@/hooks/useCart";
 import { useAudioTone } from "@/hooks/useAudioTone";
 import { useOfflineStatus } from "@/hooks/useOfflineStatus";
-import { generateSlug, paise, getItemImage } from "@/lib/utils";
+import { paise, getItemImage } from "@/lib/utils";
 import { api } from "@/lib/api";
 import type { Category, MenuItem as Item } from "@/types";
 
@@ -66,11 +66,12 @@ export function MenuClient({
   const router = useRouter();
   const t = I18N.en;
 
-  // Apply per-café accent color
+  // Apply per-café accent color (use indigo-600 as default)
   useEffect(() => {
-    if (accentColor && typeof document !== "undefined") {
-      document.documentElement.style.setProperty("--accent", accentColor);
-      const hex = accentColor.replace("#", "");
+    if (typeof document !== "undefined") {
+      const color = accentColor || "#4f46e5";
+      document.documentElement.style.setProperty("--accent", color);
+      const hex = color.replace("#", "");
       if (hex.length === 6) {
         const r = parseInt(hex.slice(0, 2), 16);
         const g = parseInt(hex.slice(2, 4), 16);
@@ -102,10 +103,11 @@ export function MenuClient({
   const [vegOnly, setVegOnly] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [codeInput, setCodeInput] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"counter" | "online">("counter");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // UI states
   const [cartOpen, setCartOpen] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<Item | null>(null);
@@ -199,10 +201,13 @@ export function MenuClient({
     setError(null);
 
     try {
+      const urlCode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("booking") : null;
+      const eff = (codeInput.trim() || urlCode || "");
       const payload = {
         qrToken,
         customerName: name.trim() || undefined,
         customerPhone: phone.trim() || undefined,
+        reservation_code: /^[A-Za-z0-9]{6}$/.test(eff) ? eff.toUpperCase() : undefined,
         paymentMethod,
         items: cartLines.map((l) => ({
           itemId: l.item.id,
@@ -215,18 +220,23 @@ export function MenuClient({
 
       const res = await api.placeOrder(payload);
       if (res.error) {
-        setError(res.error + (res.details ? ` ${JSON.stringify(res.details).slice(0,120)}` : ""));
+        setError(res.error + (res.details ? ` ${JSON.stringify(res.details).slice(0, 120)}` : ""));
         return;
       }
 
       playAudioTone("order");
       clearCart();
-      const token = (res.data as any)?.status_token || (res.data as any)?.statusToken;
-      if (token) {
-        sessionStorage.setItem(`status:${qrToken}`, token);
-        router.push(`/order/${token}`);
-      } else if ((res.data as any)?.order_id) {
-        router.push(`/order/${(res.data as any).order_id}`);
+      const statusToken =
+        (res.data as any)?.status_token ||
+        (res.data as any)?.statusToken ||
+        (res.data as any)?.order_id ||
+        (res.data as any)?.order_number;
+
+      if (statusToken) {
+        sessionStorage.setItem(`status:${qrToken}`, statusToken);
+        router.push(`/order/${statusToken}`);
+      } else {
+        setError("Order placed, but status token was missing. Please ask staff for assistance.");
       }
     } catch (err: any) {
       setError(err?.message ? `Failed: ${err.message}` : "Network connection error.");
@@ -236,10 +246,10 @@ export function MenuClient({
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 pb-36 font-sans antialiased selection:bg-amber-500 selection:text-black">
+    <main className="min-h-screen bg-slate-50 text-slate-900 pb-36 font-sans antialiased selection:bg-indigo-600 selection:text-white">
       {/* Offline Awareness Banner */}
       {isOffline && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-red-600 text-white text-xs font-bold text-center py-2 px-4 flex items-center justify-center gap-2 animate-fade-in-up">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-red-500 text-white text-xs font-bold text-center py-2 px-4 flex items-center justify-center gap-2 animate-fade-in-up">
           <span>⚠️</span>
           <span>You appear offline — orders may not submit. Check your connection.</span>
         </div>
@@ -283,10 +293,10 @@ export function MenuClient({
         ))}
 
         {visibleItems.length === 0 && (
-          <div className="text-center py-20 px-4 bg-stone-900/40 rounded-3xl border border-dashed border-stone-800">
-            <CoffeeIcon className="w-10 h-10 text-stone-500 mx-auto mb-4 animate-float" />
-            <p className="text-stone-200 font-bold text-base">{t.emptyMenu}</p>
-            <p className="text-stone-500 text-xs mt-1">Try browsing all categories or clear your search</p>
+          <div className="text-center py-20 px-4 bg-slate-100 rounded-3xl border border-dashed border-slate-300">
+            <CoffeeIcon className="w-10 h-10 text-slate-400 mx-auto mb-4 animate-float" />
+            <p className="text-slate-700 font-bold text-base">{t.emptyMenu}</p>
+            <p className="text-slate-500 text-xs mt-1">Try browsing all categories or clear your search</p>
           </div>
         )}
       </section>
@@ -295,29 +305,29 @@ export function MenuClient({
       {upsellItem && (
         <div className="fixed bottom-28 left-0 right-0 z-40 px-4 pointer-events-auto">
           <div className="max-w-xl mx-auto">
-            <div className="bg-stone-900/95 border border-amber-500/30 rounded-2xl p-3 shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-slide-in-bottom">
+            <div className="bg-white border border-indigo-200 rounded-2xl p-3 shadow-xl backdrop-blur-xl flex items-center gap-3 animate-slide-in-bottom">
               <img
                 src={upsellItem.image_url || getItemImage(upsellItem.name, upsellItem.is_veg)}
                 alt={upsellItem.name}
-                className="w-12 h-12 rounded-xl object-cover border border-stone-700 shrink-0"
+                className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-amber-400 font-bold uppercase tracking-wider">Customers also ordered</p>
-                <p className="text-xs font-bold text-white truncate">{upsellItem.name}</p>
-                <p className="text-xs text-amber-400 font-mono font-bold">{paise(upsellItem.price_paise)}</p>
+                <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider">Customers also ordered</p>
+                <p className="text-xs font-bold text-slate-900 truncate">{upsellItem.name}</p>
+                <p className="text-xs text-indigo-600 font-mono font-bold">{paise(upsellItem.price_paise)}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => { openCustomizeModal(upsellItem); setUpsellItem(null); }}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500 text-stone-950 font-black text-xs cursor-pointer active:scale-95"
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-black text-xs cursor-pointer active:scale-95"
                 >
                   + Add
                 </button>
                 <button
                   type="button"
                   onClick={() => setUpsellItem(null)}
-                  className="text-stone-500 hover:text-white text-xs cursor-pointer"
+                  className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
                 >
                   ✕
                 </button>
@@ -379,6 +389,8 @@ export function MenuClient({
         setName={setName}
         phone={phone}
         setPhone={setPhone}
+        bookingCode={codeInput}
+        setBookingCode={setCodeInput}
         error={error}
         submitting={submitting}
         onSubmit={submitOrder}

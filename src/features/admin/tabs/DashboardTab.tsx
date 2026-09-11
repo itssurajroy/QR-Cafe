@@ -1,93 +1,177 @@
+"use client";
+
 import Link from "next/link";
-import type { Category, MenuItem as Item, Table } from "@/types";
+import { paise } from "@/lib/utils";
+import {
+  CreditCardIcon,
+  ClipboardListIcon,
+  BookOpenIcon,
+  ChairIcon,
+  ArrowRightIcon,
+  QrCodeIcon,
+} from "@/components/Icons";
 
 interface DashboardTabProps {
   liveRevenue: number;
   liveOrders: number;
-  itemList: Item[];
-  tableList: Table[];
+  itemList: any[];
+  tableList: any[];
   recentOrders: any[];
-  setTab: (t: any) => void;
+  setTab: any;
   restaurant: any;
 }
 
-export function DashboardTab({
-  liveRevenue,
-  liveOrders,
-  itemList,
-  tableList,
-  recentOrders,
-  setTab,
-  restaurant,
-}: DashboardTabProps) {
+const STATS = [
+  {
+    key: "revenue",
+    label: "Today's Revenue",
+    caption: "Live · refreshes every 30s",
+    tile: "bg-gradient-to-br from-indigo-500 to-violet-600 shadow-indigo-500/30",
+    Icon: CreditCardIcon,
+  },
+  {
+    key: "orders",
+    label: "Orders Today",
+    caption: "Dine-in, takeaway & delivery",
+    tile: "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30",
+    Icon: ClipboardListIcon,
+  },
+  {
+    key: "items",
+    label: "Menu Items",
+    caption: "Across all categories",
+    tile: "bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/30",
+    Icon: BookOpenIcon,
+  },
+  {
+    key: "tables",
+    label: "Tables Live",
+    caption: "With QR ordering enabled",
+    tile: "bg-gradient-to-br from-sky-500 to-blue-600 shadow-sky-500/30",
+    Icon: ChairIcon,
+  },
+] as const;
+
+export function DashboardTab({ liveRevenue, liveOrders, itemList, tableList, recentOrders, setTab, restaurant }: DashboardTabProps) {
+  const values: Record<(typeof STATS)[number]["key"], string> = {
+    revenue: paise(liveRevenue),
+    orders: String(liveOrders),
+    items: String(itemList.length),
+    tables: String(tableList.length),
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: "Today's Revenue", value: `₹${(liveRevenue / 100).toLocaleString("en-IN")}`, icon: "💰", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
-          { label: "Orders Today", value: liveOrders, icon: "🧾", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
-          { label: "Menu Items", value: itemList.filter(i => i.available).length, icon: "🍽️", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
-          { label: "Active Tables", value: tableList.filter(t => t.active).length, icon: "🪑", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
-        ].map((stat) => (
-          <div key={stat.label} className={`rounded-2xl border p-4 ${stat.bg} glass-card`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xl">{stat.icon}</span>
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+    <div className="space-y-6">
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {STATS.map((s) => (
+          <div
+            key={s.key}
+            className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className={`w-11 h-11 rounded-2xl ${s.tile} text-white flex items-center justify-center shadow-md`}>
+                <s.Icon className="w-5 h-5" />
+              </span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
             </div>
-            <p className={`text-xl font-black font-mono ${stat.color}`}>{stat.value}</p>
-            <p className="text-xs text-stone-400 mt-1">{stat.label}</p>
+            <div className="text-[26px] leading-8 font-black text-slate-900 font-mono tracking-tight">{values[s.key]}</div>
+            <div className="text-xs font-bold text-slate-700 mt-1">{s.label}</div>
+            <div className="text-[11px] text-slate-400 font-medium">{s.caption}</div>
           </div>
         ))}
       </div>
 
-      {/* Real-time Order Feed */}
-      <div className="rounded-3xl border border-stone-800 bg-stone-900/80 p-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-            <h3 className="font-black text-white text-sm" style={{ fontFamily: "var(--font-heading)" }}>Live Order Feed</h3>
-            <span className="text-xs text-stone-500">Auto-refreshes every 30s</span>
+      {/* Recent Orders */}
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-900">Recent Orders</h3>
+            <p className="text-[11px] text-slate-400 font-medium">Latest activity across all channels</p>
           </div>
           <button
             type="button"
-            onClick={() => setTab("report")}
-            className="text-xs text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
+            onClick={() => setTab("analytics")}
+            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
           >
-            View Full Report →
+            View analytics <ArrowRightIcon className="w-3.5 h-3.5" />
           </button>
         </div>
-
         {recentOrders.length === 0 ? (
-          <div className="text-center py-12 text-stone-500">
-            <p className="text-2xl mb-2">📋</p>
-            <p className="text-sm font-bold">No recent orders yet</p>
-            <p className="text-xs mt-1">Orders placed by customers will appear here in real-time</p>
+          <div className="mx-5 mb-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center">
+            <ClipboardListIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-slate-500 text-xs font-semibold">No orders today yet</p>
+            <p className="text-slate-400 text-[11px] mt-0.5">New orders will appear here live</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {recentOrders.map((o) => (
-              <div key={o.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-950 border border-stone-800">
-                <div>
-                  <p className="text-xs font-bold text-stone-200">
-                    Table {o.table_label} <span className="text-stone-500 font-normal">({o.customer_name})</span>
-                  </p>
-                  <p className="text-xs text-stone-500">
-                    {new Date(o.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} • {o.items?.length || 0} items
-                  </p>
+          <div className="px-2 pb-2">
+            {recentOrders.slice(0, 5).map((order: any) => (
+              <div key={order.id} className="flex justify-between items-center gap-3 text-xs px-3 py-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs shrink-0">
+                    {(order.customer_name || "G").charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 truncate">{order.customer_name || "Guest"}</div>
+                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${
+                      order.status === "paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-mono font-bold text-amber-400">
-                    ₹{(o.total_paise / 100).toFixed(2)}
-                  </p>
-                  <p className={`text-xs uppercase font-black ${o.payment_status === "paid" ? "text-emerald-400" : "text-stone-500"}`}>
-                    {o.payment_status}
-                  </p>
-                </div>
+                <span className="font-mono text-slate-900 font-extrabold shrink-0">{paise(order.total_amount)}</span>
               </div>
             ))}
           </div>
         )}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <button
+          onClick={() => setTab("menu")}
+          className="group bg-white border border-slate-200 rounded-3xl p-5 text-left hover:shadow-lg hover:-translate-y-0.5 hover:border-indigo-200 transition-all cursor-pointer"
+        >
+          <div className="flex items-start justify-between mb-3">
+            <span className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <BookOpenIcon className="w-5 h-5" />
+            </span>
+            <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
+          </div>
+          <span className="text-sm font-extrabold text-slate-900 block">Manage Menu</span>
+          <span className="text-xs text-slate-500 font-medium">{itemList.length} dishes live</span>
+        </button>
+        <button
+          onClick={() => setTab("tables")}
+          className="group bg-white border border-slate-200 rounded-3xl p-5 text-left hover:shadow-lg hover:-translate-y-0.5 hover:border-emerald-200 transition-all cursor-pointer"
+        >
+          <div className="flex items-start justify-between mb-3">
+            <span className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+              <ChairIcon className="w-5 h-5" />
+            </span>
+            <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+          </div>
+          <span className="text-sm font-extrabold text-slate-900 block">Manage Tables</span>
+          <span className="text-xs text-slate-500 font-medium">{tableList.length} tables with QRs</span>
+        </button>
+        <Link
+          href={restaurant?.slug ? `/c/${restaurant.slug}` : "/"}
+          target="_blank"
+          className="group bg-slate-900 border border-slate-900 rounded-3xl p-5 text-left hover:shadow-lg hover:-translate-y-0.5 transition-all"
+        >
+          <div className="flex items-start justify-between mb-3">
+            <span className="w-11 h-11 rounded-2xl bg-white/10 text-white flex items-center justify-center group-hover:bg-white/20 transition-colors">
+              <QrCodeIcon className="w-5 h-5" />
+            </span>
+            <ArrowRightIcon className="w-4 h-4 text-slate-500 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+          <span className="text-sm font-extrabold text-white block">View Guest Menu</span>
+          <span className="text-xs text-slate-400 font-medium">See exactly what diners see</span>
+        </Link>
       </div>
     </div>
   );

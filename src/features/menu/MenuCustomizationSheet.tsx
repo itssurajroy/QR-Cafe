@@ -30,29 +30,29 @@ export function MenuCustomizationSheet({
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end justify-center"
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-end justify-center"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-stone-900 border border-stone-800 rounded-t-3xl p-5 space-y-4 shadow-2xl animate-slide-in-bottom"
+        className="w-full max-w-lg bg-white border border-slate-200 rounded-t-3xl p-5 space-y-4 shadow-2xl animate-slide-in-bottom"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <div>
             <h3
-              className="font-black text-white text-base"
+              className="font-black text-slate-900 text-base"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Customize Order
             </h3>
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-slate-500">
               {item.name} • {paise(item.price_paise)}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-stone-400 hover:text-white text-xs cursor-pointer"
+            className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
           >
             ✕
           </button>
@@ -60,7 +60,7 @@ export function MenuCustomizationSheet({
 
         {/* Spice Level */}
         <div>
-          <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
             🌶️ Spice Level
           </label>
           <div className="flex gap-2">
@@ -71,8 +71,8 @@ export function MenuCustomizationSheet({
                 onClick={() => setCustomSpice(s)}
                 className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                   customSpice === s
-                    ? "bg-red-950 border-red-500 text-red-300"
-                    : "bg-stone-950 border-stone-800 text-stone-400 hover:border-stone-700"
+                    ? "bg-red-50 border-red-500 text-red-600"
+                    : "bg-slate-100 border-slate-200 text-slate-500 hover:border-slate-300"
                 }`}
               >
                 {s}
@@ -84,7 +84,7 @@ export function MenuCustomizationSheet({
         {/* Size (only for items > ₹150) */}
         {item.price_paise > 15000 && (
           <div>
-            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
               📏 Portion Size
             </label>
             <div className="flex gap-2">
@@ -95,8 +95,8 @@ export function MenuCustomizationSheet({
                   onClick={() => setCustomSize(sz)}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     customSize === sz
-                      ? "bg-amber-950 border-amber-500 text-amber-300"
-                      : "bg-stone-950 border-stone-800 text-stone-400"
+                      ? "bg-indigo-50 border-indigo-500 text-indigo-600"
+                      : "bg-slate-100 border-slate-200 text-slate-500"
                   }`}
                 >
                   {sz}
@@ -108,7 +108,7 @@ export function MenuCustomizationSheet({
 
         {/* Special Notes */}
         <div>
-          <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
             📝 Special Instructions
           </label>
           <input
@@ -117,14 +117,14 @@ export function MenuCustomizationSheet({
             value={customNote}
             onChange={(e) => setCustomNote(e.target.value)}
             maxLength={100}
-            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-amber-500"
+            className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
           />
         </div>
 
         <button
           type="button"
           onClick={onConfirm}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 font-black text-sm cursor-pointer shadow-lg shadow-amber-500/30 active:scale-95 transition-all"
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-black text-sm cursor-pointer shadow-lg shadow-indigo-600/30 active:scale-95 transition-all"
         >
           + Add to Cart • {paise(item.price_paise)}
         </button>

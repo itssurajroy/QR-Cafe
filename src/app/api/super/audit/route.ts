@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { getSessionUser } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
-  const user = await getSessionUser();
-  if (!user || user.role !== "super_admin") {
+  const user = await requireSuperAdmin();
+  if (!user) {
     return NextResponse.json({ error: "Forbidden: Super Admin only" }, { status: 403 });
   }
 

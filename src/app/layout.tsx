@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
-import GlobalFlowBar from "@/components/GlobalFlowBar";
 import OfflineBanner from "@/components/OfflineBanner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastProvider";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,15 +23,64 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "QR Café — Next-Gen QR Dine-In Ordering & POS",
-  description: "Seamless QR table ordering, real-time KDS kitchen display, POS terminal, and café management platform.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://qrcafe.app",
+  ),
+  title: {
+    default: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+    template: "%s | QR Cafe",
+  },
+  description:
+    "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes. Setup in 30 minutes.",
+  keywords: [
+    "QR menu",
+    "restaurant ordering",
+    "cafe POS",
+    "kitchen display system",
+    "GST invoicing",
+    "digital menu",
+    "QR code ordering",
+    "India restaurant software",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    siteName: "QR Cafe",
+    url: "/",
+    title: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+    description:
+      "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes. Setup in 30 minutes.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "QR Cafe — QR Menu Ordering & POS for Restaurants",
+    description:
+      "QR menu ordering, kitchen display, GST invoicing, and POS for Indian cafes. Setup in 30 minutes.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "QR Café",
+    title: "QR Cafe",
   },
   icons: {
+    icon: "/favicon.ico",
     apple: "/icon-192.png",
   },
 };
@@ -40,10 +89,14 @@ export const viewport: Viewport = {
   themeColor: "#0c0a09",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
@@ -54,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ToastProvider>
             <OfflineBanner />
             {children}
-            <GlobalFlowBar />
+            <CookieConsent />
           </ToastProvider>
         </ErrorBoundary>
       </body>

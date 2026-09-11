@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 2. Create the Restaurant Tenant (single unified plan + 30-day free trial)
+  // 2. Create the Restaurant Tenant (single plan + 14-day full-access trial)
   const { data: restaurant, error: restErr } = await admin
     .from("restaurants")
     .insert({
@@ -153,7 +153,8 @@ export async function POST(req: NextRequest) {
       tax_rate: input.taxRate !== undefined ? input.taxRate : 5,
       plan: "trial",
       tier: "pro",
-      trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      trial_starts_at: new Date().toISOString(),
+      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
     })
     .select()
     .single();

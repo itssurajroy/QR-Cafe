@@ -20,23 +20,23 @@ export function MenuHeader({
   t,
 }: MenuHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-stone-900/95 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 shadow-xl transition-all">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 px-4 py-3 shadow-sm transition-all">
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-stone-950 shadow-lg shadow-amber-500/25 shrink-0 transition-transform active:scale-95">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0 transition-transform active:scale-95">
               <CoffeeIcon className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-base font-black text-white tracking-tight truncate">
+              <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
                 {restaurantName}
               </h1>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
                   Table {tableLabel}
                 </span>
-                <span className="text-xs text-stone-500 font-medium">
+                <span className="text-xs text-slate-500 font-medium">
                   • {t.dineIn}
                 </span>
               </div>
@@ -47,7 +47,7 @@ export function MenuHeader({
             <button
               type="button"
               onClick={onHelpClick}
-              className="px-3 py-1.5 rounded-xl bg-stone-800/90 hover:bg-stone-700 text-amber-400 text-xs font-black border border-stone-700/80 cursor-pointer touch-manipulation flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-indigo-600 text-xs font-bold border border-slate-200 cursor-pointer touch-manipulation flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
             >
               <BellIcon className="w-3.5 h-3.5 animate-bounce" />
               <span className="hidden sm:inline">Help</span>
@@ -56,13 +56,13 @@ export function MenuHeader({
             <button
               type="button"
               onClick={onVegToggle}
-              className={`flex items-center gap-1.5 text-xs font-black px-3 py-1.5 rounded-xl border transition-all cursor-pointer touch-manipulation active:scale-95 shadow-sm ${
+              className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer touch-manipulation active:scale-95 shadow-sm ${
                 vegOnly
-                  ? "bg-emerald-950/90 border-emerald-600 text-emerald-400 shadow-emerald-950/50"
-                  : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-emerald-500/10"
+                  : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               <span className="hidden sm:inline">{t.vegOnly}</span>
               <span className="sm:hidden">Veg</span>
             </button>

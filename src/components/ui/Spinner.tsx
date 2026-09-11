@@ -6,7 +6,7 @@
 
 export interface SpinnerProps {
   size?: "xs" | "sm" | "md" | "lg";
-  color?: "amber" | "white" | "stone";
+  color?: "indigo" | "white" | "slate";
   className?: string;
 }
 
@@ -18,12 +18,12 @@ const SPINNER_SIZES: Record<NonNullable<SpinnerProps["size"]>, string> = {
 };
 
 const SPINNER_COLORS: Record<NonNullable<SpinnerProps["color"]>, string> = {
-  amber: "border-amber-500 border-t-transparent",
+  indigo: "border-indigo-500 border-t-transparent",
   white: "border-white border-t-transparent",
-  stone: "border-stone-500 border-t-transparent",
+  slate: "border-slate-500 border-t-transparent",
 };
 
-export function Spinner({ size = "md", color = "amber", className = "" }: SpinnerProps) {
+export function Spinner({ size = "md", color = "indigo", className = "" }: SpinnerProps) {
   return (
     <div
       role="status"
@@ -46,16 +46,16 @@ export interface EmptyStateProps {
 export function EmptyState({ icon = "☕", title, subtitle, action, className = "" }: EmptyStateProps) {
   return (
     <div
-      className={`text-center py-16 px-6 bg-stone-900/40 rounded-3xl border border-dashed border-stone-800 ${className}`}
+      className={`text-center py-16 px-6 bg-slate-100 rounded-3xl border border-dashed border-slate-300 ${className}`}
     >
       {typeof icon === "string" ? (
         <div className="text-4xl mb-4 animate-float">{icon}</div>
       ) : (
         <div className="flex justify-center mb-4">{icon}</div>
       )}
-      <p className="text-stone-200 font-bold text-sm">{title}</p>
+      <p className="text-slate-700 font-bold text-sm">{title}</p>
       {subtitle && (
-        <p className="text-stone-500 text-xs mt-1 leading-relaxed">{subtitle}</p>
+        <p className="text-slate-500 text-xs mt-1 leading-relaxed">{subtitle}</p>
       )}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -67,10 +67,10 @@ export function EmptyState({ icon = "☕", title, subtitle, action, className = 
 /** Full-page centered spinner used while data loads */
 export function LoadingPage({ message = "Loading…" }: { message?: string }) {
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6">
+    <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-6">
       <div className="text-center space-y-3">
         <Spinner size="lg" />
-        <p className="text-xs text-stone-400 font-mono">{message}</p>
+        <p className="text-xs text-slate-500 font-mono">{message}</p>
       </div>
     </main>
   );

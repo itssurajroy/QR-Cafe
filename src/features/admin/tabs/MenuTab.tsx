@@ -48,8 +48,8 @@ export function MenuTab({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-extrabold text-white">Menu Catalog</h2>
-          <p className="text-xs text-stone-400">
+          <h2 className="text-lg font-extrabold text-slate-900">Menu Catalog</h2>
+          <p className="text-xs text-slate-500">
             {itemList.length} items across {categoryList.length} categories
           </p>
         </div>
@@ -63,19 +63,19 @@ export function MenuTab({
           </button>
           <button
             onClick={() => setShowCatModal(true)}
-            className="px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold rounded-xl border border-stone-700 cursor-pointer"
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 cursor-pointer"
           >
             + Category
           </button>
           <button
             onClick={() => setShowItemModal(true)}
-            className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-black rounded-xl shadow-md shadow-amber-500/20 cursor-pointer"
+            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-xl shadow-md shadow-indigo-600/20 cursor-pointer"
           >
             + Add Dish
           </button>
           <button
             onClick={selectAllItems}
-            className="px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold rounded-xl border border-stone-700 cursor-pointer"
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 cursor-pointer"
           >
             ☐ Select All
           </button>
@@ -85,13 +85,13 @@ export function MenuTab({
       {/* Bulk Action Bar */}
       {showBulkBar && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 animate-slide-in-bottom">
-          <div className="bg-stone-900 border border-amber-500/40 rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl flex items-center gap-3">
-            <span className="text-xs font-bold text-amber-400">{selectedItems.size} selected</span>
-            <div className="w-px h-4 bg-stone-700"></div>
-            <button type="button" onClick={() => bulkToggleAvailability(true)} className="text-xs font-bold text-emerald-400 hover:text-emerald-300 cursor-pointer">Enable</button>
-            <button type="button" onClick={() => bulkToggleAvailability(false)} className="text-xs font-bold text-amber-400 hover:text-amber-300 cursor-pointer">Disable</button>
-            <button type="button" onClick={bulkDelete} className="text-xs font-bold text-red-400 hover:text-red-300 cursor-pointer">🗑️ Delete</button>
-            <button type="button" onClick={clearSelection} className="text-xs text-stone-500 hover:text-white cursor-pointer">× Clear</button>
+          <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl flex items-center gap-3">
+            <span className="text-xs font-bold text-indigo-600">{selectedItems.size} selected</span>
+            <div className="w-px h-4 bg-slate-200"></div>
+            <button type="button" onClick={() => bulkToggleAvailability(true)} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer">Enable</button>
+            <button type="button" onClick={() => bulkToggleAvailability(false)} className="text-xs font-bold text-amber-600 hover:text-amber-700 cursor-pointer">Disable</button>
+            <button type="button" onClick={bulkDelete} className="text-xs font-bold text-red-500 hover:text-red-600 cursor-pointer">🗑️ Delete</button>
+            <button type="button" onClick={clearSelection} className="text-xs text-slate-400 hover:text-slate-900 cursor-pointer">× Clear</button>
           </div>
         </div>
       )}
@@ -101,15 +101,15 @@ export function MenuTab({
         {categoryList.map((cat) => {
           const catItems = itemList.filter((i) => i.category_id === cat.id);
           return (
-            <div key={cat.id} className="bg-stone-900 border border-stone-800 rounded-3xl p-5 space-y-4 shadow-xl">
-              <div className="flex justify-between items-center border-b border-stone-800/80 pb-3">
+            <div key={cat.id} className="bg-white border border-slate-200 rounded-3xl p-5 space-y-4 shadow-sm">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-black text-sm text-amber-400 uppercase tracking-wider">{cat.name}</h3>
-                  <span className="text-xs font-mono text-stone-500">({catItems.length} items)</span>
+                  <h3 className="font-black text-sm text-indigo-600 uppercase tracking-wider">{cat.name}</h3>
+                  <span className="text-xs font-mono text-slate-400">({catItems.length} items)</span>
                 </div>
                 <button
                   onClick={() => handleDeleteCategory(cat.id)}
-                  className="text-stone-500 hover:text-red-400 text-xs font-bold"
+                  className="text-slate-400 hover:text-red-500 text-xs font-bold"
                 >
                   Delete Category
                 </button>
@@ -125,27 +125,26 @@ export function MenuTab({
                     onDragOver={(e) => handleDragOver(e, item.id)}
                     className={`p-3 rounded-2xl border flex items-center justify-between transition-colors cursor-grab active:cursor-grabbing ${
                       selectedItems.has(item.id)
-                        ? "bg-amber-950/20 border-amber-500/50"
+                        ? "bg-indigo-50 border-indigo-300"
                         : item.available
-                        ? "bg-stone-950 border-stone-800 hover:border-stone-700"
-                        : "bg-stone-950/40 border-stone-900 opacity-60"
+                        ? "bg-slate-50 border-slate-200 hover:border-slate-300"
+                        : "bg-slate-100 border-slate-200 opacity-60"
                     } ${draggedItemId === item.id ? "dragging" : ""}`}
                   >
                     <div className="flex items-center gap-2">
-                      {/* Checkbox for bulk select */}
                       <input
                         type="checkbox"
                         checked={selectedItems.has(item.id)}
                         onChange={() => toggleSelectItem(item.id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                        className="w-4 h-4 rounded accent-indigo-600 cursor-pointer"
                       />
                       <div>
                         <div className="flex items-center gap-1.5">
                           <span className={`w-2.5 h-2.5 rounded-full ${item.is_veg ? "bg-emerald-500" : "bg-red-500"}`}></span>
-                          <h4 className="font-bold text-xs text-white">{item.name}</h4>
+                          <h4 className="font-bold text-xs text-slate-900">{item.name}</h4>
                         </div>
-                        <span className="font-mono text-amber-400 font-bold text-xs block mt-1">
+                        <span className="font-mono text-indigo-600 font-bold text-xs block mt-1">
                           {paise(item.price_paise)}
                         </span>
                       </div>
@@ -157,8 +156,8 @@ export function MenuTab({
                         onClick={() => handleToggleAvailable(item.id, item.available)}
                         className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                           item.available
-                            ? "bg-emerald-950 border-emerald-800 text-emerald-400"
-                            : "bg-stone-900 border-stone-800 text-stone-500"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            : "bg-slate-100 border-slate-200 text-slate-400"
                         }`}
                       >
                         {item.available ? "In Stock" : "Sold Out"}
@@ -166,7 +165,7 @@ export function MenuTab({
                       <button
                         type="button"
                         onClick={() => handleDeleteItem(item.id)}
-                        className="text-stone-600 hover:text-red-400 text-xs font-bold px-1.5"
+                        className="text-slate-300 hover:text-red-500 text-xs font-bold px-1.5"
                       >
                         ✕
                       </button>

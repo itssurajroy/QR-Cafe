@@ -3,9 +3,8 @@ import type { NextRequest } from "next/server";
 
 // Derive the café subdomain from the host and forward it as a request header
 // so Server Components can scope data without re-parsing the host.
-//   curry-leaf.lvh.me   -> x-cafe-slug: curry-leaf
 //   curry-leaf.localhost -> x-cafe-slug: curry-leaf
-//   lvh.me / localhost  -> x-cafe-slug: (apex / super-admin console)
+//   localhost            -> x-cafe-slug: (apex / super-admin console)
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0].toLowerCase();

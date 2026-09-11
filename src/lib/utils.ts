@@ -256,3 +256,27 @@ export function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
+// ─── WhatsApp Formatting Helpers ──────────────────────────────────────────────
+
+/** Normalize an Indian/international phone number for WhatsApp API & wa.me URLs */
+export function normalizeWaPhone(phone: string): string {
+  let digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) {
+    digits = `91${digits}`;
+  } else if (digits.length === 11 && digits.startsWith("0")) {
+    digits = `91${digits.slice(1)}`;
+  }
+  return digits;
+}
+
+/** Build a valid WhatsApp wa.me link with encoded text message */
+export function getWaLink(phone: string, message: string): string {
+  const normalized = phone ? normalizeWaPhone(phone) : "";
+  const encodedText = encodeURIComponent(message);
+  if (normalized) {
+    return `https://wa.me/${normalized}?text=${encodedText}`;
+  }
+  return `https://wa.me/?text=${encodedText}`;
+}
+
+

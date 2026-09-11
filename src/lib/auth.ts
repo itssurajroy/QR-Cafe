@@ -30,3 +30,12 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     restaurantId: profile.restaurant_id,
   };
 }
+
+// Server-only: returns the session user iff super_admin, else null.
+// Pages: `const user = await requireSuperAdmin(); if (!user) redirect("/login")`.
+// API routes: `const user = await requireSuperAdmin(); if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 })`.
+export async function requireSuperAdmin(): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  if (!user || user.role !== "super_admin") return null;
+  return user;
+}

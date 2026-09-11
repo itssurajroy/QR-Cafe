@@ -26,12 +26,12 @@ export function MenuFloatingCartButton({
         <button
           type="button"
           onClick={onOpenCart}
-          className={`w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black rounded-2xl p-4 shadow-2xl shadow-amber-500/40 flex items-center justify-between transition-all active:scale-95 cursor-pointer border border-amber-300/50 touch-manipulation ${
+          className={`w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-400 text-white font-black rounded-2xl p-4 shadow-2xl shadow-indigo-600/40 flex items-center justify-between transition-all active:scale-95 cursor-pointer border border-indigo-300/50 touch-manipulation ${
             cartPulse ? "animate-scale-bounce" : "animate-glow-pulse"
           }`}
         >
           <div className="flex items-center gap-2">
-            <div className="bg-stone-950 text-amber-400 p-1.5 rounded-xl flex items-center justify-center">
+            <div className="bg-white/20 text-white p-1.5 rounded-xl flex items-center justify-center">
               <ShoppingBagIcon className="w-4 h-4" />
             </div>
             <div className="text-left">

@@ -1,154 +1,96 @@
 import Link from "next/link";
 
-const TIERS = [
-  {
-    name: "Free",
-    price: "₹0",
-    cta: "Get Started",
-    href: "/onboarding",
-    popular: false,
-    features: [
-      "QR Digital Menu",
-      "Live Order Viewing",
-      "Table & Section Management",
-      "Basic Dashboard",
-      "Sound Alerts",
-      "Community Support",
-    ],
-  },
-  {
-    name: "Starter",
-    price: "₹499",
-    cta: "Start Free Trial",
-    href: "/onboarding",
-    popular: false,
-    features: [
-      "Everything in Free",
-      "Session & Multi-batch Orders",
-      "Customer Tracking & Invoice",
-      "KOT & Bill Printing (BT)",
-      "WhatsApp Notifications",
-      "Email Support",
-    ],
-  },
-  {
-    name: "Growth",
-    price: "₹799",
-    cta: "Start Free Trial",
-    href: "/onboarding",
-    popular: true,
-    features: [
-      "Everything in Starter",
-      "Kitchen Display (KDS)",
-      "Gravy & Recipe Batch Mgmt",
-      "Ingredient-wise Control",
-      "Stock Control & Reports",
-      "Advanced Analytics",
-    ],
-  },
-  {
-    name: "Pro",
-    price: "₹1099",
-    cta: "Start Free Trial",
-    href: "/onboarding",
-    popular: false,
-    features: [
-      "Everything in Growth",
-      "AI Menu Optimization",
-      "AI Purchase & Restocking",
-      "Multi-outlet Dashboard",
-      "Central Menu Sync",
-      "API & Webhooks",
-      "Audit Logs & Tax Presets",
-      "99.9% SLA",
-    ],
-  },
+const INCLUDED = [
+  "QR ordering + live guest tracking",
+  "Multi-station Kitchen Display",
+  "Stock control & recipe auto-deduction",
+  "Full POS + Bluetooth KOT printing",
+  "Analytics, API & Webhooks",
+  "Priority support",
 ];
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
 
 export function Pricing() {
   return (
     <section id="pricing" className="bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Simple, transparent pricing
+          <p className="text-sm font-medium tracking-wide text-indigo-600 uppercase">
+            Pricing
+          </p>
+          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
+            One plan. Complete system.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
-            Start free. Upgrade when you need more.
+            No feature gates. No hidden tiers. Everything included.
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {TIERS.map((tier) =>
-            tier.popular ? (
-              <div
-                key={tier.name}
-                className="relative rounded-2xl bg-indigo-600 p-6 text-white"
-              >
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-600">
-                  Most Popular
-                </span>
-                <h3 className="text-lg font-semibold">{tier.name}</h3>
-                <p className="mt-4">
-                  <span className="text-3xl font-bold">{tier.price}</span>
-                  <span className="text-sm font-normal">/mo</span>
-                </p>
-                <ul className="mt-6 space-y-3">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-slate-200">
-                      <span className="mt-0.5 text-white">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={tier.href}
-                  className="mt-8 block w-full rounded-lg bg-white px-4 py-2 text-center text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-50"
-                >
-                  {tier.cta}
-                </Link>
-              </div>
-            ) : (
-              <div
-                key={tier.name}
-                className="rounded-2xl border border-slate-200 bg-white p-6"
-              >
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {tier.name}
-                </h3>
-                <p className="mt-4">
-                  <span className="text-3xl font-bold text-slate-900">
-                    {tier.price}
-                  </span>
-                  <span className="text-sm font-normal text-slate-500">/mo</span>
-                </p>
-                <ul className="mt-6 space-y-3">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
-                      <span className="mt-0.5 text-indigo-600">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                {tier.name === "Free" ? (
-                  <Link
-                    href={tier.href}
-                    className="mt-8 block w-full rounded-lg bg-slate-100 px-4 py-2 text-center text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
-                  >
-                    {tier.cta}
-                  </Link>
-                ) : (
-                  <Link
-                    href={tier.href}
-                    className="mt-8 block w-full rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-                  >
-                    {tier.cta}
-                  </Link>
-                )}
-              </div>
-            )
-          )}
+        {/* Single plan card */}
+        <div className="mx-auto mt-12 max-w-2xl">
+          <div className="relative rounded-3xl bg-slate-900 p-8 text-white shadow-2xl shadow-slate-900/20 sm:p-10">
+            <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-4 py-1 text-xs font-bold text-slate-950 ring-4 ring-white">
+              Every feature included
+            </span>
+
+            <h3 className="text-xl font-bold">QR Café</h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Full QR ordering, multi-station KDS, stock control, recipes,
+              POS, and analytics for independent cafés and restaurants.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-end gap-x-3 gap-y-1">
+              <span className="text-5xl font-black tracking-tight">
+                {"\u20B9"}999
+              </span>
+              <span className="pb-1.5 text-sm text-slate-400">
+                / month per outlet
+              </span>
+            </div>
+            <p className="mt-2 text-sm font-medium text-amber-300">
+              Or {"\u20B9"}9,999 / year <span className="text-slate-400">(save {"\u20B9"}1,989)</span>
+            </p>
+
+            <Link
+              href="/onboarding"
+              className="mt-8 block w-full rounded-xl bg-amber-400 px-4 py-3.5 text-center text-base font-bold text-slate-950 transition-all duration-200 hover:bg-amber-300 hover:shadow-lg active:scale-[0.98]"
+            >
+              Start 14-day free trial
+            </Link>
+            <p className="mt-3 text-center text-xs text-slate-400">
+              No credit card required · Cancel anytime · GST extra
+            </p>
+          </div>
         </div>
+
+        {/* What's included */}
+        <ul className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+          {INCLUDED.map((feature) => (
+            <li
+              key={feature}
+              className="flex items-start gap-2.5 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm"
+            >
+              <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-600" />
+              {feature}
+            </li>
+          ))}
+        </ul>
+
+        <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-500">
+          All prices per outlet · GST extra · Cancel anytime · No credit card
+          for trial
+        </p>
       </div>
     </section>
   );

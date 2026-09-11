@@ -68,6 +68,7 @@ export const api = {
     items: Array<{ itemId: string; quantity: number; notes?: string; spiceLevel?: string; sizeVariant?: string }>;
     customerName?: string;
     customerPhone?: string;
+    reservation_code?: string;
     paymentMethod?: string;
   }): Promise<ApiResponse<{ statusToken: string; orderNumber: string; order_id: string; status_token: string }>> {
     const body = {
@@ -75,6 +76,7 @@ export const api = {
       customer_name: payload.customerName,
       customer_phone: payload.customerPhone,
       payment_method: (payload.paymentMethod as "counter" | "online") ?? "counter",
+      ...(payload.reservation_code ? { reservation_code: payload.reservation_code } : {}),
       items: payload.items.map((it) => {
         const mods: Array<{ option_name: string; price_delta_paise: number }> = [];
         if (it.spiceLevel && it.spiceLevel !== "Medium") mods.push({ option_name: `Spice: ${it.spiceLevel}`, price_delta_paise: 0 });
@@ -112,12 +114,7 @@ export const api = {
     return post("/api/admin/crud", { type: "void_order", orderId, reason });
   },
 
-  sendWhatsappBill(
-    orderId: string,
-    phone: string,
-  ): Promise<ApiResponse<{ success: boolean }>> {
-    return post("/api/admin/crud", { type: "send_whatsapp_bill", orderId, phone });
-  },
+
 
   // ── Menu Management ─────────────────────────────────────────────────────────
 

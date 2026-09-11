@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import { getSessionUser } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/auth";
 import { getTierLimits } from "@/lib/tenant";
 
 async function verifySuperAdmin(req: NextRequest) {
-  const sessionUser = await getSessionUser();
-  if (sessionUser && sessionUser.role === "super_admin") {
+  const sessionUser = await requireSuperAdmin();
+  if (sessionUser) {
     return { ok: true, userId: sessionUser.userId };
   }
 

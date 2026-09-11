@@ -3,6 +3,8 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { createOrderSchema } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
 import { computeOrderChecksum, generateAuditBlockHash } from "@/lib/crypto";
+import { deductInventoryIngredients } from "@/lib/inventory";
+import { overlaps, istDayStart } from "@/lib/booking";
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -68,6 +70,42 @@ export async function POST(req: NextRequest) {
       { error: "Café subscription is inactive or trial has expired. Ordering is paused." },
       { status: 403 },
     );
+  }
+
+  let linkedReservationId: string | null = null;
+  if (input.reservation_code) {
+    const { data: res } = await db
+      .from("table_reservations")
+      .select("id, table_ids, status, starts_at, ends_at")
+      .eq("restaurant_id", table.restaurant_id)
+      .eq("code", input.reservation_code.toUpperCase())
+      .gte("starts_at", istDayStart().toISOString())
+      .order("starts_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (res && res.status === "confirmed" && res.table_ids.includes(table.id)) {
+      linkedReservationId = res.id;
+      await db.from("table_reservations").update({ status: "seated" }).eq("id", res.id);
+    }
+  }
+  if (!linkedReservationId) {
+    const now = new Date();
+    const { data: holds } = await db
+      .from("table_reservations")
+      .select("id, table_ids, starts_at, ends_at")
+      .eq("restaurant_id", table.restaurant_id)
+      .eq("status", "confirmed")
+      .lte("starts_at", new Date(now.getTime() + 90 * 60000).toISOString());
+    for (const h of holds ?? []) {
+      if (!h.table_ids.includes(table.id)) continue;
+      // BOOKING_DEFAULT_MIN window
+      if (!overlaps(now, new Date(now.getTime() + 90 * 60000), new Date(h.starts_at), new Date(h.ends_at))) continue;
+      await db.from("table_reservations").update({ status: "expired" }).eq("id", h.id);
+      await db.from("audit_events").insert({
+        restaurant_id: table.restaurant_id, entity: "reservation",
+        entity_id: h.id, action: "walkin_override", metadata: { table_id: table.id },
+      });
+    }
   }
 
   // Idempotency: if this key already created an order, return existing
@@ -161,9 +199,10 @@ export async function POST(req: NextRequest) {
         subtotal_paise: subtotal,
         total_paise: subtotal,
         payment_method: input.payment_method,
-        customer_name: input.customer_name ?? null,
-        customer_phone: input.customer_phone ?? null,
+        customer_name: input.customer_name ?? "",
+        customer_phone: input.customer_phone ?? "",
         idempotency_key: idempotencyKey,
+        reservation_id: linkedReservationId,
         status: "pending",
         payment_status: "unpaid",
       })
@@ -256,6 +295,11 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  // Auto-deduct ingredients from inventory (non-blocking)
+  deductInventoryIngredients(db, table.restaurant_id, orderItems).catch(
+    (err) => console.error("Inventory deduction failed:", err)
+  );
+
   return NextResponse.json({
     order_id: orderId,
     status_token: statusToken,
@@ -264,3 +308,5 @@ export async function POST(req: NextRequest) {
     unavailable,
   });
 }
+
+

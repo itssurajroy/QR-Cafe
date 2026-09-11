@@ -8,7 +8,7 @@
 
 import { useCallback } from "react";
 
-export type AudioToneType = "add" | "order" | "notify" | "alert" | "success" | "statusChange";
+export type AudioToneType = "add" | "order" | "notify" | "alert" | "success" | "statusChange" | "newOrder";
 
 interface ToneConfig {
   frequency: number;
@@ -32,6 +32,13 @@ const TONE_CONFIGS: Record<AudioToneType, ToneConfig> = {
     type: "triangle",
     gain: 0.3,
     duration: 0.4,
+  },
+  newOrder: {
+    frequency: 587, // D5 chime
+    frequency2: 880, // A5 bell
+    type: "triangle",
+    gain: 0.35,
+    duration: 0.5,
   },
   notify: {
     frequency: 523,
@@ -100,5 +107,20 @@ export function useAudioTone() {
     }
   }, []);
 
-  return { playAudioTone };
+  /**
+   * playRushAlert — alert tone plus physical vibration for high-priority
+   * Rush orders. Vibration is guarded: unsupported browsers just get audio.
+   */
+  const playRushAlert = useCallback(() => {
+    playAudioTone("alert");
+    try {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    } catch {
+      // Vibration unsupported or blocked — audio already played.
+    }
+  }, [playAudioTone]);
+
+  return { playAudioTone, playRushAlert };
 }

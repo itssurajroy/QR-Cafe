@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSessionUser } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import SuperClient from "@/components/SuperClient";
 
@@ -10,8 +10,8 @@ export default async function SuperPage({
 }: {
   searchParams: Promise<{ page?: string; q?: string; plan?: string; status?: string }>;
 }) {
-  const user = await getSessionUser();
-  if (!user || user.role !== "super_admin") {
+  const user = await requireSuperAdmin();
+  if (!user) {
     redirect("/login");
   }
 
@@ -63,8 +63,8 @@ export default async function SuperPage({
   const trialCafes = all.filter((c) => c.plan === "trial");
   const suspendedCafes = all.filter((c) => c.plan === "suspended" || c.plan === "cancelled");
 
-  // MRR: Single Unified Plan (₹799/mo)
-  const mrr = activeCafes.length * 799;
+  // MRR: Single QR Café Plan (₹999/mo)
+  const mrr = activeCafes.length * 999;
 
   // Today Orders & Revenue
   const today = todayOrders || [];
@@ -75,6 +75,14 @@ export default async function SuperPage({
   const trialToPaid = activeCafes.filter((c) => c.trial_ends_at && new Date(c.trial_ends_at).getTime() < Date.now()).length;
   const failedPayments = all.filter((c) => c.billing_status === "past_due").length;
   const new7dCafes = all.filter((c) => new Date(c.created_at).getTime() >= Date.now() - 7 * 864e5).length;
+  const trialsEnding7d = all.filter(
+    (c) =>
+      c.plan === "trial" &&
+      c.trial_ends_at &&
+      new Date(c.trial_ends_at).getTime() >= Date.now() &&
+      new Date(c.trial_ends_at).getTime() <= Date.now() + 7 * 864e5
+  ).length;
+  const new7d = all.filter((c) => new Date(c.created_at).getTime() >= Date.now() - 7 * 864e5).length;
 
   // Chart Data: 14d Revenue & Orders
   const dateMap: Record<string, { date: string; revenue: number; orders: number }> = {};
@@ -151,6 +159,8 @@ export default async function SuperPage({
         trialToPaid,
         failedPayments,
         new7dCafes,
+        trialsEnding7d,
+        new7d,
       }}
       charts={{
         revenue14,

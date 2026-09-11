@@ -67,35 +67,35 @@ export function Modal({
     mode === "bottom-sheet" ? (
       // Bottom Sheet
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end justify-center"
+        className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-end justify-center"
         onClick={onClose}
       >
         <div
-          className={`w-full ${MAX_WIDTHS[maxWidth]} bg-stone-900 border border-stone-800 rounded-t-3xl p-5 shadow-2xl animate-slide-in-bottom`}
+          className={`w-full ${MAX_WIDTHS[maxWidth]} bg-white border border-slate-200 rounded-t-3xl p-5 shadow-2xl animate-slide-in-bottom`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Drag Handle */}
-          <div className="w-10 h-1 bg-stone-700 rounded-full mx-auto mb-4" />
+          <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-4" />
           {(title || showClose) && (
             <div className="flex items-center justify-between mb-4">
               <div>
                 {title && (
                   <h3
-                    className="font-black text-white text-base"
+                    className="font-black text-slate-900 text-base"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {title}
                   </h3>
                 )}
                 {subtitle && (
-                  <p className="text-xs text-stone-400 mt-0.5">{subtitle}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
                 )}
               </div>
               {showClose && (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-stone-400 hover:text-white text-sm cursor-pointer"
+                  className="text-slate-400 hover:text-slate-600 text-sm cursor-pointer"
                 >
                   ✕
                 </button>
@@ -108,11 +108,11 @@ export function Modal({
     ) : (
       // Centered Dialog
       <div
-        className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-50 flex items-center justify-center p-4"
         onClick={onClose}
       >
         <div
-          className={`w-full ${MAX_WIDTHS[maxWidth]} bg-stone-900 border border-stone-800 rounded-3xl p-5 shadow-2xl animate-fade-in-up`}
+          className={`w-full ${MAX_WIDTHS[maxWidth]} bg-white border border-slate-200 rounded-3xl p-5 shadow-2xl animate-fade-in-up`}
           onClick={(e) => e.stopPropagation()}
         >
           {(title || showClose) && (
@@ -120,21 +120,21 @@ export function Modal({
               <div>
                 {title && (
                   <h3
-                    className="font-black text-white text-base"
+                    className="font-black text-slate-900 text-base"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {title}
                   </h3>
                 )}
                 {subtitle && (
-                  <p className="text-xs text-stone-400 mt-0.5">{subtitle}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
                 )}
               </div>
               {showClose && (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-7 h-7 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white text-xs flex items-center justify-center cursor-pointer transition-colors"
+                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 text-xs flex items-center justify-center cursor-pointer transition-colors"
                 >
                   ✕
                 </button>

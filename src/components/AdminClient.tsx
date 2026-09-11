@@ -1,20 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import QRCode from "qrcode";
 import Link from "next/link";
 import { DashboardTab } from "@/features/admin/tabs/DashboardTab";
 import { SettingsTab } from "@/features/admin/tabs/SettingsTab";
 import { MenuTab } from "@/features/admin/tabs/MenuTab";
 import { TablesTab } from "@/features/admin/tabs/TablesTab";
+import { ReservationsTab } from "@/features/admin/tabs/ReservationsTab";
 import { ReportSummary, FloorIntelligence } from "@/features/admin/tabs/AnalyticsTab";
 import { BrandingTab } from "@/features/admin/tabs/BrandingTab";
-import { AdminTopNav } from "@/features/admin/AdminTopNav";
+
+import { InventoryTab } from "@/features/admin/tabs/InventoryTab";
+import { RecipesTab } from "@/features/admin/tabs/RecipesTab";
+import { KdsTab } from "@/features/admin/tabs/KdsTab";
+import { WebhooksTab } from "@/features/admin/tabs/WebhooksTab";
+import { SupportTab } from "@/features/admin/tabs/SupportTab";
+import { MultiOutletModal } from "@/features/admin/MultiOutletModal";
+import { AdminTopNav, type AdminTabId } from "@/features/admin/AdminTopNav";
 import type { Category, MenuItem as Item, Table } from "@/types";
+import { speakHumanVoice } from "@/lib/tts";
+
 type Report = { orders: number; paid: number; revenue: number; avg: number };
 
-function paise(n: number) {
-  return `₹${(n / 100).toLocaleString("en-IN")}`;
+interface RestaurantProps {
+  id: string;
+  name?: string;
+  slug?: string;
+  tax_rate?: number;
+  upi_id?: string;
+  upi_qr_url?: string;
+  gst_number?: string;
+  phone?: string;
+  address?: string;
+  logo_url?: string;
+  tagline?: string;
+  google_review_url?: string;
+  accent_color?: string;
+  wifi_ssid?: string;
+  wifi_password?: string;
+  plan?: string;
+  tier?: string;
+  trial_ends_at?: string;
+  api_key?: string;
+  webhook_url?: string;
+}
+
+interface AnalyticsData {
+  today?: { orders: number; revenue: number };
+  recentOrders?: unknown[];
+  [key: string]: unknown;
+}
+
+interface BulkImportItem {
+  name: string;
+  price: number;
+  category: string;
+  isVeg: boolean;
+  description: string;
 }
 
 export default function AdminClient({
@@ -26,25 +69,30 @@ export default function AdminClient({
   report,
 }: {
   restaurantId: string;
-  restaurant?: any;
+  restaurant?: RestaurantProps;
   categories: Category[];
   items: Item[];
   tables: Table[];
   report: Report;
 }) {
-  const [tab, setTab] = useState<"dashboard" | "menu" | "tables" | "report" | "analytics" | "branding" | "settings" | "help">("dashboard");
+  const activeRestaurant: RestaurantProps = restaurant || { id: restaurantId, name: "QR Cafe", slug: "cafe" };
+
+  const [tab, setTab] = useState<AdminTabId>("dashboard");
+  const [showMultiOutletModal, setShowMultiOutletModal] = useState(false);
   const [categoryList, setCategoryList] = useState<Category[]>(categories);
   const [itemList, setItemList] = useState<Item[]>(items);
   const [tableList, setTableList] = useState<Table[]>(tables);
 
-  const [settingsCafeName, setSettingsCafeName] = useState(restaurant?.name || "");
-  const [settingsTaxRate, setSettingsTaxRate] = useState(restaurant?.tax_rate || 5);
-  const [settingsUpiId, setSettingsUpiId] = useState(restaurant?.upi_id || "");
-  const [settingsUpiQrUrl, setSettingsUpiQrUrl] = useState(restaurant?.upi_qr_url || "");
-  const [settingsGstNumber, setSettingsGstNumber] = useState(restaurant?.gst_number || "");
-  const [settingsPhone, setSettingsPhone] = useState(restaurant?.phone || "");
-  const [settingsAddress, setSettingsAddress] = useState(restaurant?.address || "");
-  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsCafeName, setSettingsCafeName] = useState(activeRestaurant.name || "");
+  const [settingsTaxRate, setSettingsTaxRate] = useState(activeRestaurant.tax_rate || 5);
+  const [settingsUpiId, setSettingsUpiId] = useState(activeRestaurant.upi_id || "");
+  const [settingsUpiQrUrl, setSettingsUpiQrUrl] = useState(activeRestaurant.upi_qr_url || "");
+  const [settingsPhone, setSettingsPhone] = useState(activeRestaurant.phone || "");
+  const [settingsAddress, setSettingsAddress] = useState(activeRestaurant.address || "");
+
+  // Tent Standee Config
+  const wifiSsid = activeRestaurant.wifi_ssid || "Cafe_Guest_5G";
+  const wifiPassword = activeRestaurant.wifi_password || "welcome123";
 
   // Modal / Form States
   const [showItemModal, setShowItemModal] = useState(false);
@@ -62,21 +110,17 @@ export default function AdminClient({
   const [isAddingTable, setIsAddingTable] = useState(false);
 
   // Branding Form State (Pro tier)
-  const [brandingLogoUrl, setBrandingLogoUrl] = useState(restaurant?.logo_url || "");
-  const [brandingTagline, setBrandingTagline] = useState(restaurant?.tagline || "");
-  const [brandingGoogleReviewUrl, setBrandingGoogleReviewUrl] = useState(restaurant?.google_review_url || "");
-  const [brandingAccentColor, setBrandingAccentColor] = useState(restaurant?.accent_color || "#f59e0b");
+  const [brandingLogoUrl, setBrandingLogoUrl] = useState(activeRestaurant.logo_url || "");
+  const [brandingTagline, setBrandingTagline] = useState(activeRestaurant.tagline || "");
+  const [brandingGoogleReviewUrl, setBrandingGoogleReviewUrl] = useState(activeRestaurant.google_review_url || "");
+  const [brandingAccentColor, setBrandingAccentColor] = useState(activeRestaurant.accent_color || "#f59e0b");
   const [savingBranding, setSavingBranding] = useState(false);
 
   // Bulk Menu Import State
   const [showBulkMenuModal, setShowBulkMenuModal] = useState(false);
   const [bulkMenuText, setBulkMenuText] = useState("");
-  const [parsedBulkItems, setParsedBulkItems] = useState<any[]>([]);
+  const [parsedBulkItems, setParsedBulkItems] = useState<BulkImportItem[]>([]);
   const [isImportingMenu, setIsImportingMenu] = useState(false);
-
-  // Tent Standee Config
-  const [wifiSsid, setWifiSsid] = useState(restaurant?.wifi_ssid || "Cafe_Guest_5G");
-  const [wifiPassword, setWifiPassword] = useState(restaurant?.wifi_password || "welcome123");
 
   // QR Modal States
   const [qrModal, setQrModal] = useState<{
@@ -90,21 +134,19 @@ export default function AdminClient({
   const [bulkQrList, setBulkQrList] = useState<
     { label: string; url: string; directUrl: string; seats: number }[]
   >([]);
-  const [generatingBulk, setGeneratingBulk] = useState(false);
+  const [_generatingBulk, setGeneratingBulk] = useState(false);
 
   // Analytics State
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   // Live Revenue Ticker
   const [liveRevenue, setLiveRevenue] = useState<number>(report.revenue);
   const [liveOrders, setLiveOrders] = useState<number>(report.orders);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
-  const [loadingFeed, setLoadingFeed] = useState(false);
+  const [recentOrders, setRecentOrders] = useState<unknown[]>([]);
 
   // Bulk Menu Operations
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [bulkPriceChange, setBulkPriceChange] = useState("");
   const [showBulkBar, setShowBulkBar] = useState(false);
 
   // Drag-and-drop sort
@@ -116,10 +158,10 @@ export default function AdminClient({
   // Toast/Flash Alert
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
-  const flash = (kind: "ok" | "err", text: string) => {
+  const flash = useCallback((kind: "ok" | "err", text: string) => {
     setMsg({ kind, text });
     setTimeout(() => setMsg(null), 3500);
-  };
+  }, []);
 
   const plan = restaurant?.plan || "trial";
   const tier = restaurant?.tier || "pro";
@@ -148,12 +190,6 @@ export default function AdminClient({
     return () => clearInterval(ticker);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (tab === "analytics" && !analytics) {
-      loadAnalytics();
-    }
-  }, [tab, analytics]);
 
   // Bulk selection helpers
   function toggleSelectItem(id: string) {
@@ -226,7 +262,7 @@ export default function AdminClient({
     });
   }
 
-  async function loadAnalytics() {
+  const loadAnalytics = useCallback(async () => {
     setLoadingAnalytics(true);
     try {
       const res = await fetch("/api/analytics");
@@ -239,7 +275,13 @@ export default function AdminClient({
     } finally {
       setLoadingAnalytics(false);
     }
-  }
+  }, [flash]);
+
+  useEffect(() => {
+    if (tab === "analytics" && !analytics) {
+      loadAnalytics();
+    }
+  }, [tab, analytics, loadAnalytics]);
 
   async function handleToggleAvailable(id: string, current: boolean) {
     try {
@@ -480,41 +522,7 @@ export default function AdminClient({
     }
   }
 
-  async function handleSaveSettings(e: React.FormEvent) {
-    e.preventDefault();
-    setSavingSettings(true);
-    try {
-      // Store local counter preferences in localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem(`cafe_upi_${restaurant.id}`, settingsUpiId.trim());
-        localStorage.setItem(`cafe_wifi_ssid_${restaurant.id}`, wifiSsid.trim());
-        localStorage.setItem(`cafe_wifi_pass_${restaurant.id}`, wifiPassword.trim());
-      }
 
-      const res = await fetch("/api/admin/crud", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "update_settings",
-          name: settingsCafeName.trim(),
-          taxRate: Number(settingsTaxRate),
-          phone: settingsPhone.trim(),
-          address: settingsAddress.trim(),
-        }),
-      });
-
-      if (!res.ok) {
-        const d = await res.json();
-        return flash("err", d.error || "Failed to update café settings");
-      }
-
-      flash("ok", "Café configuration, UPI & tax settings updated successfully!");
-    } catch {
-      flash("err", "Network error saving settings");
-    } finally {
-      setSavingSettings(false);
-    }
-  }
 
   async function generateQrDataUrl(tableOrToken: Table | string) {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://qr-cafe-blond.vercel.app";
@@ -554,123 +562,156 @@ export default function AdminClient({
     setBulkQrModal(true);
   }
 
+  const [hideTrialBanner, setHideTrialBanner] = useState(false);
+
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100 selection:bg-amber-500 selection:text-black flex flex-col">
-      {/* SaaS Subscription Top Bar Banner */}
-      <div
-        className={`px-6 py-2.5 text-xs font-bold flex items-center justify-between shadow-md no-print ${
-          isSuspended
-            ? "bg-red-950/90 border-b border-red-800 text-red-300"
-            : isTrial
-            ? "bg-gradient-to-r from-amber-500/20 via-stone-900 to-amber-500/20 border-b border-amber-500/30 text-amber-300"
-            : "bg-emerald-950/80 border-b border-emerald-800 text-emerald-300"
-        }`}
-      >
-        <div className="flex items-center gap-2 max-w-5xl mx-auto w-full justify-between">
-          <div className="flex items-center gap-2">
-            <span>{isSuspended ? "🚫" : isTrial ? "⏳" : "✓"}</span>
+    <main className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-600 selection:text-black flex flex-col">
+      {/* Trial countdown — trial state only, dismissible per session */}
+      {isTrial && !isSuspended && !hideTrialBanner && (
+        <div className="bg-indigo-600 text-white no-print">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-center gap-3 text-xs font-bold">
             <span>
-              {isSuspended
-                ? "Subscription expired — ordering is paused for your customers."
-                : isTrial
-                ? `Free Trial (${tier.toUpperCase()} Tier): ${daysLeft} days left.`
-                : `Active Plan: ${tier.toUpperCase()} Subscriber`}
+              {daysLeft > 0
+                ? `Free trial · ${daysLeft} day${daysLeft === 1 ? "" : "s"} left — full access, no card needed`
+                : "Free trial ends today — upgrade to keep ordering live"}
             </span>
+            <Link
+              href="/admin/billing"
+              className="px-2.5 py-1 rounded-lg bg-white text-indigo-700 font-black hover:bg-indigo-50 transition-colors shrink-0"
+            >
+              Upgrade now
+            </Link>
+            <button
+              type="button"
+              onClick={() => setHideTrialBanner(true)}
+              aria-label="Dismiss trial banner"
+              className="text-indigo-200 hover:text-white font-bold shrink-0"
+            >
+              ✕
+            </button>
           </div>
-
-          <Link
-            href="/admin/billing"
-            className={`px-3 py-1 rounded-xl font-black text-xs transition-all cursor-pointer ${
-              isSuspended
-                ? "bg-red-600 hover:bg-red-500 text-white"
-                : isTrial
-                ? "bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-sm"
-                : "bg-emerald-800 hover:bg-emerald-700 text-white"
-            }`}
-          >
-            {isSuspended ? "Renew Now &rarr;" : isTrial ? "Subscribe (₹799/mo) &rarr;" : "Manage Billing &rarr;"}
-          </Link>
         </div>
-      </div>
+      )}
 
-      <header className="bg-stone-900 border-b border-stone-800 sticky top-0 z-20 shadow-md no-print">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-stone-950 font-black text-xl shadow-md shadow-amber-500/20">
-              📊
+      <header className="bg-white/90 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-20 no-print shadow-[0_1px_12px_rgba(15,23,42,0.06)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Top row: Brand + Live Stats */}
+          <div className="min-h-16 py-2.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-base shadow-md shadow-indigo-600/30 shrink-0">
+                {restaurant?.name?.charAt(0) || "C"}
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="font-extrabold text-[15px] text-slate-900 truncate" style={{ fontFamily: "var(--font-heading)" }}>{restaurant?.name || "Café Admin"}</h1>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                    isSuspended
+                      ? "bg-red-100 text-red-700"
+                      : isTrial
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-emerald-100 text-emerald-700"
+                  }`}>
+                    {isSuspended ? "Suspended" : isTrial ? `Trial · ${daysLeft}d left` : "Active"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  Operations Hub · {new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-extrabold text-white text-base" style={{ fontFamily: "var(--font-heading)" }}>{restaurant?.name || "Café Admin"}</h1>
-              <p className="text-xs text-stone-400">Operations &amp; Setup Hub</p>
+
+            {/* Live Stats + Multi-Outlet Switcher */}
+            <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowMultiOutletModal(true)}
+                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+              >
+                <span>🏢 Outlets</span>
+              </button>
+              <div className="flex items-center gap-1.5 text-xs bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2">
+                <span className="text-slate-500 font-medium">Revenue</span>
+                <span className="font-extrabold text-indigo-700 font-mono">₹{(liveRevenue / 100).toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                <span className="text-slate-500 font-medium">Orders</span>
+                <span className="font-extrabold text-emerald-700 font-mono">{liveOrders}</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Live Revenue Ticker */}
-          <div className="hidden md:flex items-center gap-4 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2">
-            <div className="text-center">
-              <p className="text-xs text-stone-500 uppercase tracking-wider">Today's Revenue</p>
-              <p className="text-sm font-black text-amber-400 font-mono">₹{(liveRevenue / 100).toLocaleString("en-IN")}</p>
-            </div>
-            <div className="w-px h-6 bg-stone-800"></div>
-            <div className="text-center">
-              <p className="text-xs text-stone-500 uppercase tracking-wider">Orders</p>
-              <p className="text-sm font-black text-emerald-400 font-mono">{liveOrders}</p>
-            </div>
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          {/* Bottom row: Tabs */}
+          <div className="border-t border-slate-100">
+            <AdminTopNav tab={tab} setTab={setTab} />
           </div>
-
-          <AdminTopNav tab={tab} setTab={setTab} />
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto p-6 space-y-6 no-print flex-1 w-full">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-5 no-print flex-1 w-full">
         {/* Onboarding Starter Checklist (Dismissible) */}
-        {!dismissChecklist && (
-          <div className="p-4 rounded-3xl bg-stone-900/90 border border-stone-800 shadow-xl space-y-3 relative">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-base">🚀</span>
-                <h3 className="font-black text-xs text-white">Café Launch Checklist</h3>
+        {!dismissChecklist && (() => {
+          const doneCount = (itemList.length > 0 ? 1 : 0) + (tableList.length > 0 ? 1 : 0);
+          const pct = Math.round((doneCount / 2) * 100);
+          return (
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-white to-indigo-50/60 border border-indigo-100 shadow-lg shadow-indigo-100/50 space-y-4 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-slate-100">
+                <div
+                  className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500"
+                  style={{ width: `${pct}%` }}
+                />
               </div>
-              <button
-                type="button"
-                onClick={() => setDismissChecklist(true)}
-                className="text-xs text-stone-500 hover:text-stone-300 font-bold"
-              >
-                Dismiss ✕
-              </button>
-            </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-md shadow-indigo-600/25">🚀</span>
+                  <div>
+                    <h3 className="font-extrabold text-sm text-slate-900">Café Launch Checklist</h3>
+                    <p className="text-[11px] text-slate-500 font-medium">{doneCount === 2 ? "All set — you're live! 🎉" : `${doneCount} of 2 setup steps complete`}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDismissChecklist(true)}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-bold px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  Dismiss ✕
+                </button>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-950 border border-stone-800">
-                <span className={itemList.length > 0 ? "text-emerald-400 font-bold" : "text-stone-600"}>
-                  {itemList.length > 0 ? "✓" : "○"}
-                </span>
-                <span className="text-stone-300">Add Menu Dishes ({itemList.length})</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-950 border border-stone-800">
-                <span className={tableList.length > 0 ? "text-emerald-400 font-bold" : "text-stone-600"}>
-                  {tableList.length > 0 ? "✓" : "○"}
-                </span>
-                <span className="text-stone-300">Generate Tables & QRs ({tableList.length})</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-stone-950 border border-stone-800">
-                <span className="text-amber-400 font-bold">★</span>
-                <Link href={restaurant?.slug ? `/c/${restaurant.slug}` : "/"} className="text-amber-400 hover:underline">
-                  Test Guest Menu ↗
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                <div className={`flex items-center gap-2.5 p-3 rounded-2xl border transition-colors ${itemList.length > 0 ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"}`}>
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${itemList.length > 0 ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                    {itemList.length > 0 ? "✓" : "1"}
+                  </span>
+                  <span className="text-slate-700 font-semibold">Add Menu Dishes ({itemList.length})</span>
+                </div>
+                <div className={`flex items-center gap-2.5 p-3 rounded-2xl border transition-colors ${tableList.length > 0 ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"}`}>
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${tableList.length > 0 ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                    {tableList.length > 0 ? "✓" : "2"}
+                  </span>
+                  <span className="text-slate-700 font-semibold">Generate Tables & QRs ({tableList.length})</span>
+                </div>
+                <Link href={restaurant?.slug ? `/c/${restaurant.slug}` : "/"} className="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-600 transition-colors group">
+                  <span className="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black shrink-0">★</span>
+                  <span className="text-white font-bold">
+                    Test Guest Menu <span className="inline-block transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
+                  </span>
                 </Link>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Flash Message */}
         {msg && (
           <div
             className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 border shadow-lg animate-in fade-in duration-200 ${
               msg.kind === "ok"
-                ? "bg-emerald-950/80 border-emerald-800 text-emerald-300"
-                : "bg-red-950/80 border-red-800 text-red-300"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                : "bg-red-50 border-red-200 text-red-700"
             }`}
           >
             <span>{msg.kind === "ok" ? "✓" : "⚠️"}</span>
@@ -723,11 +764,9 @@ export default function AdminClient({
           <div className="animate-fade-in-up">
             <TablesTab
               tableList={tableList}
-              generatingBulk={generatingBulk}
               isAddingTable={isAddingTable}
               newTableLabel={newTableLabel}
               newTableSeats={newTableSeats}
-              showBulkQr={showBulkQr}
               showQr={showQr}
               handleDeleteTable={handleDeleteTable}
               setNewTableLabel={setNewTableLabel}
@@ -737,7 +776,14 @@ export default function AdminClient({
           </div>
         )}
 
-        {/* TAB 3: REPORT SUMMARY */}
+        {tab === "bookings" && (
+          <div className="animate-fade-in-up">
+            <ReservationsTab />
+          </div>
+        )}
+
+
+        {/* TAB 4: REPORT SUMMARY */}
         {tab === "report" && (
           <div className="animate-fade-in-up">
             <ReportSummary report={report} />
@@ -773,28 +819,53 @@ export default function AdminClient({
           </div>
         )}
 
+        {/* TAB: KITCHEN DISPLAY SYSTEM */}
+        {tab === "kds" && (
+          <KdsTab restaurantId={restaurantId} flash={flash} />
+        )}
+
+        {/* TAB: STOCK CONTROL & ALERTS */}
+        {tab === "inventory" && (
+          <InventoryTab flash={flash} />
+        )}
+
+        {/* TAB: GRAVY & RECIPE MGMT */}
+        {tab === "recipes" && (
+          <RecipesTab itemList={itemList} flash={flash} />
+        )}
+
+        {/* TAB: MENU SYNC & API/WEBHOOKS */}
+        {tab === "webhooks" && (
+          <WebhooksTab restaurant={activeRestaurant} flash={flash} />
+        )}
+
+        {/* TAB: PRIORITY SUPPORT */}
+        {tab === "support" && (
+          <SupportTab restaurant={activeRestaurant} flash={flash} />
+        )}
+
         {/* TAB 6: OWNER GOVERNANCE & DIAGNOSTIC MANUAL */}
         {tab === "help" && (
-          <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl max-w-4xl">
-            <div className="flex justify-between items-start flex-wrap gap-4 border-b border-stone-800 pb-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl max-w-4xl">
+            <div className="flex justify-between items-start flex-wrap gap-4 border-b border-slate-200 pb-4">
               <div>
                 <h2 className="text-xl font-black text-white">🏛️ Owner Governance &amp; Operating Manual</h2>
-                <p className="text-xs text-stone-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Subscription controls, multi-tenant governance, Google Review setup &amp; hardware diagnostics
                 </p>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-amber-500 text-stone-950">
+              <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-indigo-600 text-slate-900">
                 Operational Runbook
               </span>
             </div>
 
             {/* 1. INTERACTIVE 1-CLICK SYSTEM DIAGNOSTICS */}
-            <div className="p-5 rounded-3xl bg-stone-950 border border-amber-500/30 space-y-4 shadow-inner">
+            <div className="p-5 rounded-3xl bg-slate-50 border border-amber-500/30 space-y-4 shadow-inner">
               <div>
-                <h3 className="text-sm font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-sm font-black text-indigo-600 uppercase tracking-wider flex items-center gap-2">
                   <span>🛠️ Live Floor &amp; Hardware Self-Diagnostics</span>
                 </h3>
-                <p className="text-xs text-stone-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Test your browser audio, WhatsApp URL encoding, and tax calculations before operating live.
                 </p>
               </div>
@@ -804,21 +875,14 @@ export default function AdminClient({
                 <button
                   type="button"
                   onClick={() => {
-                    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-                      window.speechSynthesis.cancel();
-                      const u = new SpeechSynthesisUtterance("Table 01 needs Water!");
-                      u.rate = 1.05;
-                      window.speechSynthesis.speak(u);
-                      flash("ok", "🔊 Voice Synth Test Triggered: 'Table 01 needs Water!'");
-                    } else {
-                      flash("err", "Web Speech API not supported on this browser.");
-                    }
+                    speakHumanVoice("Table 01 needs Water!");
+                    flash("ok", "🔊 Human Voice Synth Test Triggered: 'Staff assistance needed! Table 1 has requested fresh water.'");
                   }}
-                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">🔊</span>
                   <div className="text-xs font-bold text-white">Test Voice Call Bell</div>
-                  <div className="text-xs text-stone-500 font-mono">Speak: Table 01 Call</div>
+                  <div className="text-xs text-slate-400 font-mono">Speak: Table 01 Call</div>
                 </button>
 
                 {/* Test 2: WhatsApp Link Test */}
@@ -839,11 +903,11 @@ export default function AdminClient({
                     window.open(`https://wa.me/?text=${encodeURIComponent(sampleMsg)}`, "_blank");
                     flash("ok", "💬 WhatsApp Test Receipt Dispatched!");
                   }}
-                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">💬</span>
-                  <div className="text-xs font-bold text-emerald-400">Test WhatsApp Bill</div>
-                  <div className="text-xs text-stone-500 font-mono">Launch pre-formatted text</div>
+                  <div className="text-xs font-bold text-emerald-600">Test WhatsApp Bill</div>
+                  <div className="text-xs text-slate-400 font-mono">Launch pre-formatted text</div>
                 </button>
 
                 {/* Test 3: GST Tax Calculation */}
@@ -858,11 +922,11 @@ export default function AdminClient({
                     const sgst = (gstTotal / 2).toFixed(2);
                     flash("ok", `🧮 GST Test (₹1,000 Bill): Taxable=₹${taxable}, CGST (${taxRate / 2}%)=₹${cgst}, SGST (${taxRate / 2}%)=₹${sgst}`);
                   }}
-                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">🧮</span>
-                  <div className="text-xs font-bold text-amber-400">Verify GST Math</div>
-                  <div className="text-xs text-stone-500 font-mono">Compute 2.5% CGST/SGST</div>
+                  <div className="text-xs font-bold text-indigo-600">Verify GST Math</div>
+                  <div className="text-xs text-slate-400 font-mono">Compute 2.5% CGST/SGST</div>
                 </button>
 
                 {/* Test 4: Realtime WebSocket Ping */}
@@ -882,11 +946,11 @@ export default function AdminClient({
                       flash("err", "Server unreachable");
                     }
                   }}
-                  className="p-3 rounded-2xl bg-stone-900 hover:bg-stone-800 border border-stone-800 text-left space-y-1.5 transition-all cursor-pointer group"
+                  className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-left space-y-1.5 transition-all cursor-pointer group"
                 >
                   <span className="text-xl block group-hover:scale-110 transition-transform">⚡</span>
                   <div className="text-xs font-bold text-stone-200">Ping Server Latency</div>
-                  <div className="text-xs text-stone-500 font-mono">Verify Edge connection</div>
+                  <div className="text-xs text-slate-400 font-mono">Verify Edge connection</div>
                 </button>
               </div>
             </div>
@@ -894,30 +958,30 @@ export default function AdminClient({
             {/* 2. GOVERNANCE MODULE A: SUBSCRIPTIONS & BILLING */}
             <div className="space-y-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                <span className="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-600 flex items-center justify-center font-bold text-xs">
                   A
                 </span>
                 <h3 className="text-sm font-extrabold text-white">Subscription &amp; SaaS Billing Governance</h3>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2 text-stone-300 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-slate-600 leading-relaxed">
                 <p>
-                  QR Café operates on a unified flat plan at <strong>₹799/month</strong> with unlimited tables, dishes, KDS screens, and cash POS registers.
+                  QR Café operates on a unified flat plan at <strong>₹999/month</strong> (₹9,999/year) with unlimited tables, dishes, KDS screens, and cash POS registers.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 font-mono text-xs">
-                  <div className="p-2 rounded-xl bg-stone-900 border border-stone-800">
-                    <span className="text-stone-500 block">Subscription Status:</span>
-                    <span className="text-emerald-400 font-bold uppercase">{plan}</span>
+                  <div className="p-2 rounded-xl bg-white border border-slate-200">
+                    <span className="text-slate-400 block">Subscription Status:</span>
+                    <span className="text-emerald-600 font-bold uppercase">{plan}</span>
                   </div>
-                  <div className="p-2 rounded-xl bg-stone-900 border border-stone-800">
-                    <span className="text-stone-500 block">Trial Expiry / Renewal:</span>
-                    <span className="text-amber-400 font-bold">{trialEnds ? trialEnds.toLocaleDateString("en-IN") : "Active"}</span>
+                  <div className="p-2 rounded-xl bg-white border border-slate-200">
+                    <span className="text-slate-400 block">Trial Expiry / Renewal:</span>
+                    <span className="text-indigo-600 font-bold">{trialEnds ? trialEnds.toLocaleDateString("en-IN") : "Active"}</span>
                   </div>
                 </div>
                 <div className="pt-2">
                   <Link
                     href="/admin/billing"
-                    className="inline-block px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs transition-all shadow-md cursor-pointer"
+                    className="inline-block px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs transition-all shadow-md cursor-pointer"
                   >
                     Manage Razorpay Subscription &rarr;
                   </Link>
@@ -928,17 +992,17 @@ export default function AdminClient({
             {/* 3. GOVERNANCE MODULE B: MULTI-TENANT FLOOR DEPLOYMENT */}
             <div className="space-y-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                <span className="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-600 flex items-center justify-center font-bold text-xs">
                   B
                 </span>
                 <h3 className="text-sm font-extrabold text-white">Floor Deployment &amp; Table QR Stands</h3>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2 text-stone-300 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-slate-600 leading-relaxed">
                 <p>
                   Each table has a permanent human-readable URL (e.g. <code>/c/{restaurant?.slug || "cafe"}/t/01</code>). In the <strong>Tables Tab</strong>, you can add tables and click <strong>&quot;Print All Tent Cards 🖨️&quot;</strong> to generate ready-to-fold acrylic table inserts.
                 </p>
-                <ul className="space-y-1 text-stone-400 list-disc pl-4 pt-1">
+                <ul className="space-y-1 text-slate-500 list-disc pl-4 pt-1">
                   <li>Table QR stands never expire and work with any standard smartphone camera.</li>
                   <li>Chefs hear spoken announcements immediately on the Kitchen KDS (`/kds`).</li>
                   <li>Cashiers can view all open tables simultaneously on the Cloud POS (`/pos`).</li>
@@ -949,20 +1013,20 @@ export default function AdminClient({
             {/* 4. GOVERNANCE MODULE C: GOOGLE BUSINESS REVIEW AUTOMATION */}
             <div className="space-y-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                <span className="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-600 flex items-center justify-center font-bold text-xs">
                   C
                 </span>
                 <h3 className="text-sm font-extrabold text-white">Google Business 5★ Review Capture Setup</h3>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-2 text-stone-300 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-slate-600 leading-relaxed">
                 <p>
                   To maximize your restaurant&apos;s local Google Maps ranking, set your Google Place Review URL in the <strong>Branding Tab</strong>.
                 </p>
-                <div className="p-3 rounded-xl bg-stone-900 border border-stone-800 font-mono text-xs text-amber-400">
+                <div className="p-3 rounded-xl bg-white border border-slate-200 font-mono text-xs text-indigo-600">
                   Current Review URL: {restaurant?.google_review_url || "Not configured yet (Add in Branding tab)"}
                 </div>
-                <p className="text-stone-400">
+                <p className="text-slate-500">
                   Whenever a guest rates their meal 4★ or 5★ on the live order tracker, or receives a WhatsApp bill, they are 1-click routed directly to leave a 5-star Google review.
                 </p>
               </div>
@@ -974,7 +1038,7 @@ export default function AdminClient({
         {tab === "settings" && (
           <div className="animate-fade-in-up">
             <SettingsTab
-              restaurant={restaurant}
+              restaurant={activeRestaurant}
               settingsCafeName={settingsCafeName}
               setSettingsCafeName={setSettingsCafeName}
               settingsTaxRate={settingsTaxRate}
@@ -1000,12 +1064,12 @@ export default function AdminClient({
           onClick={() => setQrModal(null)}
         >
           <div
-            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center"
+            className="bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-800 pb-2">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
               <h3 className="text-sm font-black text-white">Table {qrModal.label} QR Stand</h3>
-              <button onClick={() => setQrModal(null)} className="text-stone-400 hover:text-white text-xs">
+              <button onClick={() => setQrModal(null)} className="text-slate-500 hover:text-slate-900 text-xs">
                 ✕
               </button>
             </div>
@@ -1014,14 +1078,14 @@ export default function AdminClient({
               <img src={qrModal.url} alt={`QR for Table ${qrModal.label}`} className="w-56 h-56 mx-auto" />
             </div>
 
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-slate-500">
               Scan with any mobile camera to launch digital ordering for Table {qrModal.label}
             </p>
 
             <button
               type="button"
               onClick={() => window.print()}
-              className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs cursor-pointer shadow-md"
+              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs cursor-pointer shadow-md"
             >
               Print Stand Card 🖨️
             </button>
@@ -1036,21 +1100,21 @@ export default function AdminClient({
           onClick={() => setShowItemModal(false)}
         >
           <div
-            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
+            className="bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-800 pb-3">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <h3 className="text-base font-black text-white">Add Menu Dish</h3>
-              <button onClick={() => setShowItemModal(false)} className="text-stone-400 hover:text-white text-xs">
+              <button onClick={() => setShowItemModal(false)} className="text-slate-500 hover:text-slate-900 text-xs">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateItem} className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Dish Name</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Dish Name</label>
                 <input
-                  className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-indigo-500"
                   placeholder="e.g. Hazelnut Iced Latte"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
@@ -1060,9 +1124,9 @@ export default function AdminClient({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Price (₹)</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Price (₹)</label>
                   <input
-                    className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-indigo-500"
                     placeholder="e.g. 240"
                     type="number"
                     step="0.01"
@@ -1072,9 +1136,9 @@ export default function AdminClient({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Category</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Category</label>
                   <select
-                    className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-indigo-500"
                     value={newItemCatId}
                     onChange={(e) => setNewItemCatId(e.target.value)}
                   >
@@ -1088,16 +1152,16 @@ export default function AdminClient({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Description (Optional)</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Description (Optional)</label>
                 <input
-                  className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-indigo-500"
                   placeholder="Freshly brewed espresso with toasted hazelnut syrup"
                   value={newItemDesc}
                   onChange={(e) => setNewItemDesc(e.target.value)}
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-xs text-stone-300 font-semibold cursor-pointer pt-1">
+              <label className="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={newItemVeg}
@@ -1111,13 +1175,13 @@ export default function AdminClient({
                 <button
                   type="button"
                   onClick={() => setShowItemModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer border border-slate-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs shadow-md shadow-amber-500/20 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs shadow-md shadow-indigo-600/20 cursor-pointer"
                 >
                   Save Item
                 </button>
@@ -1134,21 +1198,21 @@ export default function AdminClient({
           onClick={() => setShowCatModal(false)}
         >
           <div
-            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
+            className="bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-800 pb-3">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <h3 className="text-base font-black text-white">Create New Category</h3>
-              <button onClick={() => setShowCatModal(false)} className="text-stone-400 hover:text-white text-xs">
+              <button onClick={() => setShowCatModal(false)} className="text-slate-500 hover:text-slate-900 text-xs">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateCategory} className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-1">Category Name</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Category Name</label>
                 <input
-                  className="bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 w-full focus:outline-none focus:border-amber-500"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-indigo-500"
                   placeholder="e.g. Artisanal Breads & Toasts"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
@@ -1160,13 +1224,13 @@ export default function AdminClient({
                 <button
                   type="button"
                   onClick={() => setShowCatModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer border border-slate-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs shadow-md shadow-amber-500/20 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs shadow-md shadow-indigo-600/20 cursor-pointer"
                 >
                   Create
                 </button>
@@ -1183,17 +1247,17 @@ export default function AdminClient({
           onClick={() => setShowBulkMenuModal(false)}
         >
           <div
-            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-2xl w-full space-y-4 shadow-2xl"
+            className="bg-white border border-slate-200 rounded-3xl p-6 max-w-2xl w-full space-y-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-800 pb-3">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <div>
                 <h3 className="text-base font-black text-white">📥 Bulk Import Menu Dishes</h3>
-                <p className="text-xs text-stone-400">
+                <p className="text-xs text-slate-500">
                   Paste raw spreadsheet text or CSV (Format: <code>Dish Name, Price, Category, Veg/Non-Veg, Description</code>)
                 </p>
               </div>
-              <button onClick={() => setShowBulkMenuModal(false)} className="text-stone-400 hover:text-white text-xs">
+              <button onClick={() => setShowBulkMenuModal(false)} className="text-slate-500 hover:text-slate-900 text-xs">
                 ✕
               </button>
             </div>
@@ -1201,7 +1265,7 @@ export default function AdminClient({
             <div className="space-y-3">
               {/* Sample Preset Shortcut */}
               <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Raw CSV / Spreadsheet Text
                 </label>
                 <button
@@ -1216,7 +1280,7 @@ Avocado Sourdough Toast, 240, Breakfast, Veg, Smashed hass avocado on artisan so
 Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with ganache`;
                     handleBulkParse(sample);
                   }}
-                  className="text-xs text-amber-400 font-bold hover:underline cursor-pointer"
+                  className="text-xs text-indigo-600 font-bold hover:underline cursor-pointer"
                 >
                   ⚡ Load 6 Sample Dishes
                 </button>
@@ -1227,24 +1291,24 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 value={bulkMenuText}
                 onChange={(e) => handleBulkParse(e.target.value)}
                 placeholder="Hazelnut Cold Brew, 220, Coffee, Veg, Espresso and milk&#10;Truffle Pizza, 380, Food, Veg, Crispy sourdough pizza"
-                className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-3 text-xs text-stone-100 font-mono focus:outline-none focus:border-amber-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-900 font-mono focus:outline-none focus:border-indigo-500"
               ></textarea>
 
               {/* Live Parsed Preview Table */}
               {parsedBulkItems.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">
                     ✓ Validated {parsedBulkItems.length} Dishes Ready to Import:
                   </span>
-                  <div className="max-h-40 overflow-y-auto rounded-xl border border-stone-800 bg-stone-950/80 p-2 space-y-1">
+                  <div className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/80 p-2 space-y-1">
                     {parsedBulkItems.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-xs p-1.5 rounded-lg hover:bg-stone-900 border-b border-stone-800/40">
+                      <div key={idx} className="flex justify-between items-center text-xs p-1.5 rounded-lg hover:bg-white border-b border-slate-200/40">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${item.isVeg ? "bg-emerald-400" : "bg-red-400"}`}></span>
                           <span className="font-bold text-white">{item.name}</span>
-                          <span className="text-xs text-stone-500 font-mono">({item.category})</span>
+                          <span className="text-xs text-slate-400 font-mono">({item.category})</span>
                         </div>
-                        <span className="text-amber-400 font-mono font-bold">₹{item.price}</span>
+                        <span className="text-indigo-600 font-mono font-bold">₹{item.price}</span>
                       </div>
                     ))}
                   </div>
@@ -1252,11 +1316,11 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
               )}
             </div>
 
-            <div className="flex gap-2 pt-2 border-t border-stone-800">
+            <div className="flex gap-2 pt-2 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setShowBulkMenuModal(false)}
-                className="flex-1 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs cursor-pointer border border-stone-700"
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer border border-slate-300"
               >
                 Cancel
               </button>
@@ -1280,13 +1344,13 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
           onClick={() => setBulkQrModal(false)}
         >
           <div
-            className="bg-stone-900 border border-stone-800 rounded-3xl p-6 max-w-4xl w-full space-y-6 shadow-2xl"
+            className="bg-white border border-slate-200 rounded-3xl p-6 max-w-4xl w-full space-y-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-stone-800 pb-3 no-print">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-3 no-print">
               <div>
                 <h3 className="text-base font-black text-white">🖨️ Ready-to-Fold 80mm Table Tent Cards</h3>
-                <p className="text-xs text-stone-400">
+                <p className="text-xs text-slate-500">
                   Formatted for standard A4 cardstock or 80mm tabletop acrylic stands
                 </p>
               </div>
@@ -1294,11 +1358,11 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs shadow-md cursor-pointer"
                 >
                   Print All Stand Cards 🖨️
                 </button>
-                <button onClick={() => setBulkQrModal(false)} className="text-stone-400 hover:text-white text-xs px-2">
+                <button onClick={() => setBulkQrModal(false)} className="text-slate-500 hover:text-slate-900 text-xs px-2">
                   ✕
                 </button>
               </div>
@@ -1309,7 +1373,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
               {bulkQrList.map((t, idx) => (
                 <div
                   key={idx}
-                  className="bg-white text-stone-950 rounded-3xl p-5 border-2 border-dashed border-stone-300 text-center space-y-3 shadow-lg flex flex-col justify-between"
+                  className="bg-white text-slate-900 rounded-3xl p-5 border-2 border-dashed border-stone-300 text-center space-y-3 shadow-lg flex flex-col justify-between"
                 >
                   <div className="border-b border-stone-200 pb-2">
                     <span className="text-xs font-black uppercase tracking-widest text-amber-600 block">
@@ -1321,12 +1385,13 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                   </div>
 
                   <div className="p-2 bg-stone-50 rounded-2xl inline-block border border-stone-200 shadow-inner">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={t.url} alt={`QR for Table ${t.label}`} className="w-44 h-44 mx-auto" />
                   </div>
 
                   <div className="space-y-1.5 text-xs text-stone-700">
                     <p className="font-extrabold text-stone-900">📱 Scan with Camera to Order</p>
-                    <p className="text-xs text-stone-500">1. Scan QR • 2. Select Food • 3. Pay Cash at Counter</p>
+                    <p className="text-xs text-slate-400">1. Scan QR • 2. Select Food • 3. Pay Cash at Counter</p>
                   </div>
 
                   {/* WiFi Badge */}
@@ -1339,6 +1404,15 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
           </div>
         </div>
       )}
+      {/* Multi-Outlet Switcher Dialog Modal */}
+      {showMultiOutletModal && (
+        <MultiOutletModal
+          currentRestaurantId={restaurantId}
+          currentRestaurantName={restaurant?.name || "Main Outlet"}
+          onClose={() => setShowMultiOutletModal(false)}
+        />
+      )}
     </main>
   );
 }
+

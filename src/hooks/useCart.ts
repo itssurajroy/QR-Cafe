@@ -23,19 +23,15 @@ export interface UseCartReturn {
 }
 
 export function useCart(storageKey: string): UseCartReturn {
-  const [cart, setCart] = useState<Record<string, CartLine>>({});
-
-  // Restore from sessionStorage on mount
-  useEffect(() => {
+  const [cart, setCart] = useState<Record<string, CartLine>>(() => {
+    if (typeof window === "undefined") return {};
     try {
       const saved = sessionStorage.getItem(`cart:${storageKey}`);
-      if (saved) {
-        setCart(JSON.parse(saved));
-      }
+      return saved ? JSON.parse(saved) : {};
     } catch {
-      // ignore parse errors
+      return {};
     }
-  }, [storageKey]);
+  });
 
   // Persist to sessionStorage on every change
   useEffect(() => {

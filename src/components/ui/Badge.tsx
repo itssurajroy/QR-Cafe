@@ -13,12 +13,12 @@ export interface BadgeProps {
 }
 
 const VARIANTS: Record<NonNullable<BadgeProps["variant"]>, string> = {
-  success: "bg-emerald-950/80 border-emerald-700 text-emerald-400",
-  warning: "bg-amber-950/80 border-amber-700 text-amber-400",
-  danger:  "bg-red-950/80 border-red-700 text-red-400",
-  info:    "bg-blue-950/80 border-blue-700 text-blue-400",
-  neutral: "bg-stone-900 border-stone-700 text-stone-400",
-  amber:   "bg-amber-500/10 border-amber-500/30 text-amber-400",
+  success: "bg-emerald-50 border-emerald-200 text-emerald-700",
+  warning: "bg-amber-50 border-amber-200 text-amber-700",
+  danger:  "bg-red-50 border-red-200 text-red-700",
+  info:    "bg-blue-50 border-blue-200 text-blue-700",
+  neutral: "bg-slate-100 border-slate-200 text-slate-700",
+  amber:   "bg-amber-50 border-amber-200 text-amber-700",
 };
 
 const SIZES: Record<NonNullable<BadgeProps["size"]>, string> = {
@@ -27,12 +27,12 @@ const SIZES: Record<NonNullable<BadgeProps["size"]>, string> = {
 };
 
 const DOT_COLORS: Record<NonNullable<BadgeProps["variant"]>, string> = {
-  success: "bg-emerald-400",
-  warning: "bg-amber-400",
-  danger:  "bg-red-400",
-  info:    "bg-blue-400",
-  neutral: "bg-stone-400",
-  amber:   "bg-amber-400",
+  success: "bg-emerald-500",
+  warning: "bg-amber-500",
+  danger:  "bg-red-500",
+  info:    "bg-blue-500",
+  neutral: "bg-slate-500",
+  amber:   "bg-amber-500",
 };
 
 export function Badge({

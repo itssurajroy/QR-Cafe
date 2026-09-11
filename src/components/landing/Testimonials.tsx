@@ -1,143 +1,72 @@
-"use client";
-
-import { useCallback, useEffect, useRef, useState } from "react";
-
 const TESTIMONIALS = [
   {
     quote:
-      "QR Café transformed our ordering. We reduced wait times by 40% and our staff can focus on food instead of taking orders.",
+      "We cut order wait times by 40% in the first week. Our staff finally has time to focus on food quality instead of taking orders.",
     name: "Priya Sharma",
-    location: "Mumbai",
+    role: "Owner",
+    cafe: "Chai & Co., Mumbai",
+    metric: "40% faster orders",
   },
   {
     quote:
-      "The KDS is a game changer. Our kitchen has never been more organized. Orders flow in real-time and we never miss one.",
-    name: "Rahul Verdel",
-    location: "Delhi",
+      "The kitchen display changed everything. No more paper chits, no more missed orders. Our kitchen runs like clockwork now.",
+    name: "Rahul Verma",
+    role: "Manager",
+    cafe: "Street Bites, Delhi",
+    metric: "Zero missed orders",
   },
   {
     quote:
-      "Simple setup, beautiful menu, and our customers love it. We went from paper menus to digital in one afternoon.",
+      "Set up the entire menu in one afternoon. Our customers love the QR experience — it feels modern and premium.",
     name: "Anjali Mehta",
-    location: "Bangalore",
+    role: "Founder",
+    cafe: "Brew House, Bangalore",
+    metric: "Live same day",
   },
 ];
 
-function ChevronLeft() {
-  return (
-    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-function ChevronRight() {
-  return (
-    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  );
-}
-
 export function Testimonials() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const next = useCallback(() => {
-    setActiveIndex((i) => (i + 1) % TESTIMONIALS.length);
-  }, []);
-
-  const prev = useCallback(() => {
-    setActiveIndex((i) => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
-  }, []);
-
-  useEffect(() => {
-    if (isPaused) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-
-    intervalRef.current = setInterval(next, 4000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isPaused, next]);
-
   return (
     <section id="testimonials" className="bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Loved by café owners
+          <p className="text-sm font-medium tracking-wide text-indigo-600 uppercase">
+            Testimonials
+          </p>
+          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
+            Trusted by cafe owners across India
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
-            See what our merchants have to say.
+            From Mumbai street food to Bangalore brew houses — here&apos;s what
+            cafe owners say about QR Cafe.
           </p>
         </div>
 
-        <div
-          className="relative mt-16"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          {/* Carousel */}
-          <div className="overflow-hidden">
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+          {TESTIMONIALS.map((t) => (
             <div
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{
-                transform: `translateX(-${activeIndex * (100 / 3)}%)`,
-              }}
+              key={t.name}
+              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
             >
-              {TESTIMONIALS.map((t, i) => (
-                <div
-                  key={i}
-                  className="w-full shrink-0 px-3 sm:w-1/2 md:w-1/3"
-                >
-                  <div className="flex h-full flex-col bg-white p-6 rounded-2xl border border-slate-200">
-                    <p className="flex-1 text-slate-600 leading-relaxed">
-                      &ldquo;{t.quote}&rdquo;
-                    </p>
-                    <div className="mt-6">
-                      <p className="font-semibold text-slate-900">{t.name}</p>
-                      <p className="text-sm text-slate-500">{t.location}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="mb-4 inline-flex self-start rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-100">
+                {t.metric}
+              </div>
+              <blockquote className="flex-1 leading-relaxed text-slate-600">
+                &ldquo;{t.quote}&rdquo;
+              </blockquote>
+              <div className="mt-6 border-t border-slate-100 pt-4">
+                <p className="font-semibold text-slate-900">{t.name}</p>
+                <p className="text-sm text-slate-500">
+                  {t.role}, {t.cafe}
+                </p>
+              </div>
             </div>
-          </div>
-
-          {/* Arrow buttons */}
-          <button
-            onClick={prev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 rounded-full bg-white p-2 shadow-md border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors hidden sm:flex"
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 rounded-full bg-white p-2 shadow-md border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors hidden sm:flex"
-            aria-label="Next testimonial"
-          >
-            <ChevronRight />
-          </button>
-
-          {/* Dot indicators */}
-          <div className="mt-8 flex justify-center gap-2">
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                  i === activeIndex ? "bg-indigo-600" : "bg-slate-300"
-                }`}
-                aria-label={`Go to testimonial ${i + 1}`}
-              />
-            ))}
-          </div>
+          ))}
         </div>
+        <p className="mt-8 text-center text-xs text-slate-400">
+          * Illustrative testimonials. Metrics shown are representative of typical use
+          cases and may vary by restaurant.
+        </p>
       </div>
     </section>
   );

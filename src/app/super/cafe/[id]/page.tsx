@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSessionUser } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import AdminClient from "@/components/AdminClient";
 import Link from "next/link";
@@ -11,8 +11,8 @@ export default async function ImpersonateCafePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await getSessionUser();
-  if (!user || user.role !== "super_admin") {
+  const user = await requireSuperAdmin();
+  if (!user) {
     redirect("/login");
   }
 

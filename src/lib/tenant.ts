@@ -8,8 +8,10 @@ export type Tenant = {
   logo_url: string | null;
   accent_color: string | null;
   tagline: string | null;
+  google_review_url: string | null;
   plan: "trial" | "active" | "suspended" | "cancelled";
   tier?: "all_in_one" | "pro" | "basic";
+  trial_starts_at: string | null;
   trial_ends_at: string | null;
   subscription_ends_at: string | null;
   billing_status: string | null;
@@ -25,7 +27,7 @@ export type TierLimits = {
   multiLocation: boolean;
 };
 
-// Single unified All-in-One plan (Unlimited Everything, ₹799/mo)
+// Single unified QR Café plan (Unlimited Everything, ₹999/mo, ₹9,999/yr)
 export function getTierLimits(_tier?: string): TierLimits {
   return {
     maxTables: null,
@@ -35,6 +37,29 @@ export function getTierLimits(_tier?: string): TierLimits {
     analytics: true,
     multiLocation: true,
   };
+}
+
+export type SubscriptionState = "trial" | "active" | "expired" | "suspended" | "cancelled";
+
+// Single source of truth for where a café stands in the trial → paid lifecycle.
+export function getSubscriptionState(
+  t: Pick<Tenant, "plan" | "trial_ends_at"> | null,
+): SubscriptionState {
+  if (!t) return "expired";
+  if (t.plan === "active") return "active";
+  if (t.plan === "suspended") return "suspended";
+  if (t.plan === "cancelled") return "cancelled";
+  if (t.plan === "trial") {
+    if (!t.trial_ends_at) return "trial"; // safety: no expiry set yet
+    return new Date(t.trial_ends_at).getTime() > Date.now() ? "trial" : "expired";
+  }
+  return "expired";
+}
+
+// Whole days remaining in the trial (0 when not trialling or lapsed).
+export function trialDaysLeft(t: Pick<Tenant, "plan" | "trial_ends_at"> | null): number {
+  if (!t || t.plan !== "trial" || !t.trial_ends_at) return 0;
+  return Math.max(0, Math.ceil((new Date(t.trial_ends_at).getTime() - Date.now()) / 864e5));
 }
 
 // True when the café is allowed to take orders.
@@ -54,7 +79,7 @@ export async function getRestaurantBySlug(slug: string): Promise<Tenant | null> 
   const { data, error } = await db
     .from("restaurants")
     .select(
-      "id,name,slug,currency,logo_url,accent_color,tagline,plan,tier,trial_ends_at,subscription_ends_at,billing_status,upi_qr_url",
+      "id,name,slug,currency,logo_url,accent_color,tagline,plan,tier,trial_starts_at,trial_ends_at,subscription_ends_at,billing_status,upi_qr_url,google_review_url",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -75,7 +100,7 @@ export async function getTenantByTableToken(
   const { data, error } = await db
     .from("restaurant_tables")
     .select(
-      "id, active, restaurant_id, restaurants(id,name,slug,currency,logo_url,accent_color,tagline,plan,tier,trial_ends_at,subscription_ends_at,billing_status)",
+      "id, active, restaurant_id, restaurants(id,name,slug,currency,logo_url,accent_color,tagline,plan,tier,trial_starts_at,trial_ends_at,subscription_ends_at,billing_status)",
     )
     .eq("qr_token", token)
     .maybeSingle();
