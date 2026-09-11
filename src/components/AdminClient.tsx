@@ -1069,7 +1069,7 @@ export default function AdminClient({
                 </p>
                 <ul className="space-y-1 text-slate-500 list-disc pl-4 pt-1">
                   <li>Table QR stands never expire and work with any standard smartphone camera.</li>
-                  <li>Chefs hear spoken announcements immediately on the Kitchen KDS (`/kds`).</li>
+                  <li>Chefs hear spoken announcements immediately on the Kitchen KDS (`/pos?view=kitchen`).</li>
                   <li>Cashiers can view all open tables simultaneously on the Cloud POS (`/pos`).</li>
                 </ul>
               </div>

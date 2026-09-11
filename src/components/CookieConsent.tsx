@@ -8,7 +8,7 @@ const COOKIE_CONSENT_KEY = "qrslice-cookie-consent";
 
 // Operational screens never show the banner (kitchen displays, POS
 // terminals, staff/admin consoles).
-const HIDDEN_PREFIXES = ["/pos", "/kds", "/admin", "/super", "/login"];
+const HIDDEN_PREFIXES = ["/pos", "/admin", "/super", "/login"];
 
 type ConsentState = {
   essential: boolean;

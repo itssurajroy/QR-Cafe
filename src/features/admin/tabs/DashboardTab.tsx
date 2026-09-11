@@ -349,7 +349,7 @@ export function DashboardTab({
           </button>
 
           <Link
-            href="/kds"
+            href="/pos?view=kitchen"
             className="group bg-white border border-[#E7E4F0] hover:border-[#5738F5] rounded-3xl p-5 text-left transition-all hover:shadow-md block"
           >
             <div className="flex items-center justify-between mb-3">
