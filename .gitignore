@@ -45,3 +45,5 @@ next-env.d.ts
 # agents & superpowers
 .agents/
 .superpowers/
+.claude/
+docs/
