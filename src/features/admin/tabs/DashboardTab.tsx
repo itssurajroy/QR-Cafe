@@ -93,7 +93,7 @@ export function DashboardTab({
     <div className="space-y-6 animate-fade-in-up">
       {/* Demo Data Banner if in demo mode */}
       {isDemo && (
-        <div className="p-3.5 rounded-2xl bg-[#EEEAFE] border border-[#5738F5]/20 flex items-center justify-between text-xs text-[#5738F5]">
+        <div className="p-3.5 rounded-2xl bg-[rgba(0,122,255,0.08)] border border-[#007AFF]/20 flex items-center justify-between text-xs text-[#007AFF]">
           <div className="flex items-center gap-2">
             <span className="text-base">💡</span>
             <span className="font-semibold">
@@ -101,7 +101,7 @@ export function DashboardTab({
               <strong>{restaurant?.name || "Table & Grain"}</strong>.
             </span>
           </div>
-          <span className="font-mono text-[10px] uppercase font-bold bg-[#5738F5] text-white px-2 py-0.5 rounded-md">
+          <span className="font-mono text-[10px] uppercase font-bold bg-[#007AFF] text-white px-2 py-0.5 rounded-md">
             DEMO DATA
           </span>
         </div>
@@ -110,9 +110,9 @@ export function DashboardTab({
       {/* METRIC CARDS ROW */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Today's Orders */}
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
-            <span className="w-10 h-10 rounded-2xl bg-[#EEEAFE] text-[#5738F5] flex items-center justify-center shadow-xs">
+            <span className="w-10 h-10 rounded-2xl bg-[rgba(0,122,255,0.08)] text-[#007AFF] flex items-center justify-center shadow-xs">
               <ClipboardListIcon className="w-5 h-5" />
             </span>
             <span className="relative flex h-2 w-2">
@@ -120,15 +120,15 @@ export function DashboardTab({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
           </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
             {liveOrders}
           </div>
-          <div className="text-xs font-bold text-[#17142B] mt-1">Today's Orders</div>
-          <div className="text-[11px] text-[#6F7185] font-medium">All channels · Live feed</div>
+          <div className="text-xs font-bold text-[#0f172a] mt-1">Today's Orders</div>
+          <div className="text-[11px] text-[#64748b] font-medium">All channels · Live feed</div>
         </div>
 
         {/* Card 2: Revenue */}
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
             <span className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
               <CreditCardIcon className="w-5 h-5" />
@@ -137,58 +137,58 @@ export function DashboardTab({
               LIVE
             </span>
           </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
             {paise(liveRevenue)}
           </div>
-          <div className="text-xs font-bold text-[#17142B] mt-1">Gross Revenue</div>
-          <div className="text-[11px] text-[#6F7185] font-medium">Settled & counter collections</div>
+          <div className="text-xs font-bold text-[#0f172a] mt-1">Gross Revenue</div>
+          <div className="text-[11px] text-[#64748b] font-medium">Settled & counter collections</div>
         </div>
 
         {/* Card 3: Average Order */}
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
             <span className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-xs">
               <ChartIcon className="w-5 h-5" />
             </span>
           </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
             {paise(avgOrderValue || 28000)}
           </div>
-          <div className="text-xs font-bold text-[#17142B] mt-1">Average Order Value</div>
-          <div className="text-[11px] text-[#6F7185] font-medium">Per table ticket</div>
+          <div className="text-xs font-bold text-[#0f172a] mt-1">Average Order Value</div>
+          <div className="text-[11px] text-[#64748b] font-medium">Per table ticket</div>
         </div>
 
         {/* Card 4: Active Tables */}
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
-            <span className="w-10 h-10 rounded-2xl bg-indigo-50 text-[#5738F5] flex items-center justify-center shadow-xs">
+            <span className="w-10 h-10 rounded-2xl bg-indigo-50 text-[#007AFF] flex items-center justify-center shadow-xs">
               <ChairIcon className="w-5 h-5" />
             </span>
-            <span className="font-mono text-xs font-bold text-[#6F7185]">
+            <span className="font-mono text-xs font-bold text-[#64748b]">
               {tableList.length} Total
             </span>
           </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
             {activeTablesCount || 8}
           </div>
-          <div className="text-xs font-bold text-[#17142B] mt-1">Active Tables</div>
-          <div className="text-[11px] text-[#6F7185] font-medium">QR ordering enabled</div>
+          <div className="text-xs font-bold text-[#0f172a] mt-1">Active Tables</div>
+          <div className="text-[11px] text-[#64748b] font-medium">QR ordering enabled</div>
         </div>
       </div>
 
       {/* SECTION: ORDER ACTIVITY PIPELINE */}
-      <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4">
+      <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-black uppercase tracking-wider text-[#17142B]">
+            <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
               Order Activity Pipeline
             </h3>
-            <p className="text-[11px] text-[#6F7185]">Real-time operational queue across kitchen & floor</p>
+            <p className="text-[11px] text-[#64748b]">Real-time operational queue across kitchen & floor</p>
           </div>
           <button
             type="button"
             onClick={() => setTab("orders")}
-            className="text-xs font-bold text-[#5738F5] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-[#007AFF] hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>View all orders</span>
             <ArrowRightIcon className="w-3.5 h-3.5" />
@@ -196,12 +196,12 @@ export function DashboardTab({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-2xl bg-[#EEEAFE]/60 border border-[#5738F5]/20 text-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-[#5738F5]">New</div>
-            <div className="text-2xl font-black font-mono text-[#5738F5] mt-1">
+          <div className="p-4 rounded-2xl bg-[rgba(0,122,255,0.08)]/60 border border-[#007AFF]/20 text-center">
+            <div className="text-xs font-bold uppercase tracking-wider text-[#007AFF]">New</div>
+            <div className="text-2xl font-black font-mono text-[#007AFF] mt-1">
               {orderCounts.newCount}
             </div>
-            <div className="text-[10px] text-[#6F7185] mt-0.5">Awaiting accept</div>
+            <div className="text-[10px] text-[#64748b] mt-0.5">Awaiting accept</div>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center">
@@ -209,7 +209,7 @@ export function DashboardTab({
             <div className="text-2xl font-black font-mono text-amber-700 mt-1">
               {orderCounts.prepCount}
             </div>
-            <div className="text-[10px] text-[#6F7185] mt-0.5">On kitchen line</div>
+            <div className="text-[10px] text-[#64748b] mt-0.5">On kitchen line</div>
           </div>
 
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
@@ -217,15 +217,15 @@ export function DashboardTab({
             <div className="text-2xl font-black font-mono text-emerald-700 mt-1">
               {orderCounts.readyCount}
             </div>
-            <div className="text-[10px] text-[#6F7185] mt-0.5">Call bell active</div>
+            <div className="text-[10px] text-[#64748b] mt-0.5">Call bell active</div>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200 text-center">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-700">Completed</div>
-            <div className="text-2xl font-black font-mono text-[#17142B] mt-1">
+            <div className="text-2xl font-black font-mono text-[#0f172a] mt-1">
               {orderCounts.completedCount || (liveOrders > 0 ? liveOrders : 0)}
             </div>
-            <div className="text-[10px] text-[#6F7185] mt-0.5">Served & settled</div>
+            <div className="text-[10px] text-[#64748b] mt-0.5">Served & settled</div>
           </div>
         </div>
       </div>
@@ -233,36 +233,36 @@ export function DashboardTab({
       {/* POPULAR ITEMS & SALES OVERVIEW (2 Columns) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Column 1: Popular Items */}
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-[#17142B]">
+              <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
                 Popular Items Today
               </h3>
-              <p className="text-[11px] text-[#6F7185]">Top ordered dishes by volume</p>
+              <p className="text-[11px] text-[#64748b]">Top ordered dishes by volume</p>
             </div>
             <button
               type="button"
               onClick={() => setTab("menu")}
-              className="text-xs font-bold text-[#5738F5] hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#007AFF] hover:underline cursor-pointer"
             >
               Menu items →
             </button>
           </div>
 
-          <div className="divide-y divide-[#E7E4F0]">
+          <div className="divide-y divide-[rgba(0,0,0,0.06)]">
             {popularItems.map((item, idx) => (
               <div key={item.name} className="py-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-lg bg-slate-100 text-[#6F7185] font-mono font-bold flex items-center justify-center text-[11px]">
+                  <span className="w-6 h-6 rounded-lg bg-slate-100 text-[#64748b] font-mono font-bold flex items-center justify-center text-[11px]">
                     0{idx + 1}
                   </span>
                   <div>
-                    <div className="font-bold text-[#17142B]">{item.name}</div>
-                    <div className="text-[11px] text-[#6F7185] font-mono">{item.count} orders</div>
+                    <div className="font-bold text-[#0f172a]">{item.name}</div>
+                    <div className="text-[11px] text-[#64748b] font-mono">{item.count} orders</div>
                   </div>
                 </div>
-                <div className="text-right font-mono font-extrabold text-[#17142B]">
+                <div className="text-right font-mono font-extrabold text-[#0f172a]">
                   {paise(item.revenue)}
                 </div>
               </div>
@@ -271,18 +271,18 @@ export function DashboardTab({
         </div>
 
         {/* Column 2: Floor Table Activity */}
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-[#17142B]">
+              <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
                 Table Activity
               </h3>
-              <p className="text-[11px] text-[#6F7185]">Live floor status & QR readiness</p>
+              <p className="text-[11px] text-[#64748b]">Live floor status & QR readiness</p>
             </div>
             <button
               type="button"
               onClick={() => setTab("tables")}
-              className="text-xs font-bold text-[#5738F5] hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#007AFF] hover:underline cursor-pointer"
             >
               Manage tables →
             </button>
@@ -298,12 +298,12 @@ export function DashboardTab({
                   className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1.5"
                 >
                   <div
-                    className="font-mono font-black text-sm text-[#17142B]"
+                    className="font-mono font-black text-sm text-[#0f172a]"
                     style={{ fontFamily: "var(--font-mono)" }}
                   >
                     TABLE {tbl.label || String(idx + 1).padStart(2, "0")}
                   </div>
-                  <div className="text-[10px] text-[#6F7185]">{tbl.seats || 4} Seats</div>
+                  <div className="text-[10px] text-[#64748b]">{tbl.seats || 4} Seats</div>
                   <StatusBadge status={status} type="table" size="sm" />
                 </div>
               );
@@ -314,67 +314,67 @@ export function DashboardTab({
 
       {/* SECTION: QUICK ACTIONS */}
       <div className="space-y-3">
-        <h3 className="text-xs font-black uppercase tracking-wider text-[#6F7185]">
+        <h3 className="text-xs font-black uppercase tracking-wider text-[#64748b]">
           Quick Actions
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
             type="button"
             onClick={() => setTab("menu")}
-            className="group bg-white border border-[#E7E4F0] hover:border-[#5738F5] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
+            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="w-11 h-11 rounded-2xl bg-[#EEEAFE] text-[#5738F5] flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span className="w-11 h-11 rounded-2xl bg-[rgba(0,122,255,0.08)] text-[#007AFF] flex items-center justify-center group-hover:scale-105 transition-transform">
                 <BookOpenIcon className="w-5 h-5" />
               </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#5738F5] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <div className="font-extrabold text-sm text-[#17142B]">Add Menu Item</div>
-            <div className="text-xs text-[#6F7185] mt-0.5">Create dishes, prices & photos</div>
+            <div className="font-extrabold text-sm text-[#0f172a]">Add Menu Item</div>
+            <div className="text-xs text-[#64748b] mt-0.5">Create dishes, prices & photos</div>
           </button>
 
           <button
             type="button"
             onClick={() => setTab("tables")}
-            className="group bg-white border border-[#E7E4F0] hover:border-[#5738F5] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
+            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <QrCodeIcon className="w-5 h-5" />
               </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#5738F5] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <div className="font-extrabold text-sm text-[#17142B]">Generate QR Code</div>
-            <div className="text-xs text-[#6F7185] mt-0.5">Print table standees & cards</div>
+            <div className="font-extrabold text-sm text-[#0f172a]">Generate QR Code</div>
+            <div className="text-xs text-[#64748b] mt-0.5">Print table standees & cards</div>
           </button>
 
           <Link
             href="/pos?view=kitchen"
-            className="group bg-white border border-[#E7E4F0] hover:border-[#5738F5] rounded-3xl p-5 text-left transition-all hover:shadow-md block"
+            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md block"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <ChefHatIcon className="w-5 h-5" />
               </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#5738F5] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <div className="font-extrabold text-sm text-[#17142B]">Open Kitchen KDS</div>
-            <div className="text-xs text-[#6F7185] mt-0.5">Fullscreen touch display ↗</div>
+            <div className="font-extrabold text-sm text-[#0f172a]">Open Kitchen KDS</div>
+            <div className="text-xs text-[#64748b] mt-0.5">Fullscreen touch display ↗</div>
           </Link>
 
           <button
             type="button"
             onClick={() => setTab("tables")}
-            className="group bg-white border border-[#E7E4F0] hover:border-[#5738F5] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
+            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <ChairIcon className="w-5 h-5" />
               </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#5738F5] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <div className="font-extrabold text-sm text-[#17142B]">Manage Tables</div>
-            <div className="text-xs text-[#6F7185] mt-0.5">{tableList.length} tables configured</div>
+            <div className="font-extrabold text-sm text-[#0f172a]">Manage Tables</div>
+            <div className="text-xs text-[#64748b] mt-0.5">{tableList.length} tables configured</div>
           </button>
         </div>
       </div>

@@ -4,6 +4,19 @@
    QRSLICE DESIGN TOKENS
    ============================================ */
 :root {
+  /* Apple iOS Design Tokens */
+  --ios-bg: #F5F5F7;
+  --ios-card: #FFFFFF;
+  --ios-subtle: #E5E5EA;
+  --ios-border: rgba(0, 0, 0, 0.06);
+  --ios-blue: #007AFF;
+  --ios-indigo: #5856D6;
+  --ios-green: #34C759;
+  --ios-orange: #FF9500;
+  --ios-red: #FF3B30;
+  --ios-text-primary: #1C1C1E;
+  --ios-text-secondary: #8E8E93;
+
   /* Brand Colors */
   --color-primary: #5738F5;
   --color-primary-dark: #4328D9;
@@ -14,25 +27,26 @@
   --color-white: #FFFFFF;
 
   /* Legacy tokens (preserved for dashboard/admin) */
-  --background: #ffffff;
-  --foreground: #17142B;
+  --background: #F5F5F7;
+  --foreground: #1C1C1E;
   --color-primary-hover: #4328D9;
   --accent: #5738F5;
   --accent-rgb: 87, 56, 245;
   --accent-amber: #f59e0b;
 
   /* Typography */
-  --font-heading: 'Plus Jakarta Sans', var(--font-geist-sans), system-ui, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
   --font-mono: 'DM Mono', var(--font-geist-mono), monospace;
 
   /* Radius */
   --radius-sm: 10px;
-  --radius-md: 12px;
+  --radius-md: 14px;
   --radius-lg: 20px;
-  --radius-xl: 24px;
+  --radius-xl: 26px;
   --radius-pill: 999px;
 
   /* Shadows */
+  --shadow-ios: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   --shadow-card: 0 8px 30px rgba(23, 20, 43, 0.06);
   --shadow-large: 0 20px 60px rgba(23, 20, 43, 0.08);
 }
@@ -100,6 +114,81 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* ============================================
+   APPLE IOS DESIGN SYSTEM UTILITIES
+   ============================================ */
+.ios-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ios-glass-header {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ios-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.ios-card-interactive {
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08);
+}
+
+.ios-card-interactive:active {
+  transform: scale(0.98);
+}
+
+.ios-segmented {
+  background: #E5E5EA;
+  padding: 3px;
+  border-radius: 9999px;
+  display: inline-flex;
+  gap: 2px;
+}
+
+.ios-segmented-btn {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #636366;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-segmented-btn-active {
+  background: #FFFFFF;
+  color: #1C1C1E;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ios-spring {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-bottom-sheet {
+  background: #FFFFFF;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12);
 }
 
 /* ============================================

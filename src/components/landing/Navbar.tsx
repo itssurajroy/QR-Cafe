@@ -62,8 +62,8 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-50 transition-all duration-200 ${
         scrolled
-          ? "bg-white/95 backdrop-blur-sm border-b border-[#E7E4F0] shadow-[0_1px_3px_rgba(23,20,43,0.04)]"
-          : "bg-white border-b border-transparent"
+          ? "bg-[#F5F5F7]/80 backdrop-blur-xl saturate-[180%] border-b border-black/[0.06] shadow-xs"
+          : "bg-white/70 backdrop-blur-md border-b border-black/[0.04]"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -77,7 +77,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-semibold text-[#6F7185] transition-colors duration-150 hover:text-[#17142B]"
+              className="text-sm font-medium text-slate-600 transition-colors duration-150 hover:text-slate-900"
             >
               {link.label}
             </a>
@@ -88,13 +88,13 @@ export function Navbar() {
         <div className="hidden items-center gap-4 md:flex">
           <Link
             href="/login"
-            className="text-sm font-semibold text-[#6F7185] transition-colors duration-150 hover:text-[#17142B]"
+            className="text-sm font-medium text-slate-600 transition-colors duration-150 hover:text-slate-900"
           >
             Sign in
           </Link>
           <Link
             href="/onboarding"
-            className="rounded-[12px] bg-[#5738F5] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-[#4328D9] active:scale-[0.98]"
+            className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-slate-800 active:scale-[0.98] shadow-xs"
           >
             Start free
           </Link>

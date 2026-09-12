@@ -147,14 +147,14 @@ export function AdminAppShell({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7FC] text-[#17142B] flex flex-col font-sans selection:bg-[#5738F5] selection:text-white antialiased">
+    <div className="min-h-screen bg-[#F5F5F7] text-slate-900 flex flex-col font-sans selection:bg-[#007AFF] selection:text-white antialiased">
       {/* Top Mobile Bar */}
-      <div className="lg:hidden bg-white border-b border-[#E7E4F0] px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+      <div className="lg:hidden bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}
-            className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-[#17142B] cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] flex items-center justify-center text-slate-800 cursor-pointer"
             aria-label="Open Navigation Menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,12 +331,12 @@ export function AdminAppShell({
         {/* MAIN CONTENT AREA */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
           {/* Top Header */}
-          <header className="bg-white border-b border-[#E7E4F0] px-6 py-3.5 sticky top-0 z-10 hidden lg:flex items-center justify-between">
+          <header className="bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-6 py-3.5 sticky top-0 z-10 hidden lg:flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-black text-[#17142B] tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+              <h1 className="text-lg font-bold text-slate-900 tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
                 {greetingTime()}, {restaurantName}
               </h1>
-              <p className="text-xs text-[#6F7185] font-medium">Here's what's happening today.</p>
+              <p className="text-xs text-slate-500 font-medium">Here's what's happening today.</p>
             </div>
 
             {/* Quick Metrics & Search */}

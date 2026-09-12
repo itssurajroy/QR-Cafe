@@ -308,92 +308,92 @@ export function KitchenView({
     "px-3 h-11 min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm";
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden no-print antialiased bg-[#f1f5f9] text-[#0f172a]">
+    <div className="flex-1 flex flex-col h-full overflow-hidden no-print antialiased bg-[#F5F5F7] text-slate-900">
       {/* 1. Global Chrome — 56px top bar */}
-      <header className="h-14 shrink-0 bg-white border-b border-[#e2e8f0] px-3 sm:px-4 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="w-8 h-8 rounded-lg bg-[#0f172a] text-white flex items-center justify-center font-black text-sm shrink-0">
+      <header className="h-14 shrink-0 bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-3 sm:px-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="w-8 h-8 rounded-xl bg-[#007AFF] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
             Q
           </span>
-          <span className="font-extrabold text-sm tracking-tight truncate">
-            {restaurant?.name || "WAH JI WAH"} <span className="text-[#64748b] font-bold">· KDS</span>
+          <span className="font-bold text-sm tracking-tight truncate">
+            {restaurant?.name || "WAH JI WAH"} <span className="text-slate-400 font-medium">· Kitchen KDS</span>
           </span>
         </div>
 
-        <div className="hidden md:flex items-center gap-2 text-xs font-mono font-bold text-[#0f172a] whitespace-nowrap">
-          <span>{cookingCount} Cooking</span>
-          <span className="text-[#e2e8f0]">·</span>
+        <div className="hidden md:flex items-center gap-2 text-xs font-mono font-semibold text-slate-700 whitespace-nowrap">
+          <span className="px-2 py-0.5 rounded-lg bg-[#FF9500]/10 text-[#FF9500] font-bold">{cookingCount} Cooking</span>
+          <span className="text-slate-300">·</span>
           <span>{servedCount} Served Today</span>
-          <span className="text-[#e2e8f0]">·</span>
-          <span>Prep Batch {prepSummary.length}</span>
+          <span className="text-slate-300">·</span>
+          <span>Batch {prepSummary.length}</span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           <button type="button" onClick={toggleSound} title="Toggle sound alerts"
-            className={`${controlBtn} ${soundMuted ? "bg-slate-100 text-slate-500 border-slate-200" : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"}`}>
-            <span>{soundMuted ? "🔇 Muted" : "Sound On"}</span>
+            className={`${controlBtn} ${soundMuted ? "bg-black/[0.04] text-slate-500 border-transparent" : "bg-white text-slate-700 border-black/[0.08] hover:bg-slate-50"}`}>
+            <span>{soundMuted ? "🔇 Muted" : "🔔 Sound On"}</span>
           </button>
           <span title={awakeFresh ? "Ticket received in the last 90 seconds" : "No recent tickets"}
-            className={`px-3 h-11 min-h-[44px] rounded-xl border text-xs font-bold hidden sm:flex items-center gap-1.5 ${
-              awakeFresh ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500 border-slate-200"
+            className={`px-3 h-10 min-h-[40px] rounded-xl border text-xs font-semibold hidden sm:flex items-center gap-1.5 ${
+              awakeFresh ? "bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20" : "bg-black/[0.04] text-slate-500 border-transparent"
             }`}>
-            <span className={`w-2 h-2 rounded-full ${awakeFresh ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+            <span className={`w-2 h-2 rounded-full ${awakeFresh ? "bg-[#34C759] animate-pulse" : "bg-slate-400"}`} />
             <span>Awake</span>
           </span>
           <button type="button" onClick={toggleVoice} title="Toggle voice announcements"
-            className={`${controlBtn} ${voiceEnabled ? "bg-white text-slate-700 border-slate-300 hover:bg-slate-50" : "bg-slate-100 text-slate-500 border-slate-200"}`}>
+            className={`${controlBtn} ${voiceEnabled ? "bg-white text-slate-700 border-black/[0.08] hover:bg-slate-50" : "bg-black/[0.04] text-slate-500 border-transparent"}`}>
             <span>Voice</span>
           </button>
           <button type="button" onClick={fetchLiveOrders} title="Refresh queue now"
-            className={`${controlBtn} bg-white text-slate-700 border-slate-300 hover:bg-slate-50`}>
+            className={`${controlBtn} bg-white text-slate-700 border-black/[0.08] hover:bg-slate-50`}>
             <span>Sync</span>
           </button>
           <button type="button" onClick={() => setShowPrepSummary(true)} title="Prep batch summary"
-            className={`${controlBtn} bg-amber-500 hover:bg-amber-400 text-white border-amber-500`}>
+            className={`${controlBtn} bg-[#FF9500] hover:bg-[#FF9500]/90 text-white border-transparent shadow-xs`}>
             <span>Prep</span>
           </button>
           <button type="button" onClick={() => setShowServedHistory(true)} title="Served ticket history"
-            className={`${controlBtn} bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hidden sm:flex`}>
+            className={`${controlBtn} bg-white text-slate-700 border-black/[0.08] hover:bg-slate-50 hidden sm:flex`}>
             <span>History</span>
           </button>
           <button type="button" onClick={toggleFullscreen} title="Toggle fullscreen"
-            className={`${controlBtn} bg-white text-slate-700 border-slate-300 hover:bg-slate-50`}>
+            className={`${controlBtn} bg-white text-slate-700 border-black/[0.08] hover:bg-slate-50`}>
             <span>{isFullscreen ? "⛶ Exit" : "⛶ Full"}</span>
           </button>
         </div>
       </header>
 
       {/* 2. Station & Order-Type Filter Bar — 48px */}
-      <div className="h-12 shrink-0 bg-[#f8fafc] border-b border-[#e2e8f0] px-3 sm:px-4 flex items-center gap-4 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-1.5 shrink-0" role="group" aria-label="Kitchen stations">
+      <div className="h-12 shrink-0 bg-white/60 backdrop-blur-md border-b border-black/[0.06] px-3 sm:px-4 flex items-center gap-4 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 shrink-0 bg-black/[0.04] p-1 rounded-xl" role="group" aria-label="Kitchen stations">
           {STATIONS.map((st) => (
             <button
               key={st.id}
               type="button"
               onClick={() => setSelectedStation(st.id)}
               aria-pressed={selectedStation === st.id}
-              className={`px-3 h-9 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedStation === st.id
-                  ? "bg-amber-500 text-white border-amber-500 shadow-sm"
-                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                  ? "bg-white text-slate-900 shadow-xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               {st.label}
             </button>
           ))}
         </div>
-        <div className="w-px h-6 bg-[#e2e8f0] shrink-0" />
-        <div className="flex items-center gap-1.5 shrink-0" role="group" aria-label="Order types">
+        <div className="w-px h-5 bg-black/[0.08] shrink-0" />
+        <div className="flex items-center gap-1 shrink-0 bg-black/[0.04] p-1 rounded-xl" role="group" aria-label="Order types">
           {ORDER_TYPES.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setSelectedOrderType(t.id)}
               aria-pressed={selectedOrderType === t.id}
-              className={`px-3 h-9 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedOrderType === t.id
-                  ? "bg-amber-500 text-white border-amber-500 shadow-sm"
-                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                  ? "bg-white text-slate-900 shadow-xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               {t.label}
@@ -401,7 +401,7 @@ export function KitchenView({
           ))}
         </div>
         {overdueCount > 0 && (
-          <span className="ml-auto shrink-0 px-2.5 py-1 rounded-full bg-red-100 border border-red-300 text-red-700 text-xs font-black animate-pulse">
+          <span className="ml-auto shrink-0 px-2.5 py-1 rounded-full bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#FF3B30] text-xs font-bold animate-pulse">
             🚨 {overdueCount} Overdue
           </span>
         )}

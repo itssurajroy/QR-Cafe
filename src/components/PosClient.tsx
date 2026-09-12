@@ -447,48 +447,26 @@ export default function PosClient({
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       {/* POS HEADER / TOP NAVIGATION BAR */}
-      <header
-        className={`h-14 transition-colors duration-200 px-4 flex items-center justify-between shadow-sm shrink-0 z-30 ${
-          viewMode === "kitchen"
-            ? "bg-stone-950 border-b border-stone-800 text-stone-100"
-            : "bg-white border-b border-slate-200 text-slate-900"
-        }`}
-      >
+      <header className="h-14 bg-[#F5F5F7]/85 backdrop-blur-xl border-b border-black/[0.06] px-4 flex items-center justify-between shadow-xs shrink-0 z-30 sticky top-0">
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 group-hover:bg-indigo-700 text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 transition-all duration-200">
+          <Link href="/admin" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-[#007AFF] text-white font-black text-sm flex items-center justify-center shadow-sm shadow-[#007AFF]/25 transition-all duration-200 group-hover:scale-105">
               Q
             </div>
-            <span
-              className={`font-extrabold text-sm tracking-tight transition-colors hidden sm:inline ${
-                viewMode === "kitchen"
-                  ? "text-stone-100 group-hover:text-amber-400"
-                  : "text-slate-900 group-hover:text-indigo-600"
-              }`}
-            >
+            <span className="font-bold text-sm tracking-tight text-slate-900 group-hover:text-[#007AFF] transition-colors hidden sm:inline">
               {restaurant.name}
             </span>
           </Link>
-          <div
-            className={`h-4 w-px ${
-              viewMode === "kitchen" ? "bg-stone-800" : "bg-slate-200"
-            }`}
-          />
-          <div
-            className={`flex items-center p-1 rounded-xl shadow-inner transition-colors ${
-              viewMode === "kitchen"
-                ? "bg-stone-900 border border-stone-800"
-                : "bg-slate-100 border border-slate-200"
-            }`}
-          >
+          <div className="h-4 w-px bg-black/[0.08]" />
+          
+          {/* Apple Segmented Control */}
+          <div className="flex items-center p-1 rounded-2xl bg-black/[0.05] border border-black/[0.04]">
             <button
               type="button"
               onClick={() => setViewMode("catalog")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer min-h-[36px] ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer min-h-[32px] ${
                 viewMode === "catalog"
-                  ? "bg-white text-indigo-600 shadow-sm font-black"
-                  : viewMode === "kitchen"
-                  ? "text-stone-400 hover:text-stone-100"
+                  ? "bg-white text-slate-900 shadow-xs font-bold"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -498,32 +476,30 @@ export default function PosClient({
             <button
               type="button"
               onClick={() => setViewMode("live_tables")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer min-h-[36px] flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer min-h-[32px] flex items-center gap-1.5 ${
                 viewMode === "live_tables"
-                  ? "bg-white text-indigo-600 shadow-sm font-black"
-                  : viewMode === "kitchen"
-                  ? "text-stone-400 hover:text-stone-100"
+                  ? "bg-white text-slate-900 shadow-xs font-bold"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <span>Live Tables</span>
               {tables.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-[#34C759] animate-pulse"></span>
               )}
             </button>
 
             <button
               type="button"
               onClick={() => setViewMode("kitchen")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer min-h-[36px] flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer min-h-[32px] flex items-center gap-1.5 ${
                 viewMode === "kitchen"
-                  ? "bg-amber-500 text-stone-950 shadow-sm font-black"
+                  ? "bg-white text-slate-900 shadow-xs font-bold"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <span>Kitchen (KDS)</span>
               {liveOrders.filter((o) => o.status === "placed" || o.status === "preparing").length > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-mono font-black text-[10px]">
+                <span className="px-1.5 py-0.5 rounded-full bg-[#FF9500] text-white font-mono font-bold text-[10px]">
                   {liveOrders.filter((o) => o.status === "placed" || o.status === "preparing").length}
                 </span>
               )}
@@ -539,14 +515,10 @@ export default function PosClient({
               setSoundEnabled(!soundEnabled);
               flash("ok", !soundEnabled ? "Audio Alerts Enabled 🔔" : "Audio Muted 🔕");
             }}
-            className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer min-h-[38px] flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer min-h-[36px] flex items-center gap-1.5 active:scale-95 ${
               soundEnabled
-                ? viewMode === "kitchen"
-                  ? "bg-indigo-950/80 border-indigo-700 text-indigo-300 shadow-sm"
-                  : "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm"
-                : viewMode === "kitchen"
-                ? "bg-stone-900 border-stone-800 text-stone-500"
-                : "bg-slate-100 border-slate-200 text-slate-500"
+                ? "bg-white border-black/[0.08] text-[#007AFF] shadow-xs"
+                : "bg-black/[0.03] border-transparent text-slate-500"
             }`}
             title="Toggle Voice Alerts"
           >
@@ -557,13 +529,9 @@ export default function PosClient({
           <button
             type="button"
             onClick={() => setShowCustomItemModal(true)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all duration-200 cursor-pointer active:scale-95 min-h-[38px] ${
-              viewMode === "kitchen"
-                ? "bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-400"
-                : "bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900"
-            }`}
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all duration-200 cursor-pointer active:scale-95 min-h-[36px] bg-white hover:bg-slate-50 border border-black/[0.08] text-slate-800"
           >
-            + Custom Item
+            ＋ Custom Item
           </button>
 
           {/* Parked Tabs Button */}
@@ -571,15 +539,15 @@ export default function PosClient({
             <div className="relative group">
               <button
                 type="button"
-                className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 flex items-center gap-1 cursor-pointer min-h-[38px]"
+                className="px-3.5 py-1.5 rounded-xl bg-[#FF9500] text-white font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer min-h-[36px]"
               >
                 <span>Hold Tabs</span>
-                <span className="w-4 h-4 rounded-full bg-slate-950 text-amber-400 font-mono text-[10px] flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-white text-[#FF9500] font-mono text-[10px] flex items-center justify-center font-bold">
                   {parkedTabs.length}
                 </span>
               </button>
-              <div className="absolute right-0 top-full mt-1.5 w-64 bg-white border border-slate-200 rounded-2xl p-2 shadow-2xl hidden group-hover:block z-50">
-                <div className="text-[11px] font-black uppercase text-slate-500 px-2 py-1 border-b border-slate-100 mb-1">
+              <div className="absolute right-0 top-full mt-1.5 w-64 bg-white border border-black/[0.08] rounded-2xl p-2 shadow-xl hidden group-hover:block z-50">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1 border-b border-black/[0.05] mb-1">
                   Parked Orders (Hold)
                 </div>
                 <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -587,13 +555,13 @@ export default function PosClient({
                     <div
                       key={pt.id}
                       onClick={() => handleRecallTab(pt)}
-                      className="p-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 cursor-pointer flex items-center justify-between transition-colors"
+                      className="p-2 rounded-xl bg-slate-50 hover:bg-[#007AFF]/10 border border-black/[0.04] cursor-pointer flex items-center justify-between transition-colors"
                     >
                       <div>
-                        <div className="text-xs font-bold text-slate-900">{pt.customer}</div>
+                        <div className="text-xs font-semibold text-slate-900">{pt.customer}</div>
                         <div className="text-[10px] text-slate-500 font-mono">{pt.time} • {pt.cart.length} items</div>
                       </div>
-                      <span className="text-xs font-black text-indigo-600">Recall &rarr;</span>
+                      <span className="text-xs font-bold text-[#007AFF]">Recall &rarr;</span>
                     </div>
                   ))}
                 </div>
@@ -605,11 +573,7 @@ export default function PosClient({
           <button
             type="button"
             onClick={() => setShowZReportModal(true)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all duration-200 cursor-pointer min-h-[38px] ${
-              viewMode === "kitchen"
-                ? "bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-200"
-                : "bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800"
-            }`}
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-all duration-200 cursor-pointer min-h-[36px] bg-white hover:bg-slate-50 border border-black/[0.08] text-slate-800"
           >
             📊 Shift / Z-Report (F9)
           </button>
@@ -682,11 +646,24 @@ export default function PosClient({
       )}
 
       {viewMode === "live_tables" && (
-        <div className="flex-1 p-6 bg-slate-100 overflow-y-auto">
+        <div className="flex-1 p-6 bg-[#F5F5F7] overflow-y-auto">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-xl font-black text-slate-900 mb-2">Live Table Status & Active Billing</h2>
-            <p className="text-xs text-slate-600 mb-6">Select any table to view active orders or assign a new guest tab</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">Live Table Floor Status</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Select any table to review live guest orders or start a new tab</p>
+              </div>
+              <div className="flex items-center gap-3 text-xs">
+                <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#34C759]"></span> Available
+                </span>
+                <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF9500]"></span> Active Order
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
               {tables.map((tbl) => {
                 const count = tableOrderCounts[tbl.id] || 0;
                 return (
@@ -696,25 +673,25 @@ export default function PosClient({
                       setSelectedTable(tbl);
                       setViewMode("catalog");
                     }}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md flex flex-col justify-between min-h-[120px] ${
+                    className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md flex flex-col justify-between min-h-[128px] active:scale-[0.98] ${
                       count > 0
-                        ? "bg-amber-50 border-amber-400 text-amber-950"
-                        : "bg-white border-slate-200 text-slate-900 hover:border-indigo-400"
+                        ? "bg-white border-[#FF9500]/40 ring-1 ring-[#FF9500]/20 text-slate-900"
+                        : "bg-white border-black/[0.06] text-slate-900 hover:border-[#007AFF]/40"
                     }`}
                   >
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="font-mono text-[10px] uppercase font-black tracking-wider text-slate-400">Table</span>
-                        {count > 0 && <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>}
+                        <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-slate-400">Table</span>
+                        {count > 0 && <span className="w-2 h-2 rounded-full bg-[#FF9500] animate-pulse"></span>}
                       </div>
-                      <div className="font-black text-xl text-slate-900">#{tbl.label}</div>
-                      <div className="text-[11px] text-slate-500 font-medium mt-0.5">{(tbl as unknown as { capacity?: number }).capacity || 4} Seats</div>
+                      <div className="font-bold text-2xl text-slate-900 tracking-tight">#{tbl.label}</div>
+                      <div className="text-[11px] text-slate-500 font-medium mt-0.5">{(tbl as unknown as { capacity?: number }).capacity || 4} Guests</div>
                     </div>
-                    <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                      <span className={`text-[11px] font-extrabold ${count > 0 ? "text-amber-700" : "text-emerald-700"}`}>
-                        {count > 0 ? `${count} Active Order` : "Available"}
+                    <div className="pt-2.5 border-t border-black/[0.04] flex items-center justify-between">
+                      <span className={`text-[11px] font-semibold ${count > 0 ? "text-[#FF9500]" : "text-[#34C759]"}`}>
+                        {count > 0 ? `${count} Active` : "Available"}
                       </span>
-                      <span className="text-xs text-indigo-600 font-bold">&rarr;</span>
+                      <span className="text-xs text-slate-400 font-bold">&rarr;</span>
                     </div>
                   </div>
                 );
@@ -724,66 +701,72 @@ export default function PosClient({
         </div>
       )}
 
-      {/* OPEN / CUSTOM ITEM MODAL */}
+      {/* OPEN / CUSTOM ITEM MODAL (Apple Sheet Style) */}
       {showCustomItemModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <h3 className="font-black text-lg text-slate-900">Add Open Custom Item</h3>
-            <p className="text-xs text-slate-500">For unlisted specials, modifications, or open pricing</p>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-black/[0.08] space-y-4 animate-in zoom-in-95 duration-200">
+            <div>
+              <h3 className="font-bold text-lg text-slate-900">Add Open Custom Item</h3>
+              <p className="text-xs text-slate-500 mt-0.5">For unlisted specials, modifications, or open pricing</p>
+            </div>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Item Description</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Item Description</label>
                 <input
                   type="text"
-                  placeholder="e.g. Extra Cheese Slice / Special Thali"
+                  placeholder="e.g. Extra Cheese Slice / Chef Special"
                   value={customItemName}
                   onChange={(e) => setCustomItemName(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-medium min-h-[44px]"
+                  className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#007AFF] focus:bg-white font-medium min-h-[44px] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Price (₹)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Price (₹)</label>
                 <input
                   type="number"
                   placeholder="50"
                   value={customItemPrice}
                   onChange={(e) => setCustomItemPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-mono min-h-[44px]"
+                  className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#007AFF] focus:bg-white font-mono min-h-[44px] transition-all"
                 />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => setCustomItemIsVeg(true)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border min-h-[40px] ${
-                    customItemIsVeg ? "bg-emerald-50 border-emerald-300 text-emerald-800 font-extrabold" : "bg-white border-slate-200 text-slate-600"
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border min-h-[44px] transition-all cursor-pointer ${
+                    customItemIsVeg
+                      ? "bg-[#34C759]/10 border-[#34C759]/40 text-[#34C759] font-bold"
+                      : "bg-white border-black/[0.08] text-slate-600"
                   }`}
                 >
-                  🟢 Veg
+                  🟢 Pure Veg
                 </button>
                 <button
                   type="button"
                   onClick={() => setCustomItemIsVeg(false)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border min-h-[40px] ${
-                    !customItemIsVeg ? "bg-red-50 border-red-300 text-red-800 font-extrabold" : "bg-white border-slate-200 text-slate-600"
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border min-h-[44px] transition-all cursor-pointer ${
+                    !customItemIsVeg
+                      ? "bg-[#FF3B30]/10 border-[#FF3B30]/40 text-[#FF3B30] font-bold"
+                      : "bg-white border-black/[0.08] text-slate-600"
                   }`}
                 >
                   🔴 Non-Veg
                 </button>
               </div>
             </div>
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setShowCustomItemModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 min-h-[44px]"
+                className="flex-1 py-2.5 rounded-xl border border-black/[0.08] text-slate-700 font-semibold text-xs hover:bg-slate-50 min-h-[44px] cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleAddCustomItem}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md min-h-[44px]"
+                className="flex-1 py-2.5 rounded-xl bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-bold text-xs shadow-sm min-h-[44px] cursor-pointer active:scale-95 transition-transform"
               >
                 Add to Bill
               </button>
@@ -792,99 +775,104 @@ export default function PosClient({
         </div>
       )}
 
-      {/* SHIFT Z-REPORT MODAL */}
+      {/* SHIFT Z-REPORT MODAL (Apple Light Bento Card) */}
       {showZReportModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 text-slate-100 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-800 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-black/[0.08] space-y-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-black/[0.06] pb-3">
               <div>
-                <h3 className="font-black text-lg text-white">Shift Z-Report & Cash Drawer</h3>
-                <p className="text-xs text-slate-400">Terminal 1 Shift Closing & Cash Reconciliation</p>
+                <h3 className="font-bold text-lg text-slate-900">Shift Z-Report & Cash Drawer</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Terminal 1 Shift Closing & Cash Reconciliation</p>
               </div>
-              <button onClick={() => setShowZReportModal(false)} className="text-slate-400 hover:text-white font-black text-sm">✕</button>
+              <button
+                onClick={() => setShowZReportModal(false)}
+                className="w-8 h-8 rounded-full bg-black/[0.05] hover:bg-black/[0.1] text-slate-600 flex items-center justify-center font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Total Shift Sales</div>
-                <div className="text-base font-black font-mono text-emerald-400">₹{(zReport.totalRevenuePaise / 100).toFixed(2)}</div>
-                <div className="text-[10px] text-slate-400 mt-1">{zReport.orderCount} Settled Orders</div>
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="bg-[#F5F5F7] p-3 rounded-2xl border border-black/[0.04]">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Total Shift Sales</div>
+                <div className="text-base font-bold font-mono text-[#34C759] mt-0.5">₹{(zReport.totalRevenuePaise / 100).toFixed(2)}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{zReport.orderCount} Settled Orders</div>
               </div>
-              <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Cash Sales</div>
-                <div className="text-base font-black font-mono text-amber-400">₹{(zReport.cashSalesPaise / 100).toFixed(2)}</div>
+              <div className="bg-[#F5F5F7] p-3 rounded-2xl border border-black/[0.04]">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Cash Sales</div>
+                <div className="text-base font-bold font-mono text-[#FF9500] mt-0.5">₹{(zReport.cashSalesPaise / 100).toFixed(2)}</div>
               </div>
-              <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">UPI Sales</div>
-                <div className="text-base font-black font-mono text-indigo-400">₹{(zReport.upiSalesPaise / 100).toFixed(2)}</div>
+              <div className="bg-[#F5F5F7] p-3 rounded-2xl border border-black/[0.04]">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">UPI Sales</div>
+                <div className="text-base font-bold font-mono text-[#007AFF] mt-0.5">₹{(zReport.upiSalesPaise / 100).toFixed(2)}</div>
               </div>
-              <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Card Sales</div>
-                <div className="text-base font-black font-mono text-cyan-400">₹{(zReport.cardSalesPaise / 100).toFixed(2)}</div>
+              <div className="bg-[#F5F5F7] p-3 rounded-2xl border border-black/[0.04]">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Card Sales</div>
+                <div className="text-base font-bold font-mono text-[#5856D6] mt-0.5">₹{(zReport.cardSalesPaise / 100).toFixed(2)}</div>
               </div>
             </div>
 
-            <div className="space-y-3 pt-2 border-t border-slate-800 text-xs">
+            <div className="space-y-3 pt-2 border-t border-black/[0.06] text-xs">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Opening Cash Float (₹)</label>
+                <label className="block text-slate-700 font-semibold mb-1">Opening Cash Float (₹)</label>
                 <input
                   type="number"
                   value={openingFloat}
                   onChange={(e) => setOpeningFloat(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3 py-2 text-slate-900 font-mono text-xs focus:outline-none focus:border-[#007AFF] focus:bg-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Paid Out Expenses / Vendor Petty Cash (₹)</label>
+                <label className="block text-slate-700 font-semibold mb-1">Paid Out Expenses / Vendor Petty Cash (₹)</label>
                 <input
                   type="number"
                   value={payoutsAmount}
                   onChange={(e) => setPayoutsAmount(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3 py-2 text-slate-900 font-mono text-xs focus:outline-none focus:border-[#007AFF] focus:bg-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Actual Physical Cash Count (₹)</label>
+                <label className="block text-slate-700 font-semibold mb-1">Actual Physical Cash Count (₹)</label>
                 <input
                   type="number"
                   placeholder={`Expected: ₹${(zReport.expectedDrawerCashPaise / 100).toFixed(2)}`}
                   value={actualCashCount}
                   onChange={(e) => setActualCashCount(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3 py-2 text-slate-900 font-mono text-xs focus:outline-none focus:border-[#007AFF] focus:bg-white transition-colors"
                 />
               </div>
 
-              <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5">
-                <div className="flex justify-between text-slate-400">
+              <div className="p-3 bg-[#F5F5F7] rounded-2xl border border-black/[0.04] space-y-1.5">
+                <div className="flex justify-between text-slate-500">
                   <span>Expected Drawer Cash:</span>
-                  <span className="font-mono text-slate-200">₹{(zReport.expectedDrawerCashPaise / 100).toFixed(2)}</span>
+                  <span className="font-mono font-medium text-slate-800">₹{(zReport.expectedDrawerCashPaise / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold">
-                  <span>Cash Variance / Discrepancy:</span>
-                  <span className={`font-mono ${zReport.cashVariancePaise < 0 ? "text-red-400" : zReport.cashVariancePaise > 0 ? "text-emerald-400" : "text-slate-300"}`}>
+                  <span className="text-slate-700">Cash Variance:</span>
+                  <span className={`font-mono ${zReport.cashVariancePaise < 0 ? "text-[#FF3B30]" : zReport.cashVariancePaise > 0 ? "text-[#34C759]" : "text-slate-600"}`}>
                     {zReport.cashVariancePaise === 0 ? "₹0.00 (Balanced ✓)" : `${zReport.cashVariancePaise > 0 ? "+" : ""}₹${(zReport.cashVariancePaise / 100).toFixed(2)}`}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   window.print();
                   flash("ok", "Printing Z-Report slip...");
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md"
+                className="flex-1 py-2.5 rounded-xl bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-bold text-xs shadow-sm cursor-pointer active:scale-95 transition-transform"
               >
                 🖨️ Print Shift Z-Report
               </button>
               <button
                 type="button"
                 onClick={() => setShowZReportModal(false)}
-                className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs"
+                className="py-2.5 px-4 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] text-slate-700 font-semibold text-xs cursor-pointer"
               >
                 Close
               </button>
@@ -893,41 +881,41 @@ export default function PosClient({
         </div>
       )}
 
-      {/* BILL SETTLEMENT MODAL WITH AUTOMATIC WHATSAPP DELIVER */}
+      {/* BILL SETTLEMENT MODAL (Apple Clean Receipt Style) */}
       {showBill && lastBill && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowBill(false)}>
-          <div className="bg-stone-900 text-stone-100 rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-stone-800" onClick={(e) => e.stopPropagation()}>
-            <div className={`p-3.5 text-center font-black text-xs ${lastBill.payment_status === "paid" ? "bg-emerald-500 text-stone-950 uppercase tracking-wider" : "bg-amber-500 text-stone-950 uppercase tracking-wider"}`}>
-              {lastBill.payment_status === "paid" ? "✓ PAID — Payment Received" : "⚠️ UNPAID — Collect at Counter"}
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowBill(false)}>
+          <div className="bg-white text-slate-900 rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-black/[0.08] animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className={`p-3 text-center font-bold text-xs ${lastBill.payment_status === "paid" ? "bg-[#34C759] text-white uppercase tracking-wider" : "bg-[#FF9500] text-white uppercase tracking-wider"}`}>
+              {lastBill.payment_status === "paid" ? "✓ Payment Settled" : "⚠️ Payment Pending"}
             </div>
             <div className="p-5 space-y-4">
-              <div className="text-center border-b border-stone-800 pb-3">
-                <h3 className="font-black text-lg text-white">{restaurant.name}</h3>
-                <p className="text-xs text-stone-400">{restaurant.address || ""} • {restaurant.phone || ""}</p>
-                <p className="text-xs font-mono text-amber-400 mt-1">Bill: {lastBill.order_number || lastBill.orderNumber} • Table: {lastBill.table_label} • {new Date().toLocaleString("en-IN")}</p>
+              <div className="text-center border-b border-black/[0.06] pb-3">
+                <h3 className="font-bold text-lg text-slate-900">{restaurant.name}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{restaurant.address || ""} • {restaurant.phone || ""}</p>
+                <p className="text-[11px] font-mono text-[#007AFF] mt-1 font-medium">Bill: {lastBill.order_number || lastBill.orderNumber} • Table: {lastBill.table_label}</p>
               </div>
-              <div className="space-y-1.5 text-xs">
+              <div className="space-y-2 text-xs max-h-48 overflow-y-auto">
                 {(lastBill.itemsSnapshot || lastBill.order_items || []).map((it: any, idx: number) => (
-                  <div key={idx} className="flex justify-between text-stone-200">
+                  <div key={idx} className="flex justify-between text-slate-700">
                     <span>{it.item?.name || it.item_name} × {it.quantity}</span>
-                    <span className="font-mono font-bold">₹{(((it.item?.price_paise || it.unit_price_paise || 0) * it.quantity) / 100).toFixed(2)}</span>
+                    <span className="font-mono font-semibold text-slate-900">₹{(((it.item?.price_paise || it.unit_price_paise || 0) * it.quantity) / 100).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-stone-800 pt-3 space-y-1.5 text-xs">
-                <div className="flex justify-between text-stone-400"><span>Subtotal</span><span className="font-mono">₹{(lastBill.subtotalPaise || lastBill.subtotal_paise || 0) / 100}</span></div>
+              <div className="border-t border-black/[0.06] pt-3 space-y-1.5 text-xs">
+                <div className="flex justify-between text-slate-500"><span>Subtotal</span><span className="font-mono font-medium text-slate-800">₹{(lastBill.subtotalPaise || lastBill.subtotal_paise || 0) / 100}</span></div>
                 {(lastBill.discountPaise || lastBill.discount_paise || 0) > 0 && (
-                  <div className="flex justify-between text-emerald-400">
+                  <div className="flex justify-between text-[#34C759]">
                     <span>Discount</span>
-                    <span className="font-mono">-₹{(lastBill.discountPaise || lastBill.discount_paise || 0) / 100}</span>
+                    <span className="font-mono font-medium">-₹{(lastBill.discountPaise || lastBill.discount_paise || 0) / 100}</span>
                   </div>
                 )}
-                <div className="flex justify-between font-black text-sm text-stone-100 pt-1"><span>Total</span><span className="font-mono text-amber-400">₹{(lastBill.finalTotalPaise || lastBill.total_paise || 0) / 100}</span></div>
-                <div className={`p-2.5 rounded-xl text-center text-xs font-bold ${lastBill.payment_status === "paid" ? "bg-emerald-950/80 text-emerald-400 border border-emerald-700" : "bg-amber-950/80 text-amber-400 border border-amber-700"}`}>
-                  {lastBill.payment_status === "paid" ? `✓ Paid via ${lastBill.paymentMethod || "cash"} — No balance` : `⚠️ Unpaid — Please collect ₹${(lastBill.finalTotalPaise || lastBill.total_paise || 0) / 100} at counter`}
+                <div className="flex justify-between font-bold text-sm text-slate-900 pt-1"><span>Total</span><span className="font-mono text-[#007AFF]">₹{(lastBill.finalTotalPaise || lastBill.total_paise || 0) / 100}</span></div>
+                <div className={`p-2.5 rounded-xl text-center text-xs font-semibold mt-2 ${lastBill.payment_status === "paid" ? "bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20" : "bg-[#FF9500]/10 text-[#FF9500] border border-[#FF9500]/20"}`}>
+                  {lastBill.payment_status === "paid" ? `✓ Paid via ${lastBill.paymentMethod || "cash"}` : `⚠️ Please collect ₹${(lastBill.finalTotalPaise || lastBill.total_paise || 0) / 100} at counter`}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2.5 pt-1">
                 <button
                   type="button"
                   onClick={async () => {
@@ -961,11 +949,17 @@ export default function PosClient({
                     doc.save(`TaxInvoice-${lastBill.order_number || lastBill.orderNumber}.pdf`);
                     flash("ok", "Tax Invoice PDF downloaded! 🖨️");
                   }}
-                  className="py-2.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs shadow-sm cursor-pointer"
+                  className="py-2.5 px-3 rounded-xl bg-[#007AFF]/10 hover:bg-[#007AFF]/15 border border-[#007AFF]/20 text-[#007AFF] font-bold text-xs shadow-xs cursor-pointer active:scale-95 transition-transform"
                 >
                   🖨️ Invoice PDF
                 </button>
-                <button type="button" onClick={() => setShowBill(false)} className="flex-1 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-xs cursor-pointer">Close</button>
+                <button
+                  type="button"
+                  onClick={() => setShowBill(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] text-slate-700 font-semibold text-xs cursor-pointer"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

@@ -250,18 +250,18 @@ export default function OrderStatusPage({
   const progressPercent = Math.min(100, Math.round(((currentIdx + 1) / STEPS.length) * 100));
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 flex flex-col items-center justify-start overflow-y-auto font-sans antialiased selection:bg-indigo-600 selection:text-white">
-      <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-5 my-auto relative overflow-hidden backdrop-blur-xl">
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600"></div>
-
+    <main className="min-h-screen bg-[#F5F5F7] text-slate-900 p-4 sm:p-6 flex flex-col items-center justify-start overflow-y-auto font-sans antialiased selection:bg-indigo-600 selection:text-white">
+      {/* Apple Dynamic Island Style Floating Island Card */}
+      <div className="max-w-md w-full bg-white border border-black/[0.06] rounded-3xl p-5 sm:p-6 shadow-xl space-y-6 my-auto relative overflow-hidden">
         {/* Top Header with Table Badge & Payment Pill */}
-        <div className="flex items-start justify-between border-b border-slate-200 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
                 Live Kitchen Sync
               </span>
-              <span className="text-xs text-slate-500 font-mono">
+              <span className="text-xs text-slate-500 font-mono font-medium">
                 ⏱ {formatElapsed(elapsedSeconds)}
               </span>
             </div>
@@ -269,7 +269,7 @@ export default function OrderStatusPage({
               Order #{data.order_number}
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Table <span className="text-indigo-600 font-bold font-mono">{data.table}</span>
+              Table <span className="text-indigo-600 font-bold font-mono text-sm">{data.table}</span>
             </p>
           </div>
 
@@ -281,7 +281,7 @@ export default function OrderStatusPage({
                   : "bg-amber-50 border-amber-200 text-amber-700"
               }`}
             >
-              {data.payment_status === "paid" ? "Paid in Cash ✓" : "Cash at Counter"}
+              {data.payment_status === "paid" ? "Paid in Cash ✓" : "Pay at Counter"}
             </span>
             <div className="text-xs font-mono text-slate-400">
               {new Date(data.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
@@ -291,16 +291,16 @@ export default function OrderStatusPage({
 
         {/* Customer Payment Required Alert Banner (When Food Served & Unpaid) */}
         {data.status === "served" && data.payment_status === "unpaid" && (
-          <div className="p-4 rounded-3xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 text-white shadow-2xl space-y-2 text-center animate-pulse border-2 border-amber-300">
-            <div className="w-10 h-10 rounded-2xl bg-white text-slate-900 flex items-center justify-center mx-auto shadow-md">
-              <CreditCardIcon className="w-5 h-5 text-red-600" />
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-slate-900 shadow-sm space-y-2 text-center">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center mx-auto shadow-md">
+              <CreditCardIcon className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black uppercase tracking-tight">
+              <h3 className="text-base font-black tracking-tight text-amber-950">
                 Bill Payment Due: {paise(data.total_paise)}
               </h3>
-              <p className="text-xs opacity-95">
-                Your food has been served! Please settle your bill at the counter or scan the café UPI QR before leaving.
+              <p className="text-xs text-amber-800/90 mt-0.5">
+                Your order is served! Please settle your bill at the counter or scan the café UPI QR.
               </p>
             </div>
           </div>
@@ -308,31 +308,31 @@ export default function OrderStatusPage({
 
         {/* Kitchen Preparation Delay Alert Banner */}
         {data.delay_minutes > 0 && !isOrderServed && (
-          <div className="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 text-slate-900 shadow-xl space-y-1 text-left animate-in fade-in slide-in-from-top-2">
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-slate-900 shadow-sm space-y-1 text-left">
             <div className="flex items-center gap-2">
-              <ClockIcon className="w-5 h-5 text-amber-600 animate-bounce" />
-              <h3 className="text-sm font-black text-amber-700 uppercase tracking-wider">
+              <ClockIcon className="w-4 h-4 text-amber-600 animate-bounce" />
+              <h3 className="text-xs font-black text-amber-800 uppercase tracking-wider">
                 Kitchen Delay: +{data.delay_minutes} Minutes
               </h3>
             </div>
-            <p className="text-xs text-slate-600 pl-7 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed pl-6">
               {data.delay_reason ? `Notice: ${data.delay_reason}.` : "Chef requested extra time to ensure fresh quality preparation."}
             </p>
           </div>
         )}
 
         {/* Current State Highlight Banner */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 via-white to-white border border-indigo-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 font-black animate-pulse">
+            <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20 font-black">
               {currentStep.renderIcon("w-6 h-6")}
             </div>
             <div>
-              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">
                 Current Status
               </span>
               <h3 className="text-base font-black text-slate-900">{currentStep.label}</h3>
-              <p className="text-xs text-slate-600">{currentStep.desc}</p>
+              <p className="text-xs text-slate-500">{currentStep.desc}</p>
             </div>
           </div>
         </div>
@@ -345,7 +345,7 @@ export default function OrderStatusPage({
             <div className="absolute top-5 left-5 right-5 h-0.5 bg-slate-200 z-0"></div>
             {/* Active progress line */}
             <div
-              className="absolute top-5 left-5 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400 z-0 transition-all duration-700"
+              className="absolute top-5 left-5 h-0.5 bg-indigo-600 z-0 transition-all duration-700"
               style={{ width: `${Math.max(0, (currentIdx / (STEPS.length - 1)) * 100)}%`, right: "auto" }}
             ></div>
 
@@ -356,15 +356,15 @@ export default function OrderStatusPage({
                 <div key={s.key} className="flex flex-col items-center gap-1.5 relative z-10">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isCompleted
-                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
                       : isCurrent
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 animate-glow-pulse scale-110"
-                      : "bg-slate-100 border-2 border-slate-300 text-slate-400"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-110 ring-4 ring-indigo-100"
+                      : "bg-slate-100 border-2 border-slate-200 text-slate-400"
                   }`}>
                     {isCompleted ? <CheckCircleIcon className="w-5 h-5" /> : s.renderIcon("w-5 h-5")}
                   </div>
-                  <span className={`text-[11px] font-bold text-center max-w-12 leading-tight ${
-                    isCurrent ? "text-indigo-600" : isCompleted ? "text-emerald-500" : "text-slate-500"
+                  <span className={`text-[10px] font-bold text-center max-w-12 leading-tight ${
+                    isCurrent ? "text-indigo-600" : isCompleted ? "text-emerald-600" : "text-slate-400"
                   }`}>
                     {s.label}
                   </span>
@@ -375,81 +375,77 @@ export default function OrderStatusPage({
 
           {/* Countdown timer */}
           {countdownSeconds !== null && countdownSeconds > 0 && (
-            <div className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-amber-50 border border-amber-200">
+            <div className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-amber-50 border border-amber-200/80">
               <span className="text-amber-600 text-sm">⏳</span>
-              <span className="text-xs text-slate-500">Est. ready in</span>
-              <span className="text-sm font-black text-amber-600 font-mono">
+              <span className="text-xs text-slate-600 font-medium">Estimated preparation:</span>
+              <span className="text-sm font-black text-amber-700 font-mono">
                 {Math.floor(countdownSeconds / 60)}:{String(countdownSeconds % 60).padStart(2, "0")}
               </span>
             </div>
           )}
           {data.status === "ready" && (
-            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-700 text-center animate-scale-bounce">
-              <p className="text-sm font-black text-emerald-400">🔔 Your order is ready! A waiter is on the way.</p>
+            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+              <p className="text-sm font-black text-emerald-700">🔔 Your order is ready! A server is bringing it to your table.</p>
             </div>
           )}
         </div>
 
         {/* Loyalty Points (when served) */}
         {isOrderServed && (
-          <div className="space-y-3">
-            {/* Loyalty Points Earned */}
-            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between animate-fade-in-up">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🏆</span>
-                <div>
-                  <p className="text-xs font-black text-slate-900">Loyalty Points Earned!</p>
-                  <p className="text-xs text-slate-500">Redeemable on your next visit</p>
-                </div>
+          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🏆</span>
+              <div>
+                <p className="text-xs font-black text-slate-900">Loyalty Points Earned!</p>
+                <p className="text-[11px] text-slate-500">Credited to your table session</p>
               </div>
-              <span className="text-lg font-black text-amber-600 font-mono">+{Math.floor((data.total_paise || 0) / 10000)} pts</span>
             </div>
-
+            <span className="text-sm font-black text-amber-700 font-mono">+{Math.floor((data.total_paise || 0) / 10000)} pts</span>
           </div>
         )}
 
         {/* Itemized Order Recap */}
         {data.items && data.items.length > 0 && (
-          <div className="bg-slate-100 border border-slate-200 rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-500">
-              <span>Itemized Order</span>
-              <span>{data.items.length} dishes</span>
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2">
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <span>Itemized Receipt</span>
+              <span>{data.items.length} {data.items.length === 1 ? "item" : "items"}</span>
             </div>
-            <div className="space-y-1.5 pt-1 max-h-48 overflow-y-auto pr-1">
+            <div className="space-y-1.5 pt-1 max-h-48 overflow-y-auto pr-1 divide-y divide-slate-100">
               {data.items.map((it: any) => (
-                <div key={it.id} className="flex justify-between items-center text-xs">
-                  <span className="text-slate-700 font-medium">
+                <div key={it.id} className="flex justify-between items-center text-xs pt-1.5">
+                  <span className="text-slate-800 font-medium">
                     {it.item_name} <span className="text-indigo-600 font-bold font-mono">×{it.quantity}</span>
                   </span>
-                  <span className="text-slate-500 font-mono">{paise(it.line_total_paise)}</span>
+                  <span className="text-slate-600 font-mono font-medium">{paise(it.line_total_paise)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-xs font-black">
-              <span className="text-slate-600">Total</span>
-              <span className="text-indigo-600 font-mono text-sm">{paise(data.total_paise)}</span>
+              <span className="text-slate-700">Total Bill</span>
+              <span className="text-slate-900 font-mono text-sm font-black">{paise(data.total_paise)}</span>
             </div>
           </div>
         )}
 
         {/* Re-Open Feedback CTA Banner when Order Complete */}
         {isOrderServed && (
-          <div className="bg-gradient-to-r from-indigo-50 via-white to-indigo-50 border border-indigo-200 rounded-2xl p-3 flex items-center justify-between">
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xl">🌟</span>
               <div>
-                <span className="text-xs font-black text-white block">
+                <span className="text-xs font-black text-slate-900 block">
                   {submittedFeedback ? "Feedback Submitted ✓" : "Enjoyed your meal?"}
                 </span>
-                <span className="text-xs text-slate-500">
-                  {submittedFeedback ? "Thank you! Rate us on Google Reviews." : "Tap to rate and review your experience."}
+                <span className="text-[11px] text-slate-500">
+                  {submittedFeedback ? "Thank you! Rate us on Google." : "Tap to rate your dining experience."}
                 </span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowFeedbackModal(true)}
-              className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs cursor-pointer active:scale-95 transition-all shadow-sm min-h-[44px]"
+              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer active:scale-95 transition-all shadow-sm"
             >
               {submittedFeedback ? "Google Review" : "Rate ★"}
             </button>
@@ -457,18 +453,18 @@ export default function OrderStatusPage({
         )}
 
         {/* Bottom Actions */}
-        <div className="border-t border-slate-200 pt-4 space-y-3 text-center">
+        <div className="border-t border-slate-100 pt-4 space-y-3 text-center">
           {data.qr_token && (
             <Link
               href={`/t/${data.qr_token}`}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-black text-xs flex items-center justify-center shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer min-h-[44px]"
+              className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer min-h-[44px]"
             >
               + Add More Dishes to Table {data.table} &rarr;
             </Link>
           )}
 
-          <p className="text-xs text-slate-500">
-            Live kitchen status updates automatically as your order is prepared.
+          <p className="text-[11px] text-slate-400 font-medium">
+            This live receipt updates in real-time as your meal progresses.
           </p>
         </div>
       </div>

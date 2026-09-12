@@ -120,18 +120,18 @@ export default function OnboardingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F7FC] text-[#17142B] flex flex-col font-sans selection:bg-[#5738F5] selection:text-white antialiased">
+    <div className="min-h-screen bg-[#F5F5F7] text-slate-900 flex flex-col font-sans selection:bg-[#007AFF] selection:text-white antialiased">
       {/* Top Header */}
-      <header className="bg-white border-b border-[#E7E4F0] px-6 py-4 sticky top-0 z-20">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-6 py-4 sticky top-0 z-20 shadow-2xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/">
             <QrSliceLogo size="md" />
           </Link>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-[#6F7185] hidden sm:inline">Already registered?</span>
+            <span className="text-xs text-slate-500 hidden sm:inline">Already registered?</span>
             <Link
               href="/login"
-              className="text-xs font-bold text-[#5738F5] bg-[#EEEAFE] px-3.5 py-1.5 rounded-xl hover:bg-purple-100 transition-colors"
+              className="text-xs font-semibold text-slate-900 bg-black/[0.05] px-3.5 py-1.5 rounded-full hover:bg-black/[0.08] transition-colors"
             >
               Sign In
             </Link>
@@ -140,7 +140,7 @@ export default function OnboardingPage() {
       </header>
 
       {/* Progress Indicator 1..7 */}
-      <div className="bg-white border-b border-[#E7E4F0] py-3.5 px-4 overflow-x-auto scrollbar-none">
+      <div className="bg-white/70 backdrop-blur-md border-b border-black/[0.06] py-3.5 px-4 overflow-x-auto scrollbar-none">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-2">
           {stepsList.map((st, idx) => {
             const isDone = currentStep > st.num;
@@ -149,19 +149,19 @@ export default function OnboardingPage() {
               <React.Fragment key={st.num}>
                 <div className="flex items-center gap-2 shrink-0">
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center font-mono font-black text-xs transition-all ${
+                    className={`w-7 h-7 rounded-full flex items-center justify-center font-mono font-bold text-xs transition-all ${
                       isDone
-                        ? "bg-emerald-500 text-white"
+                        ? "bg-[#34C759] text-white"
                         : isCurrent
-                        ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/30 scale-105"
-                        : "bg-slate-100 text-[#6F7185]"
+                        ? "bg-[#007AFF] text-white shadow-xs scale-105"
+                        : "bg-black/[0.05] text-slate-400"
                     }`}
                   >
                     {isDone ? "✓" : st.num}
                   </div>
                   <span
-                    className={`text-xs font-bold hidden md:inline ${
-                      isCurrent ? "text-[#17142B]" : "text-[#6F7185]"
+                    className={`text-xs font-semibold hidden md:inline ${
+                      isCurrent ? "text-slate-900" : "text-slate-400"
                     }`}
                   >
                     {st.title}
@@ -170,7 +170,7 @@ export default function OnboardingPage() {
                 {idx < stepsList.length - 1 && (
                   <div
                     className={`h-0.5 flex-1 mx-1 min-w-4 transition-colors ${
-                      currentStep > st.num ? "bg-emerald-500" : "bg-slate-200"
+                      currentStep > st.num ? "bg-[#34C759]" : "bg-black/[0.06]"
                     }`}
                   />
                 )}
@@ -182,25 +182,25 @@ export default function OnboardingPage() {
 
       {/* Main Form Body */}
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center">
-        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
+        <div className="bg-white border border-black/[0.06] rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
           {/* STEP 1: RESTAURANT INFORMATION */}
           {currentStep === 1 && (
             <div className="space-y-5 animate-fade-in-up">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#5738F5] bg-[#EEEAFE] px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#007AFF] bg-[#007AFF]/10 px-2.5 py-1 rounded-md">
                   STEP 1 OF 7
                 </span>
-                <h2 className="text-2xl font-black text-[#17142B] tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
                   Tell us about your restaurant
                 </h2>
-                <p className="text-xs text-[#6F7185] mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   We'll configure your customer QR menu and staff dashboard.
                 </p>
               </div>
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#6F7185] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
                     Restaurant or Café Name
                   </label>
                   <input
@@ -208,7 +208,7 @@ export default function OnboardingPage() {
                     required
                     value={restaurantName}
                     onChange={(e) => autoSlug(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-[#007AFF] transition-all"
                   />
                 </div>
 
@@ -216,7 +216,7 @@ export default function OnboardingPage() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-[#6F7185] mb-1.5">
                     Subdomain / Web Slug
                   </label>
-                  <div className="flex items-center rounded-xl bg-slate-50 border border-slate-200 px-3">
+                  <div className="flex items-center rounded-xl bg-[#F5F5F7] border border-black/[0.06] px-3">
                     <span className="text-xs text-[#6F7185] font-mono select-none">qrslice.app/c/</span>
                     <input
                       type="text"
@@ -237,7 +237,7 @@ export default function OnboardingPage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                      className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                     />
                   </div>
 
@@ -248,7 +248,7 @@ export default function OnboardingPage() {
                     <select
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                      className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                     >
                       <option value="INR">INR (₹)</option>
                       <option value="USD">USD ($)</option>
@@ -267,7 +267,7 @@ export default function OnboardingPage() {
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                   />
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setCurrentStep(2)}
-                className="w-full py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-md shadow-[#5738F5]/25 cursor-pointer mt-2"
+                className="w-full py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-md shadow-[#007AFF]/25 cursor-pointer mt-2"
               >
                 Next: Create First Category →
               </button>
@@ -286,7 +286,7 @@ export default function OnboardingPage() {
           {currentStep === 2 && (
             <div className="space-y-5 animate-fade-in-up">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#5738F5] bg-[#EEEAFE] px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#007AFF] bg-[rgba(0,122,255,0.08)] px-2.5 py-1 rounded-md">
                   STEP 2 OF 7
                 </span>
                 <h2 className="text-2xl font-black text-[#17142B] tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
@@ -307,7 +307,7 @@ export default function OnboardingPage() {
                     required
                     value={categoryName}
                     onChange={(e) => setCategoryName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                   />
                 </div>
 
@@ -318,7 +318,7 @@ export default function OnboardingPage() {
                       key={sugg}
                       type="button"
                       onClick={() => setCategoryName(sugg)}
-                      className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 hover:bg-[#EEEAFE] hover:text-[#5738F5] transition-colors"
+                      className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007AFF] transition-colors"
                     >
                       + {sugg}
                     </button>
@@ -337,7 +337,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(3)}
-                  className="flex-1 py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-md shadow-[#5738F5]/25 cursor-pointer"
+                  className="flex-1 py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-md shadow-[#007AFF]/25 cursor-pointer"
                 >
                   Next: Add First Item →
                 </button>
@@ -349,7 +349,7 @@ export default function OnboardingPage() {
           {currentStep === 3 && (
             <div className="space-y-5 animate-fade-in-up">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#5738F5] bg-[#EEEAFE] px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#007AFF] bg-[rgba(0,122,255,0.08)] px-2.5 py-1 rounded-md">
                   STEP 3 OF 7
                 </span>
                 <h2 className="text-2xl font-black text-[#17142B] tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
@@ -370,7 +370,7 @@ export default function OnboardingPage() {
                     required
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                   />
                 </div>
 
@@ -384,7 +384,7 @@ export default function OnboardingPage() {
                       required
                       value={itemPrice}
                       onChange={(e) => setItemPrice(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                      className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm font-mono text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                     />
                   </div>
 
@@ -427,7 +427,7 @@ export default function OnboardingPage() {
                     rows={2}
                     value={itemDesc}
                     onChange={(e) => setItemDesc(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-[#17142B] focus:outline-none focus:border-[#5738F5] resize-none"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-xs text-[#17142B] focus:outline-none focus:border-[#007AFF] resize-none"
                   />
                 </div>
               </div>
@@ -443,7 +443,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(4)}
-                  className="flex-1 py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-md shadow-[#5738F5]/25 cursor-pointer"
+                  className="flex-1 py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-md shadow-[#007AFF]/25 cursor-pointer"
                 >
                   Next: Configure Tables →
                 </button>
@@ -455,7 +455,7 @@ export default function OnboardingPage() {
           {currentStep === 4 && (
             <div className="space-y-5 animate-fade-in-up">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#5738F5] bg-[#EEEAFE] px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#007AFF] bg-[rgba(0,122,255,0.08)] px-2.5 py-1 rounded-md">
                   STEP 4 OF 7
                 </span>
                 <h2 className="text-2xl font-black text-[#17142B] tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
@@ -467,7 +467,7 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-[#F5F5F7] border border-black/[0.06]">
                   <div>
                     <div className="font-extrabold text-sm text-[#17142B]">Initial Table Count</div>
                     <div className="text-xs text-[#6F7185]">Generates Table 01 to Table {String(tableCount).padStart(2, "0")}</div>
@@ -480,7 +480,7 @@ export default function OnboardingPage() {
                     >
                       -
                     </button>
-                    <span className="font-mono font-black text-lg text-[#5738F5] w-8 text-center">
+                    <span className="font-mono font-black text-lg text-[#007AFF] w-8 text-center">
                       {tableCount}
                     </span>
                     <button
@@ -497,7 +497,7 @@ export default function OnboardingPage() {
                   {Array.from({ length: Math.min(tableCount, 12) }).map((_, i) => (
                     <div
                       key={i}
-                      className="p-3 rounded-xl bg-[#EEEAFE]/50 border border-[#5738F5]/20 text-center font-mono font-bold text-xs text-[#5738F5]"
+                      className="p-3 rounded-xl bg-[rgba(0,122,255,0.08)]/50 border border-[#007AFF]/20 text-center font-mono font-bold text-xs text-[#007AFF]"
                     >
                       T{String(i + 1).padStart(2, "0")}
                     </div>
@@ -516,7 +516,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(5)}
-                  className="flex-1 py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-md shadow-[#5738F5]/25 cursor-pointer"
+                  className="flex-1 py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-md shadow-[#007AFF]/25 cursor-pointer"
                 >
                   Next: Generate QR Codes →
                 </button>
@@ -528,7 +528,7 @@ export default function OnboardingPage() {
           {currentStep === 5 && (
             <div className="space-y-5 animate-fade-in-up">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#5738F5] bg-[#EEEAFE] px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#007AFF] bg-[rgba(0,122,255,0.08)] px-2.5 py-1 rounded-md">
                   STEP 5 OF 7
                 </span>
                 <h2 className="text-2xl font-black text-[#17142B] tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
@@ -539,7 +539,7 @@ export default function OnboardingPage() {
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-3xl flex flex-col items-center">
+              <div className="p-4 bg-[#F5F5F7] border border-black/[0.06] rounded-3xl flex flex-col items-center">
                 <QRCodeDisplay
                   url={`https://qrslice.app/c/${slug}?table=01`}
                   restaurantName={restaurantName}
@@ -560,7 +560,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(6)}
-                  className="flex-1 py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-md shadow-[#5738F5]/25 cursor-pointer"
+                  className="flex-1 py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-md shadow-[#007AFF]/25 cursor-pointer"
                 >
                   Next: Test Customer Ordering →
                 </button>
@@ -572,7 +572,7 @@ export default function OnboardingPage() {
           {currentStep === 6 && (
             <div className="space-y-5 animate-fade-in-up">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#5738F5] bg-[#EEEAFE] px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#007AFF] bg-[rgba(0,122,255,0.08)] px-2.5 py-1 rounded-md">
                   STEP 6 OF 7
                 </span>
                 <h2 className="text-2xl font-black text-[#17142B] tracking-tight mt-2" style={{ fontFamily: "var(--font-heading)" }}>
@@ -586,12 +586,12 @@ export default function OnboardingPage() {
               <div className="border border-[#E7E4F0] rounded-3xl p-5 bg-slate-50 space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-xl bg-[#5738F5] text-white flex items-center justify-center font-black text-xs">
+                    <span className="w-8 h-8 rounded-xl bg-[#007AFF] text-white flex items-center justify-center font-black text-xs">
                       Q
                     </span>
                     <div>
                       <div className="font-extrabold text-xs text-[#17142B]">{restaurantName}</div>
-                      <div className="text-[10px] font-mono text-[#5738F5]">TABLE 01 · DINE-IN</div>
+                      <div className="text-[10px] font-mono text-[#007AFF]">TABLE 01 · DINE-IN</div>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
@@ -614,7 +614,7 @@ export default function OnboardingPage() {
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                       testOrderPlaced
                         ? "bg-emerald-600 text-white font-black"
-                        : "bg-[#5738F5] text-white shadow-xs"
+                        : "bg-[#007AFF] text-white shadow-xs"
                     }`}
                   >
                     {testOrderPlaced ? "Added ✓" : "+ Add"}
@@ -640,7 +640,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(7)}
-                  className="flex-1 py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-md shadow-[#5738F5]/25 cursor-pointer"
+                  className="flex-1 py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-md shadow-[#007AFF]/25 cursor-pointer"
                 >
                   Next: Ready to Launch →
                 </button>
@@ -673,7 +673,7 @@ export default function OnboardingPage() {
                     required
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                   />
                 </div>
 
@@ -687,7 +687,7 @@ export default function OnboardingPage() {
                     placeholder="owner@myrestaurant.com"
                     value={ownerEmail}
                     onChange={(e) => setOwnerEmail(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                   />
                 </div>
 
@@ -701,7 +701,7 @@ export default function OnboardingPage() {
                     placeholder="••••••••••••"
                     value={ownerPassword}
                     onChange={(e) => setOwnerPassword(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                    className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-4 py-3 text-sm text-[#17142B] focus:outline-none focus:border-[#007AFF]"
                   />
                 </div>
 
@@ -723,7 +723,7 @@ export default function OnboardingPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-sm transition-all shadow-lg shadow-[#5738F5]/30 cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-3.5 rounded-xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-black text-sm transition-all shadow-lg shadow-[#007AFF]/30 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? "Provisioning Restaurant…" : "🚀 Launch My Restaurant Now →"}
                 </button>

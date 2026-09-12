@@ -46,29 +46,29 @@ export function PosCatalogGrid({
   });
 
   return (
-    <section className="flex-1 flex flex-col bg-slate-100 p-3 sm:p-4 overflow-hidden pb-20 md:pb-4 border-r border-slate-200">
+    <section className="flex-1 flex flex-col bg-[#F5F5F7] p-3 sm:p-4 overflow-hidden pb-20 md:pb-4 border-r border-black/[0.06]">
       {msg && (
         <div
-          className={`p-3 mb-3 rounded-2xl text-xs font-bold flex items-center gap-2 border shadow-sm animate-in fade-in duration-200 ${
+          className={`p-3 mb-3 rounded-2xl text-xs font-semibold flex items-center gap-2 border shadow-xs animate-in fade-in duration-200 ${
             msg.kind === "ok"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-red-50 border-red-200 text-red-800"
+              ? "bg-[#34C759]/10 border-[#34C759]/25 text-[#34C759]"
+              : "bg-[#FF3B30]/10 border-[#FF3B30]/25 text-[#FF3B30]"
           }`}
         >
-          <span className="font-extrabold text-sm">{msg.kind === "ok" ? "✓" : "⚠️"}</span>
+          <span className="font-bold text-sm">{msg.kind === "ok" ? "✓" : "⚠️"}</span>
           <span>{msg.text}</span>
         </div>
       )}
 
       {/* Category scroll on mobile */}
-      <div className="md:hidden flex gap-2 overflow-x-auto pb-2.5 mb-1 no-scrollbar shrink-0">
+      <div className="md:hidden flex gap-2 overflow-x-auto pb-2 mb-1 no-scrollbar shrink-0">
         <button
           type="button"
           onClick={() => setSelectedCategory("all")}
-          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 min-h-[44px] ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 min-h-[40px] ${
             selectedCategory === "all"
-              ? "bg-indigo-600 text-white shadow-md font-black"
-              : "bg-white border border-slate-200 text-slate-700 hover:text-slate-900"
+              ? "bg-slate-900 text-white shadow-xs font-bold"
+              : "bg-white border border-black/[0.06] text-slate-700 hover:text-slate-900"
           }`}
         >
           All
@@ -78,10 +78,10 @@ export function PosCatalogGrid({
             key={c.id}
             type="button"
             onClick={() => setSelectedCategory(c.id)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 min-h-[44px] ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 min-h-[40px] ${
               selectedCategory === c.id
-                ? "bg-indigo-600 text-white shadow-md font-black"
-                : "bg-white border border-slate-200 text-slate-700 hover:text-slate-900"
+                ? "bg-slate-900 text-white shadow-xs font-bold"
+                : "bg-white border border-black/[0.06] text-slate-700 hover:text-slate-900"
             }`}
           >
             {c.name}
@@ -98,7 +98,7 @@ export function PosCatalogGrid({
             placeholder="Search dishes (F2)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 min-h-[44px] transition-all shadow-sm"
+            className="w-full bg-white border border-black/[0.06] rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/15 min-h-[44px] transition-all shadow-xs font-medium"
           />
           {searchQuery && (
             <button
@@ -114,13 +114,13 @@ export function PosCatalogGrid({
         <button
           type="button"
           onClick={() => setVegOnly(!vegOnly)}
-          className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-95 min-h-[44px] ${
+          className={`px-3.5 py-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-95 min-h-[44px] ${
             vegOnly
-              ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-sm"
-              : "bg-white border-slate-200 text-slate-600 hover:text-slate-900"
+              ? "bg-[#34C759]/10 border-[#34C759]/30 text-[#34C759] shadow-xs font-bold"
+              : "bg-white border-black/[0.06] text-slate-600 hover:text-slate-900"
           }`}
         >
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/80 animate-pulse"></span>
+          <span className="w-2 h-2 rounded-full bg-[#34C759] shadow-xs shadow-[#34C759]/80 animate-pulse"></span>
           <span>Veg</span>
         </button>
       </div>
@@ -131,27 +131,27 @@ export function PosCatalogGrid({
           <div
             key={it.id}
             onClick={() => onAddToCart(it)}
-            className="bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-indigo-400 rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm hover:shadow-md group min-h-[110px]"
+            className="bg-white hover:bg-slate-50/80 border border-black/[0.06] hover:border-[#007AFF]/40 rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] shadow-xs hover:shadow-md group min-h-[114px]"
           >
             <div>
-              <div className="flex items-start justify-between gap-1.5 mb-1">
+              <div className="flex items-start justify-between gap-1.5 mb-1.5">
                 <span
                   className={`w-2.5 h-2.5 rounded-full border mt-1 shrink-0 ${
-                    it.is_veg ? "border-emerald-500 bg-emerald-500" : "border-red-500 bg-red-500"
+                    it.is_veg ? "border-[#34C759] bg-[#34C759]" : "border-[#FF3B30] bg-[#FF3B30]"
                   }`}
                 />
-                <span className="font-bold text-xs text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
+                <span className="font-semibold text-xs text-slate-900 group-hover:text-[#007AFF] transition-colors line-clamp-2 leading-snug">
                   {it.name}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-              <span className="text-xs font-mono font-black text-indigo-600 tracking-tight">
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-black/[0.04]">
+              <span className="text-xs font-mono font-bold text-slate-900 tracking-tight">
                 {paise(it.price_paise)}
               </span>
-              <span className="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-indigo-600 group-hover:text-white text-indigo-600 text-xs font-black flex items-center justify-center transition-all duration-200 shadow-sm">
-                <PlusIcon className="w-4 h-4" />
+              <span className="w-7 h-7 rounded-full bg-[#007AFF]/10 group-hover:bg-[#007AFF] group-hover:text-white text-[#007AFF] text-xs font-bold flex items-center justify-center transition-all duration-200 shadow-xs">
+                <PlusIcon className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -160,15 +160,15 @@ export function PosCatalogGrid({
 
       {/* MOBILE FLOATING CART ACTION BAR */}
       {cartLength > 0 && (
-        <div className="md:hidden fixed bottom-16 left-3 right-3 z-40 bg-indigo-600 text-white rounded-2xl p-3 shadow-2xl flex items-center justify-between font-black animate-in slide-in-from-bottom duration-200">
+        <div className="md:hidden fixed bottom-16 left-3 right-3 z-40 bg-[#007AFF] text-white rounded-2xl p-3 shadow-xl flex items-center justify-between font-bold animate-in slide-in-from-bottom duration-200">
           <div>
-            <div className="text-xs uppercase tracking-wider">{totalItemCount} Items Selected</div>
-            <div className="text-sm font-mono">{paise(finalTotalPaise)}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/80">{totalItemCount} Items Selected</div>
+            <div className="text-sm font-mono font-bold">{paise(finalTotalPaise)}</div>
           </div>
           <button
             type="button"
             onClick={onOpenMobileCart}
-            className="px-4 py-2.5 bg-white text-indigo-600 rounded-xl text-xs font-black shadow-md cursor-pointer active:scale-95 transition-transform min-h-[44px]"
+            className="px-4 py-2 bg-white text-[#007AFF] rounded-xl text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-transform min-h-[40px]"
           >
             View Bill & Settle &rarr;
           </button>

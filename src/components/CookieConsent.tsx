@@ -88,74 +88,72 @@ export function CookieConsent() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed inset-x-0 bottom-0 z-50 p-4 sm:p-6"
+      className="fixed inset-x-0 bottom-4 z-50 px-4 sm:px-6 pointer-events-none"
     >
-      <div className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-5 shadow-lg sm:p-6">
-        <h2 className="text-base font-semibold text-slate-900">
-          We use cookies
+      <div className="mx-auto max-w-3xl rounded-3xl border border-black/[0.08] bg-white/90 backdrop-blur-xl p-5 shadow-2xl sm:p-6 pointer-events-auto animate-in slide-in-from-bottom duration-300">
+        <h2 className="text-base font-bold text-slate-900 tracking-tight">
+          Cookie Preferences & Privacy
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          QRslice uses cookies to provide essential functionality, remember your
-          preferences, and understand how the service is used. You can choose
-          which cookies to accept.
+        <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+          QrSlice uses cookies to provide seamless table ordering, maintain table session state, and evaluate platform reliability. You can personalize which cookies to allow.
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          <label className="flex items-center gap-2">
+        <div className="mt-3.5 flex flex-wrap gap-4 text-xs font-medium">
+          <label className="flex items-center gap-2 cursor-default">
             <input
               type="checkbox"
               checked
               disabled
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+              className="h-4 w-4 rounded-md border-black/[0.1] text-[#007AFF]"
             />
-            <span className="text-slate-700">Essential (required)</span>
+            <span className="text-slate-800 font-semibold">Essential (Required)</span>
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={consent.functional}
               onChange={(e) =>
                 setConsent((p) => ({ ...p, functional: e.target.checked }))
               }
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+              className="h-4 w-4 rounded-md border-black/[0.1] text-[#007AFF] focus:ring-0"
             />
             <span className="text-slate-700">Functional</span>
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={consent.analytics}
               onChange={(e) =>
                 setConsent((p) => ({ ...p, analytics: e.target.checked }))
               }
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+              className="h-4 w-4 rounded-md border-black/[0.1] text-[#007AFF] focus:ring-0"
             />
             <span className="text-slate-700">Analytics</span>
           </label>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-2.5">
           <button
             onClick={acceptAll}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+            className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 shadow-xs cursor-pointer"
           >
             Accept All
           </button>
           <button
             onClick={acceptSelected}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="rounded-full border border-black/[0.08] bg-black/[0.04] px-4 py-2 text-xs font-semibold text-slate-700 transition-all hover:bg-black/[0.07] active:scale-95 cursor-pointer"
           >
             Save Preferences
           </button>
           <button
             onClick={rejectOptional}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="rounded-full border border-black/[0.08] bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-50 active:scale-95 cursor-pointer"
           >
             Reject Optional
           </button>
           <Link
             href="/legal/cookies"
-            className="ml-auto text-xs text-slate-500 hover:text-slate-700"
+            className="ml-auto text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
           >
             Cookie Policy
           </Link>
