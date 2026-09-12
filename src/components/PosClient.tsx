@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
@@ -328,7 +329,8 @@ export default function PosClient({
         if (status === "unpaid") speakVoice(`K O T sent to kitchen for table ${selectedTable?.label || "Counter"}`);
         clearCart();
       } catch (err: unknown) {
-        flash("err", err instanceof Error ? err.message : "Failed to settle order");
+        const message = err instanceof Error ? err.message : "Failed to settle order";
+        flash("err", message.includes("No active table") ? "Add a table first: Admin → Tables, then retry." : message);
       } finally {
         setIsSettling(false);
       }
