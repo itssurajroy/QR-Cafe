@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { paise } from "@/lib/utils";
 import type { Category, MenuItem as Item } from "@/types";
 import { SearchIcon, PlusIcon } from "@/components/Icons";
@@ -44,6 +45,15 @@ export function PosCatalogGrid({
     const matchesVeg = !vegOnly || i.is_veg;
     return i.available && matchesCat && matchesSearch && matchesVeg;
   });
+
+  const soldOutHidden = items.filter((i) => {
+    const matchesCat = selectedCategory === "all" || i.category_id === selectedCategory;
+    const matchesSearch =
+      !searchQuery.trim() ||
+      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (i.description && i.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    return !i.available && matchesCat && matchesSearch;
+  }).length;
 
   return (
     <section className="flex-1 flex flex-col bg-[#F5F5F7] p-3 sm:p-4 overflow-hidden pb-20 md:pb-4 border-r border-black/[0.06]">
@@ -124,6 +134,12 @@ export function PosCatalogGrid({
           <span>Veg</span>
         </button>
       </div>
+
+      {filteredItems.length === 0 && soldOutHidden > 0 && (
+        <p className="mb-3 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+          {soldOutHidden} matching {soldOutHidden === 1 ? "dish is" : "dishes are"} marked sold out. Enable in Admin → Menu to sell.
+        </p>
+      )}
 
       {/* Grid of Dishes */}
       <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 pr-1 pb-16 md:pb-0">
