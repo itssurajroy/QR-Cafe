@@ -165,30 +165,44 @@ export default function PosClient({
 
   useEffect(() => {
     fetchLiveOrders();
-    const channel = supabase
-      .channel("live-orders")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "orders", filter: `restaurant_id=${restaurant.id}` },
-        () => {
-          fetchLiveOrders();
-          speakVoice("New order received");
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "orders", filter: `restaurant_id=${restaurant.id}` },
-        () => {
-          fetchLiveOrders();
-        }
-      )
-      .subscribe();
+    let channel: any = null;
+
+    try {
+      channel = supabase
+        .channel("live-orders")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "orders", filter: `restaurant_id=${restaurant.id}` },
+          () => {
+            fetchLiveOrders();
+            speakVoice("New order received");
+          }
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "orders", filter: `restaurant_id=${restaurant.id}` },
+          () => {
+            fetchLiveOrders();
+          }
+        )
+        .subscribe((status: string, err?: Error) => {
+          if (err) console.warn("Supabase Realtime:", err);
+        });
+    } catch (err) {
+      console.warn("Realtime WebSocket unavailable, falling back to polling", err);
+    }
 
     const poll = setInterval(fetchLiveOrders, 5000);
 
     return () => {
       clearInterval(poll);
-      supabase.removeChannel(channel);
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (e) {
+          // ignore
+        }
+      }
     };
   }, [restaurant.id, supabase, fetchLiveOrders, speakVoice]);
 
@@ -204,7 +218,7 @@ export default function PosClient({
 
   const handleAddCustomItem = () => {
     const err =
-      !customItemName.trim() || !customItemPrice || Number(customItemPrice) <= 0
+      !customItemName.trim() || !customItemPrice || Number.isNaN(Number(customItemPrice)) || Number(customItemPrice) <= 0
         ? "Please enter valid item name and price"
         : customItemName.trim().length > 80
           ? "Item name too long (max 80)"
