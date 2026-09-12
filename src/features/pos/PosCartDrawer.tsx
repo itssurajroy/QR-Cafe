@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { useState } from "react";
 import { paise } from "@/lib/utils";
 import type { CartLine } from "@/types";
@@ -523,6 +524,12 @@ export function PosCartDrawer({
               onChange={(e) => setAmountReceived(e.target.value)}
               className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl p-2.5 text-xs text-slate-900 font-mono focus:outline-none focus:border-[#007AFF] focus:bg-white min-h-[44px] transition-all font-bold shadow-xs"
             />
+            {amountReceived && Number(amountReceived) > 0 && (
+              <p className="text-[11px] font-semibold text-slate-600">
+                Change due: ₹{Math.max(0, Number(amountReceived) * 100 - finalTotalPaise) / 100}
+                {Number(amountReceived) * 100 < finalTotalPaise ? " (short — collect more)" : ""}
+              </p>
+            )}
             {/* Quick Cash Tender Pills */}
             <div className="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar">
               {[
