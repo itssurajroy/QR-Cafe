@@ -14,6 +14,20 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
   const [simulating, setSimulating] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<{ message: string; hint?: string } | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (
+        params.get("payment") === "success" ||
+        params.get("razorpay_payment_id") ||
+        params.get("razorpay_payment_link_status") === "paid"
+      ) {
+        setPaymentSuccess(true);
+      }
+    }
+  });
 
   const plan = restaurant?.plan || "trial";
   const trialEnds = restaurant?.trial_ends_at ? new Date(restaurant.trial_ends_at) : null;
@@ -145,6 +159,19 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
             </button>
           </div>
         </div>
+
+        {/* Payment Success Celebratory Banner */}
+        {paymentSuccess && (
+          <div className="p-4 rounded-3xl bg-emerald-50 border border-emerald-200/80 text-emerald-900 shadow-sm flex items-center gap-3">
+            <span className="text-2xl">🎉</span>
+            <div>
+              <p className="text-xs font-bold text-emerald-900">Payment Successful!</p>
+              <p className="text-[11px] text-emerald-700">
+                Your café subscription is active. Thank you for powering your restaurant with QrSlice!
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Bento Main Card */}
         <div className="bg-white border border-black/[0.06] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 relative overflow-hidden">

@@ -22,26 +22,33 @@ export async function POST(req: NextRequest) {
   const eventType = event.event;
   const payload = event.payload;
 
-  const restaurantId =
-    payload?.subscription?.entity?.notes?.restaurant_id ||
-    payload?.payment?.entity?.notes?.restaurant_id;
+  const notes =
+    payload?.subscription?.entity?.notes ||
+    payload?.payment_link?.entity?.notes ||
+    payload?.payment?.entity?.notes ||
+    payload?.order?.entity?.notes;
+
+  const restaurantId = notes?.restaurant_id;
 
   if (restaurantId) {
-    if (eventType === "subscription.activated" || eventType === "subscription.charged") {
+    const cycle = notes?.cycle || "monthly";
+    const durationDays = cycle === "yearly" ? 365 : 30;
+
+    if (
+      eventType === "subscription.activated" ||
+      eventType === "subscription.charged" ||
+      eventType === "payment_link.paid" ||
+      eventType === "order.paid" ||
+      eventType === "payment.captured"
+    ) {
       await db
         .from("restaurants")
         .update({
           plan: "active",
           billing_status: "active",
-          subscription_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        })
-        .eq("id", restaurantId);
-    } else if (eventType === "payment.captured") {
-      await db
-        .from("restaurants")
-        .update({
-          billing_status: "paid",
-          subscription_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          subscription_ends_at: new Date(
+            Date.now() + durationDays * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         })
         .eq("id", restaurantId);
     } else if (

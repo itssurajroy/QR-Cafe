@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const amountPaise = cycle === "yearly" ? 999900 : 99900;
+  const planTitle = cycle === "yearly" ? "QrSlice Complete (1 Year)" : "QrSlice Complete (1 Month)";
+
   // Developer / Sandbox Instant Activation
   if (simulate) {
     const mockSubId = `sub_sim_${Date.now()}`;
@@ -60,17 +63,23 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // 1. Ensure Razorpay Customer (Optional in Razorpay - omit if invalid)
+  // 1. Ensure Razorpay Customer (optional for Payment Links / Subscriptions)
   let customerId = rest.razorpay_customer_id;
+  let customerEmail = "owner@qrslice.com";
+  try {
+    const { data: authUser } = await db.auth.admin.getUserById(user.userId);
+    if (authUser?.user?.email) customerEmail = authUser.user.email;
+  } catch {
+    // ignore
+  }
+
   if (
     !customerId ||
     !customerId.startsWith("cust_") ||
     customerId === "cust_guest" ||
     customerId.startsWith("cust_sim_")
   ) {
-    const { data: authUser } = await db.auth.admin.getUserById(user.userId);
-    const email = authUser?.user?.email || "owner@qrslice.com";
-    const customer = await razorpay.createCustomer(email, rest.name);
+    const customer = await razorpay.createCustomer(customerEmail, rest.name);
     if (customer?.id && !customer.error) {
       customerId = customer.id;
       await db
@@ -82,84 +91,90 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 2. Resolve or Auto-Create Plan
-  let planId =
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qr-cafe-blond.vercel.app";
+  const callbackUrl = `${appUrl}/admin/billing?payment=success&cycle=${cycle}`;
+
+  // 2. Check if recurring plan ID is configured
+  const configuredPlanId =
     cycle === "yearly"
       ? process.env.RAZORPAY_PLAN_ID_YEARLY
       : process.env.RAZORPAY_PLAN_ID_PRO || process.env.RAZORPAY_PLAN_ID;
 
-  // If planId is missing or a placeholder, auto-provision the plan on Razorpay
-  if (
-    !planId ||
-    planId.includes("XXX") ||
-    planId.includes("placeholder") ||
-    planId === "plan_qrslice_999"
-  ) {
-    const amountPaise = cycle === "yearly" ? 999900 : 99900;
-    const planName = cycle === "yearly" ? "QrSlice Complete (Yearly)" : "QrSlice Complete (Monthly)";
-    const createdPlan = await razorpay.createPlan(amountPaise, planName, cycle);
-    if (createdPlan?.id) {
-      planId = createdPlan.id;
-    } else if (createdPlan?.error) {
-      return NextResponse.json(
-        {
-          error: createdPlan.error,
-          details: createdPlan.details,
-          hint:
-            createdPlan.status === 401
-              ? "Razorpay authentication failed: Invalid Key ID or Key Secret. Please check your RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Razorpay Dashboard > Settings > API Keys."
-              : "Razorpay rejected the plan request.",
-        },
-        { status: createdPlan.status || 502 },
-      );
-    } else {
-      planId = "plan_sim_default";
+  const hasValidRecurringPlan =
+    configuredPlanId &&
+    !configuredPlanId.includes("XXX") &&
+    !configuredPlanId.includes("placeholder") &&
+    configuredPlanId !== "plan_qrslice_999";
+
+  // If a dedicated recurring plan ID is present, try recurring subscription first
+  if (hasValidRecurringPlan) {
+    const sub = await razorpay.createSubscription(customerId, configuredPlanId, {
+      restaurant_id: rest.id,
+      slug: rest.slug,
+      plan_name: planTitle,
+      billing_cycle: cycle,
+    });
+
+    if (sub && sub.id && !sub.error) {
+      await db
+        .from("restaurants")
+        .update({
+          razorpay_subscription_id: sub.id,
+          billing_status: "pending",
+        })
+        .eq("id", user.restaurantId);
+
+      return NextResponse.json({
+        ok: true,
+        subscription_id: sub.id,
+        short_url: sub.short_url || `https://rzp.io/i/${sub.id}`,
+      });
     }
   }
 
-  if (!planId) {
-    return NextResponse.json(
-      {
-        error: "Unable to resolve Razorpay Plan ID.",
-        hint: "Please configure RAZORPAY_PLAN_ID_PRO in your environment variables.",
-      },
-      { status: 400 },
-    );
-  }
-
-  // 3. Create Subscription
-  const sub = await razorpay.createSubscription(customerId, planId, {
-    restaurant_id: rest.id,
-    slug: rest.slug,
-    plan_name: cycle === "yearly" ? "QrSlice Complete (₹9,999/yr)" : "QrSlice Complete (₹999/mo)",
-    billing_cycle: cycle,
+  // 3. Robust Default: Generate Razorpay Hosted Payment Link (Works with ALL Razorpay Accounts)
+  const link = await razorpay.createPaymentLink({
+    amount: amountPaise,
+    description: `${planTitle} - Restaurant Operating System`,
+    customer: {
+      name: rest.name,
+      email: customerEmail,
+    },
+    notes: {
+      restaurant_id: rest.id,
+      slug: rest.slug,
+      cycle,
+      restaurant_name: rest.name,
+    },
+    callbackUrl,
   });
 
-  if (!sub || sub.error || !sub.id) {
-    return NextResponse.json(
-      {
-        error: sub?.error || "Failed to initiate Razorpay checkout.",
-        details: sub?.details,
-        hint:
-          sub?.status === 401
-            ? "Your Razorpay Key ID or Key Secret is unauthorized. Regenerate them from Razorpay Dashboard > Settings > API Keys and update your environment variables."
-            : "Ensure your Razorpay plan is active and in the same mode (Test/Live).",
-      },
-      { status: sub?.status || 500 },
-    );
+  if (link && link.short_url && !link.error) {
+    await db
+      .from("restaurants")
+      .update({
+        razorpay_subscription_id: link.id,
+        billing_status: "pending",
+      })
+      .eq("id", user.restaurantId);
+
+    return NextResponse.json({
+      ok: true,
+      short_url: link.short_url,
+      payment_link_id: link.id,
+    });
   }
 
-  await db
-    .from("restaurants")
-    .update({
-      razorpay_subscription_id: sub.id,
-      billing_status: "pending",
-    })
-    .eq("id", user.restaurantId);
-
-  return NextResponse.json({
-    ok: true,
-    subscription_id: sub.id,
-    short_url: sub.short_url || `https://rzp.io/i/${sub.id}`,
-  });
+  // 4. If Razorpay failed, return explicit diagnostics
+  return NextResponse.json(
+    {
+      error: link?.error || "Failed to initiate Razorpay checkout.",
+      details: link?.details,
+      hint:
+        link?.status === 401
+          ? "Your Razorpay Key ID or Key Secret is unauthorized. Regenerate them from Razorpay Dashboard > Settings > API Keys and update your environment variables."
+          : "Please verify that your Razorpay account is active and credentials are correct.",
+    },
+    { status: link?.status || 500 },
+  );
 }

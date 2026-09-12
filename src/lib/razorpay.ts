@@ -108,6 +108,26 @@ export const razorpay = {
     return rp("POST", "/subscriptions", payload);
   },
 
+  createPaymentLink: (options: {
+    amount: number;
+    description: string;
+    customer?: { name?: string; email?: string; contact?: string };
+    notes?: Record<string, any>;
+    callbackUrl?: string;
+  }) => {
+    return rp("POST", "/payment_links", {
+      amount: options.amount,
+      currency: "INR",
+      accept_partial: false,
+      description: options.description,
+      customer: options.customer,
+      notes: options.notes,
+      callback_url: options.callbackUrl,
+      callback_method: "get",
+      notify: { sms: false, email: true },
+    });
+  },
+
   cancelSubscription: (subId: string) =>
     rp("POST", `/subscriptions/${subId}/cancel`, { cancel_at_cycle_end: 0 }),
 
