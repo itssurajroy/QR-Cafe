@@ -203,15 +203,23 @@ export default function PosClient({
   };
 
   const handleAddCustomItem = () => {
-    if (!customItemName.trim() || !customItemPrice || Number(customItemPrice) <= 0) {
-      flash("err", "Please enter valid item name and price");
+    const err =
+      !customItemName.trim() || !customItemPrice || Number(customItemPrice) <= 0
+        ? "Please enter valid item name and price"
+        : customItemName.trim().length > 80
+          ? "Item name too long (max 80)"
+          : Number(customItemPrice) > 100000
+            ? "Price too high (max ₹100000)"
+            : null;
+    if (err) {
+      flash("err", err);
       return;
     }
     const newItem: Item = {
       id: `custom-${Date.now()}`,
       restaurant_id: restaurant.id,
       category_id: categories[0]?.id || "custom",
-      name: customItemName.trim(),
+      name: customItemName.trim().slice(0, 80),
       price_paise: Math.round(Number(customItemPrice) * 100),
       is_veg: customItemIsVeg,
       available: true,
