@@ -12,11 +12,11 @@ export function SuperSidebar() {
     <aside className="w-full md:w-64 bg-white dark:bg-stone-900 border-r border-slate-200 dark:border-stone-800 p-5 flex flex-col justify-between flex-shrink-0">
         <div className="space-y-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-slate-900 dark:text-white font-black text-xl shadow-lg shadow-indigo-600/20">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-600/20">
               ⚡
             </div>
             <div>
-              <h1 className="font-black text-white text-sm tracking-tight">QR Café Platform</h1>
+              <h1 className="font-black text-slate-900 dark:text-white text-sm tracking-tight">QR Café Platform</h1>
               <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest block">
                 Super Console
               </span>
@@ -42,8 +42,8 @@ export function SuperSidebar() {
                 onClick={() => setTab(item.id as any)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   tab === item.id
-                    ? "bg-indigo-600 text-slate-900 dark:text-white shadow-md shadow-indigo-600/20 font-black"
-                    : "text-slate-500 dark:text-stone-400 hover:text-slate-900 dark:hover:text-white dark:text-white hover:bg-slate-100 dark:hover:bg-stone-800 dark:bg-stone-800/80"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-black"
+                    : "text-slate-600 dark:text-stone-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-stone-800/80"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -53,7 +53,7 @@ export function SuperSidebar() {
                 {item.count !== undefined && (
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-mono font-black ${
-                      tab === item.id ? "bg-slate-50 dark:bg-stone-950 text-indigo-600" : "bg-slate-100 dark:bg-stone-800 text-slate-500 dark:text-stone-400"
+                      tab === item.id ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-stone-800 text-slate-500 dark:text-stone-400"
                     }`}
                   >
                     {item.count}
@@ -80,7 +80,7 @@ export function SuperSidebar() {
           <div className="flex gap-2">
             <Link
               href="/"
-              className="flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-600 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white dark:text-white text-xs font-bold transition-colors"
+              className="flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-600 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors"
             >
               <span>🌐 View Public Site</span>
             </Link>

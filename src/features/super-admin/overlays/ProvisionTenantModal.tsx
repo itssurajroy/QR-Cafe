@@ -19,11 +19,11 @@ export function ProvisionTenantModal() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
-              <h3 className="font-black text-white text-base">Provision New Café Tenant</h3>
+              <h3 className="font-black text-slate-900 dark:text-white text-base">Provision New Café Tenant</h3>
               <button
                 type="button"
                 onClick={() => setShowNewCafeModal(false)}
-                className="text-slate-500 dark:text-stone-400 hover:text-slate-900 dark:hover:text-white dark:text-white text-xs"
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs cursor-pointer"
               >
                 ✕
               </button>
@@ -45,7 +45,7 @@ export function ProvisionTenantModal() {
                       e.target.value.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-"),
                     );
                   }}
-                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl p-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -59,22 +59,22 @@ export function ProvisionTenantModal() {
                   placeholder="amber-coffee"
                   value={newCafeSlug}
                   onChange={(e) => setNewCafeSlug(e.target.value.toLowerCase())}
-                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl p-3 text-indigo-600 font-mono focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl p-3 text-indigo-600 dark:text-indigo-400 font-mono placeholder-slate-400 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div className="p-3 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-white">Basic Plan</span>
-                  <span className="text-indigo-600 font-mono font-bold text-xs">₹699/mo</span>
+                  <span className="text-xs font-black text-slate-900 dark:text-white">All-in-One Pro Plan</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">₹999/mo (14d Free Trial)</span>
                 </div>
-                <span className="text-xs text-slate-500 dark:text-stone-400 block">QR Menu, Orders, Billing, Inventory</span>
+                <span className="text-xs text-slate-500 dark:text-stone-400 block">QR Menu, Live Kitchen, Billing, Inventory, Recipes</span>
               </div>
 
               <button
                 type="submit"
                 disabled={creatingCafe || !newCafeName || !newCafeSlug}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-900 dark:text-white font-black text-xs shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-50 cursor-pointer mt-2"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer mt-2"
               >
                 {creatingCafe ? "Provisioning…" : "Create Café Tenant →"}
               </button>

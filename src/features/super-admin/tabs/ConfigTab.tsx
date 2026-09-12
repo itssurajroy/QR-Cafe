@@ -25,9 +25,9 @@ export function ConfigTab() {
 {/* TAB 4: PLATFORM CONFIGURATION */}
           
             <div className="max-w-3xl space-y-6">
-              <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-6 shadow-xl dark:shadow-2xl dark:shadow-black\/50">
+              <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-6 shadow-xl dark:shadow-2xl dark:shadow-black/50">
                 <div>
-                  <h3 className="text-base font-black text-white">Global SaaS Platform Configuration</h3>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">Global SaaS Platform Configuration</h3>
                   <p className="text-xs text-slate-500 dark:text-stone-400 mt-0.5">
                     Live system flags and pricing defaults stored in `platform_config`.
                   </p>
@@ -36,7 +36,7 @@ export function ConfigTab() {
                 {/* Signups Toggle */}
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800">
                   <div>
-                    <div className="font-bold text-xs text-white">Self-Serve Signups</div>
+                    <div className="font-bold text-xs text-slate-900 dark:text-white">Self-Serve Signups</div>
                     <p className="text-xs text-slate-500 dark:text-stone-400">Allow new café owners to register via /onboarding</p>
                   </div>
                   <button
@@ -48,8 +48,8 @@ export function ConfigTab() {
                     }
                     className={`px-4 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
                       platformConfig?.signups_open?.enabled
-                        ? "bg-emerald-500 text-slate-900 dark:text-white"
-                        : "bg-slate-100 dark:bg-stone-800 text-slate-500 dark:text-stone-400"
+                        ? "bg-emerald-500 text-white"
+                        : "bg-slate-200 dark:bg-stone-800 text-slate-600 dark:text-stone-400"
                     }`}
                   >
                     {platformConfig?.signups_open?.enabled ? "Enabled ✓" : "Disabled ✕"}
@@ -59,7 +59,7 @@ export function ConfigTab() {
                 {/* Trial Length */}
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800">
                   <div>
-                    <div className="font-bold text-xs text-white">Default Free Trial Duration</div>
+                    <div className="font-bold text-xs text-slate-900 dark:text-white">Default Free Trial Duration</div>
                     <p className="text-xs text-slate-500 dark:text-stone-400">Days of full access granted upon onboarding</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -74,13 +74,13 @@ export function ConfigTab() {
                           trial_days: { days: Number(e.target.value) },
                         }))
                       }
-                      className="w-16 bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl px-2.5 py-1 text-xs text-white text-center font-mono font-bold"
+                      className="w-16 bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl px-2.5 py-1 text-xs text-slate-900 dark:text-white text-center font-mono font-bold"
                     />
                     <button
                       type="button"
                       onClick={() => handleSaveConfig("trial_days", platformConfig?.trial_days)}
                       disabled={savingConfigKey === "trial_days"}
-                      className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 dark:text-white font-bold text-xs cursor-pointer"
+                      className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
                     >
                       Save
                     </button>
@@ -90,7 +90,7 @@ export function ConfigTab() {
                 {/* Pricing Defaults */}
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 space-y-3">
                   <div>
-                    <div className="font-bold text-xs text-white">Monthly Subscription Pricing (INR)</div>
+                    <div className="font-bold text-xs text-slate-900 dark:text-white">Monthly Subscription Pricing (INR)</div>
                     <p className="text-xs text-slate-500 dark:text-stone-400">Default recurring rate displayed across the platform</p>
                   </div>
                   <div>
@@ -106,13 +106,13 @@ export function ConfigTab() {
                           prices: { ...prev.prices, pro: Number(e.target.value) },
                         }))
                       }
-                      className="w-full bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl p-2 text-xs text-white font-mono font-bold"
+                      className="w-full bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white font-mono font-bold"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => handleSaveConfig("prices", platformConfig?.prices)}
-                    className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 dark:text-white font-bold text-xs cursor-pointer"
+                    className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
                   >
                     Update Plan Rate
                   </button>

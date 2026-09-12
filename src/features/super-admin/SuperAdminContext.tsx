@@ -348,7 +348,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   const value = {
     cafes, totalCafes, page, pageSize, initialQ, initialPlanFilter, staff, kpis, charts, initialConfig, recentAudit,
     tab, setTab, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab, showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
-    handleExtendTrial, handleMarkPaid, handleSetPlan, handleAddRefundNote, handleExportCSV, handleSaveBroadcast, handleFastExtendTrial, handleFastToggleStatus, handleDeleteCafe, handleSaveConfig, handleCreateCafeSubmit, loadFilteredAudit, openDrawer, applyFilter, totalPages
+    handleExtendTrial, handleMarkPaid, handleSetPlan, handleAddRefundNote, handleExportCSV, handleSaveBroadcast, handleFastExtendTrial, handleFastToggleStatus, handleDeleteCafe, handleSaveConfig, handleCreateCafeSubmit, loadFilteredAudit, openDrawer, applyFilter, totalPages, flash
   };
 
   return <SuperAdminContext.Provider value={value}>{children}</SuperAdminContext.Provider>;

@@ -11,14 +11,14 @@ export function SuperHeader() {
     <header className="h-16 border-b border-slate-200 dark:border-stone-800 bg-white dark:bg-stone-900/60 backdrop-blur-md px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-slate-500 dark:text-stone-400">Section:</span>
-            <h2 className="text-sm font-black text-white capitalize">{tab} Management</h2>
+            <h2 className="text-sm font-black text-slate-900 dark:text-white capitalize">{tab} Management</h2>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setShowNewCafeModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-900 dark:text-white font-black text-xs transition-all shadow-md shadow-indigo-600/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
             >
               <span>＋ New Café Tenant</span>
             </button>

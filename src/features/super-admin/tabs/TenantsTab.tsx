@@ -57,7 +57,7 @@ export function TenantsTab() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") applyFilter(searchQuery, selectedPlan);
                     }}
-                    className="bg-transparent text-white placeholder-stone-600 focus:outline-none flex-1"
+                    className="bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none flex-1"
                   />
                   {searchQuery && (
                     <button
@@ -66,7 +66,7 @@ export function TenantsTab() {
                         setSearchQuery("");
                         applyFilter("", selectedPlan);
                       }}
-                      className="text-slate-400 dark:text-stone-500 hover:text-slate-900 dark:hover:text-white dark:text-white"
+                      className="text-slate-400 dark:text-stone-500 hover:text-slate-900 dark:hover:text-white"
                     >
                       ✕
                     </button>
@@ -80,7 +80,7 @@ export function TenantsTab() {
                       setSelectedPlan(e.target.value);
                       applyFilter(searchQuery, e.target.value);
                     }}
-                    className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-600 dark:text-stone-300 focus:outline-none"
+                    className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-stone-300 focus:outline-none"
                   >
                     <option value="">All Plans (All)</option>
                     <option value="active">Active Paying</option>
@@ -91,7 +91,7 @@ export function TenantsTab() {
                   <button
                     type="button"
                     onClick={() => applyFilter(searchQuery, selectedPlan)}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 dark:text-white font-bold text-xs cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
                   >
                     Search
                   </button>
@@ -99,7 +99,7 @@ export function TenantsTab() {
                   <button
                     type="button"
                     onClick={handleExportCSV}
-                    className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-600 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white dark:text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-300 dark:border-stone-700"
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-700 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-300 dark:border-stone-700"
                     title="Export filtered records to CSV"
                   >
                     <span>📥 Export CSV</span>
@@ -108,7 +108,7 @@ export function TenantsTab() {
               </div>
 
               {/* Tenants Table */}
-              <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-black\/50">
+              <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-black/50">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
@@ -121,7 +121,7 @@ export function TenantsTab() {
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-800/60">
+                    <tbody className="divide-y divide-slate-100 dark:divide-stone-800/60">
                       {cafes.map((c: any) => {
                         const isTrial = c.plan === "trial";
                         const isActive = c.plan === "active";
@@ -131,19 +131,19 @@ export function TenantsTab() {
                           <tr
                             key={c.id}
                             onClick={() => openDrawer(c.id)}
-                            className="hover:bg-slate-100 dark:hover:bg-stone-800 dark:bg-stone-800/40 transition-colors cursor-pointer group"
+                            className="hover:bg-slate-50 dark:hover:bg-stone-800/40 transition-colors cursor-pointer group"
                           >
                             <td className="p-4">
-                              <div className="font-black text-white group-hover:text-indigo-600 transition-colors">
+                              <div className="font-black text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
                                 {c.name}
                               </div>
-                              <span className="text-xs font-mono text-slate-400 dark:text-stone-500">
+                              <span className="text-xs font-mono text-slate-500 dark:text-stone-400">
                                 /c/{c.slug}
                               </span>
                             </td>
 
                             <td className="p-4">
-                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-xs bg-slate-100 dark:bg-stone-800 border border-slate-300 dark:border-stone-700 text-slate-600 dark:text-stone-300">
+                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-xs bg-slate-100 dark:bg-stone-800 border border-slate-200 dark:border-stone-700 text-slate-700 dark:text-stone-300">
                                 {c.tier || "pro"}
                               </span>
                             </td>
@@ -152,17 +152,17 @@ export function TenantsTab() {
                               <span
                                 className={`px-2.5 py-1 rounded-full font-black uppercase text-xs border ${
                                   isActive
-                                    ? "bg-emerald-50 border-emerald-700 text-emerald-600"
+                                    ? "bg-emerald-50 border-emerald-300 text-emerald-700"
                                     : isTrial
-                                    ? "bg-amber-50 border-amber-200 text-indigo-600"
-                                    : "bg-red-50 border-red-200 text-red-600"
+                                    ? "bg-amber-50 border-amber-300 text-amber-800"
+                                    : "bg-red-50 border-red-300 text-red-700"
                                 }`}
                               >
                                 {c.plan}
                               </span>
                             </td>
 
-                            <td className="p-4 text-slate-500 dark:text-stone-400 font-mono text-xs">
+                            <td className="p-4 text-slate-600 dark:text-stone-400 font-mono text-xs">
                               {isActive
                                 ? c.subscription_ends_at
                                   ? new Date(c.subscription_ends_at).toLocaleDateString("en-IN")
@@ -172,7 +172,7 @@ export function TenantsTab() {
                                 : "Expired"}
                             </td>
 
-                            <td className="p-4 font-mono font-bold text-white">
+                            <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">
                               ₹999/mo
                             </td>
 
@@ -181,7 +181,7 @@ export function TenantsTab() {
                                 type="button"
                                 onClick={(e) => handleFastExtendTrial(c.id, e)}
                                 title="Add 7 Free Trial Days"
-                                className="px-2 py-1 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/25 text-indigo-700 border border-indigo-200 font-bold text-xs cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs cursor-pointer"
                               >
                                 +7d Trial
                               </button>
@@ -191,23 +191,22 @@ export function TenantsTab() {
                                 title="Toggle Active / Suspended"
                                 className={`px-2 py-1 rounded-lg border font-bold text-xs cursor-pointer ${
                                   c.plan === "suspended"
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-700 hover:bg-emerald-100"
-                                    : "bg-red-50/70 text-red-700 border-red-200 hover:bg-red-100"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+                                    : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
                                 }`}
                               >
                                 {c.plan === "suspended" ? "Activate" : "Suspend"}
                               </button>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); handleImpersonate(c.id); }}
+                              <Link
+                                href={`/super/cafe/${c.id}`}
                                 className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-700 dark:text-stone-300 border border-slate-300 dark:border-stone-700 font-bold text-xs inline-block transition-colors cursor-pointer"
                               >
                                 🕵️ Impersonate
-                              </button>
+                              </Link>
                               <Link
                                 href={`/c/${c.slug}`}
                                 target="_blank"
-                                className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-500 dark:text-stone-400 hover:text-stone-200 font-bold text-xs inline-block transition-colors"
+                                className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-600 dark:text-stone-400 hover:text-slate-900 font-bold text-xs inline-block transition-colors"
                               >
                                 View ↗
                               </Link>
