@@ -29,6 +29,14 @@ function TabRenderer() {
     case 'broadcast': return <BroadcastTab />;
     case 'health': return <HealthTab />;
     case 'content': return <ContentTab />;
+    case 'users': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'billing': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'orders': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'analytics': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'settings': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'announcements': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'support': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'system-health': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
     default: return <DashboardTab />;
   }
 }

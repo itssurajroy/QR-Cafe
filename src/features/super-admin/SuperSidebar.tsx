@@ -35,6 +35,14 @@ export function SuperSidebar() {
               { id: "content", label: "Content Mgmt", icon: "📝" },
               { id: "config", label: "Platform Config", icon: "⚙️" },
               { id: "audit", label: "Audit Event Logs", icon: "📜" },
+              { id: "users", label: "Users", icon: "👥" },
+              { id: "billing", label: "Billing", icon: "💳" },
+              { id: "orders", label: "Orders", icon: "🧾" },
+              { id: "analytics", label: "Analytics", icon: "📈" },
+              { id: "settings", label: "Settings", icon: "⚙️" },
+              { id: "announcements", label: "Announce", icon: "📣" },
+              { id: "support", label: "Support", icon: "🛟" },
+              { id: "system-health", label: "System Health", icon: "🩺" },
             ].map((item) => (
               <button
                 key={item.id}
