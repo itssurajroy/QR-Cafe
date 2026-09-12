@@ -957,6 +957,18 @@ export default function PosClient({
                 </button>
                 <button
                   type="button"
+                  onClick={() => {
+                    const msg =
+                      `Bill ${lastBill?.order_number || lastBill?.orderNumber} • Table ${lastBill?.table_label}\n` +
+                      `Total: ₹${((lastBill?.finalTotalPaise ?? lastBill?.total_paise ?? 0) / 100).toFixed(2)} (${lastBill?.payment_status})`;
+                    window.open(getWaLink("", msg), "_blank");
+                  }}
+                  className="py-2.5 px-3 rounded-xl bg-[#34C759]/10 hover:bg-[#34C759]/15 border border-[#34C759]/20 text-[#34C759] font-bold text-xs cursor-pointer active:scale-95 transition-transform"
+                >
+                  💬 WhatsApp Bill
+                </button>
+                <button
+                  type="button"
                   onClick={() => setShowBill(false)}
                   className="flex-1 py-2.5 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] text-slate-700 font-semibold text-xs cursor-pointer"
                 >
