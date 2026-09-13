@@ -9,6 +9,7 @@ import { ConfigTab } from '../features/super-admin/tabs/ConfigTab';
 import { AuditTab } from '../features/super-admin/tabs/AuditTab';
 import { StaffTab } from '../features/super-admin/tabs/StaffTab';
 import { SubscriptionsTab } from '../features/super-admin/tabs/SubscriptionsTab';
+import { BillingTab } from '../features/super-admin/tabs/BillingTab';
 import { BroadcastTab } from '../features/super-admin/tabs/BroadcastTab';
 import { HealthTab } from '../features/super-admin/tabs/HealthTab';
 import { ContentTab } from '../features/super-admin/tabs/ContentTab';
@@ -30,7 +31,7 @@ function TabRenderer() {
     case 'health': return <HealthTab />;
     case 'content': return <ContentTab />;
     case 'users': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
-    case 'billing': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'billing': return <BillingTab />;
     case 'orders': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
     case 'analytics': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
     case 'settings': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
