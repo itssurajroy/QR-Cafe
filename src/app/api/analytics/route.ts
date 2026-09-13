@@ -131,6 +131,25 @@ export async function GET(req: NextRequest) {
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 10);
 
+  // Fetch full details for recent orders (for Orders Tab)
+  let recentQuery = admin
+    .from("orders")
+    .select(`
+      id, order_number, restaurant_id, table_label, total_paise, 
+      payment_status, status, customer_name, customer_phone, notes, created_at,
+      order_items (
+        id, item_name, quantity, unit_price_paise, line_total_paise, notes, spice_level, size_variant
+      )
+    `)
+    .order("created_at", { ascending: false })
+    .limit(50);
+    
+  if (targetRestaurantId) {
+    recentQuery = recentQuery.eq("restaurant_id", targetRestaurantId);
+  }
+
+  const { data: recentOrders } = await recentQuery;
+
   return NextResponse.json({
     metrics: {
       totalOrders: orderList.length,
@@ -150,6 +169,7 @@ export async function GET(req: NextRequest) {
     upi_count: upiCount,
     card_count: cardCount,
     hourly_slots: hourlySlots,
+    recentOrders: recentOrders || [],
   });
 }
 

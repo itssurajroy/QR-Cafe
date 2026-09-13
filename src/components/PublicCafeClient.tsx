@@ -734,8 +734,8 @@ export default function PublicCafeClient({
                 </span>
               </div>
 
-              {/* Grid of Dishes */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* List of Dishes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 pb-4">
                 {categoryDishes.map((dish) => {
                   const inCartQty = cart[dish.id]?.quantity || 0;
                   const imageUrl = dish.image_url || getItemImage(dish.name, dish.is_veg);
@@ -743,109 +743,84 @@ export default function PublicCafeClient({
                   return (
                     <article
                       key={dish.id}
-                      className="group bg-white rounded-3xl border border-stone-200 hover:border-amber-400/80 p-4 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative"
+                      className="group bg-white rounded-3xl p-4 transition-all duration-300 flex items-start justify-between gap-4 cursor-pointer relative shadow-sm border border-slate-100 hover:border-indigo-100 hover:shadow-md"
+                      onClick={() => {
+                        setCustomizingItem(dish);
+                        setSelectedSpice(cart[dish.id]?.spiceLevel as any || "Medium");
+                        setCustomNotes(cart[dish.id]?.notes || "");
+                      }}
                     >
-                      {/* Top Visual Container */}
-                      <div>
-                        <div
-                          className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-stone-100 mb-3.5 cursor-pointer"
-                          onClick={() => {
-                            setCustomizingItem(dish);
-                            setSelectedSpice(cart[dish.id]?.spiceLevel as any || "Medium");
-                            setCustomNotes(cart[dish.id]?.notes || "");
-                          }}
-                        >
+                      {/* Left: Info */}
+                      <div className="flex-1 min-w-0 pt-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span
+                            className={`w-3.5 h-3.5 flex items-center justify-center rounded-sm border ${
+                              dish.is_veg
+                                ? "border-emerald-600 text-emerald-600"
+                                : "border-red-600 text-red-600"
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          </span>
+                          {dish.is_veg && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                              Veg
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-base sm:text-lg text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug mb-1">
+                          {dish.name}
+                        </h4>
+                        <div className="font-black text-sm text-slate-800 font-mono mb-2">
+                          {paise(dish.price_paise)}
+                        </div>
+                        {dish.description && (
+                          <p className="text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed pr-2">
+                            {dish.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Right: Image & Add Button */}
+                      <div className="relative shrink-0 flex flex-col items-center ml-2">
+                        <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden bg-stone-100 shadow-sm relative border border-slate-100">
                           <img
                             src={imageUrl}
                             alt={dish.name}
                             loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                           />
-
-                          {/* Indian FSSAI Standard Veg/Non-Veg Badge */}
-                          <div className="absolute top-2.5 left-2.5">
-                            <span
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md border ${
-                                dish.is_veg
-                                  ? "bg-white/95 border-emerald-300 text-emerald-800"
-                                  : "bg-white/95 border-red-300 text-red-800"
-                              }`}
-                            >
-                              <span
-                                className={`w-2 h-2 rounded-full ${
-                                  dish.is_veg ? "bg-emerald-600" : "bg-red-600"
-                                }`}
-                              />
-                              {dish.is_veg ? "Veg" : "Non-Veg"}
-                            </span>
-                          </div>
-
-                          {/* Quick Customization Icon */}
-                          <div className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-lg text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                            Tap for details & spice
-                          </div>
                         </div>
 
-                        {/* Title & Description */}
-                        <div className="flex items-start justify-between gap-3 mb-1">
-                          <h4
-                            className="font-black text-base text-slate-900 group-hover:text-amber-600 transition-colors leading-snug cursor-pointer"
-                            onClick={() => {
-                              setCustomizingItem(dish);
-                              setSelectedSpice(cart[dish.id]?.spiceLevel as any || "Medium");
-                              setCustomNotes(cart[dish.id]?.notes || "");
-                            }}
-                          >
-                            {dish.name}
-                          </h4>
-                        </div>
-
-                        {dish.description && (
-                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
-                            {dish.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Price & Action Row */}
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
-                        <div>
-                          <span className="text-[10px] text-slate-400 block font-medium uppercase tracking-wider">Price</span>
-                          <span className="text-base font-black text-slate-900 font-mono">
-                            {paise(dish.price_paise)}
-                          </span>
-                        </div>
-
-                        {inCartQty === 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => addItemToCart(dish)}
-                            className="px-4 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200/60 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
-                          >
-                            <span>＋</span>
-                            <span>ADD</span>
-                          </button>
-                        ) : (
-                          <div className="flex items-center gap-2 bg-slate-900 text-white rounded-full px-2.5 py-1 shadow-sm">
+                        <div className="absolute -bottom-3.5 left-1/2 -translate-x-1/2" onClick={(e) => e.stopPropagation()}>
+                          {inCartQty === 0 ? (
                             <button
                               type="button"
-                              onClick={() => decreaseQuantity(dish.id)}
-                              className="w-6 h-6 flex items-center justify-center font-black text-sm hover:text-indigo-400 active:scale-90"
-                              aria-label="Decrease quantity"
+                              onClick={() => addItemToCart(dish)}
+                              className="w-24 py-2 rounded-xl bg-white text-indigo-600 font-black text-xs sm:text-sm border border-slate-200 shadow-md hover:bg-slate-50 active:scale-95 transition-all text-center uppercase tracking-wide"
                             >
-                              -
+                              ADD
                             </button>
-                            <span className="font-mono text-xs font-black px-1">{inCartQty}</span>
-                            <button
-                              type="button"
-                              onClick={() => increaseQuantity(dish.id)}
-                              className="w-6 h-6 flex items-center justify-center font-black text-sm hover:text-indigo-400 active:scale-90"
-                              aria-label="Increase quantity"
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="w-24 flex items-center justify-between bg-white text-indigo-600 rounded-xl px-1.5 py-1.5 shadow-md border border-slate-200">
+                              <button
+                                type="button"
+                                onClick={() => decreaseQuantity(dish.id)}
+                                className="w-7 h-7 flex items-center justify-center font-black text-base hover:bg-slate-100 rounded-lg"
+                              >
+                                -
+                              </button>
+                              <span className="font-mono text-sm font-black">{inCartQty}</span>
+                              <button
+                                type="button"
+                                onClick={() => increaseQuantity(dish.id)}
+                                className="w-7 h-7 flex items-center justify-center font-black text-base hover:bg-slate-100 rounded-lg"
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </article>
                   );

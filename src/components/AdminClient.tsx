@@ -188,7 +188,7 @@ export default function AdminClient({
             setLiveRevenue(d.today.revenue ?? report.revenue);
             setLiveOrders(d.today.orders ?? report.orders);
           }
-          if (d.recentOrders) setRecentOrders(d.recentOrders.slice(0, 10));
+          if (d.recentOrders) setRecentOrders(d.recentOrders);
         }
       } catch { /* network fail, keep last value */ }
     }

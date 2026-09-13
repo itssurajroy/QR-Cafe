@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { jsPDF } from "jspdf";
 import { QrSliceLogo } from "./QrSliceLogo";
 
 interface QRCodeDisplayProps {
@@ -51,12 +52,78 @@ export function QRCodeDisplay({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownloadPDF = () => {
     if (!dataUrl) return;
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `table-${tableLabel}-qr.png`;
-    a.click();
+
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const centerX = pageWidth / 2;
+    let cursorY = 40;
+
+    // Outer Border
+    doc.setDrawColor(23, 20, 43); // #17142B
+    doc.setLineWidth(1.5);
+    doc.roundedRect(20, 20, pageWidth - 40, 240, 10, 10, "S");
+
+    // "WELCOME TO"
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(87, 56, 245); // #5738F5
+    doc.text("WELCOME TO", centerX, cursorY, { align: "center" });
+    
+    cursorY += 14;
+
+    // Restaurant Name
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(32);
+    doc.setTextColor(23, 20, 43);
+    doc.text(restaurantName.toUpperCase(), centerX, cursorY, { align: "center" });
+
+    cursorY += 20;
+
+    // TABLE Badge
+    doc.setFillColor(23, 20, 43);
+    doc.roundedRect(centerX - 30, cursorY, 60, 12, 6, 6, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text(`TABLE ${tableLabel.padStart(2, "0")}`, centerX, cursorY + 8.5, { align: "center" });
+
+    cursorY += 40;
+
+    // SCAN TO ORDER
+    doc.setTextColor(23, 20, 43);
+    doc.setFontSize(18);
+    doc.text("SCAN TO ORDER", centerX, cursorY, { align: "center" });
+
+    cursorY += 10;
+
+    // QR Code
+    const qrSize = 100;
+    doc.addImage(dataUrl, "PNG", centerX - qrSize / 2, cursorY, qrSize, qrSize);
+
+    cursorY += qrSize + 20;
+
+    // Instructions
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(14);
+    doc.setTextColor(111, 113, 133); // #6F7185
+    doc.text("Scan with your phone camera or QR scanner", centerX, cursorY, { align: "center" });
+
+    cursorY += 20;
+
+    // Footer Perks
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(87, 56, 245);
+    doc.text("No app required  •  Order & pay in seconds", centerX, cursorY, { align: "center" });
+
+    // Save PDF
+    doc.save(`Table_${tableLabel.padStart(2, "0")}_Signage.pdf`);
   };
 
   if (!showSignage) {
@@ -82,10 +149,10 @@ export function QRCodeDisplay({
         <div className="flex items-center gap-2 w-full pt-1">
           <button
             type="button"
-            onClick={handleDownload}
+            onClick={handleDownloadPDF}
             className="flex-1 py-2 px-3 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
-            Download
+            Download PDF
           </button>
           <button
             type="button"
@@ -102,7 +169,7 @@ export function QRCodeDisplay({
   // Printable Table Standee Signage Template
   return (
     <div
-      className={`print-container bg-white text-[#17142B] border-2 border-[#17142B] rounded-3xl p-8 max-w-sm mx-auto text-center shadow-xl space-y-6 ${className}`}
+      className={`print-container standee-print bg-white text-[#17142B] border-2 border-[#17142B] rounded-3xl p-8 max-w-sm mx-auto text-center shadow-xl space-y-6 ${className}`}
     >
       {/* Restaurant Header */}
       <div className="border-b border-[#E7E4F0] pb-4">
@@ -164,10 +231,10 @@ export function QRCodeDisplay({
         </button>
         <button
           type="button"
-          onClick={handleDownload}
+          onClick={handleDownloadPDF}
           className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#17142B] font-bold text-xs transition-all cursor-pointer"
         >
-          Download PNG
+          Download PDF
         </button>
       </div>
     </div>

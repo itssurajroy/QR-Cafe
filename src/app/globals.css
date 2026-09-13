@@ -382,10 +382,10 @@ h1, h2, h3, h4, h5, h6 {
   .print-only { display: block !important; }
   .print-page-break { page-break-inside: avoid; break-inside: avoid; }
 
-  @page { margin: 0; size: 80mm auto; }
-
+  /* By default hide everything during print */
   body * { visibility: hidden !important; }
 
+  /* --- Receipt Print Styles --- */
   .receipt-print,
   .receipt-print * { visibility: visible !important; }
 
@@ -399,6 +399,24 @@ h1, h2, h3, h4, h5, h6 {
     padding: 4mm !important;
     background: #fff !important;
     color: #000 !important;
+  }
+
+  /* --- Standee Print Styles --- */
+  .standee-print,
+  .standee-print * { visibility: visible !important; }
+
+  .standee-print {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: #fff !important;
+    color: #17142B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }
 
