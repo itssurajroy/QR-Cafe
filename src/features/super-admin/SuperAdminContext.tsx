@@ -14,7 +14,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   // Destructure initialData to match what hooks expect
   const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit } = initialData as any;
 
-  const [tab, setTab] = useState<"dashboard" | "cafes" | "config" | "audit" | "staff" | "system-health" | "users" | "billing" | "orders" | "analytics" | "settings" | "announcements" | "support" | "system-health">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "cafes" | "config" | "audit" | "staff" | "system-health" | "users" | "billing" | "orders" | "analytics" | "settings" | "announcements" | "support">("dashboard");
 
   // Global Platform Broadcast Banner
   const [broadcastMsg, setBroadcastMsg] = useState(
