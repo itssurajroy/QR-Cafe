@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "@/lib/auth";
 import { getTierLimits } from "@/lib/tenant";
 import { planToSubscriptionStatus } from "@/lib/subscription";
+import { checkPlatformRateLimit } from "@/lib/rate-limit-platform";
+import { logAudit } from "@/lib/audit";
+import { sendTrialEmail } from "@/lib/email";
 
 async function audit(
   admin: ReturnType<typeof createSupabaseAdmin>,
@@ -64,31 +68,115 @@ export async function POST(req: NextRequest) {
 
   // --- CAFES ---
   if (action === "create_cafe") {
-    const plan = data.plan || "trial";
+    // (1) Zod-validate input
+    const provisionSchema = z.object({
+      name: z.string().min(2).max(80),
+      slug: z.string().min(2).max(40).regex(/^[a-z0-9-]+$/),
+      ownerEmail: z.string().email().optional(),
+      ownerName: z.string().optional(),
+      phone: z.string().optional(),
+      address: z.string().optional(),
+      tier: z.string().optional(),
+    });
+    const parsed = provisionSchema.safeParse({
+      name: typeof data.name === "string" ? data.name.trim() : data.name,
+      slug: typeof data.slug === "string" ? String(data.slug).toLowerCase().replace(/\s+/g, "-").trim() : data.slug,
+      ownerEmail: data.ownerEmail ?? data.owner_email,
+      ownerName: data.ownerName ?? data.owner_name,
+      phone: data.phone,
+      address: data.address,
+      tier: data.tier,
+    });
+    if (!parsed.success) return NextResponse.json({ error: "Validation failed" }, { status: 422 });
+    const input = parsed.data;
+
+    // (2) Platform rate limit: max 5 tenant provisions per minute per super-admin
+    const rl = checkPlatformRateLimit(auth.userId, "tenant.create", 5);
+    if (!rl.ok) return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+
+    // (3) Slug uniqueness check
+    const { data: existing } = await admin.from("restaurants").select("id").eq("slug", input.slug).maybeSingle();
+    if (existing) return NextResponse.json({ error: "Slug already taken" }, { status: 409 });
+
+    // (4) Insert restaurants row (14-day trial)
+    const now = new Date();
     const { data: cafe, error } = await admin
       .from("restaurants")
       .insert({
-        name: String(data.name).trim(),
-        slug: String(data.slug).toLowerCase().replace(/\s+/g, "-").trim(),
+        name: input.name.trim(),
+        slug: input.slug,
         currency: String(data.currency || "INR").trim(),
         timezone: String(data.timezone || "Asia/Kolkata").trim(),
         logo_url: data.logo_url || null,
-        address: data.address ? String(data.address).trim() : null,
+        address: input.address ? String(input.address).trim() : null,
         gstin: data.gstin ? String(data.gstin).trim().toUpperCase() : null,
-        phone: data.phone ? String(data.phone).trim() : null,
+        phone: input.phone ? String(input.phone).trim() : null,
         tax_rate: data.tax_rate !== undefined && data.tax_rate !== "" ? Number(data.tax_rate) : 5,
         tagline: data.tagline ? String(data.tagline).trim() : null,
         accent_color: data.accent_color || "#f59e0b",
-        plan,
-        subscription_status: planToSubscriptionStatus(plan, null),
-        tier: data.tier || "pro",
+        plan: "trial",
+        subscription_status: planToSubscriptionStatus("trial", null),
+        tier: input.tier || "pro",
+        trial_starts_at: now.toISOString(),
+        trial_ends_at: new Date(now.getTime() + 14 * 864e5).toISOString(),
+        onboarded_at: now.toISOString(),
         created_by: auth.userId,
       })
       .select()
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    await audit(admin, auth.userId, cafe.id, "tenant", cafe.id, "super_create_cafe", { name: cafe.name, slug: cafe.slug });
+
+    // (5) Owner auth user + cafe_profiles row (only when owner email supplied)
+    if (input.ownerEmail) {
+      const ownerEmail = input.ownerEmail.toLowerCase().trim();
+      const displayName = input.ownerName?.trim() || input.name.trim();
+      const { data: authUser, error: uErr } = await admin.auth.admin.createUser({
+        email: ownerEmail,
+        email_confirm: true,
+        user_metadata: { display_name: displayName },
+      });
+      if (uErr || !authUser?.user) {
+        await admin.from("restaurants").delete().eq("id", cafe.id);
+        return NextResponse.json({ error: uErr?.message || "Owner creation failed" }, { status: 500 });
+      }
+      const { error: pErr } = await admin.from("cafe_profiles").upsert({
+        id: authUser.user.id,
+        restaurant_id: cafe.id,
+        role: "owner",
+        display_name: displayName,
+        active: true,
+      });
+      if (pErr) {
+        await admin.from("restaurants").delete().eq("id", cafe.id);
+        return NextResponse.json({ error: pErr.message }, { status: 500 });
+      }
+    }
+
+    // (6) Audit the provisioning
+    await logAudit(admin, {
+      actor_id: auth.userId,
+      restaurant_id: cafe.id,
+      entity: "tenant",
+      entity_id: cafe.id,
+      action: "tenant.created",
+      metadata: { name: cafe.name, slug: cafe.slug, owner_email: input.ownerEmail ?? null, tier: cafe.tier },
+    });
+
+    // (7) Best-effort day-0 welcome email (must never fail provisioning)
+    if (input.ownerEmail) {
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
+        await sendTrialEmail(input.ownerEmail.toLowerCase().trim(), 0, {
+          cafeName: cafe.name,
+          daysLeft: 14,
+          billingUrl: `${appUrl}/admin/billing`,
+        });
+      } catch (e) {
+        console.error("[provision] day-0 welcome email failed:", e);
+      }
+    }
+
     return NextResponse.json({ ok: true, cafe });
   }
 
