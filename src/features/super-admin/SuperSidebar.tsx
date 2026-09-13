@@ -32,18 +32,17 @@ export function SuperSidebar() {
               { id: "staff", label: "Staff Directory", icon: "👥", count: staff?.length || 0 },
               { id: "subscriptions", label: "Subscriptions", icon: "💳" },
               { id: "broadcast", label: "Broadcasts", icon: "📣" },
-              { id: "health", label: "System Health", icon: "🩺" },
+              { id: "system-health", label: "System Health", icon: "🩺" },
               { id: "content", label: "Content Mgmt", icon: "📝" },
               { id: "config", label: "Platform Config", icon: "⚙️" },
               { id: "audit", label: "Audit Event Logs", icon: "📜" },
               { id: "users", label: "Users", icon: "👥" },
               { id: "billing", label: "Billing", icon: "💳" },
-              { id: "orders", label: "Orders", icon: "🧾" },
+              { id: "orders", label: "Orders", icon: "📦" },
               { id: "analytics", label: "Analytics", icon: "📈" },
               { id: "settings", label: "Settings", icon: "⚙️" },
               { id: "announcements", label: "Announce", icon: "📣" },
               { id: "support", label: "Support", icon: "🛟" },
-              { id: "system-health", label: "System Health", icon: "🩺" },
             ].map((item) => (
               <button
                 key={item.id}
@@ -53,8 +52,7 @@ export function SuperSidebar() {
                   tab === item.id
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-black"
                     : "text-slate-600 dark:text-stone-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-stone-800/80"
-                }`}
-              >
+                }`}>
                 <div className="flex items-center gap-2">
                   <span className="text-sm">{item.icon}</span>
                   <span>{item.label}</span>
@@ -63,8 +61,7 @@ export function SuperSidebar() {
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-mono font-black ${
                       tab === item.id ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-stone-800 text-slate-500 dark:text-stone-400"
-                    }`}
-                  >
+                    }`}>
                     {item.count}
                   </span>
                 )}
@@ -79,7 +76,7 @@ export function SuperSidebar() {
               Monthly Recurring Rev
             </span>
             <div className="text-lg font-black text-indigo-600 font-mono">
-              ₹{(kpis.mrr / 100).toLocaleString("en-IN")}
+              ₹{kpis.mrr.toLocaleString("en-IN")}
             </div>
             <span className="text-xs text-emerald-600 font-bold">
               {kpis.active} active paying subscribers

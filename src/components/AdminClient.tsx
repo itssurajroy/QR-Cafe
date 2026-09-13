@@ -19,6 +19,7 @@ import { SupportTab } from "@/features/admin/tabs/SupportTab";
 import { OrdersTab } from "@/features/admin/tabs/OrdersTab";
 import { ModifiersTab } from "@/features/admin/tabs/ModifiersTab";
 import { StaffTab } from "@/features/admin/tabs/StaffTab";
+import { CrmTab } from "@/features/admin/tabs/CrmTab";
 import { AdminAppShell, type AdminSectionId } from "@/components/shell/AdminAppShell";
 import { MultiOutletModal } from "@/features/admin/MultiOutletModal";
 import { AdminTopNav, type AdminTabId } from "@/features/admin/AdminTopNav";
@@ -759,6 +760,11 @@ export default function AdminClient({
         {/* TAB: STAFF MANAGEMENT */}
         {tab === "staff" && (
           <StaffTab restaurantId={restaurantId} />
+        )}
+
+        {/* TAB: CRM & LOYALTY */}
+        {tab === "crm" && (
+          <CrmTab flash={flash} />
         )}
 
         {/* TAB 1: MENU & CATEGORY MANAGEMENT */}

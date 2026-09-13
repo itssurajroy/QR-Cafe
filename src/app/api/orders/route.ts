@@ -6,6 +6,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { computeOrderChecksum, generateAuditBlockHash } from "@/lib/crypto";
 import { deductInventoryIngredients } from "@/lib/inventory";
 import { overlaps, istDayStart } from "@/lib/booking";
+import { processCustomerLoyalty } from "@/lib/crm";
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -301,12 +302,29 @@ export async function POST(req: NextRequest) {
     (err) => console.error("Inventory deduction failed:", err)
   );
 
+  // Loyalty processing (non-blocking)
+  let loyaltyData = { pointsEarned: 0, newTotalPoints: 0 };
+  if (input.customer_phone) {
+    try {
+      loyaltyData = await processCustomerLoyalty(
+        db,
+        table.restaurant_id,
+        input.customer_phone,
+        input.customer_name || "",
+        subtotal
+      );
+    } catch (err) {
+      console.error("Loyalty processing failed:", err);
+    }
+  }
+
   return NextResponse.json({
     order_id: orderId,
     status_token: statusToken,
     order_number: orderNumber,
     checksum: payloadHash.slice(0, 12),
     unavailable,
+    loyalty: loyaltyData,
   });
 }
 

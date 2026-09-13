@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
 import { deductInventoryIngredients } from "@/lib/inventory";
+import { processCustomerLoyalty, redeemCustomerPoints } from "@/lib/crm";
 
 // orders.payment_method is constrained to ('counter','online'): the channel
 // category. POS methods cash/upi/card/mixed map to it; the exact method is kept in
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
     customer_phone,
     items,
     discount_paise = 0,
+    redeem_points = 0,
     payment_method = "cash",
     payment_status = "paid", // POS orders can be immediately settled
     split_cash_paise = 0,
@@ -80,7 +82,13 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const totalPaise = Math.max(0, subtotal - discount_paise);
+  // 1 Point = 1 Rupee = 100 Paise
+  const maxRedeem = Math.floor((subtotal * 0.25) / 100); // 25% cap
+  const pointsToUse = redeem_points > 0 ? Math.min(redeem_points, maxRedeem) : 0;
+  const pointsDiscountPaise = pointsToUse * 100;
+
+  const finalDiscountPaise = discount_paise + pointsDiscountPaise;
+  const totalPaise = Math.max(0, subtotal - finalDiscountPaise);
 
   // Generate POS Order Number
   const orderNumber = `POS-${Math.floor(Math.random() * 9000) + 1000}`;
@@ -112,7 +120,7 @@ export async function POST(req: NextRequest) {
       order_number: orderNumber,
       subtotal_paise: subtotal,
       total_paise: totalPaise,
-      discount_paise,
+      discount_paise: finalDiscountPaise,
       payment_method: normalizePaymentMethod(payment_method),
       payment_status,
       status: payment_status === "paid" ? "preparing" : "pending",
@@ -133,6 +141,15 @@ export async function POST(req: NextRequest) {
 
   if (oErr || !order) {
     return NextResponse.json({ error: oErr?.message || "Order creation failed" }, { status: 500 });
+  }
+
+  // Redeem points if applicable
+  if (pointsToUse > 0 && customer_phone) {
+    try {
+      await redeemCustomerPoints(admin, user.restaurantId, customer_phone, pointsToUse, order.id);
+    } catch (err) {
+      console.error("Failed to redeem points:", err);
+    }
   }
 
   // Insert Order Items
@@ -199,11 +216,28 @@ export async function POST(req: NextRequest) {
       },
   });
 
+  // Loyalty processing (non-blocking)
+  let loyaltyData = { pointsEarned: 0, newTotalPoints: 0 };
+  if (customer_phone) {
+    try {
+      loyaltyData = await processCustomerLoyalty(
+        admin,
+        user.restaurantId,
+        customer_phone,
+        customer_name || "",
+        totalPaise
+      );
+    } catch (err) {
+      console.error("Loyalty processing failed:", err);
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     order: {
       ...order,
       order_items: orderItemsData,
+      loyalty: loyaltyData,
     },
   });
 }

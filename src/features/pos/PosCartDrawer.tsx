@@ -44,6 +44,14 @@ interface PosCartDrawerProps {
   handleSettle: (status: "paid" | "unpaid") => void;
   isSettling: boolean;
 
+  customerPhone?: string;
+  setCustomerPhone?: (v: string) => void;
+  customerPoints?: number | null;
+  redeemPoints?: number;
+  setRedeemPoints?: (v: number) => void;
+  handleCheckPoints?: () => void;
+  isCheckingPoints?: boolean;
+
   liveOrders?: any[];
   handleUpdateOrderStatus?: (id: string, status: string, orderNumber: string, tableLabel: string) => void;
   onOpenWaModal?: (ord: any) => void;
@@ -84,6 +92,13 @@ export function PosCartDrawer({
   setAmountReceived,
   handleSettle,
   isSettling,
+  customerPhone,
+  setCustomerPhone,
+  customerPoints,
+  redeemPoints = 0,
+  setRedeemPoints,
+  handleCheckPoints,
+  isCheckingPoints,
   liveOrders,
   handleUpdateOrderStatus,
   onOpenWaModal,
@@ -91,6 +106,8 @@ export function PosCartDrawer({
   const [splitGuests, setSplitGuests] = useState<number>(1);
   const [gstin, setGstin] = useState<string>("");
   const [isRushKOT, setIsRushKOT] = useState<boolean>(false);
+
+  const pointsDiscount = (redeemPoints || 0) * 100;
 
   // Filter active KDS orders for current table
   const activeTableOrders = selectedTable && liveOrders
@@ -354,6 +371,55 @@ export function PosCartDrawer({
           </button>
         </div>
 
+        {/* Customer & Loyalty Section */}
+        <div className="mb-4">
+          <div className="flex gap-2 items-center">
+            <input
+              type="tel"
+              placeholder="Customer Phone (e.g. 9876543210)"
+              value={customerPhone || ""}
+              onChange={(e) => setCustomerPhone?.(e.target.value)}
+              className="flex-1 bg-white border border-slate-200 rounded-xl p-2 text-xs focus:outline-none focus:border-indigo-500"
+            />
+            <button
+              type="button"
+              onClick={handleCheckPoints}
+              disabled={isCheckingPoints || (customerPhone?.length || 0) < 10}
+              className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-200 disabled:opacity-50 cursor-pointer"
+            >
+              Check Points
+            </button>
+          </div>
+          
+          {customerPoints !== null && customerPoints !== undefined && (
+            <div className="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-indigo-900">Available Points: {customerPoints}</span>
+                {customerPoints > 0 && (
+                  <span className="text-indigo-600 font-semibold">1 pt = ₹1</span>
+                )}
+              </div>
+              
+              {customerPoints > 0 && (
+                <div className="mt-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max={Math.min(customerPoints, Math.floor(subtotalPaise * 0.25 / 100))}
+                    value={redeemPoints || 0}
+                    onChange={(e) => setRedeemPoints?.(Number(e.target.value))}
+                    className="w-full accent-indigo-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-indigo-700 mt-1 font-medium">
+                    <span>Redeeming: {redeemPoints || 0} pts</span>
+                    <span>Max: {Math.min(customerPoints, Math.floor(subtotalPaise * 0.25 / 100))} pts (25% cap)</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Discount Section */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -412,10 +478,16 @@ export function PosCartDrawer({
           </div>
           {discountPaise > 0 && (
             <div className="flex justify-between text-[#34C759] font-semibold">
-              <span>
+              <span className="text-slate-500 font-medium">
                 Discount {flatDiscountRupees ? `(Flat ₹${flatDiscountRupees})` : `(${discountPercent}%)`}:
               </span>
-              <span className="font-mono">-{paise(discountPaise)}</span>
+              <span className="font-mono text-emerald-600 font-medium">-{paise(discountPaise)}</span>
+            </div>
+          )}
+          {pointsDiscount > 0 && (
+            <div className="flex justify-between text-xs py-0.5">
+              <span className="text-slate-500 font-medium">Points Redeemed:</span>
+              <span className="font-mono text-emerald-600 font-medium">-{paise(pointsDiscount)}</span>
             </div>
           )}
           <div className="flex justify-between text-sm sm:text-base font-bold text-slate-900 pt-1">

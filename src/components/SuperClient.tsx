@@ -12,7 +12,6 @@ import { StaffTab } from '../features/super-admin/tabs/StaffTab';
 import { SubscriptionsTab } from '../features/super-admin/tabs/SubscriptionsTab';
 import { BillingTab } from '../features/super-admin/tabs/BillingTab';
 import { BroadcastTab } from '../features/super-admin/tabs/BroadcastTab';
-import { HealthTab } from '../features/super-admin/tabs/HealthTab';
 import { ContentTab } from '../features/super-admin/tabs/ContentTab';
 import { AnnouncementsTab } from '../features/super-admin/tabs/AnnouncementsTab';
 import { SupportTab } from '../features/super-admin/tabs/SupportTab';
@@ -37,7 +36,6 @@ function TabRenderer() {
     case 'staff': return <StaffTab />;
     case 'subscriptions': return <SubscriptionsTab />;
     case 'broadcast': return <BroadcastTab />;
-    case 'health': return <HealthTab />;
     case 'content': return <ContentTab />;
     case 'users': return <UsersTab />;
     case 'billing': return <BillingTab />;

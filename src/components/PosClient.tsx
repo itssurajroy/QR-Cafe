@@ -111,6 +111,26 @@ export default function PosClient({
   const [splitCashAmount, setSplitCashAmount] = useState<string>("");
   const [splitUpiAmount, setSplitUpiAmount] = useState<string>("");
 
+  // Customer & Loyalty State
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerPoints, setCustomerPoints] = useState<number | null>(null);
+  const [redeemPoints, setRedeemPoints] = useState<number>(0);
+  const [isCheckingPoints, setIsCheckingPoints] = useState(false);
+
+  const handleCheckPoints = useCallback(async () => {
+    if (customerPhone.length < 10) return;
+    setIsCheckingPoints(true);
+    try {
+      const res = await fetch(`/api/pos/customer-balance?phone=${customerPhone}`);
+      const data = await res.json();
+      if (res.ok) setCustomerPoints(data.points || 0);
+    } catch {
+      // ignore
+    } finally {
+      setIsCheckingPoints(false);
+    }
+  }, [customerPhone]);
+
   const [liveOrders, setLiveOrders] = useState<PosOrder[]>([]);
 
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "upi" | "card" | "mixed">("cash");
@@ -322,9 +342,10 @@ export default function PosClient({
             table_id: selectedTable?.id || null,
             order_type: orderType,
             customer_name: "Walk-in Guest",
-            customer_phone: "",
+            customer_phone: customerPhone,
             items: cart.map((c) => ({ id: c.item.id, quantity: c.quantity, notes: c.notes || "" })),
             discount_paise: discountPaise || 0,
+            redeem_points: redeemPoints || 0,
             payment_method: paymentMethod || "cash",
             payment_status: status,
             split_cash_paise: splitCashPaise,
@@ -661,6 +682,13 @@ export default function PosClient({
           subtotalPaise={subtotalPaise}
           discountPaise={discountPaise}
           finalTotalPaise={finalTotalPaise}
+          customerPhone={customerPhone}
+          setCustomerPhone={setCustomerPhone}
+          customerPoints={customerPoints}
+          redeemPoints={redeemPoints}
+          setRedeemPoints={setRedeemPoints}
+          handleCheckPoints={handleCheckPoints}
+          isCheckingPoints={isCheckingPoints}
           liveOrders={liveOrders as any}
           handleUpdateOrderStatus={handleUpdateOrderStatus}
           onOpenWaModal={(ord) => setWaModal({

@@ -290,6 +290,23 @@ export default function OrderStatusPage({
           </div>
         </div>
 
+        {/* Loyalty Banner (Shown once on fresh checkout) */}
+        {loyaltyEarned !== null && loyaltyTotal !== null && (
+          <div className="p-4 rounded-3xl bg-amber-50 border border-amber-200 shadow-sm animate-fade-in-up">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
+                <StarIcon className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <h3 className="font-black text-amber-900 text-sm">You earned {loyaltyEarned} points!</h3>
+                <p className="text-xs text-amber-700/80 font-medium leading-relaxed mt-0.5">
+                  Thanks for visiting! You now have a total of <strong className="font-black">{loyaltyTotal} points</strong> linked to your phone number.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Customer Payment Required Alert Banner (When Food Served & Unpaid) */}
         {data.status === "served" && data.payment_status === "unpaid" && (
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-slate-900 shadow-sm space-y-2 text-center">

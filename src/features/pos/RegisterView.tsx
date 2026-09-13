@@ -59,6 +59,14 @@ interface RegisterViewProps {
   handleSettle: (status: "paid" | "unpaid") => void;
   isSettling: boolean;
 
+  customerPhone?: string;
+  setCustomerPhone?: (v: string) => void;
+  customerPoints?: number | null;
+  redeemPoints?: number;
+  setRedeemPoints?: (v: number) => void;
+  handleCheckPoints?: () => void;
+  isCheckingPoints?: boolean;
+
   mobileCartOpen: boolean;
   setMobileCartOpen: (v: boolean) => void;
   msg: { kind: "ok" | "err"; text: string } | null;
@@ -295,12 +303,18 @@ export function RegisterView(props: RegisterViewProps) {
         setSplitUpiAmount={props.setSplitUpiAmount}
         amountReceived={props.amountReceived}
         setAmountReceived={props.setAmountReceived}
-        handleSettle={props.handleSettle}
         isSettling={props.isSettling}
+        handleSettle={props.handleSettle}
+        customerPhone={props.customerPhone}
+        setCustomerPhone={props.setCustomerPhone}
+        customerPoints={props.customerPoints}
+        redeemPoints={props.redeemPoints}
+        setRedeemPoints={props.setRedeemPoints}
+        handleCheckPoints={props.handleCheckPoints}
+        isCheckingPoints={props.isCheckingPoints}
         liveOrders={props.liveOrders}
         handleUpdateOrderStatus={props.handleUpdateOrderStatus}
         onOpenWaModal={props.onOpenWaModal}
-
       />
     </div>
   );

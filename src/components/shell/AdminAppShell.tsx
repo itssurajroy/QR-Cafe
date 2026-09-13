@@ -39,6 +39,7 @@ export type AdminSectionId =
   | "billing"
   // BUSINESS
   | "analytics"
+  | "crm"
   | "staff"
   // SETTINGS
   | "settings"
@@ -87,6 +88,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "BUSINESS",
     items: [
       { id: "analytics", label: "Analytics", icon: ChartIcon },
+      { id: "crm", label: "Loyalty & CRM", icon: UsersIcon },
       { id: "staff", label: "Staff", icon: UsersIcon },
     ],
   },

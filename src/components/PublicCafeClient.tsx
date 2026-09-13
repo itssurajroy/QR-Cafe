@@ -88,6 +88,25 @@ export default function PublicCafeClient({
   // Checkout info
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerPoints, setCustomerPoints] = useState<number | null>(null);
+
+  // Check Loyalty Points automatically when phone changes
+  useEffect(() => {
+    if (customerPhone.length < 10) {
+      setCustomerPoints(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/public/customer-balance?phone=${customerPhone}&restaurant_id=${activeRestaurant.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCustomerPoints(data.points || null);
+        }
+      } catch { /* ignore */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [customerPhone, activeRestaurant.id]);
   const [paymentMethod, setPaymentMethod] = useState<"counter" | "online">("counter");
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -302,9 +321,12 @@ export default function PublicCafeClient({
         (res.data as any)?.order_id ||
         (res.data as any)?.order_number;
 
+      const loyalty = (res.data as any)?.loyalty;
+      const qs = loyalty?.pointsEarned ? `?earned=${loyalty.pointsEarned}&total=${loyalty.newTotalPoints}` : "";
+
       if (statusToken) {
         sessionStorage.setItem(`status:${selectedTable.qr_token}`, statusToken);
-        router.push(`/order/${statusToken}`);
+        router.push(`/order/${statusToken}${qs}`);
       } else {
         setOrderError("Order placed successfully. Please ask your server for your ticket.");
       }
@@ -622,8 +644,8 @@ export default function PublicCafeClient({
         </section>
       )}
 
-      {/* ─── 4. Search & Category Filter (Apple iOS Sticky Segmented Bar) ─── */}
-      <div className="sticky top-[58px] sm:top-[64px] z-30 bg-[#F5F5F7]/85 backdrop-blur-2xl border-b border-black/[0.06] py-2.5 shadow-sm transition-all">
+      {/* ─── 4. Search & Category Filter (Premium Sticky Segmented Bar) ─── */}
+      <div className="sticky top-[58px] sm:top-[64px] z-30 bg-[#F5F5F7]/80 backdrop-blur-3xl border-b border-black/[0.04] py-3 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.1)] transition-all">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row gap-3 items-center justify-between">
           {/* Search Box with iOS Soft Surface */}
           <div className="relative w-full sm:w-80">
@@ -725,11 +747,11 @@ export default function PublicCafeClient({
               className="mb-14 scroll-mt-[150px]"
             >
               {/* Category Header */}
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-stone-200">
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+              <div className="flex items-center gap-4 mb-8 pb-3 border-b border-stone-200/60">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">
                   {cat.name}
                 </h3>
-                <span className="text-xs font-bold text-stone-400 bg-stone-100 px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-slate-500 bg-slate-100/80 px-3 py-1 rounded-full border border-slate-200/50">
                   {categoryDishes.length} {categoryDishes.length === 1 ? "item" : "items"}
                 </span>
               </div>
@@ -741,15 +763,15 @@ export default function PublicCafeClient({
                   const imageUrl = dish.image_url || getItemImage(dish.name, dish.is_veg);
 
                   return (
-                    <article
-                      key={dish.id}
-                      className="group bg-white rounded-3xl p-4 transition-all duration-300 flex items-start justify-between gap-4 cursor-pointer relative shadow-sm border border-slate-100 hover:border-indigo-100 hover:shadow-md"
-                      onClick={() => {
-                        setCustomizingItem(dish);
-                        setSelectedSpice(cart[dish.id]?.spiceLevel as any || "Medium");
-                        setCustomNotes(cart[dish.id]?.notes || "");
-                      }}
-                    >
+                      <article
+                        key={dish.id}
+                        className="group bg-white rounded-[2rem] p-4 transition-all duration-300 flex items-start justify-between gap-4 cursor-pointer relative shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-indigo-100 hover:shadow-[0_8px_24px_-8px_rgba(79,70,229,0.15)]"
+                        onClick={() => {
+                          setCustomizingItem(dish);
+                          setSelectedSpice(cart[dish.id]?.spiceLevel as any || "Medium");
+                          setCustomNotes(cart[dish.id]?.notes || "");
+                        }}
+                      >
                       {/* Left: Info */}
                       <div className="flex-1 min-w-0 pt-1">
                         <div className="flex items-center gap-2 mb-1.5">
@@ -783,26 +805,26 @@ export default function PublicCafeClient({
 
                       {/* Right: Image & Add Button */}
                       <div className="relative shrink-0 flex flex-col items-center ml-2">
-                        <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden bg-stone-100 shadow-sm relative border border-slate-100">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl overflow-hidden bg-stone-100 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] relative">
                           <img
                             src={imageUrl}
                             alt={dish.name}
                             loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
                           />
                         </div>
 
-                        <div className="absolute -bottom-3.5 left-1/2 -translate-x-1/2" onClick={(e) => e.stopPropagation()}>
+                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-10" onClick={(e) => e.stopPropagation()}>
                           {inCartQty === 0 ? (
                             <button
                               type="button"
                               onClick={() => addItemToCart(dish)}
-                              className="w-24 py-2 rounded-xl bg-white text-indigo-600 font-black text-xs sm:text-sm border border-slate-200 shadow-md hover:bg-slate-50 active:scale-95 transition-all text-center uppercase tracking-wide"
+                              className="w-24 sm:w-28 py-2.5 rounded-2xl bg-white text-indigo-600 font-black text-xs sm:text-sm border border-slate-200 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all text-center uppercase tracking-wider"
                             >
                               ADD
                             </button>
                           ) : (
-                            <div className="w-24 flex items-center justify-between bg-white text-indigo-600 rounded-xl px-1.5 py-1.5 shadow-md border border-slate-200">
+                            <div className="w-24 sm:w-28 flex items-center justify-between bg-white text-indigo-600 rounded-2xl px-1.5 py-1.5 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] border border-slate-200">
                               <button
                                 type="button"
                                 onClick={() => decreaseQuantity(dish.id)}
@@ -1244,6 +1266,16 @@ export default function PublicCafeClient({
                       />
                     </div>
                   </div>
+
+                  {customerPoints !== null && customerPoints > 0 && (
+                    <div className="mt-3 p-3 bg-indigo-50/80 rounded-xl border border-indigo-100 flex items-center justify-between text-xs animate-fade-in-up">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base leading-none">✨</span>
+                        <span className="font-black text-indigo-900 tracking-tight">Available Points: {customerPoints}</span>
+                      </div>
+                      <span className="text-indigo-600 font-bold tracking-tight">1 pt = ₹1</span>
+                    </div>
+                  )}
 
                   {orderError && (
                     <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold">
