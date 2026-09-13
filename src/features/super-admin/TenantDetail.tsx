@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { paise } from "@/lib/utils";
 import { format } from "date-fns";
@@ -28,6 +28,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import SubscriptionForm from "@/app/super/tenants/[id]/SubscriptionForm";
+import TenantDangerZone from "@/app/super/tenants/[id]/TenantDangerZone";
 
 interface TenantDetailProps {
   tenant: {
@@ -65,11 +67,25 @@ export function TenantDetail({
   todayRevenue,
   todayOrdersCount,
 }: TenantDetailProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "subscription" | "users" | "danger">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "billing" | "usage" | "liveops" | "settings" | "danger">("overview");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [drawer, setDrawer] = useState<{
+    categories: any[]; items: any[]; tables: any[]; orders: any[]; audit: any[];
+  } | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/super/tenant?cafeId=${tenant.id}`)
+      .then((r) => r.json())
+      .then((d) => { if (live && d?.ok) setDrawer(d); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [tenant.id]);
+
+  const suspended = (tenant as any).is_suspended ?? tenant.plan === "suspended";
 
   const supabase = getSupabaseBrowserClient();
 
@@ -120,9 +136,12 @@ export function TenantDetail({
         <nav className="flex gap-1 px-4 -mb-px" aria-label="Tabs">
           {[
             { id: "overview", label: "Overview", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 002-2V6a2 2 0 012-2h4a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 00-2 2H6a2 2 0 00-2 2v10.5a.5.5 0 00.5.5h9a.5.5 0 010 1H6a2 2 0 00-2 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2h2.5" /></svg> },
-            { id: "subscription", label: "Subscription", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s.895 2 3 2 3 .895 3-2 .895-2 3-2-.895-2-3-2-.895-2-3-.895-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v18m-3-6l4-4m0 0L7 14M7 7h.01M17 21h-10a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2v-6.009A4.988 4.988 0 0017 8c0-2.206-1.523-3.662-4-4.408V2a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h2.5"/></svg> },
             { id: "users", label: "Users", icon: <UsersIcon className="w-4 h-4" /> },
-            { id: "danger", label: "Danger Zone", icon: <AlertTriangleIcon className="w-4 h-4" /> },
+            { id: "billing", label: "Billing", icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s.895 2 3 2 3 .895 3-2 .895-2 3-2-.895-2-3-2-.895-2-3-.895-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v18m-3-6l4-4m0 0L7 14M7 7h.01M17 21h-10a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2v-6.009A4.988 4.988 0 0017 8c0-2.206-1.523-3.662-4-4.408V2a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h2.5"/></svg> },
+            { id: "usage", label: "Usage", icon: <ClipboardListIcon className="w-4 h-4" /> },
+            { id: "liveops", label: "Live Ops", icon: <QrCodeIcon className="w-4 h-4" /> },
+            { id: "settings", label: "Settings", icon: <PencilIcon className="w-4 h-4" /> },
+            { id: "danger", label: "Danger", icon: <AlertTriangleIcon className="w-4 h-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -219,8 +238,8 @@ export function TenantDetail({
           </div>
         )}
 
-        {/* Subscription Tab */}
-        {activeTab === "subscription" && (
+        {/* Billing Tab */}
+        {activeTab === "billing" && (
           <div className="space-y-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -299,6 +318,7 @@ export function TenantDetail({
                 </div>
               </div>
             </div>
+            <SubscriptionForm id={tenant.id} plan={tenant.plan} trialEndsAt={tenant.trial_ends_at} tier={tenant.tier} />
           </div>
         )}
 
@@ -360,34 +380,141 @@ export function TenantDetail({
           </div>
         )}
 
+        {/* Usage Tab */}
+        {activeTab === "usage" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: "Menu Categories", value: drawer ? drawer.categories.length : "…" },
+                { label: "Menu Items", value: drawer ? drawer.items.length : "…" },
+                { label: "Tables", value: drawer ? drawer.tables.length : "…" },
+                { label: "Staff Members", value: staff.length },
+              ].map((s) => (
+                <div key={s.label} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{s.label}</p>
+                  <p className="text-3xl font-black text-slate-900 font-mono">{s.value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Orders (last 50)</h3>
+              {!drawer ? (
+                <p className="text-sm text-slate-400 py-8 text-center">Loading live usage…</p>
+              ) : drawer.orders.length === 0 ? (
+                <p className="text-sm text-slate-400 py-8 text-center">No orders recorded</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs">
+                        <th className="p-4 text-left">Order #</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Payment</th>
+                        <th className="p-4 text-right">Amount</th>
+                        <th className="p-4 text-right">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {drawer.orders.map((order: any) => (
+                        <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-4 font-bold text-slate-900">#{order.order_number}</td>
+                          <td className="text-slate-600">{order.status}</td>
+                          <td className="text-slate-600">{order.payment_status}</td>
+                          <td className="text-right font-mono font-bold text-indigo-600">₹{(order.total_paise / 100).toFixed(2)}</td>
+                          <td className="text-right text-slate-500 font-mono">
+                            {new Date(order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Live Ops Tab */}
+        {activeTab === "liveops" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Today&apos;s Revenue</p>
+                <p className="text-3xl font-black text-slate-900 font-mono">₹{(todayRevenue / 100).toLocaleString("en-IN")}</p>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Today&apos;s Orders</p>
+                <p className="text-3xl font-black text-slate-900 font-mono">{todayOrdersCount}</p>
+              </div>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Audit Trail (last 25)</h3>
+              {!drawer ? (
+                <p className="text-sm text-slate-400 py-8 text-center">Loading audit trail…</p>
+              ) : drawer.audit.length === 0 ? (
+                <p className="text-sm text-slate-400 py-8 text-center">No audit events for this tenant yet</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs">
+                        <th className="p-4 text-left">Action</th>
+                        <th className="p-4">Entity</th>
+                        <th className="p-4 text-right">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {drawer.audit.map((e: any) => (
+                        <tr key={e.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-4 font-mono font-bold text-slate-900">{e.action}</td>
+                          <td className="text-slate-600">{e.entity}:{String(e.entity_id).slice(0, 8)}</td>
+                          <td className="text-right text-slate-500 font-mono">
+                            {new Date(e.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === "settings" && (
+          <div className="space-y-6">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Tenant Settings</h3>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                {[
+                  ["Slug", `/${tenant.slug}`],
+                  ["Tier", tenant.tier],
+                  ["Phone", tenant.phone ?? "—"],
+                  ["Address", tenant.address ?? "—"],
+                  ["UPI ID", tenant.upi_id ?? "—"],
+                  ["WhatsApp", tenant.whatsapp_enabled ? "Enabled" : "Disabled"],
+                  ["Accent color", tenant.accent_color],
+                  ["Tagline", tenant.tagline ?? "—"],
+                  ["Google review URL", tenant.google_review_url ?? "—"],
+                  ["Tax rate", tenant.tax_rate ?? "—"],
+                  ["Billing status", tenant.billing_status],
+                  ["Created", new Date(tenant.created_at).toLocaleString("en-IN")],
+                ].map(([k, v]) => (
+                  <div key={k} className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">{k}</dt>
+                    <dd className="mt-1 font-medium text-slate-900 break-words">{String(v)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        )}
+
         {/* Danger Zone Tab */}
         {activeTab === "danger" && (
           <div className="space-y-6">
-            <div className="bg-red-50 border border-red-200 rounded-3xl p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertTriangleIcon className="w-8 h-8 text-red-600" />
-                <div>
-                  <h3 className="text-lg font-bold text-red-900">Danger Zone</h3>
-                  <p className="text-sm text-red-700 mt-1">These actions are irreversible. Proceed with caution.</p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-red-200">
-                  <div>
-                    <h4 className="font-bold text-red-900">Suspend Tenant</h4>
-                    <p className="text-sm text-red-600 mt-1">Temporarily disable access for this tenant</p>
-                  </div>
-                  <button className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs">Suspend</button>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-red-200">
-                  <div>
-                    <h4 className="font-bold text-red-900">Delete Tenant</h4>
-                    <p className="text-sm text-red-600 mt-1">Permanently delete this tenant and all data</p>
-                  </div>
-                  <button className="px-4 py-2 rounded-xl bg-red-800 hover:bg-red-900 text-white font-bold text-xs">Delete</button>
-                </div>
-              </div>
-            </div>
+            <TenantDangerZone id={tenant.id} slug={tenant.slug} suspended={suspended} />
           </div>
         )}
       </div>
