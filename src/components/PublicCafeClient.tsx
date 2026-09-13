@@ -98,7 +98,7 @@ export default function PublicCafeClient({
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/public/customer-balance?phone=${customerPhone}&restaurant_id=${activeRestaurant.id}`);
+        const res = await fetch(`/api/public/customer-balance?phone=${customerPhone}&restaurant_id=${restaurant.id}`);
         if (res.ok) {
           const data = await res.json();
           setCustomerPoints(data.points || null);
@@ -106,7 +106,7 @@ export default function PublicCafeClient({
       } catch { /* ignore */ }
     }, 500);
     return () => clearTimeout(timer);
-  }, [customerPhone, activeRestaurant.id]);
+  }, [customerPhone, restaurant.id]);
   const [paymentMethod, setPaymentMethod] = useState<"counter" | "online">("counter");
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -392,7 +392,7 @@ export default function PublicCafeClient({
   }, [restaurant.upi_id, restaurant.name, totalPaise, selectedTable, upiQrUrl]);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-slate-900 font-sans selection:bg-indigo-600 selection:text-white flex flex-col relative pb-32">
+    <div className="min-h-screen bg-[#FAF9F6] text-slate-900 font-[family-name:var(--font-plus-jakarta)] selection:bg-[#5738F5] selection:text-white flex flex-col relative pb-32">
       {/* ─── Top Bar: Subscription Status (if paused) ─── */}
       {!canOrder && (
         <div className="bg-amber-600 text-white px-4 py-2 text-center text-xs font-bold shadow-sm flex items-center justify-center gap-2 relative z-50">
@@ -401,12 +401,10 @@ export default function PublicCafeClient({
         </div>
       )}
 
-      {/* ─── 1. Header (Apple Frosted Glass) ─── */}
+      {/* ─── 1. Header (Solid Crisp Light Surface) ─── */}
       <header
-        className={`sticky top-0 z-40 w-full transition-all duration-300 ${
-          scrolled
-            ? "bg-white/90 backdrop-blur-2xl border-b border-black/[0.06] shadow-sm py-2.5"
-            : "bg-white/80 backdrop-blur-xl border-b border-black/[0.06] py-3.5"
+        className={`sticky top-0 z-40 w-full transition-all duration-200 bg-white border-b border-slate-200/90 shadow-[0_2px_12px_rgba(15,23,42,0.04)] ${
+          scrolled ? "py-2.5" : "py-3.5"
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
@@ -416,10 +414,10 @@ export default function PublicCafeClient({
               <img
                 src={restaurant.logo_url}
                 alt={restaurant.name}
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-black/[0.08] shadow-sm shrink-0"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-slate-200 shadow-sm shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-black text-lg flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#5738F5] to-[#7C3AED] text-white font-black text-lg flex items-center justify-center shadow-md shadow-[#5738F5]/20 shrink-0">
                 {restaurant.name.charAt(0)}
               </div>
             )}
@@ -428,7 +426,7 @@ export default function PublicCafeClient({
                 <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
                   {restaurant.name}
                 </h1>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-extrabold text-emerald-800">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-extrabold text-emerald-800">
                   <CheckIcon className="w-2.5 h-2.5 text-emerald-600" />
                   Verified Kitchen
                 </span>
@@ -439,7 +437,7 @@ export default function PublicCafeClient({
                   Kitchen Live
                 </span>
                 <span>•</span>
-                <span>Dining & Takeaway</span>
+                <span>Contactless Table Service</span>
               </div>
             </div>
           </div>
@@ -451,16 +449,16 @@ export default function PublicCafeClient({
               <button
                 type="button"
                 onClick={() => setIsTableModalOpen(true)}
-                className={`px-3 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
                   selectedTable
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600 shadow-sm shadow-indigo-600/20"
+                    ? "bg-gradient-to-r from-[#5738F5] to-[#7C3AED] text-white border-transparent shadow-sm shadow-[#5738F5]/25"
+                    : "bg-violet-50 hover:bg-violet-100 text-[#5738F5] border-violet-200 shadow-sm"
                 }`}
                 title="Change Table Number"
               >
-                <MapPinIcon className="w-3.5 h-3.5 text-indigo-300" />
+                <MapPinIcon className={`w-3.5 h-3.5 ${selectedTable ? "text-white" : "text-[#5738F5]"}`} />
                 <span>{selectedTable ? `Table ${selectedTable.label}` : "Pick Table"}</span>
-                <span className="text-[10px] opacity-70">▾</span>
+                <span className="text-[10px] opacity-80">▾</span>
               </button>
             )}
 
@@ -469,10 +467,10 @@ export default function PublicCafeClient({
               <button
                 type="button"
                 onClick={() => setIsServiceModalOpen(true)}
-                className="p-2 sm:px-3 sm:py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-black/[0.06] cursor-pointer flex items-center gap-1.5 transition-all active:scale-95"
+                className="p-2 sm:px-3 sm:py-1.5 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold border border-slate-200 cursor-pointer flex items-center gap-1.5 transition-all active:scale-95"
                 title="Call Waiter or Request Service"
               >
-                <BellIcon className="w-4 h-4 text-indigo-600" />
+                <BellIcon className="w-4 h-4 text-[#5738F5]" />
                 <span className="hidden md:inline">Service</span>
               </button>
             )}
@@ -481,12 +479,12 @@ export default function PublicCafeClient({
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 sm:px-3.5 sm:py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md shadow-amber-600/20 flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+              className="relative p-2 sm:px-3.5 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md shadow-amber-500/25 flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
             >
               <ShoppingBagIcon className="w-4 h-4" />
               <span className="hidden sm:inline">Order</span>
               {totalQty > 0 && (
-                <span className="min-w-[20px] h-5 px-1 rounded-full bg-white text-stone-950 text-[11px] font-black flex items-center justify-center shadow-sm">
+                <span className="min-w-[20px] h-5 px-1 rounded-full bg-white text-orange-700 text-[11px] font-black flex items-center justify-center shadow-sm">
                   {totalQty}
                 </span>
               )}
@@ -583,21 +581,23 @@ export default function PublicCafeClient({
               return (
                 <div
                   key={`bestseller-${it.id}`}
-                  className="group bg-white rounded-2xl border border-stone-200/90 p-2.5 flex flex-col shadow-sm hover:shadow-md transition-all relative overflow-hidden"
+                  className="group bg-white rounded-2xl border border-slate-200/90 p-2.5 flex flex-col shadow-sm hover:shadow-md transition-all relative overflow-hidden"
                 >
-                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2 bg-stone-100">
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2 bg-slate-100">
                     <img
                       src={imgUrl}
                       alt={it.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-black border border-stone-200 shadow-sm flex items-center gap-1">
+                    <div className="absolute top-1.5 left-1.5 bg-white px-2 py-0.5 rounded-md text-[10px] font-black border border-slate-200 shadow-sm flex items-center gap-1">
                       <span
                         className={`w-2 h-2 rounded-full ${
                           it.is_veg ? "bg-emerald-600" : "bg-red-600"
                         }`}
                       />
-                      <span>{it.is_veg ? "Veg" : "Non-Veg"}</span>
+                      <span className={it.is_veg ? "text-emerald-700" : "text-red-700"}>
+                        {it.is_veg ? "Veg" : "Non-Veg"}
+                      </span>
                     </div>
                   </div>
 
@@ -605,7 +605,7 @@ export default function PublicCafeClient({
                     {it.name}
                   </h4>
                   <div className="flex items-center justify-between mt-auto pt-2">
-                    <span className="font-black text-xs sm:text-sm text-slate-900 font-mono">
+                    <span className="font-black text-xs sm:text-sm text-[#5738F5] font-mono">
                       {paise(it.price_paise)}
                     </span>
 
@@ -613,16 +613,16 @@ export default function PublicCafeClient({
                       <button
                         type="button"
                         onClick={() => addItemToCart(it)}
-                        className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-black text-xs border border-amber-300/80 transition-all cursor-pointer active:scale-95"
+                        className="px-2.5 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-[#5738F5] font-black text-xs border border-violet-200 transition-all cursor-pointer active:scale-95"
                       >
                         + ADD
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1 bg-stone-900 text-white rounded-lg px-1.5 py-0.5">
+                      <div className="flex items-center gap-1 bg-violet-50 text-[#5738F5] border border-violet-200 rounded-lg px-1.5 py-0.5 font-bold">
                         <button
                           type="button"
                           onClick={() => decreaseQuantity(it.id)}
-                          className="w-5 h-5 flex items-center justify-center font-bold text-xs"
+                          className="w-5 h-5 flex items-center justify-center font-bold text-xs hover:bg-violet-200/50 rounded"
                         >
                           -
                         </button>
@@ -630,7 +630,7 @@ export default function PublicCafeClient({
                         <button
                           type="button"
                           onClick={() => increaseQuantity(it.id)}
-                          className="w-5 h-5 flex items-center justify-center font-bold text-xs"
+                          className="w-5 h-5 flex items-center justify-center font-bold text-xs hover:bg-violet-200/50 rounded"
                         >
                           +
                         </button>
@@ -644,10 +644,10 @@ export default function PublicCafeClient({
         </section>
       )}
 
-      {/* ─── 4. Search & Category Filter (Premium Sticky Segmented Bar) ─── */}
-      <div className="sticky top-[58px] sm:top-[64px] z-30 bg-[#F5F5F7]/80 backdrop-blur-3xl border-b border-black/[0.04] py-3 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.1)] transition-all">
+      {/* ─── 4. Search & Category Filter (Solid Clean Sticky Segmented Bar) ─── */}
+      <div className="sticky top-[58px] sm:top-[64px] z-30 bg-white border-b border-slate-200/90 py-3 shadow-sm transition-all">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row gap-3 items-center justify-between">
-          {/* Search Box with iOS Soft Surface */}
+          {/* Search Box with Crisp Light Surface */}
           <div className="relative w-full sm:w-80">
             <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
@@ -655,7 +655,7 @@ export default function PublicCafeClient({
               placeholder="Search dishes (e.g. Paneer, Biryani, Coffee)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-black/[0.04] border border-black/[0.06] rounded-full pl-9 pr-8 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 font-medium transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-full pl-9 pr-8 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#5738F5] focus:ring-2 focus:ring-[#5738F5]/10 font-medium transition-all"
             />
             {searchQuery && (
               <button
@@ -670,8 +670,8 @@ export default function PublicCafeClient({
 
           {/* Dietary Buttons + Categories */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto">
-            {/* iOS Dietary Segmented Control */}
-            <div className="flex items-center bg-[#E5E5EA] p-1 rounded-full shrink-0 border border-black/[0.04]">
+            {/* Dietary Segmented Control */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-full shrink-0 border border-slate-200">
               <button
                 type="button"
                 onClick={() => setDiet("all")}
@@ -716,8 +716,8 @@ export default function PublicCafeClient({
                     onClick={() => scrollToCategory(c.id)}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
                       isActive
-                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                        : "bg-white text-slate-700 border-black/[0.06] hover:bg-slate-50"
+                        ? "bg-gradient-to-r from-[#5738F5] to-[#7C3AED] text-white border-[#5738F5] shadow-sm"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
                     <span>{c.name}</span>
@@ -765,7 +765,7 @@ export default function PublicCafeClient({
                   return (
                       <article
                         key={dish.id}
-                        className="group bg-white rounded-[2rem] p-4 transition-all duration-300 flex items-start justify-between gap-4 cursor-pointer relative shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-indigo-100 hover:shadow-[0_8px_24px_-8px_rgba(79,70,229,0.15)]"
+                        className="group bg-white rounded-[2rem] p-4 transition-all duration-300 flex items-start justify-between gap-4 cursor-pointer relative shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] border border-slate-200/80 hover:border-[#5738F5]/30 hover:shadow-[0_12px_28px_-6px_rgba(87,56,245,0.12)]"
                         onClick={() => {
                           setCustomizingItem(dish);
                           setSelectedSpice(cart[dish.id]?.spiceLevel as any || "Medium");
@@ -790,10 +790,10 @@ export default function PublicCafeClient({
                             </span>
                           )}
                         </div>
-                        <h4 className="font-bold text-base sm:text-lg text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug mb-1">
+                        <h4 className="font-bold text-base sm:text-lg text-slate-900 group-hover:text-[#5738F5] transition-colors leading-snug mb-1">
                           {dish.name}
                         </h4>
-                        <div className="font-black text-sm text-slate-800 font-mono mb-2">
+                        <div className="font-black text-sm text-[#5738F5] font-mono mb-2">
                           {paise(dish.price_paise)}
                         </div>
                         {dish.description && (
@@ -805,12 +805,12 @@ export default function PublicCafeClient({
 
                       {/* Right: Image & Add Button */}
                       <div className="relative shrink-0 flex flex-col items-center ml-2">
-                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl overflow-hidden bg-stone-100 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] relative">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl overflow-hidden bg-slate-100 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] relative">
                           <img
                             src={imageUrl}
                             alt={dish.name}
                             loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
                           />
                         </div>
 
@@ -819,12 +819,12 @@ export default function PublicCafeClient({
                             <button
                               type="button"
                               onClick={() => addItemToCart(dish)}
-                              className="w-24 sm:w-28 py-2.5 rounded-2xl bg-white text-indigo-600 font-black text-xs sm:text-sm border border-slate-200 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all text-center uppercase tracking-wider"
+                              className="w-24 sm:w-28 py-2.5 rounded-2xl bg-white text-[#5738F5] hover:bg-violet-50 font-black text-xs sm:text-sm border border-slate-200 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all text-center uppercase tracking-wider"
                             >
                               ADD
                             </button>
                           ) : (
-                            <div className="w-24 sm:w-28 flex items-center justify-between bg-white text-indigo-600 rounded-2xl px-1.5 py-1.5 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] border border-slate-200">
+                            <div className="w-24 sm:w-28 flex items-center justify-between bg-white text-[#5738F5] rounded-2xl px-1.5 py-1.5 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] border border-slate-200">
                               <button
                                 type="button"
                                 onClick={() => decreaseQuantity(dish.id)}
@@ -892,12 +892,12 @@ export default function PublicCafeClient({
         )}
       </main>
 
-      {/* ─── 7. Floating Bottom Cart Bar (Apple Frosted Glass Pill) ─── */}
+      {/* ─── 7. Floating Bottom Cart Bar (Solid Clean Crisp Pill) ─── */}
       {totalQty > 0 && (
         <aside aria-label="Order Cart Bar" className="fixed bottom-5 left-4 right-4 z-40 max-w-xl mx-auto animate-fade-in-up">
-          <div className="bg-white/95 text-slate-900 p-3 sm:p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-black/[0.08] backdrop-blur-2xl">
+          <div className="bg-white text-slate-900 p-3 sm:p-3.5 rounded-2xl shadow-[0_12px_36px_-6px_rgba(0,0,0,0.14)] flex items-center justify-between border border-slate-200">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-indigo-600/20">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-r from-[#5738F5] to-[#7C3AED] text-white flex items-center justify-center font-black text-xs shadow-md shadow-violet-500/25">
                 {totalQty}
               </div>
               <div>
@@ -907,8 +907,8 @@ export default function PublicCafeClient({
                     • {totalQty} {totalQty === 1 ? "item" : "items"}
                   </span>
                 </div>
-                <div className="text-[11px] text-indigo-700 font-medium flex items-center gap-1">
-                  <MapPinIcon className="w-3 h-3 text-indigo-600" />
+                <div className="text-[11px] text-[#5738F5] font-semibold flex items-center gap-1">
+                  <MapPinIcon className="w-3 h-3 text-[#5738F5]" />
                   <span>
                     {selectedTable ? `Table ${selectedTable.label}` : "No Table (Tap to Select)"}
                   </span>
@@ -919,7 +919,7 @@ export default function PublicCafeClient({
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
-              className="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-600/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-md shadow-violet-500/25 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <span>View Cart</span>
               <span>→</span>
@@ -931,11 +931,11 @@ export default function PublicCafeClient({
       {/* ─── 8. Modal: Table Selector ─── */}
       {isTableModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-50 bg-slate-900/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
           onClick={() => setIsTableModalOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-stone-200 animate-slide-in-bottom"
+            className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 animate-slide-in-bottom"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -950,7 +950,7 @@ export default function PublicCafeClient({
               <button
                 type="button"
                 onClick={() => setIsTableModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center font-bold text-sm hover:bg-stone-200"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-sm hover:bg-slate-200"
               >
                 ✕
               </button>
@@ -966,12 +966,12 @@ export default function PublicCafeClient({
                     onClick={() => handleSelectTable(t)}
                     className={`p-3 rounded-2xl flex flex-col items-center justify-center border transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/30 scale-105"
-                        : "bg-stone-50 hover:bg-stone-100 text-slate-800 border-stone-200"
+                        ? "bg-gradient-to-r from-[#5738F5] to-[#7C3AED] text-white border-[#5738F5] shadow-md shadow-violet-500/25 scale-105"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
                     }`}
                   >
                     <span className="text-xs font-mono font-black">{t.label}</span>
-                    <span className="text-[10px] opacity-70 mt-0.5">{t.seats || 2} Seats</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">{t.seats || 2} Seats</span>
                   </button>
                 );
               })}
@@ -988,7 +988,7 @@ export default function PublicCafeClient({
                   setIsTableModalOpen(false);
                 }
               }}
-              className="w-full py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 border border-stone-200"
+              className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200"
             >
               <span>🛍️</span>
               <span>Order for Counter / Takeaway</span>
@@ -1000,15 +1000,15 @@ export default function PublicCafeClient({
       {/* ─── 9. Modal: Item Details & Customization ─── */}
       {customizingItem && (
         <div
-          className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-50 bg-slate-900/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
           onClick={() => setCustomizingItem(null)}
         >
           <div
-            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-h-[90vh] flex flex-col animate-slide-in-bottom"
+            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col animate-slide-in-bottom"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Image */}
-            <div className="relative aspect-[16/9] w-full bg-stone-100 shrink-0">
+            <div className="relative aspect-[16/9] w-full bg-slate-100 shrink-0">
               <img
                 src={customizingItem.image_url || getItemImage(customizingItem.name, customizingItem.is_veg)}
                 alt={customizingItem.name}
@@ -1017,11 +1017,11 @@ export default function PublicCafeClient({
               <button
                 type="button"
                 onClick={() => setCustomizingItem(null)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center font-bold text-sm backdrop-blur-md"
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white text-slate-700 hover:bg-slate-100 flex items-center justify-center font-bold text-sm shadow-md border border-slate-200"
               >
                 ✕
               </button>
-              <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-black border border-stone-200">
+              <div className="absolute bottom-3 left-3 bg-white px-2.5 py-1 rounded-lg text-xs font-black border border-slate-200 shadow-sm">
                 {customizingItem.is_veg ? "🟢 Pure Vegetarian" : "🔴 Non-Vegetarian"}
               </div>
             </div>
@@ -1030,7 +1030,7 @@ export default function PublicCafeClient({
             <div className="p-6 overflow-y-auto flex-1">
               <div className="flex items-start justify-between gap-4 mb-2">
                 <h3 className="text-xl font-black text-slate-900">{customizingItem.name}</h3>
-                <span className="text-lg font-black text-slate-900 font-mono">
+                <span className="text-lg font-black text-[#5738F5] font-mono">
                   {paise(customizingItem.price_paise)}
                 </span>
               </div>
@@ -1053,8 +1053,8 @@ export default function PublicCafeClient({
                       onClick={() => setSelectedSpice(spice)}
                       className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                         selectedSpice === spice
-                          ? "bg-amber-50 border-amber-500 text-amber-900 shadow-sm"
-                          : "bg-stone-50 border-stone-200 text-slate-600 hover:bg-stone-100"
+                          ? "bg-violet-50 border-violet-300 text-[#5738F5] shadow-sm"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
                       }`}
                     >
                       {spice === "Mild" && "🌿 Mild"}
@@ -1075,13 +1075,13 @@ export default function PublicCafeClient({
                   value={customNotes}
                   maxLength={150}
                   onChange={(e) => setCustomNotes(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 placeholder:text-stone-400 focus:outline-none focus:border-amber-500 focus:bg-white resize-none h-20"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#5738F5] focus:bg-white resize-none h-20"
                 />
               </div>
             </div>
 
             {/* Bottom Add Action */}
-            <div className="p-4 border-t border-stone-200 bg-stone-50 shrink-0">
+            <div className="p-4 border-t border-slate-200 bg-slate-50 shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -1091,7 +1091,7 @@ export default function PublicCafeClient({
                   });
                   setCustomizingItem(null);
                 }}
-                className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-black text-sm shadow-md shadow-amber-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-sm shadow-md shadow-violet-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Add to Order • {paise(customizingItem.price_paise)}</span>
               </button>
@@ -1103,18 +1103,18 @@ export default function PublicCafeClient({
       {/* ─── 10. Drawer: Cart & Checkout ─── */}
       {isCartOpen && (
         <div
-          className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-50 bg-slate-900/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
           onClick={() => setIsCartOpen(false)}
         >
           <div
-            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-h-[92vh] flex flex-col animate-slide-in-bottom"
+            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col animate-slide-in-bottom"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50 shrink-0">
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
               <div>
                 <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <ShoppingBagIcon className="w-5 h-5 text-amber-600" />
+                  <ShoppingBagIcon className="w-5 h-5 text-[#5738F5]" />
                   <span>Your Order Summary</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -1125,7 +1125,7 @@ export default function PublicCafeClient({
               <button
                 type="button"
                 onClick={() => setIsCartOpen(false)}
-                className="w-8 h-8 rounded-full bg-white border border-stone-200 text-stone-500 flex items-center justify-center font-bold text-sm hover:bg-stone-100"
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm hover:bg-slate-100"
               >
                 ✕
               </button>
@@ -1144,7 +1144,7 @@ export default function PublicCafeClient({
                   {cartLines.map((line) => (
                     <div
                       key={line.item.id}
-                      className="p-3 rounded-2xl bg-stone-50 border border-stone-200 flex items-center justify-between gap-3"
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
@@ -1157,7 +1157,7 @@ export default function PublicCafeClient({
                             {line.item.name}
                           </h4>
                         </div>
-                        <div className="text-[11px] text-stone-500 mt-0.5">
+                        <div className="text-[11px] text-slate-500 mt-0.5">
                           <span>{paise(line.item.price_paise)} each</span>
                           {line.spiceLevel && <span> • {line.spiceLevel}</span>}
                           {line.notes && <span> • "{line.notes}"</span>}
@@ -1168,7 +1168,7 @@ export default function PublicCafeClient({
                         <span className="font-mono text-xs font-black text-slate-900">
                           {paise(line.item.price_paise * line.quantity)}
                         </span>
-                        <div className="flex items-center bg-white border border-stone-200 rounded-xl px-1.5 py-0.5 shadow-sm">
+                        <div className="flex items-center bg-white border border-slate-200 rounded-xl px-1.5 py-0.5 shadow-sm">
                           <button
                             type="button"
                             onClick={() => decreaseQuantity(line.item.id)}
@@ -1192,7 +1192,7 @@ export default function PublicCafeClient({
                   ))}
 
                   {/* Payment Method Selection */}
-                  <div className="pt-4 border-t border-stone-200">
+                  <div className="pt-4 border-t border-slate-200">
                     <label className="text-xs font-black uppercase tracking-wider text-slate-900 block mb-2">
                       Payment Option
                     </label>
@@ -1202,38 +1202,38 @@ export default function PublicCafeClient({
                         onClick={() => setPaymentMethod("counter")}
                         className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                           paymentMethod === "counter"
-                            ? "bg-amber-50 border-amber-500 shadow-sm"
-                            : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                            ? "bg-violet-50 border-[#5738F5] shadow-sm"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                         }`}
                       >
-                        <span className="text-sm block">💵 Pay at Counter</span>
-                        <span className="text-[11px] text-stone-500">Settle cash/card after meal</span>
+                        <span className="text-sm font-bold block text-slate-900">💵 Pay at Counter</span>
+                        <span className="text-[11px] text-slate-500">Settle cash/card after meal</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("online")}
                         className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                           paymentMethod === "online"
-                            ? "bg-amber-50 border-amber-500 shadow-sm"
-                            : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                            ? "bg-violet-50 border-[#5738F5] shadow-sm"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                         }`}
                       >
-                        <span className="text-sm block">📱 Pay via UPI</span>
-                        <span className="text-[11px] text-stone-500">GPay, PhonePe, Paytm QR</span>
+                        <span className="text-sm font-bold block text-slate-900">📱 Pay via UPI</span>
+                        <span className="text-[11px] text-slate-500">GPay, PhonePe, Paytm QR</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Render UPI QR code if online chosen */}
                   {paymentMethod === "online" && upiPaymentUrl && (
-                    <div className="p-4 bg-stone-50 border border-stone-200 rounded-2xl flex flex-col items-center text-center animate-fade-in">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center text-center animate-fade-in">
                       <span className="text-xs font-black text-slate-900 mb-2">Scan & Pay via any UPI App</span>
                       <img
                         src={upiPaymentUrl}
                         alt="Store UPI QR Code"
-                        className="w-36 h-36 bg-white p-2 rounded-xl border border-stone-200 shadow-sm"
+                        className="w-36 h-36 bg-white p-2 rounded-xl border border-slate-200 shadow-sm"
                       />
-                      <span className="text-xs font-mono font-bold text-amber-700 mt-2">
+                      <span className="text-xs font-mono font-bold text-[#5738F5] mt-2">
                         Exact Amount: {paise(totalPaise)}
                       </span>
                     </div>
@@ -1242,7 +1242,7 @@ export default function PublicCafeClient({
                   {/* Optional Guest Information */}
                   <div className="pt-2 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[11px] font-bold text-stone-500 block mb-1">
+                      <label className="text-[11px] font-bold text-slate-500 block mb-1">
                         Your Name (Optional)
                       </label>
                       <input
@@ -1250,11 +1250,11 @@ export default function PublicCafeClient({
                         placeholder="e.g. Rahul Sharma"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#5738F5]"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-stone-500 block mb-1">
+                      <label className="text-[11px] font-bold text-slate-500 block mb-1">
                         Phone (Optional)
                       </label>
                       <input
@@ -1262,18 +1262,18 @@ export default function PublicCafeClient({
                         placeholder="For order SMS"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500 font-mono"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#5738F5] font-mono"
                       />
                     </div>
                   </div>
 
                   {customerPoints !== null && customerPoints > 0 && (
-                    <div className="mt-3 p-3 bg-indigo-50/80 rounded-xl border border-indigo-100 flex items-center justify-between text-xs animate-fade-in-up">
+                    <div className="mt-3 p-3 bg-violet-50 rounded-xl border border-violet-200 flex items-center justify-between text-xs animate-fade-in-up">
                       <div className="flex items-center gap-1.5">
                         <span className="text-base leading-none">✨</span>
-                        <span className="font-black text-indigo-900 tracking-tight">Available Points: {customerPoints}</span>
+                        <span className="font-black text-violet-900 tracking-tight">Available Points: {customerPoints}</span>
                       </div>
-                      <span className="text-indigo-600 font-bold tracking-tight">1 pt = ₹1</span>
+                      <span className="text-[#5738F5] font-bold tracking-tight">1 pt = ₹1</span>
                     </div>
                   )}
 
@@ -1288,17 +1288,17 @@ export default function PublicCafeClient({
 
             {/* Checkout Sticky Action */}
             {cartLines.length > 0 && (
-              <div className="p-4 sm:p-5 border-t border-stone-200 bg-stone-50 shrink-0">
+              <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 shrink-0">
                 <div className="flex items-center justify-between mb-3 text-sm font-black text-slate-900">
                   <span>Grand Total:</span>
-                  <span className="text-lg font-mono text-amber-600">{paise(totalPaise)}</span>
+                  <span className="text-lg font-mono text-[#5738F5]">{paise(totalPaise)}</span>
                 </div>
 
                 <button
                   type="button"
                   disabled={orderSubmitting}
                   onClick={handlePlaceOrder}
-                  className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-stone-950 font-black text-sm shadow-lg shadow-amber-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-violet-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {orderSubmitting ? (
                     <span>Sending to Kitchen…</span>
@@ -1318,17 +1318,17 @@ export default function PublicCafeClient({
       {/* ─── 11. Modal: Call Waiter / Service Requests ─── */}
       {isServiceModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-50 bg-slate-900/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
           onClick={() => setIsServiceModalOpen(false)}
         >
           <div
-            className="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-stone-200 animate-slide-in-bottom"
+            className="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 animate-slide-in-bottom"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <BellIcon className="w-5 h-5 text-amber-600" />
+                  <BellIcon className="w-5 h-5 text-[#5738F5]" />
                   <span>Need Assistance?</span>
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -1338,7 +1338,7 @@ export default function PublicCafeClient({
               <button
                 type="button"
                 onClick={() => setIsServiceModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center font-bold text-sm"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-sm hover:bg-slate-200"
               >
                 ✕
               </button>
@@ -1354,7 +1354,7 @@ export default function PublicCafeClient({
                   type="button"
                   disabled={serviceLoading}
                   onClick={() => handleCallService("water")}
-                  className="p-3.5 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-left cursor-pointer transition-all active:scale-95"
+                  className="p-3.5 rounded-2xl bg-slate-50 hover:bg-violet-50 hover:border-violet-300 border border-slate-200 text-left cursor-pointer transition-all active:scale-95"
                 >
                   <span className="text-2xl block mb-1">💧</span>
                   <span className="text-xs font-black text-slate-900 block">Need Water</span>
@@ -1365,7 +1365,7 @@ export default function PublicCafeClient({
                   type="button"
                   disabled={serviceLoading}
                   onClick={() => handleCallService("clean")}
-                  className="p-3.5 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-left cursor-pointer transition-all active:scale-95"
+                  className="p-3.5 rounded-2xl bg-slate-50 hover:bg-violet-50 hover:border-violet-300 border border-slate-200 text-left cursor-pointer transition-all active:scale-95"
                 >
                   <span className="text-2xl block mb-1">🧹</span>
                   <span className="text-xs font-black text-slate-900 block">Clean Table</span>
@@ -1376,7 +1376,7 @@ export default function PublicCafeClient({
                   type="button"
                   disabled={serviceLoading}
                   onClick={() => handleCallService("waiter")}
-                  className="p-3.5 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-left cursor-pointer transition-all active:scale-95"
+                  className="p-3.5 rounded-2xl bg-slate-50 hover:bg-violet-50 hover:border-violet-300 border border-slate-200 text-left cursor-pointer transition-all active:scale-95"
                 >
                   <span className="text-2xl block mb-1">🙋</span>
                   <span className="text-xs font-black text-slate-900 block">Call Server</span>
@@ -1387,7 +1387,7 @@ export default function PublicCafeClient({
                   type="button"
                   disabled={serviceLoading}
                   onClick={() => handleCallService("bill")}
-                  className="p-3.5 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-left cursor-pointer transition-all active:scale-95"
+                  className="p-3.5 rounded-2xl bg-slate-50 hover:bg-violet-50 hover:border-violet-300 border border-slate-200 text-left cursor-pointer transition-all active:scale-95"
                 >
                   <span className="text-2xl block mb-1">🧾</span>
                   <span className="text-xs font-black text-slate-900 block">Request Bill</span>
@@ -1400,13 +1400,13 @@ export default function PublicCafeClient({
       )}
 
       {/* ─── 12. Footer ─── */}
-      <footer className="mt-auto bg-stone-950 text-stone-400 py-12 px-4 text-center relative z-10 border-t border-stone-800">
+      <footer className="mt-auto bg-white text-slate-600 py-12 px-4 text-center relative z-10 border-t border-slate-200/90 shadow-inner">
         <div className="max-w-4xl mx-auto space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center font-black text-xl mx-auto border border-white/10 shadow-lg">
+          <div className="w-12 h-12 rounded-2xl bg-violet-50 text-[#5738F5] flex items-center justify-center font-black text-xl mx-auto border border-violet-200 shadow-sm">
             {restaurant.name.charAt(0)}
           </div>
-          <h4 className="text-xl font-black text-white">{restaurant.name}</h4>
-          <p className="text-xs text-stone-400 max-w-sm mx-auto">
+          <h4 className="text-xl font-black text-slate-900">{restaurant.name}</h4>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
             Thank you for dining with us! Fresh ingredients, authentic recipes, and contactless table service.
           </p>
 
@@ -1416,18 +1416,18 @@ export default function PublicCafeClient({
                 href={restaurant.google_review_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all border border-white/15"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xs transition-all border border-slate-200 shadow-sm"
               >
-                <StarIcon className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <StarIcon className="w-4 h-4 text-amber-500 fill-amber-500" />
                 <span>Review us on Google</span>
               </a>
             </div>
           )}
 
-          <div className="pt-6 border-t border-stone-800/80 text-[11px] text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="pt-6 border-t border-slate-200/80 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div>© {new Date().getFullYear()} {restaurant.name}. All rights reserved.</div>
             <div>
-              Powered by <span className="text-white font-bold">QrSlice</span> • Kitchen OS
+              Powered by <span className="text-slate-900 font-bold">QrSlice</span> • Kitchen OS
             </div>
           </div>
         </div>

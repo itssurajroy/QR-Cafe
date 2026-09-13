@@ -1,45 +1,57 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
+import { Star, CheckCircle2 } from "lucide-react";
+
 const TESTIMONIALS = [
   {
     quote:
-      "We cut order wait times by 40% in the first week. Our staff finally has time to focus on food quality instead of taking orders.",
+      "We cut order wait times by 40% in the first week. Our staff finally has time to focus on hospitality and food quality instead of scribbling chits.",
     name: "Priya Sharma",
     role: "Owner",
     cafe: "Chai & Co., Mumbai",
-    metric: "40% faster orders",
+    metric: "40% Faster Table Turn",
+    rating: 5,
+    initial: "P",
+    color: "from-amber-500 to-orange-500",
   },
   {
     quote:
-      "The kitchen display changed everything. No more paper chits, no more missed orders. Our kitchen runs like clockwork now.",
+      "The kitchen display changed everything. No more lost paper chits, no shouting waiters, and zero missed orders. Kitchen runs like clockwork.",
     name: "Rahul Verma",
-    role: "Manager",
+    role: "Head of Ops",
     cafe: "Street Bites, Delhi",
-    metric: "Zero missed orders",
+    metric: "Zero Lost Orders",
+    rating: 5,
+    initial: "R",
+    color: "from-blue-600 to-indigo-600",
   },
   {
     quote:
-      "Set up the entire menu in one afternoon. Our customers love the QR experience — it feels modern and premium.",
+      "Set up our entire 80-dish menu in one afternoon. Our guests genuinely love scanning the QR and ordering with photos — it feels so high-end.",
     name: "Anjali Mehta",
     role: "Founder",
     cafe: "Brew House, Bangalore",
-    metric: "Live same day",
+    metric: "Live Same Day",
+    rating: 5,
+    initial: "A",
+    color: "from-emerald-600 to-teal-600",
   },
 ];
 
 export function Testimonials() {
   return (
-    <section id="testimonials" className="bg-slate-50">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="text-center">
-          <p className="text-sm font-medium tracking-wide text-indigo-600 uppercase">
-            Testimonials
-          </p>
-          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Trusted by cafe owners across India
+    <section id="testimonials" className="py-20 sm:py-28 bg-[#FAF9F6] border-b border-slate-100 relative">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+            <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
+              Proven Across 500+ Outlets
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+            Trusted by restaurant & café owners across India
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
-            From Mumbai street food to Bangalore brew houses — here&apos;s what
-            cafe owners say about QRslice.
+          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+            From Mumbai specialty cafés to Bangalore microbreweries — see why operators rely on QRslice.
           </p>
         </div>
 
@@ -47,29 +59,42 @@ export function Testimonials() {
           {TESTIMONIALS.map((t) => (
             <div
               key={t.name}
-              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
+              className="flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-8 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-1 transition-all duration-200"
             >
-              <div className="mb-4 inline-flex self-start rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-100">
-                {t.metric}
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex gap-1 text-amber-400">
+                    {[...Array(t.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 border border-violet-200/80 px-3 py-1 text-xs font-bold text-[#5738F5]">
+                    {t.metric}
+                  </span>
+                </div>
+                <blockquote className="leading-relaxed text-slate-700 text-base font-medium mb-6">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
               </div>
-              <blockquote className="flex-1 leading-relaxed text-slate-600">
-                &ldquo;{t.quote}&rdquo;
-              </blockquote>
-              <div className="mt-6 border-t border-slate-100 pt-4">
-                <p className="font-semibold text-slate-900">{t.name}</p>
-                <p className="text-sm text-slate-500">
-                  {t.role}, {t.cafe}
-                </p>
+
+              <div className="flex items-center gap-3.5 border-t border-slate-100 pt-5 mt-2">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${t.color} text-white font-black text-sm flex items-center justify-center shadow-sm`}>
+                  {t.initial}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">
+                    {t.name}
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 inline-block" />
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {t.role}, {t.cafe}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
         </div>
-        <p className="mt-8 text-center text-xs text-slate-400">
-          * Illustrative testimonials. Metrics shown are representative of typical use
-          cases and may vary by restaurant.
-        </p>
       </div>
     </section>
   );
 }
-

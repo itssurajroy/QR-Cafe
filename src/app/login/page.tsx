@@ -41,9 +41,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-indigo-600/20 group-hover:scale-105 transition-transform">
-              ☕
-            </div>
+            <img src="/favicon.png" alt="QRslice" className="w-11 h-11 object-contain rounded-xl shadow-md group-hover:scale-105 transition-transform" />
             <span className="text-2xl font-black tracking-tight text-slate-900">QRslice</span>
           </Link>
           <p className="text-slate-500 text-sm mt-2">Sign in to your staff or admin terminal</p>

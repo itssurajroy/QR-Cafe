@@ -40,7 +40,7 @@ export default async function NamedCafeTablePage({
 
   if (!tenant || !table || !table.active) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-6 selection:bg-indigo-600 selection:text-white">
+      <main className="min-h-screen bg-[#FAF9F6] text-slate-900 flex items-center justify-center p-6 font-[family-name:var(--font-plus-jakarta)] selection:bg-[#5738F5] selection:text-white">
         <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-md w-full text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 rounded-3xl bg-red-100 border border-red-200 text-red-600 flex items-center justify-center text-3xl mx-auto">
             ⚠️
@@ -64,7 +64,7 @@ export default async function NamedCafeTablePage({
 
   if (!canOrder(tenant)) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-6 selection:bg-indigo-600 selection:text-white">
+      <main className="min-h-screen bg-[#FAF9F6] text-slate-900 flex items-center justify-center p-6 font-[family-name:var(--font-plus-jakarta)] selection:bg-[#5738F5] selection:text-white">
         <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-md w-full text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 rounded-3xl bg-amber-100 border border-amber-200 text-amber-600 flex items-center justify-center text-3xl mx-auto">
             ☕

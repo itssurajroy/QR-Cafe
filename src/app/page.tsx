@@ -1,14 +1,12 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
-import { TrustBar } from "@/components/landing/TrustBar";
-import { ProblemSolution } from "@/components/landing/ProblemSolution";
-import { ProductFlow } from "@/components/landing/ProductFlow";
-import { DemoPitch } from "@/components/landing/DemoPitch";
-import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Intro } from "@/components/landing/Intro";
 import { Features } from "@/components/landing/Features";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { Statement } from "@/components/landing/Statement";
 import { Pricing } from "@/components/landing/Pricing";
-import { Differentiation } from "@/components/landing/Differentiation";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
@@ -57,34 +55,26 @@ const JSON_LD = [
     mainEntity: [
       {
         "@type": "Question",
+        name: "Do guests need to download an app?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "No. QRslice opens in the guest’s browser, so they can scan, browse, and order in seconds without an app or account.",
+        },
+      },
+      {
+        "@type": "Question",
         name: "What hardware do I need?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Any phone, tablet, or laptop with a browser works. For KOT/bill printing, a Bluetooth thermal printer (58mm or 80mm). For KDS, a tablet or TV in the kitchen. No expensive POS hardware required.",
+          text: "Any phone, tablet, or laptop with a browser works. Add a Bluetooth thermal printer for KOTs or a tablet / TV for the kitchen display.",
         },
       },
       {
         "@type": "Question",
-        name: "Can I use my existing printer or tablet?",
+        name: "Can I use my existing POS?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. QrSlice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What plans are available?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "One complete plan: ₹999/month per outlet (or ₹9,999/year), with QR ordering, KDS, stock and recipes, full POS, analytics, API access, and priority support. All prices per outlet, GST extra.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How do customers pay?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Cash at counter, UPI QR codes, and online payments via Razorpay. Customers choose their preferred method at checkout.",
+          text: "Yes. QRslice is designed to sit alongside your current setup, with exports, webhooks, and a flexible API for the workflows you already trust.",
         },
       },
       {
@@ -92,31 +82,15 @@ const JSON_LD = [
         name: "How long does setup take?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Most cafes are live within 30 minutes. Add your menu items, print the QR codes for each table, and you're ready. No developer or technical knowledge required.",
+          text: "Most cafés can go live in around 30 minutes. Import your menu, print table QR codes, and invite your team.",
         },
       },
       {
         "@type": "Question",
-        name: "Do customers need to download an app?",
+        name: "What happens after the free trial?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "No. Customers scan the QR code with their phone camera and the menu opens directly in their browser. Works on Android, iOS, and any phone with a camera.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Can I use QrSlice alongside my existing POS?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. Many cafes use QrSlice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What happens to my data if I cancel?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Your data is yours. Export your menu, orders, and customer data anytime. We don't hold your data hostage.",
+          text: "You get the full system for 14 days with no credit card required. Continue for ₹999 per month per outlet, or cancel anytime.",
         },
       },
     ],
@@ -126,11 +100,12 @@ const JSON_LD = [
 export default async function LandingPage() {
   const { getContent } = await import("@/lib/content");
   const faq = await getContent<{ q: string; a: string }[]>("cms.faq", []);
+  
   return (
-    <div className="landing-page min-h-screen">
+    <div className="landing-page min-h-screen font-[family-name:var(--font-plus-jakarta)] bg-[#FAF9F6] text-slate-900 selection:bg-[#5738F5] selection:text-white">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-[#5738F5] focus:px-4 focus:py-2 focus:text-white focus:ring-2 focus:ring-[#EEEAFE]"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-[#5738F5] focus:px-4 focus:py-2 focus:text-white focus:ring-2 focus:ring-[#5738F5]/20"
       >
         Skip to main content
       </a>
@@ -138,22 +113,41 @@ export default async function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
+      
+      {/* 1. Header */}
       <Navbar />
+      
       <main id="main-content">
+        {/* 2. Hero Section */}
         <Hero />
-        <TrustBar />
-        <ProblemSolution />
-        <ProductFlow />
-        <DemoPitch />
-        <HowItWorks />
+        
+        {/* 3. Platform Introduction */}
+        <Intro />
+        
+        {/* 4. Features Grid */}
         <Features />
+        
+        {/* 5. How It Works */}
+        <HowItWorks />
+        
+        {/* 6. Testimonials */}
+        <Testimonials />
+
+        {/* 7. Statement */}
+        <Statement />
+        
+        {/* 8. Pricing */}
         <Pricing />
-        <Differentiation />
+        
+        {/* 9. FAQ */}
         <FAQ items={faq} />
+        
+        {/* 10. Final CTA */}
         <CTA />
       </main>
+      
+      {/* 11. Footer */}
       <Footer />
     </div>
   );
 }
-

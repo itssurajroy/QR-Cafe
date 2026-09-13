@@ -1,98 +1,98 @@
-// Copyright (c) 2026 QRslice. All rights reserved.
+import React from "react";
+import { ClipboardList, QrCode, Rocket } from "lucide-react";
+
+const STEPS = [
+  {
+    number: "01",
+    icon: ClipboardList,
+    title: "Set up your menu",
+    description:
+      "Add dishes with photos, prices, veg/non-veg marks, and descriptions. Organize by category. Takes about 15 minutes.",
+    color: "bg-amber-50 border-amber-200/60",
+    accentColor: "text-amber-700",
+    iconBg: "bg-amber-100",
+    numberColor: "text-amber-300",
+  },
+  {
+    number: "02",
+    icon: QrCode,
+    title: "Print table QR codes",
+    description:
+      "Generate and print unique QR codes for each table. Stick them on standees, table tents, or placemats.",
+    color: "bg-violet-50 border-violet-200/60",
+    accentColor: "text-violet-700",
+    iconBg: "bg-violet-100",
+    numberColor: "text-violet-300",
+  },
+  {
+    number: "03",
+    icon: Rocket,
+    title: "Go live.",
+    description:
+      "Guests scan and order. Kitchen gets live tickets. You watch orders, revenue, and analytics flow in real-time.",
+    color: "bg-emerald-50 border-emerald-200/60",
+    accentColor: "text-emerald-700",
+    iconBg: "bg-emerald-100",
+    numberColor: "text-emerald-300",
+  },
+];
+
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-[#EEEAFE]">
-      <div className="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#5738F5] mb-3">
-            Kitchen OS
-          </p>
-          <h2 className="text-[30px] font-extrabold text-[#17142B] sm:text-[42px] leading-[1.1]">
-            Orders that reach the kitchen instantly.
+    <section id="how-it-works" className="py-24 sm:py-32 bg-white relative overflow-hidden border-y border-slate-100">
+      {/* Background ambient gradient accents */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-violet-50/60 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+            <Rocket className="w-4 h-4 text-[#5738F5]" />
+            <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
+              30-Minute Launch
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+            Live in <span className="text-[#5738F5]">three steps</span>. Not three months.
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-[#6F7185] sm:text-lg">
-            No paper chits, no shouting across the room. Every order flows to the right station.
+          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+            No expensive hardware to buy, no proprietary terminals, no technician visits needed.
           </p>
         </div>
 
-        {/* Kitchen Display Mockup */}
-        <div className="max-w-3xl mx-auto">
-          <div className="rounded-[24px] border border-[#E7E4F0] bg-white p-1 shadow-[0_20px_60px_rgba(23,20,43,0.08)]">
-            {/* KDS header bar */}
-            <div className="rounded-t-[20px] bg-[#17142B] px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                </div>
-                <span className="text-xs font-bold text-white/60" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>
-                  KITCHEN DISPLAY
-                </span>
-              </div>
-              <span className="rounded-[999px] bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>
-                ● LIVE
-              </span>
-            </div>
-
-            {/* KDS content */}
-            <div className="rounded-b-[20px] bg-white p-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {/* New order */}
-                <div className="rounded-[16px] border-2 border-[#5738F5] bg-[#EEEAFE] p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="rounded-[999px] bg-[#5738F5] px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>NEW</span>
-                    <span className="text-xs font-bold text-[#6F7185]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>02:41</span>
-                  </div>
-                  <p className="text-sm font-bold text-[#17142B] mb-1" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>TABLE 08</p>
-                  <p className="text-xs text-[#6F7185] mb-3" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>ORDER #1842 · 2 ITEMS</p>
-                  <div className="space-y-1.5 mb-4">
-                    <p className="text-sm text-[#17142B]">Butter Chicken</p>
-                    <p className="text-sm text-[#17142B]">Garlic Naan × 2</p>
-                  </div>
-                  <button type="button" className="w-full rounded-[10px] bg-[#5738F5] py-2.5 text-xs font-semibold text-white">
-                    Accept
-                  </button>
+        {/* Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
+          {STEPS.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <div
+                key={i}
+                className="relative p-8 rounded-3xl bg-[#FAF9F6] border border-slate-200/90 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:bg-white hover:border-[#5738F5]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+              >
+                {/* Large step number watermark */}
+                <div className="absolute top-4 right-6 text-6xl font-black text-slate-200 font-[family-name:var(--font-plus-jakarta)] select-none pointer-events-none">
+                  {step.number}
                 </div>
 
-                {/* Preparing */}
-                <div className="rounded-[16px] border border-[#E7E4F0] bg-white p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="rounded-[999px] bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-700" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>PREPARING</span>
-                    <span className="text-xs font-bold text-[#6F7185]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>05:12</span>
+                <div>
+                  <div className={`w-14 h-14 rounded-2xl ${step.iconBg} flex items-center justify-center mb-6 relative z-10 border border-black/[0.04]`}>
+                    <Icon className={`w-7 h-7 ${step.accentColor}`} />
                   </div>
-                  <p className="text-sm font-bold text-[#17142B] mb-1" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>TABLE 03</p>
-                  <p className="text-xs text-[#6F7185] mb-3" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>ORDER #1839 · 3 ITEMS</p>
-                  <div className="space-y-1.5 mb-4">
-                    <p className="text-sm text-[#17142B]">Masala Chai × 2</p>
-                    <p className="text-sm text-[#17142B]">Samosa × 1</p>
-                  </div>
-                  <button type="button" className="w-full rounded-[10px] border border-[#E7E4F0] bg-white py-2.5 text-xs font-semibold text-[#17142B]">
-                    Mark Ready
-                  </button>
-                </div>
 
-                {/* Ready */}
-                <div className="rounded-[16px] border border-emerald-200 bg-emerald-50 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="rounded-[999px] bg-emerald-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>READY</span>
-                    <span className="text-xs font-bold text-[#6F7185]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>08:30</span>
-                  </div>
-                  <p className="text-sm font-bold text-[#17142B] mb-1" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>TABLE 01</p>
-                  <p className="text-xs text-[#6F7185] mb-3" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>ORDER #1836 · 1 ITEM</p>
-                  <div className="space-y-1.5 mb-4">
-                    <p className="text-sm text-[#17142B]">Cold Coffee</p>
-                  </div>
-                  <button type="button" className="w-full rounded-[10px] bg-emerald-500 py-2.5 text-xs font-semibold text-white">
-                    Served ✓
-                  </button>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3 font-[family-name:var(--font-plus-jakarta)] relative z-10">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed relative z-10">
+                    {step.description}
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
-

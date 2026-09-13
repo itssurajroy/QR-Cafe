@@ -1,134 +1,367 @@
-// Copyright (c) 2026 QRslice. All rights reserved.
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import { getContent } from "@/lib/content";
+import {
+  ArrowRight,
+  Monitor,
+  Smartphone,
+  LayoutDashboard,
+  Sparkles,
+} from "lucide-react";
 
-const DEFAULTS = {
-  eyebrow: "QR ordering made simple.",
-  headlineA: "Your table is now your",
-  headlineB: "ordering counter.",
-  sub: "Guests scan, browse, order and pay from their phone. Your kitchen gets the order instantly.",
-  primaryCta: "Start free",
-  secondaryCta: "See how it works",
-  trustLine: "No credit card required · Live in 30 minutes · Cancel anytime",
-  pills: [
-    "QR Ordering",
-    "Kitchen Display",
-    "Digital Menu",
-    "Inventory & POS",
-  ],
-};
+const TABS = [
+  {
+    id: "guest",
+    label: "Guest Menu",
+    icon: Smartphone,
+    description: "What your guests see when they scan",
+    gradient: "from-amber-50 to-orange-50",
+    border: "border-amber-200/60",
+    accentText: "text-amber-700",
+    accentBg: "bg-amber-100",
+  },
+  {
+    id: "kitchen",
+    label: "Kitchen Display",
+    icon: Monitor,
+    description: "Real-time KDS for your kitchen team",
+    gradient: "from-emerald-50 to-teal-50",
+    border: "border-emerald-200/60",
+    accentText: "text-emerald-700",
+    accentBg: "bg-emerald-100",
+  },
+  {
+    id: "dashboard",
+    label: "Owner Dashboard",
+    icon: LayoutDashboard,
+    description: "Revenue, analytics, full control",
+    gradient: "from-violet-50 to-indigo-50",
+    border: "border-violet-200/60",
+    accentText: "text-violet-700",
+    accentBg: "bg-violet-100",
+  },
+];
 
-export async function Hero() {
-  const c = await getContent("cms.hero", DEFAULTS);
-  const pills = c.pills?.length ? c.pills : DEFAULTS.pills;
+export function Hero() {
+  const [activeTab, setActiveTab] = useState("guest");
+
+  const currentTab = TABS.find((t) => t.id === activeTab)!;
 
   return (
-    <section className="relative overflow-hidden bg-white pt-16 pb-20 sm:pt-24 sm:pb-28">
-      {/* Subtle lavender ambient glow */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[#EEEAFE] opacity-50 blur-[120px]" />
+    <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden bg-gradient-to-b from-white via-[#FAF9F6] to-white">
+      {/* Background decorative elements - clean light tones, no blur glass */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-violet-100/40 rounded-full blur-[100px]" />
+        <div className="absolute top-36 right-[-100px] w-[500px] h-[500px] bg-amber-100/40 rounded-full blur-[90px]" />
       </div>
 
-      <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          {/* Eyebrow */}
-          <p className="inline-flex items-center gap-2 rounded-[999px] border border-[#E7E4F0] bg-[#EEEAFE] px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#5738F5]">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-[#5738F5]" />
-            {c.eyebrow}
-          </p>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Column: Copy */}
+          <div className="max-w-xl">
+            {/* Trust Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-6 shadow-sm">
+              <Sparkles className="w-4 h-4 text-[#5738F5]" />
+              <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
+                Built for Indian Cafés & Restaurants
+              </span>
+            </div>
 
-          {/* Headline — 64px desktop, 40px mobile */}
-          <h1 className="mt-6 text-[40px] font-extrabold tracking-tight text-[#17142B] sm:text-[56px] lg:text-[64px] leading-[1.05]">
-            {c.headlineA}{" "}
-            <span className="text-[#5738F5]">
-              {c.headlineB}
-            </span>
-          </h1>
+            <h1 className="text-[2.75rem] sm:text-[3.5rem] lg:text-[4rem] font-extrabold leading-[1.05] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-6">
+              QR ordering,{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10 text-[#5738F5]">without the chaos.</span>
+                <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#5738F5]/30" viewBox="0 0 200 12" preserveAspectRatio="none">
+                  <path d="M0 8 Q50 0 100 8 Q150 16 200 8" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                </svg>
+              </span>
+            </h1>
 
-          {/* Sub-headline */}
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#6F7185] sm:text-xl">
-            {c.sub}
-          </p>
+            <p className="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed mb-8 max-w-lg">
+              Guests scan and order from their phone. Kitchen gets instant live tickets.
+              You watch revenue grow — from any phone, tablet, or counter.
+            </p>
 
-          {/* CTAs */}
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link
-              href="/onboarding"
-              className="inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#5738F5] px-8 py-4 text-base font-semibold text-white shadow-[0_8px_30px_rgba(87,56,245,0.25)] transition-all duration-150 hover:bg-[#4328D9] hover:shadow-[0_12px_40px_rgba(87,56,245,0.3)] active:scale-[0.98]"
-            >
-              {c.primaryCta}
-            </Link>
-            <a
-              href="#how-it-works"
-              className="inline-flex items-center justify-center gap-1 rounded-[12px] border border-[#E7E4F0] bg-white px-8 py-4 text-base font-semibold text-[#17142B] transition-all duration-150 hover:border-[#5738F5] hover:text-[#5738F5]"
-            >
-              {c.secondaryCta}
-              <span className="text-[#5738F5]">→</span>
-            </a>
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <Link
+                href="/onboarding"
+                className="group px-8 py-4 bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:from-[#4828E0] hover:to-[#6D28D9] text-white font-bold rounded-2xl text-base flex items-center justify-center gap-2.5 shadow-lg shadow-[#5738F5]/25 hover:shadow-xl hover:shadow-[#5738F5]/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+              >
+                Start Free — 14 Days
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/c/wah-ji-wah"
+                className="px-7 py-4 text-slate-800 bg-white font-bold rounded-2xl text-base border-2 border-slate-200/90 hover:border-[#5738F5]/40 hover:bg-violet-50/50 hover:text-[#5738F5] transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                See Live Demo
+              </Link>
+            </div>
+
+            {/* Trust line */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 text-sm text-slate-600 font-medium">
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                No credit card
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                Zero app downloads
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                30-min setup
+              </span>
+            </div>
           </div>
 
-          {/* Trust line */}
-          <p className="mt-5 text-sm font-medium text-[#6F7185]">
-            {c.trustLine}
-          </p>
+          {/* Right Column: Tabbed Product Preview (Clean Solid Surfaces) */}
+          <div className="relative">
+            {/* Tabs */}
+            <div className="flex gap-2 mb-4 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/70 w-fit">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? "bg-white text-slate-900 shadow-sm border border-slate-200/80"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? tab.accentText : "text-slate-500"}`} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Removed Built */}
-        </div>
-
-        {/* Product visual — right side on desktop */}
-        <div className="mt-16 lg:absolute lg:right-8 lg:top-1/2 lg:-translate-y-1/2 lg:mt-0 lg:w-[420px]">
-          <div className="rounded-[24px] border border-[#E7E4F0] bg-white p-1 shadow-[0_20px_60px_rgba(23,20,43,0.08)]">
-            {/* Mini product mockup: table → phone → kitchen */}
-            <div className="rounded-[20px] bg-[#EEEAFE] p-6 space-y-4">
-              {/* Table QR */}
-              <div className="flex items-center gap-3 rounded-[16px] bg-white p-4 shadow-[0_4px_16px_rgba(23,20,43,0.04)]">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#EEEAFE]">
-                  <svg className="h-5 w-5 text-[#5738F5]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625v4.5m3.375-6.75v6.75m3.375-4.5v4.5" /></svg>
+            {/* Preview Window (Solid White + Refined Ambient Shadow) */}
+            <div
+              className="relative rounded-3xl border-2 border-slate-200 bg-white shadow-[0_20px_50px_-15px_rgba(15,23,42,0.12),0_0_0_1px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300"
+            >
+              {/* Window Header */}
+              <div className="flex items-center gap-2 px-5 py-3.5 bg-slate-50 border-b border-slate-200/80">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-rose-400" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
                 </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#6F7185]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>SCAN</p>
-                  <p className="text-sm font-semibold text-[#17142B]">Guest scans table QR</p>
+                <div className="flex-1 text-center text-xs font-bold text-slate-500 tracking-wide">
+                  {currentTab.description}
                 </div>
               </div>
 
-              {/* Phone order */}
-              <div className="flex items-center gap-3 rounded-[16px] bg-white p-4 shadow-[0_4px_16px_rgba(23,20,43,0.04)]">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#EEEAFE]">
-                  <svg className="h-5 w-5 text-[#5738F5]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#6F7185]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>ORDER</p>
-                  <p className="text-sm font-semibold text-[#17142B]">Browse menu &amp; place order</p>
-                </div>
-              </div>
+              {/* Content Area */}
+              <div className="bg-white min-h-[380px] sm:min-h-[420px] relative overflow-hidden">
+                {/* Guest Menu Preview */}
+                {activeTab === "guest" && (
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-black text-base shadow-sm">
+                          W
+                        </div>
+                        <div>
+                          <div className="font-bold text-sm text-slate-900">WAH JI WAH</div>
+                          <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                            Table 04 • Live Kitchen
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/60">
+                        Guest View
+                      </span>
+                    </div>
 
-              {/* Kitchen ticket */}
-              <div className="flex items-center gap-3 rounded-[16px] bg-white p-4 shadow-[0_4px_16px_rgba(23,20,43,0.04)] border-l-4 border-[#5738F5]">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#EEEAFE]">
-                  <svg className="h-5 w-5 text-[#5738F5]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.547 5.975 5.975 0 01-2.133-1.001A3.75 3.75 0 0012 18z" /></svg>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#6F7185]" style={{ fontFamily: 'var(--font-dm-mono), monospace' }}>KITCHEN</p>
-                  <p className="text-sm font-semibold text-[#17142B]">Ticket reaches kitchen instantly</p>
-                </div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      🔥 Chef&apos;s Signature Picks
+                    </div>
+
+                    {[
+                      { name: "Butter Chicken", price: "₹380", veg: false, tag: "Bestseller", desc: "Tandoori chicken in rich makhani gravy" },
+                      { name: "Paneer Tikka", price: "₹280", veg: true, tag: "Popular", desc: "Charcoal grilled cottage cheese cubes" },
+                      { name: "Garlic Butter Naan", price: "₹65", veg: true, desc: "Crisp clay oven bread brushed with garlic" },
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FAF9F6] border border-slate-200/80 hover:border-amber-300 hover:bg-amber-50/20 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center shrink-0 mt-0.5 ${
+                              item.veg ? "border-emerald-600" : "border-rose-600"
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                item.veg ? "bg-emerald-600" : "bg-rose-600"
+                              }`}
+                            />
+                          </span>
+                          <div>
+                            <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                              {item.name}
+                              {item.tag && (
+                                <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded">
+                                  {item.tag}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-slate-500">{item.desc}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0 ml-2">
+                          <span className="text-sm font-bold text-slate-900">{item.price}</span>
+                          <button className="px-3 py-1 text-xs font-bold text-[#5738F5] bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-xl transition-colors cursor-pointer">
+                            + ADD
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Order Bar - Warm Amber/Orange, NOT dark! */}
+                    <div className="mt-4 p-3.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl flex items-center justify-between shadow-md shadow-amber-600/20">
+                      <div>
+                        <span className="text-xs font-medium text-amber-100">2 items in order</span>
+                        <span className="font-extrabold ml-2 text-base">₹445</span>
+                      </div>
+                      <span className="text-xs font-bold bg-white text-orange-700 px-4 py-1.5 rounded-xl shadow-sm">
+                        Place Order →
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Kitchen Display Preview - Crisp Light KDS, NO DARK! */}
+                {activeTab === "kitchen" && (
+                  <div className="p-5 bg-slate-50 min-h-[380px] sm:min-h-[420px] space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+                        <span className="text-xs font-extrabold text-slate-800 tracking-wider">
+                          LIVE KITCHEN DISPLAY (KDS)
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200">
+                        2 Active Tickets
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3.5">
+                      {/* Ticket 1 */}
+                      <div className="bg-white rounded-2xl border-2 border-blue-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div>
+                          <div className="bg-blue-600 px-3 py-2 text-white flex items-center justify-between">
+                            <span className="font-black text-sm">TABLE T-04</span>
+                            <span className="text-[11px] font-bold bg-blue-700/80 px-2 py-0.5 rounded">
+                              2 min ago
+                            </span>
+                          </div>
+                          <div className="p-3 space-y-2">
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                              <span>1× Butter Chicken</span>
+                              <span className="text-slate-400">Main</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                              <span>2× Garlic Naan</span>
+                              <span className="text-slate-400">Bread</span>
+                            </div>
+                            <div className="text-[11px] font-medium text-amber-700 bg-amber-50 p-1.5 rounded border border-amber-100">
+                              Note: Medium spicy, crisp bread
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-2.5 bg-slate-50 border-t border-slate-100">
+                          <div className="w-full py-1.5 text-center text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg">
+                            Mark Cooking
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Ticket 2 */}
+                      <div className="bg-white rounded-2xl border-2 border-amber-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div>
+                          <div className="bg-amber-600 px-3 py-2 text-white flex items-center justify-between">
+                            <span className="font-black text-sm">TABLE T-12</span>
+                            <span className="text-[11px] font-bold bg-amber-700/80 px-2 py-0.5 rounded">
+                              8 min ago
+                            </span>
+                          </div>
+                          <div className="p-3 space-y-2">
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                              <span>2× Paneer Tikka</span>
+                              <span className="text-slate-400">Starters</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                              <span>1× Dal Makhani</span>
+                              <span className="text-slate-400">Gravy</span>
+                            </div>
+                            <div className="text-[11px] font-bold text-emerald-700 bg-emerald-50 p-1.5 rounded border border-emerald-100 flex items-center gap-1">
+                              <span>✓</span> Almost Ready
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-2.5 bg-slate-50 border-t border-slate-100">
+                          <div className="w-full py-1.5 text-center text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg">
+                            Ready to Serve
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Dashboard Preview */}
+                {activeTab === "dashboard" && (
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Today&apos;s Outlet Performance
+                      </span>
+                      <span className="text-xs font-bold text-[#5738F5] bg-violet-50 px-2.5 py-1 rounded-lg border border-violet-200/60">
+                        Live Sync
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { label: "Today's Revenue", value: "₹18,450", trend: "+14.5%", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
+                        { label: "Total Orders", value: "96", trend: "+8.2%", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
+                        { label: "Average Bill", value: "₹465", trend: "+5.1%", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
+                        { label: "Table Turn Time", value: "28 min", trend: "-12 min faster", color: "text-[#5738F5]", bg: "bg-violet-50 border-violet-100" },
+                      ].map((stat, i) => (
+                        <div key={i} className="p-3.5 bg-[#FAF9F6] rounded-2xl border border-slate-200/80">
+                          <div className="text-[11px] font-semibold text-slate-500">{stat.label}</div>
+                          <div className="text-xl font-black text-slate-900 mt-1 font-[family-name:var(--font-plus-jakarta)]">
+                            {stat.value}
+                          </div>
+                          <div className={`text-[11px] font-bold ${stat.color} mt-0.5 inline-block px-1.5 py-0.2 rounded`}>
+                            {stat.trend}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-3.5 bg-violet-50/80 border border-violet-200/80 rounded-2xl flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold text-[#5738F5]">Top Selling Item</div>
+                        <div className="text-sm font-bold text-slate-900">Butter Chicken — 32 orders</div>
+                      </div>
+                      <div className="text-2xl">🏆</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Feature pills */}
-        <div className="mt-10 flex flex-wrap items-center gap-2">
-          {pills.map((pill) => (
-            <span
-              key={pill}
-              className="rounded-[999px] border border-[#E7E4F0] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#17142B]"
-            >
-              {pill}
-            </span>
-          ))}
         </div>
       </div>
     </section>
   );
 }
-

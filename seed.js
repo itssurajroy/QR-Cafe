@@ -76,12 +76,14 @@ async function run() {
   }
 
   // Insert items
-  let sortOrder = 1;
   for (const item of ITEMS) {
     const catId = catMap.get(item.cat);
-    if (!catId) continue;
+    if (!catId) {
+      console.warn("No category found for:", item.cat);
+      continue;
+    }
 
-    await supabase.from("menu_items").insert({
+    const { error: itemErr } = await supabase.from("menu_items").insert({
       restaurant_id: rId,
       category_id: catId,
       name: item.name,
@@ -89,9 +91,14 @@ async function run() {
       price_paise: item.price,
       is_veg: item.is_veg,
       image_url: item.img || null,
-      sort_order: sortOrder++,
       available: true
     });
+
+    if (itemErr) {
+      console.error("Error inserting", item.name, itemErr);
+    } else {
+      console.log("Inserted:", item.name);
+    }
   }
 
   console.log("Wah Ji Wah menu seeded successfully.");

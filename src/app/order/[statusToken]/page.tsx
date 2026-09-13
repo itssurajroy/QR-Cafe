@@ -1,8 +1,9 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   CheckCircleIcon,
   SparklesIcon,
@@ -65,6 +66,10 @@ export default function OrderStatusPage({
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [prevStatus, setPrevStatus] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
+  const loyaltyEarned = searchParams.get("earned");
+  const loyaltyTotal = searchParams.get("total");
 
   // Time Elapsed Counter
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
@@ -251,9 +256,9 @@ export default function OrderStatusPage({
   const progressPercent = Math.min(100, Math.round(((currentIdx + 1) / STEPS.length) * 100));
 
   return (
-    <main className="min-h-screen bg-[#F5F5F7] text-slate-900 p-4 sm:p-6 flex flex-col items-center justify-start overflow-y-auto font-sans antialiased selection:bg-indigo-600 selection:text-white">
-      {/* Apple Dynamic Island Style Floating Island Card */}
-      <div className="max-w-md w-full bg-white border border-black/[0.06] rounded-3xl p-5 sm:p-6 shadow-xl space-y-6 my-auto relative overflow-hidden">
+    <main className="min-h-screen bg-[#FAF9F6] text-slate-900 p-4 sm:p-6 flex flex-col items-center justify-start overflow-y-auto font-[family-name:var(--font-plus-jakarta)] antialiased selection:bg-[#5738F5] selection:text-white">
+      {/* Dynamic Island Style Card */}
+      <div className="max-w-md w-full bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xl space-y-6 my-auto relative overflow-hidden">
         {/* Top Header with Table Badge & Payment Pill */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div>
@@ -490,7 +495,7 @@ export default function OrderStatusPage({
       {/* POPUP MODAL FEEDBACK DIALOG WITH GOOGLE REVIEWS */}
       {showFeedbackModal && (
         <div
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
           onClick={() => {
             setShowFeedbackModal(false);
             setDismissedModal(true);

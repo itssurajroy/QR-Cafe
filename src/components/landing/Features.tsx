@@ -1,78 +1,150 @@
-// Copyright (c) 2026 QRslice. All rights reserved.
-const CARDS = [
+import React from "react";
+import {
+  QrCode,
+  ChefHat,
+  Grid2X2,
+  UtensilsCrossed,
+  LineChart,
+  Locate,
+  Users,
+  Package,
+  Heart,
+} from "lucide-react";
+
+const FEATURES = [
   {
-    title: "QR Ordering",
-    icon: "📱",
-    description: "Guests scan, browse, and order from their phone. No app download needed.",
+    icon: QrCode,
+    title: "QR Table Ordering",
+    tag: "Zero App",
+    description: "Guests scan, browse with high-res food photos, and order in 30 seconds. No app, no signup.",
+    iconColor: "text-amber-600",
+    iconBg: "bg-amber-100/80",
+    tagColor: "bg-amber-50 text-amber-800 border-amber-200/80",
   },
   {
-    title: "Digital Menu",
-    icon: "📋",
-    description: "Beautiful menus with photos, prices, and dietary tags. Update instantly.",
+    icon: ChefHat,
+    title: "Kitchen Display (KDS)",
+    tag: "Zero Paper",
+    description: "Live order tickets on tablets or screens. Color-coded timers. Tap to prep, tap to serve.",
+    iconColor: "text-emerald-600",
+    iconBg: "bg-emerald-100/80",
+    tagColor: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
   },
   {
-    title: "Kitchen Display",
-    icon: "🍳",
-    description: "Orders appear in real time with table numbers, items, and status tracking.",
+    icon: Grid2X2,
+    title: "Table & Floor Control",
+    tag: "Live Floor",
+    description: "Visual floor grid. See who's seated, whose food is cooking, and who needs the bill at a single glance.",
+    iconColor: "text-[#5738F5]",
+    iconBg: "bg-violet-100/80",
+    tagColor: "bg-violet-50 text-[#5738F5] border-violet-200/80",
   },
   {
-    title: "Table Management",
-    icon: "🪑",
-    description: "See which tables are active, waiting, or available at a glance.",
+    icon: UtensilsCrossed,
+    title: "Instant Menu Builder",
+    tag: "Real-time",
+    description: "Add dishes with photos, veg/non-veg tags, spice levels, and variants. Changes go live across all tables instantly.",
+    iconColor: "text-rose-600",
+    iconBg: "bg-rose-100/80",
+    tagColor: "bg-rose-50 text-rose-800 border-rose-200/80",
   },
   {
-    title: "Menu Management",
-    icon: "✏️",
-    description: "Add items, set availability, organise categories. Changes go live instantly.",
+    icon: Locate,
+    title: "Live Order Tracking",
+    tag: "Guest Delight",
+    description: "Guests track status from Placed → Cooking → Ready → Served directly in their phone browser.",
+    iconColor: "text-sky-600",
+    iconBg: "bg-sky-100/80",
+    tagColor: "bg-sky-50 text-sky-800 border-sky-200/80",
   },
   {
-    title: "Inventory",
-    icon: "📦",
-    description: "Auto-deduct ingredients. Low-stock alerts. Recipe-based stock control.",
+    icon: LineChart,
+    title: "Analytics & Revenue",
+    tag: "Insights",
+    description: "Revenue trends, best-selling dishes, peak dining hours, and average ticket size in one clean dashboard.",
+    iconColor: "text-indigo-600",
+    iconBg: "bg-indigo-100/80",
+    tagColor: "bg-indigo-50 text-indigo-800 border-indigo-200/80",
   },
   {
-    title: "Billing",
-    icon: "🧾",
-    description: "GST invoicing, split bills, discounts, and Bluetooth KOT printing.",
+    icon: Heart,
+    title: "Loyalty & CRM",
+    tag: "Repeat Visits",
+    description: "Guests collect points per order with just a phone number. Staff redeems discounts at counter.",
+    iconColor: "text-pink-600",
+    iconBg: "bg-pink-100/80",
+    tagColor: "bg-pink-50 text-pink-800 border-pink-200/80",
   },
   {
-    title: "Analytics",
-    icon: "📊",
-    description: "Revenue, popular items, peak hours, and order trends in one dashboard.",
+    icon: Users,
+    title: "Staff Roles & Access",
+    tag: "Security",
+    description: "Granular roles: kitchen staff, counter biller, manager, or owner. Pin-based fast access.",
+    iconColor: "text-teal-600",
+    iconBg: "bg-teal-100/80",
+    tagColor: "bg-teal-50 text-teal-800 border-teal-200/80",
+  },
+  {
+    icon: Package,
+    title: "Inventory & Recipes",
+    tag: "Low Stock Alert",
+    description: "Track raw ingredient stock, deduce quantities per dish ordered, and get automated low-stock alerts.",
+    iconColor: "text-orange-600",
+    iconBg: "bg-orange-100/80",
+    tagColor: "bg-orange-50 text-orange-800 border-orange-200/80",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="bg-white">
-      <div className="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#5738F5] mb-3">Platform</p>
-          <h2 className="text-[30px] font-extrabold text-[#17142B] sm:text-[42px] leading-[1.1]">
-            Everything your café needs.
+    <section id="features" className="py-20 sm:py-28 bg-[#FAF9F6] relative">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+            <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
+              Complete Restaurant Suite
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+            Everything your restaurant needs.{" "}
+            <span className="text-[#5738F5]">Nothing it doesn&apos;t.</span>
           </h2>
+          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+            Nine tightly-integrated modules designed specifically for high-volume cafés and restaurants in India.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {CARDS.map((card) => (
-            <div
-              key={card.title}
-              className="flex flex-col rounded-[20px] border border-[#E7E4F0] bg-white p-6 shadow-[0_8px_30px_rgba(23,20,43,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(23,20,43,0.08)]"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[#EEEAFE] text-2xl mb-5">
-                {card.icon}
+        {/* Feature Grid: 3×3 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((feature, i) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={i}
+                className="group relative p-7 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-[#5738F5]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className={`w-12 h-12 rounded-2xl ${feature.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                      <Icon className={`w-6 h-6 ${feature.iconColor}`} />
+                    </div>
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${feature.tagColor}`}>
+                      {feature.tag}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-[family-name:var(--font-plus-jakarta)]">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-base font-bold text-[#17142B] mb-2">
-                {card.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-[#6F7185]">
-                {card.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
-

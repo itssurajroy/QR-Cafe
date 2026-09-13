@@ -1,151 +1,96 @@
-// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-const FAQS = [
+const DEFAULT_FAQ = [
   {
-    question: "What hardware do I need?",
-    answer:
-      "Any phone, tablet, or laptop with a browser works. For KOT/bill printing, a Bluetooth thermal printer (58mm or 80mm). For KDS, a tablet or TV in the kitchen. No expensive POS hardware required.",
+    q: "Do guests need to download an app?",
+    a: "No. QRslice opens in the guest's browser, so they can scan, browse, and order in seconds without an app or account.",
   },
   {
-    question: "Can I use my existing printer or tablet?",
-    answer:
-      "Yes. QRslice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+    q: "What hardware do I need?",
+    a: "Any phone, tablet, or laptop with a browser works. Add a Bluetooth thermal printer for KOTs or a tablet/TV for the kitchen display.",
   },
   {
-    question: "What plans are available?",
-    answer:
-      "One complete plan: ₹999/month per outlet (or ₹9,999/year), with QR ordering, KDS, stock and recipes, full POS, analytics, API access, and priority support. All prices per outlet, GST extra. Every trial is the full system — no feature gates.",
+    q: "Can I use my existing POS?",
+    a: "Yes. QRslice is designed to sit alongside your current setup, with exports, webhooks, and a flexible API for the workflows you already trust.",
   },
   {
-    question: "How does the 14-day free trial work?",
-    answer:
-      "Every new café gets 14 days of the full system — QR ordering, KDS, stock, POS, everything. No credit card required to start. You'll see a countdown in your admin, and we'll email reminders before it ends.",
+    q: "How long does setup take?",
+    a: "Most cafés can go live in around 30 minutes. Import your menu, print table QR codes, and invite your team.",
   },
   {
-    question: "Do I need a credit card for the trial?",
-    answer:
-      "No. Start with just your email. You only pay when you choose to upgrade to the ₹999/month plan (or ₹9,999/year) after trying everything.",
+    q: "What happens after the free trial?",
+    a: "You get the full system for 14 days with no credit card required. Continue for ₹999 per month per outlet, or cancel anytime.",
   },
   {
-    question: "What happens when my trial ends?",
-    answer:
-      "Ordering pauses until you subscribe, but nothing is deleted — your menu, tables, and history stay safe. Upgrade from the billing page and you're live again instantly.",
-  },
-  {
-    question: "How do customers pay?",
-    answer:
-      "Cash at counter, UPI QR codes, and online payments via Razorpay. Customers choose their preferred method at checkout.",
-  },
-  {
-    question: "How long does setup take?",
-    answer:
-      "Most cafes are live within 30 minutes. Add your menu items, print the QR codes for each table, and you're ready. No developer or technical knowledge required.",
-  },
-  {
-    question: "Do customers need to download an app?",
-    answer:
-      "No. Customers scan the QR code with their phone camera and the menu opens directly in their browser. Works on Android, iOS, and any phone with a camera.",
-  },
-  {
-question: "Can I use QRslice alongside my existing POS?",
-    answer:
-      "Yes. Many cafes use QRslice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
-  },
-  {
-    question: "What happens to my data if I cancel?",
-    answer:
-      "Your data is yours. Export your menu, orders, and customer data anytime. We don't hold your data hostage.",
+    q: "Is my data secure?",
+    a: "Yes. QRslice uses industry-standard encryption, Supabase row-level security, and never shares your data with third parties.",
   },
 ];
 
-export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const faqs =
-    items && items.length > 0
-      ? items.map((f) => ({ question: f.q, answer: f.a }))
-      : FAQS;
-
-  function toggle(index: number) {
-    setOpenIndex(openIndex === index ? null : index);
-  }
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <section id="faq" className="bg-white">
-      <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <div className="border-b border-slate-100 last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between py-5 sm:py-6 text-left group cursor-pointer"
+      >
+        <span className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#5738F5] transition-colors pr-8">
+          {q}
+        </span>
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${open ? "bg-violet-50 text-[#5738F5]" : "text-slate-400 group-hover:bg-slate-100"}`}>
+          <ChevronDown
+            className={`w-4 h-4 transition-transform duration-200 ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+        </div>
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          open ? "max-h-[500px] pb-6" : "max-h-0"
+        }`}
+      >
+        <p className="text-sm sm:text-[15px] text-slate-600 font-medium leading-relaxed pr-8">
+          {a}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
+  const faqData = items && items.length > 0 ? items : DEFAULT_FAQ;
+
+  return (
+    <section id="faq" className="py-20 sm:py-28 bg-[#FAF9F6] border-y border-slate-100 relative">
+      <div className="max-w-3xl mx-auto px-5 sm:px-8">
+        {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#5738F5] mb-3">FAQ</p>
-          <h2 className="text-[30px] font-extrabold text-[#17142B] sm:text-[42px] leading-[1.1]">
-            Questions? Answered.
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+            <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
+              Answers & Clarifications
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+            Frequently asked questions
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-[#6F7185] sm:text-lg">
-            Can&apos;t find what you&apos;re looking for?{" "}
-            <a
-              href="mailto:support@qrslice.com"
-              className="font-semibold text-[#5738F5] underline decoration-[#EEEAFE] underline-offset-2 transition-colors hover:text-[#4328D9] hover:decoration-[#5738F5]"
-            >
-              Talk to us
-            </a>
-            .
+          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+            Everything you need to know about setting up and running QRslice.
           </p>
         </div>
 
-        <div className="divide-y divide-[#E7E4F0] border-t border-[#E7E4F0]">
-          {faqs.map((faq, index) => {
-            const panelId = `faq-panel-${index}`;
-            const buttonId = `faq-button-${index}`;
-            return (
-              <div key={faq.question}>
-                <button
-                  type="button"
-                  id={buttonId}
-                  className="flex w-full items-center justify-between py-5 text-left transition-colors duration-150 hover:text-[#5738F5]"
-                  onClick={() => toggle(index)}
-                  aria-expanded={openIndex === index}
-                  aria-controls={panelId}
-                >
-                  <span className="text-base font-semibold text-[#17142B]">
-                    {faq.question}
-                  </span>
-                  <svg
-                    className={`h-5 w-5 flex-shrink-0 text-[#6F7185] transition-transform duration-200 ${
-                      openIndex === index ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-                </button>
-                <div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  className={`overflow-hidden transition-[max-height,opacity] duration-200 ease-in-out ${
-                    openIndex === index
-                      ? "max-h-[500px] opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <p className="pb-5 text-sm leading-relaxed text-[#6F7185]">
-                    {faq.answer}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+        {/* Accordion */}
+        <div className="bg-white rounded-3xl border border-slate-200/90 px-6 sm:px-10 shadow-sm">
+          {faqData.map((item, i) => (
+            <FAQItem key={i} q={item.q} a={item.a} />
+          ))}
         </div>
       </div>
     </section>
   );
 }
-
