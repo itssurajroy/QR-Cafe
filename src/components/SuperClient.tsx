@@ -15,6 +15,7 @@ import { HealthTab } from '../features/super-admin/tabs/HealthTab';
 import { ContentTab } from '../features/super-admin/tabs/ContentTab';
 import { UsersTab } from '../features/super-admin/tabs/UsersTab';
 import { OrdersTab } from '../features/super-admin/tabs/OrdersTab';
+import { SettingsTab } from '../features/super-admin/tabs/SettingsTab';
 import { TenantSlideOver } from '../features/super-admin/overlays/TenantSlideOver';
 import { ProvisionTenantModal } from '../features/super-admin/overlays/ProvisionTenantModal';
 import { SuperClientProps } from '../features/super-admin/types';
@@ -36,7 +37,7 @@ function TabRenderer() {
     case 'billing': return <BillingTab />;
     case 'orders': return <OrdersTab />;
     case 'analytics': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
-    case 'settings': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'settings': return <SettingsTab />;
     case 'announcements': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
     case 'support': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
     case 'system-health': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
