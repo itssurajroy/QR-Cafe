@@ -78,7 +78,7 @@ export function SuperSidebar() {
               Monthly Recurring Rev
             </span>
             <div className="text-lg font-black text-indigo-600 font-mono">
-              ₹{kpis.mrr.toLocaleString("en-IN")}
+              ₹{(kpis.mrr / 100).toLocaleString("en-IN")}
             </div>
             <span className="text-xs text-emerald-600 font-bold">
               {kpis.active} active paying subscribers
