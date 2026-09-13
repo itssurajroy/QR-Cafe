@@ -3,6 +3,7 @@
 import React from 'react';
 import { useSuperAdmin } from '../SuperAdminContext';
 import Link from 'next/link';
+import { tenantsToCsv } from '@/lib/platform-csv';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -38,7 +39,68 @@ export function TenantsTab() {
     }
   };
 
-  const { kpis, charts, applyFilter, handleExportCSV, openDrawer, totalPages, tab, cafes, page, pageSize, totalCafes, searchQuery, selectedPlan, handleFastToggleStatus, handleFastExtendTrial, handleDeleteCafe, staff, platformConfig, savingConfigKey, handleSaveConfig, auditRows, auditActionFilter, loadFilteredAudit, auditLoading, setAuditActionFilter, setSearchQuery, setSelectedPlan, setDrawerCafeId, setDrawerTab, setDrawerData, setShowNewCafeModal } = ctx;
+  const { kpis, charts, applyFilter, openDrawer, totalPages, tab, cafes, page, pageSize, totalCafes, searchQuery, selectedPlan, handleFastToggleStatus, handleFastExtendTrial, handleDeleteCafe, staff, platformConfig, savingConfigKey, handleSaveConfig, auditRows, auditActionFilter, loadFilteredAudit, auditLoading, setAuditActionFilter, setSearchQuery, setSelectedPlan, setDrawerCafeId, setDrawerTab, setDrawerData, setShowNewCafeModal } = ctx;
+
+  // Bulk selection + bulk actions (real actions: extend_trial / set_plan; audit logged server-side)
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = React.useState(false);
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const allSelected = cafes.length > 0 && selectedIds.length === cafes.length;
+  const toggleSelectAll = () =>
+    setSelectedIds(allSelected ? [] : cafes.map((c: any) => c.id));
+
+  async function runBulk(kind: "extend" | "suspend" | "activate") {
+    if (selectedIds.length === 0 || bulkBusy) return;
+    if (kind === "suspend" && !confirm(`Suspend ${selectedIds.length} selected café(s)? They will go offline.`)) return;
+    setBulkBusy(true);
+    try {
+      for (const id of selectedIds) {
+        const body =
+          kind === "extend"
+            ? { action: "extend_trial", id, days: 14 }
+            : { action: "set_plan", id, plan: kind === "suspend" ? "suspended" : "active" };
+        const res = await fetch("/api/super/crud", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(`Bulk ${kind} failed for ${id}`);
+      }
+      setSelectedIds([]);
+      applyFilter(searchQuery, selectedPlan, page);
+    } catch {
+      alert("Bulk action partially failed — refresh and retry");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
+  // CSV export via shared helper (qrslice-tenants-YYYY-MM-DD.csv)
+  function handleExportLocal() {
+    const csv = tenantsToCsv(
+      (cafes as any[]).map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        plan: c.plan,
+        tier: c.tier,
+        tax_rate: c.tax_rate,
+        created_at: c.created_at,
+        subscription_ends_at: c.subscription_ends_at,
+        trial_ends_at: c.trial_ends_at,
+      }))
+    );
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `qrslice-tenants-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <>
@@ -85,6 +147,7 @@ export function TenantsTab() {
                     <option value="">All Plans (All)</option>
                     <option value="active">Active Paying</option>
                     <option value="trial">Free Trial</option>
+                    <option value="expired">Expired</option>
                     <option value="suspended">Suspended</option>
                   </select>
 
@@ -98,7 +161,7 @@ export function TenantsTab() {
 
                   <button
                     type="button"
-                    onClick={handleExportCSV}
+                    onClick={handleExportLocal}
                     className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-700 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-300 dark:border-stone-700"
                     title="Export filtered records to CSV"
                   >
@@ -107,16 +170,66 @@ export function TenantsTab() {
                 </div>
               </div>
 
+              {/* Bulk-action bar */}
+              {selectedIds.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 p-3 rounded-2xl text-xs">
+                  <span className="font-bold text-indigo-700 dark:text-indigo-300">
+                    {selectedIds.length} selected
+                  </span>
+                  <button
+                    type="button"
+                    disabled={bulkBusy}
+                    onClick={() => runBulk("extend")}
+                    className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                  >
+                    Extend trial +14d
+                  </button>
+                  <button
+                    type="button"
+                    disabled={bulkBusy}
+                    onClick={() => runBulk("suspend")}
+                    className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                  >
+                    Suspend
+                  </button>
+                  <button
+                    type="button"
+                    disabled={bulkBusy}
+                    onClick={() => runBulk("activate")}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                  >
+                    Activate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIds([])}
+                    className="px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 font-bold text-xs cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
               {/* Tenants Table */}
               <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-black/50">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-stone-800 bg-slate-50 dark:bg-stone-950/60 text-slate-500 dark:text-stone-400 uppercase tracking-wider text-xs">
+                        <th className="p-4">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={toggleSelectAll}
+                            aria-label="Select all cafés"
+                            className="cursor-pointer"
+                          />
+                        </th>
                         <th className="p-4">Café & Domain</th>
                         <th className="p-4">Tier</th>
                         <th className="p-4">Plan Status</th>
                         <th className="p-4">Trial / Sub Expiry</th>
+                        <th className="p-4">Last Active</th>
                         <th className="p-4">Pricing</th>
                         <th className="p-4 text-right">Actions</th>
                       </tr>
@@ -133,6 +246,15 @@ export function TenantsTab() {
                             onClick={() => openDrawer(c.id)}
                             className="hover:bg-slate-50 dark:hover:bg-stone-800/40 transition-colors cursor-pointer group"
                           >
+                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.includes(c.id)}
+                                onChange={() => toggleSelect(c.id)}
+                                aria-label={`Select ${c.name}`}
+                                className="cursor-pointer"
+                              />
+                            </td>
                             <td className="p-4">
                               <div className="font-black text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
                                 {c.name}
@@ -170,6 +292,12 @@ export function TenantsTab() {
                                 : isTrial && c.trial_ends_at
                                 ? `${new Date(c.trial_ends_at).toLocaleDateString("en-IN")}`
                                 : "Expired"}
+                            </td>
+
+                            <td className="p-4 text-slate-600 dark:text-stone-400 font-mono text-xs">
+                              {c.last_active_at
+                                ? new Date(c.last_active_at).toLocaleDateString("en-IN")
+                                : "—"}
                             </td>
 
                             <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">
@@ -216,7 +344,7 @@ export function TenantsTab() {
                       })}
                       {cafes.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-slate-400 dark:text-stone-500">
+                          <td colSpan={8} className="p-8 text-center text-slate-400 dark:text-stone-500">
                             No cafés match the selected filter query.
                           </td>
                         </tr>
