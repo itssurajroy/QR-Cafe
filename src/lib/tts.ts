@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * Human-Tone Web Text-To-Speech (TTS) Engine for QRslice
  * Enhances standard Web Speech API with natural voice selection,
@@ -132,3 +133,4 @@ export function speakHumanVoice(rawText: string, options?: { pitch?: number; rat
     /* ignore TTS exceptions */
   }
 }
+

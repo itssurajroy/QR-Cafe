@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Image from "next/image";
 
 export default function Brochure() {
@@ -148,3 +149,4 @@ export default function Brochure() {
     </div>
   );
 }
+

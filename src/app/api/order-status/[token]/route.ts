@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
@@ -100,15 +101,19 @@ export async function GET(
   // Fetch Restaurant details safely
   let restaurantName = "Our Café";
   let googleReviewUrl: string | null = null;
+  let upiQrUrl: string | null = null;
+  let upiId: string | null = null;
   if (order.restaurant_id) {
     const { data: rest } = await db
       .from("restaurants")
-      .select("name, google_review_url")
+      .select("name, google_review_url, upi_qr_url, upi_id")
       .eq("id", order.restaurant_id)
       .maybeSingle();
     if (rest) {
       restaurantName = rest.name;
       googleReviewUrl = rest.google_review_url;
+      upiQrUrl = (rest as any).upi_qr_url || null;
+      upiId = (rest as any).upi_id || null;
     }
   }
 
@@ -123,6 +128,8 @@ export async function GET(
     qr_token: qrToken,
     restaurant_name: restaurantName,
     google_review_url: googleReviewUrl,
+    upi_qr_url: upiQrUrl,
+    upi_id: upiId,
     items: order.order_items ?? [],
     created_at: order.created_at,
   });

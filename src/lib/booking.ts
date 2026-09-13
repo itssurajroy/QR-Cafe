@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 export const BOOKING_BUFFER_MIN = 15;
 export const BOOKING_DEFAULT_MIN = 90;
 export const BOOKING_GRACE_MIN = 30;
@@ -89,3 +90,4 @@ export function suggestNextSlot(
   }
   return null;
 }
+

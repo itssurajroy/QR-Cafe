@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Image from "next/image";
 
 export default function Flyer() {
@@ -82,3 +83,4 @@ export default function Flyer() {
     </div>
   );
 }
+

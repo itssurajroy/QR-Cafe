@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createSupabaseAdmin } from '@/lib/supabase/admin';
 import { getTenantBySlugAndTableLabel, canOrder } from '@/lib/tenant';
 import { createClient } from "@supabase/supabase-js";

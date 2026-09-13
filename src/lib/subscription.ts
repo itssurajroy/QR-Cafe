@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 export type SubscriptionStatus = "trial" | "active" | "expired" | "cancelled" | "suspended";
 
 // Maps operational plan (+ trial expiry) to the subscription_status column.
@@ -10,3 +11,4 @@ export function planToSubscriptionStatus(plan: string, trialEndsAt: string | nul
   }
   return "expired";
 }
+

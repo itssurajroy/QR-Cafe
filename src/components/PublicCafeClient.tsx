@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
@@ -95,7 +96,7 @@ export default function PublicCafeClient({
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem(`qr_cafe_table_${restaurant.id}`);
+        const saved = localStorage.getItem(`qrslice_table_${restaurant.id}`);
         if (saved) {
           const parsed = JSON.parse(saved);
           const matched = tables.find((t) => t.id === parsed.id || t.label === parsed.label);
@@ -162,7 +163,7 @@ export default function PublicCafeClient({
   const handleSelectTable = (table: { id: string; label: string; qr_token: string }) => {
     setSelectedTable(table);
     try {
-      localStorage.setItem(`qr_cafe_table_${restaurant.id}`, JSON.stringify(table));
+      localStorage.setItem(`qrslice_table_${restaurant.id}`, JSON.stringify(table));
     } catch {
       // ignore
     }
@@ -472,106 +473,71 @@ export default function PublicCafeClient({
         </div>
       </header>
 
-      {/* ─── 2. Restaurant Showcase & Culinary Hero ─── */}
-      <section className="relative w-full bg-gradient-to-b from-stone-100 via-[#FDFBF7] to-[#FDFBF7] pt-8 pb-6 px-4 border-b border-stone-200/60">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-300/60 text-amber-900 text-xs font-black mb-3">
-                <SparklesIcon className="w-3.5 h-3.5 text-amber-700" />
-                <span>Authentic Tandoor, Curries & Café Classics</span>
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.1] mb-3">
-                Freshly prepared, <br className="hidden sm:inline" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-red-600 to-stone-900">
-                  served piping hot.
-                </span>
-              </h2>
-              <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed mb-4">
-                {restaurant.tagline ||
-                  "Experience rich buttery gravies, crisp tikkas, fragrant dum biryanis, and artisanal snacks ordered seamlessly from your table."}
-              </p>
-
-              {/* Highlights & Social Proof Badges */}
-              <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-700 font-semibold">
-                {restaurant.google_review_url ? (
-                  <a
-                    href={restaurant.google_review_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-sm hover:border-amber-400 hover:shadow transition-all group"
-                  >
-                    <StarIcon className="w-4 h-4 text-amber-500 fill-amber-500 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold text-slate-900">4.8</span>
-                    <span className="text-slate-500 font-medium">(500+ Google Reviews)</span>
-                  </a>
-                ) : (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-sm">
-                    <StarIcon className="w-4 h-4 text-amber-500 fill-amber-500" />
-                    <span className="font-extrabold text-slate-900">4.8 Rating</span>
-                  </div>
-                )}
-
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-sm text-slate-600">
-                  <ClockIcon className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Prep: 15–20 Mins</span>
-                </div>
-
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 shadow-sm text-slate-600">
-                  <WifiIcon className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Guest Wi-Fi Available</span>
-                </div>
+      {/* ─── 2. Premium Compact Restaurant Header ─── */}
+      <section className="relative w-full bg-white pt-6 pb-4 px-4 border-b border-stone-100">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-[1.1] mb-2">
+              {restaurant.name || "QRslice"}
+            </h2>
+            <p className="text-sm text-slate-500 font-medium leading-relaxed mb-4">
+              {restaurant.tagline || "Scan, Order, and Enjoy."}
+            </p>
+            <div className="flex items-center gap-3 text-xs font-bold">
+              {restaurant.google_review_url && (
+                <a
+                  href={restaurant.google_review_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                >
+                  <StarIcon className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  <span>4.8 (500+ Reviews)</span>
+                </a>
+              )}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-600">
+                <ClockIcon className="w-3.5 h-3.5" />
+                <span>15-20 Mins</span>
               </div>
             </div>
-
-            {/* Quick Interactive Table Selector Card */}
-            {tables.length > 0 && (
-              <div className="w-full md:w-auto min-w-[300px] bg-white border border-stone-200/90 rounded-3xl p-5 shadow-lg shadow-stone-200/50">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-                    <MapPinIcon className="w-4 h-4 text-amber-600" />
-                    <span>Seated at a Table?</span>
-                  </span>
-                  {selectedTable && (
-                    <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Table {selectedTable.label} Active
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-slate-500 mb-3">
-                  Select your table number to send orders directly to the live kitchen:
-                </p>
-
-                <div className="grid grid-cols-5 gap-1.5 mb-3 max-h-36 overflow-y-auto pr-1">
-                  {tables.map((t) => {
-                    const isSelected = selectedTable?.id === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => handleSelectTable(t)}
-                        className={`py-2 rounded-xl font-mono text-xs font-black border transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/30 scale-105"
-                            : "bg-stone-50 hover:bg-stone-100 text-slate-800 border-stone-200 hover:border-amber-400"
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsTableModalOpen(true)}
-                  className="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold border border-stone-200 transition-colors"
-                >
-                  View All Tables & Counter Takeaway →
-                </button>
-              </div>
-            )}
           </div>
+
+          {/* Quick Interactive Table Selector Card */}
+          {tables.length > 0 && (
+            <div className="w-full md:w-auto min-w-[280px] bg-slate-50 border border-slate-200 rounded-3xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                  <MapPinIcon className="w-4 h-4 text-indigo-600" />
+                  <span>Dine-In Table</span>
+                </span>
+                {selectedTable && (
+                  <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    {selectedTable.label} Active
+                  </span>
+                )}
+              </div>
+
+              <div className="flex gap-2 overflow-x-auto no-scrollbar mb-3 pb-1">
+                {tables.map((t) => {
+                  const isSelected = selectedTable?.id === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => handleSelectTable(t)}
+                      className={`shrink-0 min-w-[48px] h-10 rounded-xl font-mono text-xs font-black transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-indigo-600 text-white shadow-md"
+                          : "bg-white text-slate-700 border border-slate-200 hover:border-indigo-400"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -1462,3 +1428,4 @@ export default function PublicCafeClient({
     </div>
   );
 }
+

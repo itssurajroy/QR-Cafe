@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireSuperAdmin } from "@/lib/auth";

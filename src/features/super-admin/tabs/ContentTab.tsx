@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React, { useState, useEffect } from 'react';
 import { useSuperAdmin } from '../SuperAdminContext';
 
@@ -140,3 +141,4 @@ export function ContentTab() {
     </div>
   );
 }
+

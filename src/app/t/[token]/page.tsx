@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getTenantByTableToken, canOrder } from "@/lib/tenant";
 import { redirect } from "next/navigation";

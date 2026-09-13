@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useState } from "react";
@@ -735,3 +736,4 @@ export default function OnboardingPage() {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
@@ -69,3 +70,4 @@ export async function POST(req: NextRequest) {
     user: { id: userId, email, role, display_name: name },
   });
 }
+

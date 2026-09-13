@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * QRslice UI Library — Input
  * Standard light-themed form input with error and hint states.

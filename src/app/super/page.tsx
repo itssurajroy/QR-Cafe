@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -180,3 +181,4 @@ export default async function SuperPage({
     />
   );
 }
+

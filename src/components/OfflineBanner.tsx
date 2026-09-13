@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 import { useSyncExternalStore } from "react";
 import { useOfflineStatus } from "@/hooks/useOfflineStatus";
@@ -19,5 +20,6 @@ export default function OfflineBanner() {
     </div>
   );
 }
+
 
 

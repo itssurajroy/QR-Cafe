@@ -54,6 +54,7 @@ interface BillData {
   paymentMethod?: string;
   table_label?: string;
   customer_phone?: string;
+  status_token?: string;
   itemsSnapshot?: CartLine[];
   order_items?: BillItemSnapshot[];
   items?: any[];
@@ -129,6 +130,15 @@ export default function PosClient({
 
   const [lastBill, setLastBill] = useState<BillData | null>(null);
   const [showBill, setShowBill] = useState(false);
+
+  const [waModal, setWaModal] = useState<{
+    isOpen: boolean;
+    orderId: string;
+    orderNumber: string;
+    customerPhone: string;
+    totalPaise: number;
+    statusToken: string;
+  } | null>(null);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const supabase = getSupabaseBrowserClient();
@@ -653,6 +663,14 @@ export default function PosClient({
           finalTotalPaise={finalTotalPaise}
           liveOrders={liveOrders as any}
           handleUpdateOrderStatus={handleUpdateOrderStatus}
+          onOpenWaModal={(ord) => setWaModal({
+            isOpen: true,
+            orderId: ord.id,
+            orderNumber: ord.order_number,
+            customerPhone: ord.customer_phone || "",
+            totalPaise: ord.total_paise || 0,
+            statusToken: ord.status_token || ord.id,
+          })}
           tableOrderCounts={tableOrderCounts}
           mobileCartOpen={mobileCartOpen}
           setMobileCartOpen={setMobileCartOpen}
@@ -980,10 +998,14 @@ export default function PosClient({
                 <button
                   type="button"
                   onClick={() => {
-                    const msg =
-                      `Bill ${lastBill?.order_number || lastBill?.orderNumber} • Table ${lastBill?.table_label}\n` +
-                      `Total: ₹${((lastBill?.finalTotalPaise ?? lastBill?.total_paise ?? 0) / 100).toFixed(2)} (${lastBill?.payment_status})`;
-                    window.open(getWaLink("", msg), "_blank");
+                    setWaModal({
+                      isOpen: true,
+                      orderId: lastBill.id || "",
+                      orderNumber: lastBill.order_number || lastBill.orderNumber || "",
+                      customerPhone: lastBill.customer_phone || "",
+                      totalPaise: lastBill.finalTotalPaise ?? lastBill.total_paise ?? 0,
+                      statusToken: lastBill.status_token || lastBill.id || "",
+                    });
                   }}
                   className="py-2.5 px-3 rounded-xl bg-[#34C759]/10 hover:bg-[#34C759]/15 border border-[#34C759]/20 text-[#34C759] font-bold text-xs cursor-pointer active:scale-95 transition-transform"
                 >
@@ -997,6 +1019,63 @@ export default function PosClient({
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WHATSAPP BILL MODAL */}
+      {waModal?.isOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-black/[0.08] space-y-4 animate-in zoom-in-95 duration-200">
+            <div>
+              <h3 className="font-bold text-lg text-slate-900">Send WhatsApp Bill</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Order #{waModal.orderNumber}</p>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Customer Phone Number</label>
+              <input
+                type="tel"
+                placeholder="e.g. 9876543210"
+                value={waModal.customerPhone}
+                onChange={(e) => setWaModal({ ...waModal, customerPhone: e.target.value })}
+                className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#007AFF] focus:bg-white font-mono min-h-[44px] transition-all"
+              />
+            </div>
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setWaModal(null)}
+                className="flex-1 py-2.5 rounded-xl border border-black/[0.08] text-slate-700 font-semibold text-xs hover:bg-slate-50 min-h-[44px] cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const phone = waModal.customerPhone.trim();
+                    if (!phone) {
+                      flash("err", "Please enter a valid phone number");
+                      return;
+                    }
+                    if (waModal.orderId && !waModal.orderId.startsWith("POS-")) {
+                      await api.updateOrderCustomer(waModal.orderId, phone);
+                    }
+                    const host = typeof window !== "undefined" ? window.location.origin : "https://qrslice.com";
+                    const receiptUrl = `${host}/receipt/${waModal.statusToken}`;
+                    const msg = `Thanks for visiting ${restaurant.name}\nOrder #${waModal.orderNumber}\nTotal: ₹${(waModal.totalPaise / 100).toFixed(2)}\n\nView receipt:\n${receiptUrl}`;
+                    window.open(getWaLink(phone, msg), "_blank");
+                    setWaModal(null);
+                    flash("ok", "Opening WhatsApp...");
+                  } catch (e) {
+                    flash("err", "Failed to update customer phone");
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#34C759] hover:bg-[#34C759]/90 text-white font-bold text-xs shadow-sm min-h-[44px] cursor-pointer active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+              >
+                💬 Send
+              </button>
             </div>
           </div>
         </div>

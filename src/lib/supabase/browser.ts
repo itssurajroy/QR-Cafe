@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createBrowserClient } from "@supabase/ssr";
 
 // Browser client uses the anon key. RLS protects all data; customers only
@@ -12,3 +13,4 @@ export function getSupabaseBrowserClient() {
   );
   return browserClient;
 }
+

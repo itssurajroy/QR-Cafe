@@ -1,6 +1,11 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import crypto from "crypto";
 
-const CRYPTO_SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY || "qrcafe-cryptographic-salt-2026";
+const CRYPTO_SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+
+if (!CRYPTO_SECRET) {
+  throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for cryptographic operations.");
+}
 
 /**
  * Generates an HMAC-SHA256 signature for a table token or session
@@ -56,3 +61,4 @@ export function generateReceiptHmacStamp(orderId: string, totalPaise: number): s
   const data = `${orderId}:${totalPaise}`;
   return crypto.createHmac("sha256", CRYPTO_SECRET).update(data).digest("hex").slice(0, 8).toUpperCase();
 }
+

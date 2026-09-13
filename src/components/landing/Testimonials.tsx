@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 const TESTIMONIALS = [
   {
     quote:
@@ -71,3 +72,4 @@ export function Testimonials() {
     </section>
   );
 }
+

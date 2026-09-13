@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * QRslice UI Library — Button
  * Reusable button replacing all inline indigo/slate button Tailwind classes.

@@ -1,8 +1,9 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms and Conditions",
+  title: { absolute: "Terms and Conditions | QRslice" },
   description:
     "Terms and conditions governing use of the QRslice platform.",
   alternates: { canonical: "/legal/terms" },
@@ -13,9 +14,7 @@ export default function TermsPage() {
     <div className="landing-page min-h-screen">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link href="/" className="text-lg font-bold text-indigo-600">
-            QRslice
-          </Link>
+          <Link href="/"><img src="/logo.png" alt="QRslice" className="h-8 w-auto" /></Link>
           <Link
             href="/"
             className="text-sm text-slate-500 transition-colors hover:text-slate-800"
@@ -284,10 +283,10 @@ export default function TermsPage() {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:support@qrslice.app"
+                  href="mailto:support@qrslice.com"
                   className="text-indigo-600 hover:underline"
                 >
-                  support@qrslice.app
+                  support@qrslice.com
                 </a>
               </li>
             </ul>
@@ -297,3 +296,4 @@ export default function TermsPage() {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 /**
@@ -129,3 +130,4 @@ export function useCart(storageKey: string): UseCartReturn {
     clearCart,
   };
 }
+

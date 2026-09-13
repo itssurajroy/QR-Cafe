@@ -46,6 +46,7 @@ interface PosCartDrawerProps {
 
   liveOrders?: any[];
   handleUpdateOrderStatus?: (id: string, status: string, orderNumber: string, tableLabel: string) => void;
+  onOpenWaModal?: (ord: any) => void;
 }
 
 const QUICK_TAGS = ["🌶️ Spicy", "🧀 Extra Cheese", "🚫 No Sugar", "🥣 On Side", "🧊 Extra Ice"];
@@ -85,6 +86,7 @@ export function PosCartDrawer({
   isSettling,
   liveOrders,
   handleUpdateOrderStatus,
+  onOpenWaModal,
 }: PosCartDrawerProps) {
   const [splitGuests, setSplitGuests] = useState<number>(1);
   const [gstin, setGstin] = useState<string>("");
@@ -207,22 +209,34 @@ export function PosCartDrawer({
                     </div>
                   </div>
 
-                  {isReady && handleUpdateOrderStatus && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleUpdateOrderStatus(
-                          ord.id,
-                          "served",
-                          String(ord.order_number),
-                          String(ord.table_label || "")
-                        )
-                      }
-                      className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs cursor-pointer shadow-sm active:scale-95 whitespace-nowrap shrink-0"
-                    >
-                      ✓ Serve Table
-                    </button>
-                  )}
+                  <div className="flex gap-1">
+                    {onOpenWaModal && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenWaModal(ord)}
+                        className="px-2.5 py-1.5 rounded-xl bg-[#34C759]/10 hover:bg-[#34C759]/20 text-[#34C759] font-black text-xs cursor-pointer shadow-sm active:scale-95 whitespace-nowrap shrink-0 border border-[#34C759]/20"
+                        title="WhatsApp Bill"
+                      >
+                        💬
+                      </button>
+                    )}
+                    {isReady && handleUpdateOrderStatus && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdateOrderStatus(
+                            ord.id,
+                            "served",
+                            String(ord.order_number),
+                            String(ord.table_label || "")
+                          )
+                        }
+                        className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs cursor-pointer shadow-sm active:scale-95 whitespace-nowrap shrink-0"
+                      >
+                        ✓ Serve Table
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}

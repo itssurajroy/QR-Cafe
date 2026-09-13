@@ -1,4 +1,7 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { z } from "zod";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
@@ -14,6 +17,7 @@ const schema = z.object({
   party_size: z.number().int().min(1).max(60),
   starts_at: z.string().datetime(),
   duration_min: z.number().int().min(30).max(240).optional(),
+  table_ids: z.array(z.string()).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -61,7 +65,23 @@ export async function POST(req: NextRequest) {
     .select("id, seats")
     .eq("restaurant_id", restaurant.id)
     .eq("active", true);
-  const picked = pickTables(tables ?? [], input.party_size);
+
+  let picked: string[] | null = null;
+  
+  if (input.table_ids && input.table_ids.length > 0) {
+    // User selected specific tables via the wizard
+    const validTables = (tables ?? []).filter((t) => input.table_ids!.includes(t.id));
+    if (validTables.length !== input.table_ids.length) {
+      return NextResponse.json({ error: "Invalid table selection" }, { status: 400 });
+    }
+    // Check if the selected tables have enough seats for the party (optional strict check, we can just warn in UI but allow if they want to squeeze, but for safety let's enforce it loosely or just trust the selection)
+    // We will just trust the table selection if it's passed.
+    picked = input.table_ids;
+  } else {
+    // Auto-assign table
+    picked = pickTables(tables ?? [], input.party_size);
+  }
+
   if (!picked) return NextResponse.json({ error: "No table fits this party size" }, { status: 409 });
 
   const { data: existing } = await db
@@ -126,6 +146,11 @@ export async function GET(req: NextRequest) {
     .eq("restaurant_id", restaurantId)
     .gte("starts_at", istDayStart().toISOString())
     .order("starts_at");
-  if (error) return NextResponse.json({ error: "Something went wrong, please try again" }, { status: 500 });
+  if (error) {
+    console.error("API BOOKINGS ERROR:", error);
+    return NextResponse.json({ error: "Something went wrong, please try again" }, { status: 500 });
+  }
+  console.log("API BOOKINGS DATA:", data?.map(d => d.code));
   return NextResponse.json(data);
 }
+

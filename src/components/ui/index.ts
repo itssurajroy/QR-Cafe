@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * QRslice UI Component Library — Barrel Export
  * Import any UI primitive from "@/components/ui"
@@ -27,3 +28,4 @@ export type { SpinnerProps } from "./Spinner";
 export { Skeleton, DashboardSkeleton } from "./Skeleton";
 export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
+

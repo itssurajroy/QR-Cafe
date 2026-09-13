@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -113,7 +114,7 @@ interface AdminAppShellProps {
 export function AdminAppShell({
   currentSection,
   onSelectSection,
-  restaurantName = "QrSlice Cafe",
+  restaurantName = "QRslice",
   restaurantSlug = "cafe",
   liveRevenue = 0,
   liveOrders = 0,
@@ -145,6 +146,15 @@ export function AdminAppShell({
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   };
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch {
+      window.location.href = "/login";
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-slate-900 flex flex-col font-sans selection:bg-[#007AFF] selection:text-white antialiased">
@@ -261,7 +271,7 @@ export function AdminAppShell({
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="p-3 border-t border-[#E7E4F0]">
+          <div className="p-3 border-t border-[#E7E4F0] space-y-2">
             <Link
               href={`/c/${restaurantSlug}`}
               target="_blank"
@@ -272,6 +282,17 @@ export function AdminAppShell({
               <span>🍽️</span>
               {!collapsed && <span>Live Guest Menu ↗</span>}
             </Link>
+            <button
+              onClick={handleLogout}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition-all cursor-pointer ${
+                collapsed ? "justify-center px-0" : ""
+              }`}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              {!collapsed && <span>Log Out</span>}
+            </button>
           </div>
         </aside>
 
@@ -370,6 +391,17 @@ export function AdminAppShell({
                   </span>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Log Out"
+                className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors ml-1 cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
           </header>
 
@@ -382,3 +414,4 @@ export function AdminAppShell({
     </div>
   );
 }
+

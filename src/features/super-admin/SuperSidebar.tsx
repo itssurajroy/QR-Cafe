@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React from 'react';
@@ -16,7 +17,7 @@ export function SuperSidebar() {
               ⚡
             </div>
             <div>
-              <h1 className="font-black text-slate-900 dark:text-white text-sm tracking-tight">QR Café Platform</h1>
+              <h1 className="font-black text-slate-900 dark:text-white text-sm tracking-tight">QRslice Platform</h1>
               <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest block">
                 Super Console
               </span>

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 /**
@@ -99,3 +100,4 @@ export async function deductInventoryIngredients(
     // TODO: Send low stock alert via email or dashboard notification
   }
 }
+

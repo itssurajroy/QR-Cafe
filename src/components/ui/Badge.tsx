@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * QRslice UI Library — Badge
  * Status pills used throughout POS, Admin, and Order Tracking.

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 /* KDS Light Theme tokens (spec):
@@ -636,3 +637,4 @@ export function KitchenView({
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 /**
@@ -66,3 +67,4 @@ export function useOrderPolling(
 
   return { data, error, loading, refetch: poll };
 }
+

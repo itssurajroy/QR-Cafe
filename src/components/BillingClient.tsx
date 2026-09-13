@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useState } from "react";
@@ -167,7 +168,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
             <div>
               <p className="text-xs font-bold text-emerald-900">Payment Successful!</p>
               <p className="text-[11px] text-emerald-700">
-                Your café subscription is active. Thank you for powering your restaurant with QrSlice!
+                Your restaurant subscription is active. Thank you for powering your restaurant with QRslice!
               </p>
             </div>
           </div>
@@ -179,7 +180,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#007AFF]">
-                  QrSlice Complete
+QRslice Complete
                 </span>
                 <span
                   className={`px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
@@ -277,7 +278,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
           {/* Included Features Grid */}
           <div className="space-y-3 pt-2">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Everything Included in QrSlice Complete
+              Everything Included in QRslice Complete
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="flex items-center gap-2.5 text-slate-700 bg-slate-50/60 p-2.5 rounded-xl border border-black/[0.03]">
@@ -320,3 +321,4 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
     </div>
   );
 }
+

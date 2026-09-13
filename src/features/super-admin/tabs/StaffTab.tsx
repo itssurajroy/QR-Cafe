@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React, { useState } from 'react';
 import { useSuperAdmin } from '../SuperAdminContext';
 
@@ -105,3 +106,4 @@ export function StaffTab() {
     </div>
   );
 }
+

@@ -1,9 +1,10 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Link from "next/link";
 import { getContent } from "@/lib/content";
 
 const DEFAULTS = {
   headline: "Ready to run a tighter café?",
-  sub: "Join independent cafés using QrSlice to cut order errors and speed up service.",
+  sub: "Join independent cafés using QRslice to cut order errors and speed up service.",
   primaryCta: "Start free",
   secondaryCta: "Talk to us",
 };
@@ -31,7 +32,7 @@ export async function CTA() {
               <span>→</span>
             </Link>
             <a
-              href="mailto:support@qrslice.app"
+              href="mailto:support@qrslice.com"
               className="inline-flex items-center justify-center rounded-[12px] border border-[#E7E4F0] bg-white px-8 py-4 text-base font-semibold text-[#17142B] transition-all duration-150 hover:border-[#5738F5] hover:text-[#5738F5]"
             >
               {c.secondaryCta}
@@ -42,3 +43,4 @@ export async function CTA() {
     </section>
   );
 }
+

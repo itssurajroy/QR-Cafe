@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
 
 export function Skeleton({ className = "" }: { className?: string }) {
@@ -41,3 +42,4 @@ export function DashboardSkeleton() {
     </div>
   );
 }
+

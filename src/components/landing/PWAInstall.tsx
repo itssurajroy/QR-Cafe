@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Link from "next/link";
 
 export function PWAInstall() {
@@ -43,3 +44,4 @@ export function PWAInstall() {
     </section>
   );
 }
+

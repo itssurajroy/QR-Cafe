@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="bg-[#EEEAFE]">
@@ -94,3 +95,4 @@ export function HowItWorks() {
     </section>
   );
 }
+

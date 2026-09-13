@@ -1,30 +1,12 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import crypto from "crypto";
 
 async function rp(method: string, path: string, body?: any) {
-  const key = process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder";
-  const secret = process.env.RAZORPAY_KEY_SECRET || "secret_placeholder";
+  const key = process.env.RAZORPAY_KEY_ID;
+  const secret = process.env.RAZORPAY_KEY_SECRET;
 
-  // If in mock/placeholder mode without real keys, return simulated responses
-  if (
-    !key ||
-    !secret ||
-    key === "rzp_test_placeholder" ||
-    secret === "secret_placeholder"
-  ) {
-    if (path.startsWith("/plans")) {
-      return { id: `plan_sim_${Date.now()}`, period: "monthly", interval: 1 };
-    }
-    if (path.startsWith("/customers")) {
-      return { id: `cust_sim_${Date.now()}`, email: body?.email, name: body?.name };
-    }
-    if (path.startsWith("/subscriptions")) {
-      return {
-        id: `sub_sim_${Date.now()}`,
-        short_url: `https://rzp.io/i/sim_${Date.now()}`,
-        status: "authenticated",
-      };
-    }
-    return { ok: true };
+  if (!key || !secret) {
+    throw new Error("Razorpay keys are missing. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your environment.");
   }
 
   const auth = Buffer.from(`${key.trim()}:${secret.trim()}`).toString("base64");
@@ -132,7 +114,10 @@ export const razorpay = {
     rp("POST", `/subscriptions/${subId}/cancel`, { cancel_at_cycle_end: 0 }),
 
   verifyWebhook: (rawBody: string, signature: string) => {
-    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || "whsec_placeholder";
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret) {
+      throw new Error("RAZORPAY_WEBHOOK_SECRET is missing.");
+    }
     const expected = crypto
       .createHmac("sha256", secret.replace(/^"|"$/g, ""))
       .update(rawBody)
@@ -140,3 +125,4 @@ export const razorpay = {
     return expected === signature;
   },
 };
+

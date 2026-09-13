@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
@@ -9,3 +10,4 @@ export function createSupabaseAdmin() {
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 export type ExportRow = {
@@ -51,3 +52,4 @@ export default function TenantsExportButton({ rows }: { rows: ExportRow[] }) {
     </button>
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
@@ -68,16 +69,17 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "create_item") {
-    const { name, categoryId, pricePaise, description, isVeg } = data;
+    const { categoryId, name, pricePaise, description, isVeg, imageUrl } = data;
     const { data: item, error } = await admin
       .from("menu_items")
       .insert({
         restaurant_id: user.restaurantId,
         category_id: categoryId,
         name: String(name).trim(),
-        price_paise: Math.max(0, Math.round(Number(pricePaise))),
+        price_paise: Number(pricePaise || 0),
         description: String(description || "").trim(),
         is_veg: Boolean(isVeg),
+        image_url: imageUrl || null,
         available: true,
       })
       .select()
@@ -207,6 +209,21 @@ export async function POST(req: NextRequest) {
   }
 
 
+  if (type === "update_order_customer") {
+    const { orderId, customerPhone } = data;
+    if (!orderId || !customerPhone) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    const { error } = await admin
+      .from("orders")
+      .update({ customer_phone: String(customerPhone).trim() })
+      .eq("id", orderId)
+      .eq("restaurant_id", user.restaurantId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
 
   return NextResponse.json({ error: "Unknown operation type" }, { status: 400 });
 }
+

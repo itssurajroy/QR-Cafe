@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { Resend } from "resend";
 
 export type TrialEmailDay = 0 | 7 | 12 | 14;
@@ -63,3 +64,4 @@ export async function sendTrialEmail(
   }
   return { sent: true };
 }
+

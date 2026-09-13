@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { describe, expect, it } from "vitest";
 import { tableFloorState } from "./floorStatus";
 
@@ -27,3 +28,4 @@ describe("tableFloorState", () => {
     expect(tableFloorState("t1", now, r, new Set()).state).toBe("free");
   });
 });
+

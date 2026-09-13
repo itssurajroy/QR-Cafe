@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 const TYPES = [
   { name: "Cafes & Chai Shops", icon: "☕" },
   { name: "Restaurants & Fine Dining", icon: "🍽️" },
@@ -49,3 +50,4 @@ export function BusinessTypes() {
     </section>
   );
 }
+

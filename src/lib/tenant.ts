@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export type Tenant = {
@@ -146,3 +147,4 @@ export async function getTenantBySlugAndTableLabel(
 
   return { tenant, table: fallback || null };
 }
+

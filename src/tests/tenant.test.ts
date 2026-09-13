@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { resolveTableByLabel } from "../lib/table-helpers";
 import { describe, it, expect } from "vitest";
 
@@ -9,3 +10,4 @@ describe("resolveTableByLabel", () => {
   it("resolves 10 -> T10", () => expect(resolveTableByLabel(tables, "10")?.label).toBe("T10"));
   it("returns null for missing", () => expect(resolveTableByLabel(tables, "T99")).toBeNull());
 });
+

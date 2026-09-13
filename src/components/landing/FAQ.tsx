@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useState } from "react";
@@ -11,7 +12,7 @@ const FAQS = [
   {
     question: "Can I use my existing printer or tablet?",
     answer:
-      "Yes. QrSlice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
+      "Yes. QRslice works with most Bluetooth thermal printers and any device with a web browser. No proprietary hardware needed.",
   },
   {
     question: "What plans are available?",
@@ -49,9 +50,9 @@ const FAQS = [
       "No. Customers scan the QR code with their phone camera and the menu opens directly in their browser. Works on Android, iOS, and any phone with a camera.",
   },
   {
-    question: "Can I use QrSlice alongside my existing POS?",
+question: "Can I use QRslice alongside my existing POS?",
     answer:
-      "Yes. Many cafes use QrSlice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
+      "Yes. Many cafes use QRslice for dine-in QR ordering while keeping their existing POS for other operations. They work independently.",
   },
   {
     question: "What happens to my data if I cancel?",
@@ -82,7 +83,7 @@ export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
           <p className="mx-auto mt-4 max-w-2xl text-base text-[#6F7185] sm:text-lg">
             Can&apos;t find what you&apos;re looking for?{" "}
             <a
-              href="mailto:support@qrslice.app"
+              href="mailto:support@qrslice.com"
               className="font-semibold text-[#5738F5] underline decoration-[#EEEAFE] underline-offset-2 transition-colors hover:text-[#4328D9] hover:decoration-[#5738F5]"
             >
               Talk to us
@@ -147,3 +148,4 @@ export function FAQ({ items }: { items?: { q: string; a: string }[] }) {
     </section>
   );
 }
+

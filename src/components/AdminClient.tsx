@@ -24,6 +24,7 @@ import { MultiOutletModal } from "@/features/admin/MultiOutletModal";
 import { AdminTopNav, type AdminTabId } from "@/features/admin/AdminTopNav";
 import type { Category, MenuItem as Item, Table } from "@/types";
 import { speakHumanVoice } from "@/lib/tts";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Report = { orders: number; paid: number; revenue: number; avg: number };
 
@@ -105,6 +106,8 @@ export default function AdminClient({
   const [newItemCatId, setNewItemCatId] = useState(categories[0]?.id || "");
   const [newItemDesc, setNewItemDesc] = useState("");
   const [newItemVeg, setNewItemVeg] = useState(true);
+  const [newItemImageFile, setNewItemImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [showCatModal, setShowCatModal] = useState(false);
   const [newCatName, setNewCatName] = useState("");
@@ -315,7 +318,29 @@ export default function AdminClient({
       return flash("err", "Please provide a valid item name and price");
     }
 
+    setIsUploading(true);
+    let uploadedUrl = null;
     try {
+      if (newItemImageFile) {
+        const supabase = getSupabaseBrowserClient();
+        const fileExt = newItemImageFile.name.split('.').pop();
+        const fileName = `${restaurantId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("images")
+          .upload(fileName, newItemImageFile);
+
+        if (uploadError) {
+          throw new Error("Failed to upload image: " + uploadError.message);
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("images")
+          .getPublicUrl(fileName);
+          
+        uploadedUrl = publicUrl;
+      }
+
       const res = await fetch("/api/admin/crud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -326,6 +351,7 @@ export default function AdminClient({
           pricePaise: Math.round(priceNum * 100),
           description: newItemDesc.trim(),
           isVeg: newItemVeg,
+          imageUrl: uploadedUrl,
         }),
       });
       const data = await res.json();
@@ -334,10 +360,13 @@ export default function AdminClient({
       setNewItemName("");
       setNewItemPrice("");
       setNewItemDesc("");
+      setNewItemImageFile(null);
       setShowItemModal(false);
       flash("ok", "Menu item added successfully!");
-    } catch {
-      flash("err", "Error adding item");
+    } catch (err: any) {
+      flash("err", err.message || "Error adding item");
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -1226,6 +1255,20 @@ export default function AdminClient({
                 />
               </div>
 
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Food Image (Optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setNewItemImageFile(e.target.files[0]);
+                    }
+                  }}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"
+                />
+              </div>
+
               <label className="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer pt-1">
                 <input
                   type="checkbox"
@@ -1246,9 +1289,10 @@ export default function AdminClient({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs shadow-md shadow-indigo-600/20 cursor-pointer"
+                  disabled={isUploading}
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs shadow-md shadow-indigo-600/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save Item
+                  {isUploading ? "Uploading..." : "Save Item"}
                 </button>
               </div>
             </form>

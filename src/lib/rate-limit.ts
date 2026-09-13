@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 // In-memory rate limiter with automated LRU/TTL cleanup to prevent unbounded memory growth.
 const hits = new Map<string, { count: number; reset: number }>();
 let lastCleanup = Date.now();
@@ -31,4 +32,5 @@ export function rateLimit(
   }
   return { ok: true, retryAfter: 0 };
 }
+
 

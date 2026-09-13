@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
 
 interface EmptyStateProps {
@@ -46,3 +47,4 @@ export function EmptyState({
     </div>
   );
 }
+

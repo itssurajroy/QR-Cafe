@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { TrustBar } from "@/components/landing/TrustBar";
@@ -18,36 +19,36 @@ const JSON_LD = [
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "QrSlice",
+    name: "QRslice",
     url: APP_URL,
     logo: `${APP_URL}/favicon.png`,
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
-      email: "support@qrslice.app",
+      email: "support@qrslice.com",
     },
   },
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "QrSlice",
+    name: "QRslice",
     url: APP_URL,
   },
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "QrSlice",
+    name: "QRslice",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "QrSlice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
+      "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
     url: APP_URL,
     offers: {
       "@type": "Offer",
       price: "999",
       priceCurrency: "INR",
-      description: "QrSlice complete plan, per outlet per month. Annual option ₹9,999.",
+      description: "QRslice complete plan, per outlet per month. Annual option ₹9,999.",
     },
   },
   {
@@ -155,3 +156,4 @@ export default async function LandingPage() {
     </div>
   );
 }
+

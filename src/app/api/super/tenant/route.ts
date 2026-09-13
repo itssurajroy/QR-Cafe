@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "@/lib/auth";
@@ -38,3 +39,4 @@ export async function GET(req: NextRequest) {
     audit: audit ?? [],
   });
 }
+

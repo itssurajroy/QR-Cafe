@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { describe, expect, it } from "vitest";
 import { planToSubscriptionStatus } from "./subscription";
 
@@ -18,3 +19,4 @@ describe("planToSubscriptionStatus", () => {
     expect(planToSubscriptionStatus("weird", null)).toBe("expired");
   });
 });
+

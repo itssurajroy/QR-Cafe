@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React from 'react';
@@ -41,4 +42,5 @@ export function SuperAdminLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
@@ -268,3 +269,4 @@ export async function POST(req: NextRequest) {
     message: "Café tenant provisioned successfully with starter menu and QR tables!",
   });
 }
+

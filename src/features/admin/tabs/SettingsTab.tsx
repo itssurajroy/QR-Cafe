@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -254,4 +255,5 @@ export function SettingsTab(props: SettingsTabProps) {
     </div>
   );
 }
+
 

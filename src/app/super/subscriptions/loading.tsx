@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 export default function Loading() {
   return (
     <main className="min-h-screen bg-slate-50 p-6">
@@ -11,3 +12,4 @@ export default function Loading() {
     </main>
   );
 }
+

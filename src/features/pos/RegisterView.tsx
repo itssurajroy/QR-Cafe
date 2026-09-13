@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { PosCatalogGrid } from "./PosCatalogGrid";
 import { PosCartDrawer } from "./PosCartDrawer";
 import { tableFloorState } from "@/features/booking/floorStatus";
@@ -66,6 +67,7 @@ interface RegisterViewProps {
 
   liveOrders?: any[];
   handleUpdateOrderStatus?: (id: string, status: string, orderNumber: string, tableLabel: string) => void;
+  onOpenWaModal?: (ord: any) => void;
 }
 
 export function RegisterView(props: RegisterViewProps) {
@@ -297,6 +299,7 @@ export function RegisterView(props: RegisterViewProps) {
         isSettling={props.isSettling}
         liveOrders={props.liveOrders}
         handleUpdateOrderStatus={props.handleUpdateOrderStatus}
+        onOpenWaModal={props.onOpenWaModal}
 
       />
     </div>

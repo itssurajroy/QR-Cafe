@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 
 export interface BillPdfOptions {
   restaurant: {
@@ -289,3 +290,4 @@ export async function generateBillPdfBuffer(opts: {
   });
   return Buffer.from(doc.output("arraybuffer"));
 }
+

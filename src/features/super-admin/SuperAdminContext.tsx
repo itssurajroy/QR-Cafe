@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 import React, { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -189,7 +190,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `qr-cafe-tenants-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `qrslice-tenants-${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

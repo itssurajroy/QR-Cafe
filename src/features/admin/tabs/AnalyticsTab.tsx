@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { useState } from "react";
 import { paise } from "@/lib/utils";
 
@@ -395,3 +396,4 @@ export function FloorIntelligence({ loadingAnalytics, analytics, loadAnalytics }
     </div>
   );
 }
+

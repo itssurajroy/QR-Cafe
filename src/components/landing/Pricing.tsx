@@ -1,8 +1,9 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Link from "next/link";
 import { getContent } from "@/lib/content";
 
 const DEFAULTS = {
-  name: "QrSlice",
+  name: "QRslice",
   monthly: 999,
   yearly: 9999,
   bullets: [
@@ -101,3 +102,4 @@ export async function Pricing() {
     </section>
   );
 }
+

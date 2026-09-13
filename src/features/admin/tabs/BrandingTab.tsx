@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 interface BrandingTabProps {
   brandingLogoUrl: string;
   brandingTagline: string;
@@ -106,3 +107,4 @@ export function BrandingTab({
     </div>
   );
 }
+

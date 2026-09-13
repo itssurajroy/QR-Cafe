@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -24,3 +25,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 }
+

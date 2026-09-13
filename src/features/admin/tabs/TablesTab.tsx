@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -36,7 +37,7 @@ export function TablesTab({
   setNewTableLabel,
   setNewTableSeats,
   handleAddTable,
-  restaurantName = "QrSlice Restaurant",
+  restaurantName = "QRslice",
   restaurantSlug = "cafe",
 }: TablesTabProps) {
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -268,3 +269,4 @@ export function TablesTab({
     </div>
   );
 }
+

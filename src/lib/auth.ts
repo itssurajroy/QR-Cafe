@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
@@ -39,3 +40,4 @@ export async function requireSuperAdmin(): Promise<SessionUser | null> {
   if (!user || user.role !== "super_admin") return null;
   return user;
 }
+

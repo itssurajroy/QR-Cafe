@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { sendTrialEmail, type TrialEmailDay } from "@/lib/email";
@@ -115,3 +116,4 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ ok: true, processed: results.length, results });
 }
+

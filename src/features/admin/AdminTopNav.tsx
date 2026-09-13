@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import type { ComponentType } from "react";
@@ -125,3 +126,4 @@ export function AdminTopNav({ tab, setTab }: AdminTopNavProps) {
     </nav>
   );
 }
+

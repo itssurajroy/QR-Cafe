@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { razorpay } from "@/lib/razorpay";
@@ -79,3 +80,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, received: true });
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { notFound } from "next/navigation";
 import { getRestaurantBySlug, canOrder, getTierLimits } from "@/lib/tenant";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";

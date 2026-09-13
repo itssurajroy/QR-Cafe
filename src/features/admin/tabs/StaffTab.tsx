@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React, { useState, useEffect } from 'react';
 
 export function StaffTab({ restaurantId }: { restaurantId: string }) {
@@ -276,3 +277,4 @@ export function StaffTab({ restaurantId }: { restaurantId: string }) {
     </div>
   );
 }
+

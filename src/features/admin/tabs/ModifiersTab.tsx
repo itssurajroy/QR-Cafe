@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useState } from "react";
@@ -251,3 +252,4 @@ export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: strin
     </div>
   );
 }
+

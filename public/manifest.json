@@ -1,6 +1,6 @@
 {
-  "name": "QR Café — Dine-In Ordering & POS",
-  "short_name": "QR Café",
+  "name": "QRslice â€” Dine-In Ordering & POS",
+  "short_name": "QRslice",
   "description": "Seamless QR table ordering, real-time kitchen display, and full POS billing.",
   "start_url": "/pos",
   "display": "standalone",
@@ -32,7 +32,7 @@
       "name": "Admin Dashboard",
       "short_name": "Admin",
       "url": "/admin",
-      "description": "Manage your café"
+      "description": "Manage your QRslice"
     }
   ]
 }

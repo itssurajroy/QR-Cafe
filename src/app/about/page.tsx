@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/landing/Navbar";
@@ -72,3 +73,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

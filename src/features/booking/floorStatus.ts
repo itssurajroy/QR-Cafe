@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 export type FloorState = "free" | "held" | "occupied" | "reserved";
 
 export type FloorReservation = {
@@ -31,3 +32,4 @@ export function tableFloorState(
   }
   return { state: "free", detail: null };
 }
+

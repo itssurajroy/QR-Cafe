@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client"
 
 import { useTheme } from "next-themes"
@@ -17,3 +18,4 @@ export function ThemeToggle() {
     </button>
   )
 }
+

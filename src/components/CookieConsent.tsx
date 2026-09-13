@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useState, useEffect } from "react";
@@ -95,7 +96,7 @@ export function CookieConsent() {
           Cookie Preferences & Privacy
         </h2>
         <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-          QrSlice uses cookies to provide seamless table ordering, maintain table session state, and evaluate platform reliability. You can personalize which cookies to allow.
+          QRslice uses cookies to provide seamless table ordering, maintain table session state, and evaluate platform reliability. You can personalize which cookies to allow.
         </p>
 
         <div className="mt-3.5 flex flex-wrap gap-4 text-xs font-medium">
@@ -162,3 +163,4 @@ export function CookieConsent() {
     </div>
   );
 }
+

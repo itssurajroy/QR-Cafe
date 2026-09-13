@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
@@ -151,3 +152,4 @@ export async function GET(req: NextRequest) {
     hourly_slots: hourlySlots,
   });
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 const cache = new Map<string, { v: unknown; at: number }>();
@@ -31,3 +32,4 @@ export function clearContentCache(key?: string) {
   if (key) cache.delete(key);
   else cache.clear();
 }
+

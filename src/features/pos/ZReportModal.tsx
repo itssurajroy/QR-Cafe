@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { paise } from "@/lib/utils";
 
 interface ZReportModalProps {
@@ -195,3 +196,4 @@ export function ZReportModal({
     </div>
   );
 }
+

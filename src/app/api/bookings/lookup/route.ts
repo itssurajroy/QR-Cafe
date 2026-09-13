@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
@@ -58,3 +59,4 @@ export async function PATCH(req: NextRequest) {
   if (error) return NextResponse.json({ error: "Something went wrong, please try again" }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import Link from "next/link";
@@ -68,7 +69,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <img src="/logo.png" alt="QrSlice" className="h-8 w-auto" />
+          <img src="/logo.png" alt="QRslice" className="h-8 w-auto" />
         </Link>
 
         {/* Desktop nav */}
@@ -186,3 +187,4 @@ export function Navbar() {
     </header>
   );
 }
+

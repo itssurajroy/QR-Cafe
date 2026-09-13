@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useMemo } from "react";
@@ -381,3 +382,4 @@ export function DashboardTab({
     </div>
   );
 }
+

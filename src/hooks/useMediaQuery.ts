@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useState, useEffect } from "react";
@@ -30,3 +31,4 @@ export function useMediaQuery(query: string): boolean {
 
   return matches;
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 const OLD_STEPS = ["Wait for menu", "Find server", "Place order", "Write order", "Send to kitchen", "Wait", "Bill"];
 const NEW_STEPS = ["SCAN", "ORDER", "KITCHEN", "SERVE"];
 
@@ -11,7 +12,7 @@ export function ProblemSolution() {
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#6F7185] sm:text-lg">
             Most cafés run QR menus, WhatsApp orders, paper KOTs, and separate stock sheets.
-            QrSlice replaces them with one fast, unified system.
+            QRslice replaces them with one fast, unified system.
           </p>
         </div>
 
@@ -59,3 +60,4 @@ export function ProblemSolution() {
     </section>
   );
 }
+

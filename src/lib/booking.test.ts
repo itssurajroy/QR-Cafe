@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { describe, expect, it } from "vitest";
 import { overlaps, pickTables, genBookingCode, withinHours, istDayKey, isSameDayIST, isGraceExpired, suggestNextSlot } from "./booking";
 
@@ -83,3 +84,4 @@ describe("suggestNextSlot", () => {
     expect(suggestNextSlot(starts, 30, wall)).toBeNull();
   });
 });
+

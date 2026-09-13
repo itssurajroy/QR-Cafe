@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -6,3 +7,4 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+

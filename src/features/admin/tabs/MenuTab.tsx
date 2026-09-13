@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { paise } from "@/lib/utils";
 import type { Category, MenuItem as Item } from "@/types";
 
@@ -180,3 +181,4 @@ export function MenuTab({
     </div>
   );
 }
+

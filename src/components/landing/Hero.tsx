@@ -1,8 +1,9 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Link from "next/link";
 import { getContent } from "@/lib/content";
 
 const DEFAULTS = {
-  eyebrow: "QR Ordering & Kitchen OS",
+  eyebrow: "QR ordering made simple.",
   headlineA: "Your table is now your",
   headlineB: "ordering counter.",
   sub: "Guests scan, browse, order and pay from their phone. Your kitchen gets the order instantly.",
@@ -70,6 +71,8 @@ export async function Hero() {
           <p className="mt-5 text-sm font-medium text-[#6F7185]">
             {c.trustLine}
           </p>
+
+          {/* Removed Built */}
         </div>
 
         {/* Product visual — right side on desktop */}
@@ -128,3 +131,4 @@ export async function Hero() {
     </section>
   );
 }
+

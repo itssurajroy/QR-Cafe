@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { z } from "zod";
 
 // Trim and sanitize strings to prevent malicious inputs
@@ -54,3 +55,4 @@ export const patchOrderSchema = z.object({
   delay_minutes: z.number().int().min(0).max(120).optional(),
   delay_reason: sanitizedString(200).optional(),
 });
+

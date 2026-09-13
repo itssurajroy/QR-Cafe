@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -57,3 +58,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, url: linkData.properties.action_link });
 }
+

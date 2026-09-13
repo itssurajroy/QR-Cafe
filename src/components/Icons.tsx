@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
 
 export function CoffeeIcon({ className = "w-5 h-5" }: { className?: string }) {

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React from 'react';
@@ -44,3 +45,4 @@ export default function SuperClient(props: SuperClientProps) {
     </SuperAdminProvider>
   );
 }
+

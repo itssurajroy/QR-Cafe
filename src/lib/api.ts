@@ -114,7 +114,9 @@ export const api = {
     return post("/api/admin/crud", { type: "void_order", orderId, reason });
   },
 
-
+  updateOrderCustomer(orderId: string, customerPhone: string): Promise<ApiResponse<{ success: boolean }>> {
+    return post("/api/admin/crud", { type: "update_order_customer", orderId, customerPhone });
+  },
 
   // ── Menu Management ─────────────────────────────────────────────────────────
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -22,3 +23,4 @@ export default async function BillingPage() {
 
   return <BillingClient restaurant={restaurant} />;
 }
+

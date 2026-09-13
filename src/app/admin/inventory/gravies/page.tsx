@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import Link from "next/link";
@@ -232,3 +233,4 @@ export default function GraviesPage() {
     </div>
   );
 }
+

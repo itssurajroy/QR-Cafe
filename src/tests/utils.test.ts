@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * QRslice — Utility Functions Unit Tests
  * Run with: npx vitest run
@@ -247,3 +248,4 @@ describe("getUrgencyColor()", () => {
     expect(result).toContain("animate-pulse");
   });
 });
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import Link from "next/link";
 
 export function Footer() {
@@ -8,7 +9,7 @@ export function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block">
-              <img src="/logo.png" alt="QrSlice" className="h-8 w-auto" />
+              <img src="/logo.png" alt="QRslice" className="h-8 w-auto" />
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-[#6F7185]">
               One simple flow from table to kitchen.
@@ -57,7 +58,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@qrslice.app" className="text-sm text-[#6F7185] transition-colors hover:text-[#17142B]">
+                <a href="mailto:support@qrslice.com" className="text-sm text-[#6F7185] transition-colors hover:text-[#17142B]">
                   Contact
                 </a>
               </li>
@@ -114,10 +115,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-[#E7E4F0] pt-8 text-center">
-          <p className="text-sm text-[#6F7185]">
-            &copy; {new Date().getFullYear()} QrSlice. All rights reserved.
-          </p>
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[#E7E4F0] pt-8 sm:flex-row">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <p className="text-sm text-[#6F7185]">
+              &copy; 2026 QRslice. All rights reserved.
+            </p>
+          </div>
+          <div className="flex items-center gap-6">
+          </div>
         </div>
       </div>
     </footer>

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 export interface SuperClientProps {
   cafes: Cafe[];
   totalCafes: number;

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -253,3 +254,4 @@ export function KdsTab({
     </div>
   );
 }
+

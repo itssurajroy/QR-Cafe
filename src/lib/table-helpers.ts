@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 function normalizeTableLabel(label: string): string {
   return decodeURIComponent(label).trim().toUpperCase().replace(/^T0*/, "").replace(/^0+/, "") || "0";
 }
@@ -9,3 +10,4 @@ export function resolveTableByLabel(tables: { label: string }[], rawLabel: strin
     null
   );
 }
+

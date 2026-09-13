@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
 
 interface ErrorStateProps {
@@ -42,3 +43,4 @@ export function ErrorState({
     </div>
   );
 }
+

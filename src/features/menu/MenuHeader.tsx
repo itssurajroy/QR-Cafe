@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { CoffeeIcon, BellIcon } from "@/components/Icons";

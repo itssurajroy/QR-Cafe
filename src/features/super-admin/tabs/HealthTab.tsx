@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React from 'react';
 import { useSuperAdmin } from '../SuperAdminContext';
 
@@ -62,3 +63,4 @@ export function HealthTab() {
     </div>
   );
 }
+

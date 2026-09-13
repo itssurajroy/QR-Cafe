@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -510,3 +511,4 @@ export function OrdersTab({ orders, onUpdateStatus, onUpdatePayment, flash }: Or
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 /**
  * QRslice — Shared Domain Types
  * Single source of truth for all data shapes used across the app.
@@ -175,3 +176,4 @@ export type ApiResponse<T> = ApiSuccess<T> | ApiErrorShape;
 export function isApiError<T>(res: ApiResponse<T>): res is ApiErrorShape {
   return "error" in res && typeof res.error === "string";
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
@@ -34,12 +35,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app",
   ),
-  title: {
-    default: "QrSlice — QR Ordering & Kitchen OS for Restaurants",
-    template: "%s | QrSlice",
+title: {
+    default: "QRslice — QR Ordering & Kitchen OS",
+    template: "%s | QRslice",
   },
   description:
-    "QrSlice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
+    "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
   keywords: [
     "QR ordering",
     "restaurant ordering",
@@ -52,28 +53,28 @@ export const metadata: Metadata = {
     "kitchen OS",
     "restaurant technology",
   ],
-  openGraph: {
+openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "QrSlice",
+    siteName: "QRslice",
     url: "/",
-    title: "QrSlice — QR Ordering & Kitchen OS for Restaurants",
+    title: "QRslice — QR Ordering & Kitchen OS",
     description:
-      "QrSlice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
+      "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "QrSlice — QR Ordering & Kitchen OS for Restaurants",
+        alt: "QRslice — QR Ordering & Kitchen OS for Restaurants",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "QrSlice — QR Ordering & Kitchen OS for Restaurants",
+    title: "QRslice — QR Ordering & Kitchen OS",
     description:
-      "QrSlice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
+      "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
     images: ["/og-image.png"],
   },
   alternates: {
@@ -84,10 +85,10 @@ export const metadata: Metadata = {
     follow: true,
   },
   manifest: "/manifest.json",
-  appleWebApp: {
+appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "QrSlice",
+    title: "QRslice",
   },
   icons: {
     icon: "/favicon.png",
@@ -127,3 +128,4 @@ export default function RootLayout({
     </html>
   );
 }
+

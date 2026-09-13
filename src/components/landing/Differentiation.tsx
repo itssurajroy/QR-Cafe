@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 const POINTS = [
   "Fewer unnecessary steps between table and kitchen",
   "Less order confusion during rush hours",
@@ -34,3 +35,4 @@ export function Differentiation() {
     </section>
   );
 }
+

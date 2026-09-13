@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireSuperAdmin } from "@/lib/auth";
@@ -67,3 +68,4 @@ export async function DELETE(req: NextRequest) {
   });
   return NextResponse.json({ ok: true });
 }
+

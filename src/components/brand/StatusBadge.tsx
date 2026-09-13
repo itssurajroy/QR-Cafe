@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
 
 export type OrderStatusType =
@@ -137,3 +138,4 @@ export function StatusBadge({
     </span>
   );
 }
+

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 const BENEFITS = [
   { label: "FAST", description: "From scan to service." },
   { label: "SIMPLE", description: "Easy for guests and staff." },
@@ -29,3 +30,4 @@ export function TrustBar() {
     </section>
   );
 }
+

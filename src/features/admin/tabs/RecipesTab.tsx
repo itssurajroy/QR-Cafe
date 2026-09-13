@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useEffect, useState } from "react";
@@ -380,3 +381,4 @@ export function RecipesTab({
     </div>
   );
 }
+

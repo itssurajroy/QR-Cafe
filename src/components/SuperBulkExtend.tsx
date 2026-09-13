@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import { useState } from "react";
@@ -217,3 +218,4 @@ export default function SuperBulkExtend({ rows }: { rows: SubRow[] }) {
     </div>
   );
 }
+
