@@ -13,7 +13,7 @@ export interface ImpersonationBarProps {
 }
 
 function formatRemaining(ms: number): string {
-  if (ms <= 0) return "Expired";
+  if (ms <= 0) return "0:00";
   const total = Math.floor(ms / 1000);
   const m = Math.floor(total / 60);
   const s = total % 60;
@@ -82,9 +82,9 @@ export function ImpersonationBar({
                     ? "bg-red-600 text-white border-red-700"
                     : "bg-stone-950 text-amber-400 border-stone-950"
                 }`}
-                title={expiresAt ?? undefined}
+                title="Advisory reminder only — session does not auto-revoke. Exit when done."
               >
-                ⏳ {formatRemaining(remainingMs)} left
+                ⏳ {expired ? "Reminder elapsed — exit when done" : `${formatRemaining(remainingMs)} reminder — exit when done`}
               </span>
             )}
           </div>
@@ -116,7 +116,7 @@ export function ImpersonationBar({
             <span className="text-xs font-bold text-amber-800">Live Impersonation Active</span>
           </div>
           <span className="text-xs text-amber-800/80">
-            {remainingMs !== null ? `Session ${formatRemaining(remainingMs)} remaining` : "Exit impersonation to return to admin"}
+            {remainingMs !== null ? `Advisory session — exit when done (${formatRemaining(remainingMs)} reminder)` : "Advisory session — exit when done to return to admin"}
           </span>
         </div>
       </div>

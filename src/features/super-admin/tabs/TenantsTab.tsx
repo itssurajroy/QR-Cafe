@@ -50,16 +50,15 @@ export function TenantsTab() {
   const toggleSelectAll = () =>
     setSelectedIds(allSelected ? [] : cafes.map((c: any) => c.id));
 
-  async function runBulk(kind: "extend" | "suspend" | "activate") {
+  async function runBulk(kind: "extend" | "activate") {
     if (selectedIds.length === 0 || bulkBusy) return;
-    if (kind === "suspend" && !confirm(`Suspend ${selectedIds.length} selected café(s)? They will go offline.`)) return;
     setBulkBusy(true);
     try {
       for (const id of selectedIds) {
         const body =
           kind === "extend"
             ? { action: "extend_trial", id, days: 14 }
-            : { action: "set_plan", id, plan: kind === "suspend" ? "suspended" : "active" };
+            : { action: "set_plan", id, plan: "active" };
         const res = await fetch("/api/super/crud", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -183,14 +182,6 @@ export function TenantsTab() {
                     className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
                   >
                     Extend trial +14d
-                  </button>
-                  <button
-                    type="button"
-                    disabled={bulkBusy}
-                    onClick={() => runBulk("suspend")}
-                    className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
-                  >
-                    Suspend
                   </button>
                   <button
                     type="button"

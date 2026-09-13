@@ -5,6 +5,7 @@ import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { logAudit } from "@/lib/audit";
 import { checkPlatformRateLimit } from "@/lib/rate-limit-platform";
+import { escapeOrFilter } from "@/lib/platform-filter";
 
 // Single-purpose duplication of the subscription state machine in
 // src/lib/subscription-machine.test.ts — intentional per Task 8 brief.
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
       .select("id, name, slug, plan, subscription_status, trial_ends_at, mrr_cents")
       .order("trial_ends_at", { ascending: true });
     if (status) query = query.eq("subscription_status", status);
-    if (search) query = query.or(`name.ilike.%${search}%,slug.ilike.%${search}%`);
+    if (search) query = query.or(`name.ilike.%${escapeOrFilter(search)}%,slug.ilike.%${escapeOrFilter(search)}%`);
     const { data, error } = await query;
     if (error) throw error;
     rows = data ?? [];
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
         .select("id, name, slug, plan, subscription_status, trial_ends_at")
         .order("trial_ends_at", { ascending: true });
       if (status) query = query.eq("subscription_status", status);
-      if (search) query = query.or(`name.ilike.%${search}%,slug.ilike.%${search}%`);
+      if (search) query = query.or(`name.ilike.%${escapeOrFilter(search)}%,slug.ilike.%${escapeOrFilter(search)}%`);
       const { data, error } = await query;
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       rows = (data ?? []).map((r: any) => ({

@@ -177,7 +177,7 @@ export function BillingTab() {
                         onClick={() => transition(r.id, "active", "Payment recovered — subscription extended by super-admin")}
                         className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold cursor-pointer"
                       >
-                        Extend
+                        Recover/Activate
                       </button>
                       <button
                         type="button"

@@ -68,20 +68,39 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   } else if (parsed.data.op === "transfer") {
     const email = parsed.data.newOwnerEmail?.toLowerCase().trim();
     if (!email) return NextResponse.json({ error: "newOwnerEmail required" }, { status: 422 });
-    const { data: owners } = await db
-      .from("cafe_profiles")
-      .select("id, email, role")
-      .eq("restaurant_id", id)
-      .eq("role", "owner");
+    // Emails live only in auth.users — resolve the target user id via auth admin by email first (safe-failure order: resolve before any write).
+    let targetUserId: string | null = null;
+    try {
+      for (let page = 1; page <= 10 && !targetUserId; page++) {
+        const { data, error } = await db.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error || !data?.users?.length) break;
+        const match = data.users.find((u: any) => (u.email ?? "").toLowerCase() === email);
+        if (match?.id) targetUserId = match.id;
+        if (data.users.length < 1000) break;
+      }
+    } catch {
+      targetUserId = null;
+    }
+    if (!targetUserId) return NextResponse.json({ error: "User not found for this email" }, { status: 404 });
     const { data: target, error: tErr } = await db
       .from("cafe_profiles")
-      .select("id, email, role")
+      .select("id, role")
+      .eq("id", targetUserId)
       .eq("restaurant_id", id)
-      .eq("email", email)
       .maybeSingle();
     if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 });
     if (!target) return NextResponse.json({ error: "New owner profile not found in this tenant" }, { status: 404 });
     const targetId = (target as { id: string }).id;
+    const { data: owners } = await db
+      .from("cafe_profiles")
+      .select("id")
+      .eq("restaurant_id", id)
+      .eq("role", "owner");
+    const ownerEmails: string[] = [];
+    for (const o of owners ?? []) {
+      const { data: u } = await db.auth.admin.getUserById((o as { id: string }).id);
+      if (u?.user?.email) ownerEmails.push(u.user.email);
+    }
     const { error: dErr } = await db
       .from("cafe_profiles")
       .update({ role: "manager" })
@@ -97,7 +116,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     await logAudit(db, {
       actor_id: user.userId, restaurant_id: id, entity: "tenant", entity_id: id,
       action: "super_transfer",
-      metadata: { from: (owners ?? []).map((o: any) => o.email), to: email },
+      metadata: { from: ownerEmails, to: email },
     });
     return NextResponse.json({ ok: true, owner: email });
   } else {

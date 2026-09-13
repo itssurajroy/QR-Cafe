@@ -4,7 +4,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { logAudit } from "@/lib/audit";
 import { checkPlatformRateLimit } from "@/lib/rate-limit-platform";
 
-const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
+const IMPERSONATION_TTL_MS = 30 * 60 * 1000; // Advisory reminder only — the magic link is a standard Supabase link with no server enforcement; UI must not claim automatic revocation.
 
 export async function POST(req: NextRequest) {
   const superAdmin = await requireSuperAdmin();
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Log audit event (action name preserved: src/app/super/audit/page.tsx filters on it)
+  // expires_at is an advisory reminder in audit metadata only — no server-side revocation.
   const expiresAt = new Date(Date.now() + IMPERSONATION_TTL_MS).toISOString();
   await logAudit(db, {
     actor_id: superAdmin.userId,

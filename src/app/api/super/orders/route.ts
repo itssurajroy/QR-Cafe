@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { escapeOrFilter } from "@/lib/platform-filter";
 
 const PAGE_SIZE = 50;
 
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     if (status) out = out.eq("status", status);
     if (from) out = out.gte("created_at", from);
     if (to) out = out.lte("created_at", to);
-    if (search) out = out.or(`order_number.ilike.%${search}%,customer_name.ilike.%${search}%`);
+    if (search) out = out.or(`order_number.ilike.%${escapeOrFilter(search)}%,customer_name.ilike.%${escapeOrFilter(search)}%`);
     return out;
   }
 

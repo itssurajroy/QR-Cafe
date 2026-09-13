@@ -1,5 +1,6 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 
+// NOTE: per-instance memory only — advisory on multi-instance deployments, not a sole guard.
 const hits = new Map<string, number[]>();
 
 export function checkPlatformRateLimit(actorId: string, action: string, limit = 10, windowMs = 60_000): { ok: boolean } {
