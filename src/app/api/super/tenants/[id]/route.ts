@@ -41,7 +41,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     update = { plan: "active", subscription_status: "active", is_suspended: false, suspended_at: null, suspended_reason: null };
   } else if (parsed.data.op === "force_expire" || parsed.data.op === "expire") {
     update = { plan: "trial", subscription_status: "expired", trial_ends_at: new Date(Date.now() - 1000).toISOString() };
-    auditAction = "super_expire";
+    auditAction = parsed.data.op === "expire" ? "super_expire" : "super_force_expire";
   } else if (parsed.data.op === "extend_trial") {
     const days = parsed.data.days ?? 14;
     update = { plan: "trial", subscription_status: "trial", trial_ends_at: new Date(Date.now() + days * 864e5).toISOString(), is_suspended: false, suspended_at: null, suspended_reason: null };
