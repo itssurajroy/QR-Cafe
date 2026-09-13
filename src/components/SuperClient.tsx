@@ -15,6 +15,9 @@ import { HealthTab } from '../features/super-admin/tabs/HealthTab';
 import { ContentTab } from '../features/super-admin/tabs/ContentTab';
 import { AnnouncementsTab } from '../features/super-admin/tabs/AnnouncementsTab';
 import { SupportTab } from '../features/super-admin/tabs/SupportTab';
+import { AnalyticsTab } from '../features/super-admin/tabs/AnalyticsTab';
+import { SystemHealthTab } from '../features/super-admin/tabs/SystemHealthTab';
+import { CommandPalette } from '../features/super-admin/CommandPalette';
 import { UsersTab } from '../features/super-admin/tabs/UsersTab';
 import { OrdersTab } from '../features/super-admin/tabs/OrdersTab';
 import { SettingsTab } from '../features/super-admin/tabs/SettingsTab';
@@ -38,11 +41,11 @@ function TabRenderer() {
     case 'users': return <UsersTab />;
     case 'billing': return <BillingTab />;
     case 'orders': return <OrdersTab />;
-    case 'analytics': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'analytics': return <AnalyticsTab />;
     case 'settings': return <SettingsTab />;
     case 'announcements': return <AnnouncementsTab />;
     case 'support': return <SupportTab />;
-    case 'system-health': return <div className="p-6 text-sm text-slate-500">Coming in a later task — section shell.</div>;
+    case 'system-health': return <SystemHealthTab />;
     default: return <DashboardTab />;
   }
 }
@@ -55,6 +58,7 @@ export default function SuperClient(props: SuperClientProps) {
       </SuperAdminLayout>
       <TenantSlideOver />
       <ProvisionTenantModal />
+      <CommandPalette />
     </SuperAdminProvider>
   );
 }
