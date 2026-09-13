@@ -6,7 +6,8 @@ import { useSuperAdmin } from '../SuperAdminContext';
 
 export function ProvisionTenantModal() {
   const ctx = useSuperAdmin();
-  const { showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, creatingCafe, handleCreateCafeSubmit } = ctx;
+  const { showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, newCafeOwnerName, setNewCafeOwnerName, newCafeOwnerEmail, setNewCafeOwnerEmail, creatingCafe, handleCreateCafeSubmit } = ctx;
+  const ownerEmailValid = !newCafeOwnerEmail.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newCafeOwnerEmail.trim());
 
   if (!showNewCafeModal) return null;
 
@@ -64,6 +65,35 @@ export function ProvisionTenantModal() {
                 />
               </div>
 
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-stone-400 block mb-1">
+                  Owner Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Priya Sharma"
+                  value={newCafeOwnerName}
+                  onChange={(e) => setNewCafeOwnerName(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl p-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-stone-400 block mb-1">
+                  Owner Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="owner@example.com"
+                  value={newCafeOwnerEmail}
+                  onChange={(e) => setNewCafeOwnerEmail(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl p-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                />
+                {!ownerEmailValid && (
+                  <p className="mt-1 text-[11px] font-bold text-red-600">Enter a valid email address.</p>
+                )}
+              </div>
+
               <div className="p-3 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black text-slate-900 dark:text-white">All-in-One Pro Plan</span>
@@ -74,7 +104,7 @@ export function ProvisionTenantModal() {
 
               <button
                 type="submit"
-                disabled={creatingCafe || !newCafeName || !newCafeSlug}
+                disabled={creatingCafe || !newCafeName || !newCafeSlug || !ownerEmailValid}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer mt-2"
               >
                 {creatingCafe ? "Provisioning…" : "Create Café Tenant →"}

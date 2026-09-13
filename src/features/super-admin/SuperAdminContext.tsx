@@ -14,7 +14,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   // Destructure initialData to match what hooks expect
   const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit } = initialData as any;
 
-  const [tab, setTab] = useState<"dashboard" | "cafes" | "config" | "audit" | "staff" | "health">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "cafes" | "config" | "audit" | "staff" | "health" | "users" | "billing" | "orders" | "analytics" | "settings" | "announcements" | "support" | "system-health">("dashboard");
 
   // Global Platform Broadcast Banner
   const [broadcastMsg, setBroadcastMsg] = useState(
@@ -42,6 +42,8 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   const [newCafeTagline, setNewCafeTagline] = useState("");
   const [newCafePhone, setNewCafePhone] = useState("");
   const [newCafeAddress, setNewCafeAddress] = useState("");
+  const [newCafeOwnerName, setNewCafeOwnerName] = useState("");
+  const [newCafeOwnerEmail, setNewCafeOwnerEmail] = useState("");
   const [creatingCafe, setCreatingCafe] = useState(false);
 
   // Platform Config Edit State
@@ -294,6 +296,11 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
 
   async function handleCreateCafeSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const ownerEmailTrimmed = newCafeOwnerEmail.trim();
+    if (ownerEmailTrimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmailTrimmed)) {
+      flash("err", "Owner email looks invalid");
+      return;
+    }
     setCreatingCafe(true);
     try {
       const res = await fetch("/api/super/crud", {
@@ -308,6 +315,8 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
           tagline: newCafeTagline.trim() || undefined,
           phone: newCafePhone.trim() || undefined,
           address: newCafeAddress.trim() || undefined,
+          ownerName: newCafeOwnerName.trim() || undefined,
+          ownerEmail: ownerEmailTrimmed || undefined,
         }),
       });
       if (res.ok) {
@@ -315,6 +324,8 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
         setShowNewCafeModal(false);
         setNewCafeName("");
         setNewCafeSlug("");
+        setNewCafeOwnerName("");
+        setNewCafeOwnerEmail("");
         router.refresh();
       } else {
         const data = await res.json();
@@ -348,7 +359,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
 
   const value = {
     cafes, totalCafes, page, pageSize, initialQ, initialPlanFilter, staff, kpis, charts, initialConfig, recentAudit,
-    tab, setTab, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab, showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
+    tab, setTab, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab,     showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, newCafeOwnerName, setNewCafeOwnerName, newCafeOwnerEmail, setNewCafeOwnerEmail, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
     handleExtendTrial, handleMarkPaid, handleSetPlan, handleAddRefundNote, handleExportCSV, handleSaveBroadcast, handleFastExtendTrial, handleFastToggleStatus, handleDeleteCafe, handleSaveConfig, handleCreateCafeSubmit, loadFilteredAudit, openDrawer, applyFilter, totalPages, flash
   };
 

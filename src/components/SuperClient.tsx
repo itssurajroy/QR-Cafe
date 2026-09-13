@@ -10,9 +10,18 @@ import { ConfigTab } from '../features/super-admin/tabs/ConfigTab';
 import { AuditTab } from '../features/super-admin/tabs/AuditTab';
 import { StaffTab } from '../features/super-admin/tabs/StaffTab';
 import { SubscriptionsTab } from '../features/super-admin/tabs/SubscriptionsTab';
+import { BillingTab } from '../features/super-admin/tabs/BillingTab';
 import { BroadcastTab } from '../features/super-admin/tabs/BroadcastTab';
 import { HealthTab } from '../features/super-admin/tabs/HealthTab';
 import { ContentTab } from '../features/super-admin/tabs/ContentTab';
+import { AnnouncementsTab } from '../features/super-admin/tabs/AnnouncementsTab';
+import { SupportTab } from '../features/super-admin/tabs/SupportTab';
+import { AnalyticsTab } from '../features/super-admin/tabs/AnalyticsTab';
+import { SystemHealthTab } from '../features/super-admin/tabs/SystemHealthTab';
+import { CommandPalette } from '../features/super-admin/CommandPalette';
+import { UsersTab } from '../features/super-admin/tabs/UsersTab';
+import { OrdersTab } from '../features/super-admin/tabs/OrdersTab';
+import { SettingsTab } from '../features/super-admin/tabs/SettingsTab';
 import { TenantSlideOver } from '../features/super-admin/overlays/TenantSlideOver';
 import { ProvisionTenantModal } from '../features/super-admin/overlays/ProvisionTenantModal';
 import { SuperClientProps } from '../features/super-admin/types';
@@ -30,6 +39,14 @@ function TabRenderer() {
     case 'broadcast': return <BroadcastTab />;
     case 'health': return <HealthTab />;
     case 'content': return <ContentTab />;
+    case 'users': return <UsersTab />;
+    case 'billing': return <BillingTab />;
+    case 'orders': return <OrdersTab />;
+    case 'analytics': return <AnalyticsTab />;
+    case 'settings': return <SettingsTab />;
+    case 'announcements': return <AnnouncementsTab />;
+    case 'support': return <SupportTab />;
+    case 'system-health': return <SystemHealthTab />;
     default: return <DashboardTab />;
   }
 }
@@ -42,6 +59,7 @@ export default function SuperClient(props: SuperClientProps) {
       </SuperAdminLayout>
       <TenantSlideOver />
       <ProvisionTenantModal />
+      <CommandPalette />
     </SuperAdminProvider>
   );
 }

@@ -60,6 +60,25 @@ export default async function SuperTenantsPage({
 
   const total = count ?? 0;
   const totalPages = Math.ceil(total / limit) || 1;
+
+  // last_active_at may not exist yet (Task-1 migration unapplied) — degrade gracefully, never crash.
+  let lastActive: Record<string, string> = {};
+  if (ids.length > 0) {
+    try {
+      const { data: activeRows, error: activeErr } = await db
+        .from("restaurants")
+        .select("id, last_active_at")
+        .in("id", ids);
+      if (!activeErr) {
+        for (const r of activeRows ?? []) {
+          const v = (r as { id: string; last_active_at?: string | null }).last_active_at;
+          if (v) lastActive[r.id] = v;
+        }
+      }
+    } catch {
+      lastActive = {};
+    }
+  }
   const filterHref = (s: string) => {
     const params = new URLSearchParams();
     if (search) params.set("q", search);
@@ -106,7 +125,7 @@ export default async function SuperTenantsPage({
         </form>
 
         <div className="flex gap-2 items-center flex-wrap">
-          {["", "trial", "active", "suspended"].map((s) => (
+          {["", "trial", "active", "expired", "suspended"].map((s) => (
             <Link
               key={s || "all"}
               href={filterHref(s)}
@@ -140,6 +159,7 @@ export default async function SuperTenantsPage({
                   <th className="p-4">Slug</th>
                   <th className="p-4">Owner email</th>
                   <th className="p-4">Status</th>
+                  <th className="p-4">Last active</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -154,6 +174,9 @@ export default async function SuperTenantsPage({
                         {r.plan}
                       </span>
                     </td>
+                    <td className="p-4 text-slate-600">
+                      {lastActive[r.id] ? new Date(lastActive[r.id]).toLocaleDateString("en-IN") : "—"}
+                    </td>
                     <td className="p-4 text-right">
                       <Link
                         href={`/super/cafe/${r.id}`}
@@ -166,7 +189,7 @@ export default async function SuperTenantsPage({
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-400">
+                    <td colSpan={6} className="p-8 text-center text-slate-400">
                       No tenants match the selected filters.
                     </td>
                   </tr>

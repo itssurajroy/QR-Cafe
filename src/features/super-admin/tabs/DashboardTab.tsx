@@ -57,9 +57,17 @@ export function DashboardTab() {
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
                   <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">MRR Total</span>
                   <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-                    ₹{kpis.mrr.toLocaleString("en-IN")}
+                    ₹{Math.round(kpis.mrr / 100).toLocaleString("en-IN")}
                   </div>
                   <span className="text-xs text-emerald-600 font-medium">Single ₹999 plan</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">ARR Total</span>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                    ₹{Math.round((kpis.arr ?? 0) / 100).toLocaleString("en-IN")}
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">MRR × 12</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
@@ -78,6 +86,40 @@ export function DashboardTab() {
                   <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">New Sign-ups (7d)</span>
                   <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{kpis.new7d}</div>
                   <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">Signups this week</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">Expired</span>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{kpis.expired ?? 0}</div>
+                  <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">Ended plans</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">Trials Ending 3d</span>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{kpis.trialsEnding3d ?? 0}</div>
+                  <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">At-risk trials</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">Churn (30d)</span>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{kpis.churn30d ?? 0}</div>
+                  <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">Lost plans, 30 days</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">Revenue (7d)</span>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                    ₹{Math.round((kpis.revenue7d ?? 0) / 100).toLocaleString("en-IN")}
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">Paid dine-in volume</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-stone-400 uppercase tracking-wider block">Revenue (30d)</span>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                    ₹{Math.round((kpis.revenue30d ?? 0) / 100).toLocaleString("en-IN")}
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-stone-400 font-medium">Paid dine-in volume</span>
                 </div>
               </div>
 

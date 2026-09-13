@@ -36,6 +36,14 @@ export function SuperSidebar() {
               { id: "content", label: "Content Mgmt", icon: "📝" },
               { id: "config", label: "Platform Config", icon: "⚙️" },
               { id: "audit", label: "Audit Event Logs", icon: "📜" },
+              { id: "users", label: "Users", icon: "👥" },
+              { id: "billing", label: "Billing", icon: "💳" },
+              { id: "orders", label: "Orders", icon: "🧾" },
+              { id: "analytics", label: "Analytics", icon: "📈" },
+              { id: "settings", label: "Settings", icon: "⚙️" },
+              { id: "announcements", label: "Announce", icon: "📣" },
+              { id: "support", label: "Support", icon: "🛟" },
+              { id: "system-health", label: "System Health", icon: "🩺" },
             ].map((item) => (
               <button
                 key={item.id}
@@ -71,7 +79,7 @@ export function SuperSidebar() {
               Monthly Recurring Rev
             </span>
             <div className="text-lg font-black text-indigo-600 font-mono">
-              ₹{kpis.mrr.toLocaleString("en-IN")}
+              ₹{(kpis.mrr / 100).toLocaleString("en-IN")}
             </div>
             <span className="text-xs text-emerald-600 font-bold">
               {kpis.active} active paying subscribers

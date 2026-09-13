@@ -1,11 +1,21 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSuperAdmin } from '../SuperAdminContext';
 
 export function SubscriptionsTab() {
   const { tab, cafes, openDrawer } = useSuperAdmin();
   const [search, setSearch] = useState('');
-  
+  const [apiMrrPaise, setApiMrrPaise] = useState<number | null>(null);
+
+  // Wire to the same /api/super/billing dataset (paise-accurate server MRR).
+  useEffect(() => {
+    if (tab !== 'subscriptions') return;
+    fetch('/api/super/billing')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.ok && typeof d.mrr_paise === 'number') setApiMrrPaise(d.mrr_paise); })
+      .catch(() => {});
+  }, [tab]);
+
   if (tab !== 'subscriptions') return null;
 
   // Calculate stats based on cafe plan & billing_status
@@ -13,8 +23,8 @@ export function SubscriptionsTab() {
   const trialCafes = cafes.filter((c: any) => c.plan === 'trial' || (!c.plan && c.billing_status !== 'active'));
   const suspendedCafes = cafes.filter((c: any) => c.plan === 'suspended' || c.plan === 'cancelled');
   
-  // Single plan at ₹999/month
-  const mrr = activeCafes.length * 999;
+  // Single plan at ₹999/month — prefer server MRR (mrr_cents sums, integer paise).
+  const mrr = apiMrrPaise !== null ? apiMrrPaise / 100 : activeCafes.length * 999;
 
   const filtered = cafes.filter((c: any) => 
     c.name?.toLowerCase().includes(search.toLowerCase()) || 
