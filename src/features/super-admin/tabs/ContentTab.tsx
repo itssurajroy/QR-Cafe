@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSuperAdmin } from '../SuperAdminContext';
+import type { TrialEmailDay } from '@/lib/email';
+
+// Read-only preview of the existing trial-email templates in src/lib/email.ts.
+// Sends happen only via the existing sendTrialEmail helper (cron + provisioning) —
+// this section adds no sending paths and no send buttons.
+const EMAIL_TEMPLATES: { day: TrialEmailDay; subject: string; blurb: string }[] = [
+  { day: 0, subject: "Welcome to QRslice — your 14-day trial has started 🎉", blurb: "Day-0 welcome: 14-day full-access trial live, 30-minute setup checklist, upgrade CTA." },
+  { day: 7, subject: "You're halfway through your QRslice trial", blurb: "Day-7 midpoint: 7 days left plus order/revenue stats when available, upgrade CTA." },
+  { day: 12, subject: "2 days left — keep your kitchen running", blurb: "Day-12 nudge: 2 days remaining, upgrade now so ordering never pauses during service." },
+  { day: 14, subject: "Your QRslice trial has ended — upgrade to restore ordering", blurb: "Day-14 expiry: ordering paused, nothing deleted, restore-access CTA." },
+];
 
 export function ContentTab() {
   const { tab } = useSuperAdmin();
@@ -135,6 +146,24 @@ export function ContentTab() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-8 rounded-2xl shadow-sm">
+        <div className="mb-6">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">Email Templates (preview only)</h2>
+          <p className="text-slate-500 dark:text-stone-400 mt-1 text-sm">Trial lifecycle emails sent via the existing <span className="font-mono">sendTrialEmail</span> helper. Preview only — no sending from here.</p>
+        </div>
+        <div className="space-y-3">
+          {EMAIL_TEMPLATES.map((t) => (
+            <div key={t.day} className="border border-slate-200 dark:border-stone-800 rounded-xl p-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200">Day {t.day}</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{t.subject}</span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-stone-400 mt-1">{t.blurb}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -8,6 +8,16 @@ export interface ImpersonationBarProps {
   tenantSlug: string;
   onExit?: () => void;
   children?: React.ReactNode;
+  expiresAt?: string | null;
+  cafeId?: string | null;
+}
+
+function formatRemaining(ms: number): string {
+  if (ms <= 0) return "Expired";
+  const total = Math.floor(ms / 1000);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 export function ImpersonationBar({
@@ -15,14 +25,40 @@ export function ImpersonationBar({
   tenantSlug,
   onExit,
   children,
+  expiresAt = null,
+  cafeId = null,
 }: ImpersonationBarProps) {
   const router = useRouter();
+  const [now, setNow] = React.useState(() => Date.now());
+  const [exiting, setExiting] = React.useState(false);
 
-  const handleExit = () => {
-    if (onExit) {
-      onExit();
-    } else {
-      router.push("/super");
+  React.useEffect(() => {
+    if (!expiresAt) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [expiresAt]);
+
+  const remainingMs = expiresAt ? new Date(expiresAt).getTime() - now : null;
+  const expired = remainingMs !== null && remainingMs <= 0;
+
+  const handleExit = async () => {
+    if (exiting) return;
+    setExiting(true);
+    try {
+      if (cafeId) {
+        await fetch("/api/super/impersonate", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cafeId }),
+        }).catch(() => null);
+      }
+    } finally {
+      setExiting(false);
+      if (onExit) {
+        onExit();
+      } else {
+        router.push("/super");
+      }
     }
   };
 
@@ -39,6 +75,18 @@ export function ImpersonationBar({
               {tenantSlug}
             </span>
             <span className="text-xs text-amber-950/80 font-medium">Viewing in live owner mode</span>
+            {remainingMs !== null && (
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-black border ${
+                  expired
+                    ? "bg-red-600 text-white border-red-700"
+                    : "bg-stone-950 text-amber-400 border-stone-950"
+                }`}
+                title={expiresAt ?? undefined}
+              >
+                ⏳ {formatRemaining(remainingMs)} left
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -52,9 +100,10 @@ export function ImpersonationBar({
             <button
               type="button"
               onClick={handleExit}
-              className="px-3 py-1.5 rounded-xl bg-stone-950 hover:bg-stone-900 text-amber-400 text-xs font-black shadow-md cursor-pointer transition-all active:scale-95"
+              disabled={exiting}
+              className="px-3 py-1.5 rounded-xl bg-stone-950 hover:bg-stone-900 text-amber-400 text-xs font-black shadow-md cursor-pointer transition-all active:scale-95 disabled:opacity-50"
             >
-              ✕ Exit Impersonation
+              {exiting ? "Exiting…" : "✕ Exit Impersonation"}
             </button>
           </div>
         </div>
@@ -66,7 +115,9 @@ export function ImpersonationBar({
             <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             <span className="text-xs font-bold text-amber-800">Live Impersonation Active</span>
           </div>
-          <span className="text-xs text-amber-800/80">Exit impersonation to return to admin</span>
+          <span className="text-xs text-amber-800/80">
+            {remainingMs !== null ? `Session ${formatRemaining(remainingMs)} remaining` : "Exit impersonation to return to admin"}
+          </span>
         </div>
       </div>
 
