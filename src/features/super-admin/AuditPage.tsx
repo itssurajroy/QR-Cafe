@@ -11,8 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 
 export function SuperAuditPage() {
-  const [auditLogs, setAuditLogs] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);  const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
@@ -58,6 +57,25 @@ export function SuperAuditPage() {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
+  // CSV export of the currently loaded rows (quote-escape like tenantsToCsv).
+  const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  function handleExportCsv() {
+    const header = "Timestamp,Entity,Action,Cafe,Details";
+    const lines = auditLogs.map((log: any) =>
+      [log.created_at, esc(log.entity), esc(log.action), esc(log.entity_id), esc(JSON.stringify(log.details || {}))].join(",")
+    );
+    const csv = [header, ...lines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `qrslice-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   const getActionBadge = (action: string) => {
     const badges: Record<string, string> = {
       create: "bg-emerald-100 text-emerald-700",
@@ -94,6 +112,9 @@ export function SuperAuditPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">{totalCount} total entries</span>
+          <Button variant="outline" onClick={handleExportCsv} disabled={auditLogs.length === 0} className="h-9 text-xs font-bold">
+            📥 Export CSV
+          </Button>
         </div>
       </div>
 
