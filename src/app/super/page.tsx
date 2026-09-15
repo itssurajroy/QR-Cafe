@@ -10,14 +10,14 @@ export const dynamic = "force-dynamic";
 export default async function SuperPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string; plan?: string; status?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; plan?: string; status?: string; tab?: string }>;
 }) {
   const user = await requireSuperAdmin();
   if (!user) {
     redirect("/login");
   }
 
-  const { page = "1", q = "", plan = "", status = "" } = await searchParams;
+  const { page = "1", q = "", plan = "", status = "", tab = "dashboard" } = await searchParams;
   const currentPage = Math.max(1, parseInt(page, 10));
   const pageSize = 15;
 
@@ -238,6 +238,7 @@ export default async function SuperPage({
       }}
       config={configMap}
       recentAudit={recentAudit || []}
+      initialTab={tab}
     />
   );
 }

@@ -135,28 +135,33 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center pt-24 p-4"
+      className="fixed inset-0 bg-slate-900/40 z-50 flex items-start justify-center pt-24 p-4"
       onClick={() => setOpen(false)}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        className="w-full max-w-lg bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-lg bg-white border border-slate-200/90 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={onDialogKey}
       >
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Type a command or search tenants…"
-          className="w-full p-4 bg-transparent text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none border-b border-slate-200 dark:border-stone-800"
-        />
+        <div className="flex items-center px-4 border-b border-slate-100 bg-white">
+          <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Type a command or search tenants…"
+            className="w-full p-4 bg-transparent text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none"
+          />
+        </div>
         <div className="max-h-72 overflow-y-auto p-2">
           {rows.length === 0 && (
-            <div className="p-4 text-xs text-slate-500 dark:text-stone-400 text-center">
-              {tenantsFailed ? "Tenant search unavailable — static actions only." : "No matches. Try another search."}
+            <div className="p-4 text-xs font-medium text-slate-500 text-center">
+              {tenantsFailed ? "Tenant search unavailable — static actions only." : "No matches found. Try another search query."}
             </div>
           )}
           {rows.map((r, i) => (
@@ -165,24 +170,27 @@ export function CommandPalette() {
               type="button"
               onMouseEnter={() => setCursor(i)}
               onClick={() => r.run()}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${
                 i === cursor
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-700 dark:text-stone-200 hover:bg-slate-100 dark:hover:bg-stone-800"
+                  ? "bg-[#5738F5] text-white shadow-sm"
+                  : "text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <span className="flex items-center gap-2 truncate">
-                <span>{r.kind === "tenant" ? "🏢" : "⚡"}</span>
+              <span className="flex items-center gap-2.5 truncate">
+                <span className="text-base">{r.kind === "tenant" ? "🏢" : "⚡"}</span>
                 <span className="truncate">{r.label}</span>
               </span>
-              <span className={`text-xs font-mono ${i === cursor ? "text-white/70" : "text-slate-400"}`}>{r.sub}</span>
+              <span className={`text-[11px] font-mono ${i === cursor ? "text-white/80" : "text-slate-400"}`}>{r.sub}</span>
             </button>
           ))}
         </div>
-        <div className="px-4 py-2 border-t border-slate-200 dark:border-stone-800 text-xs text-slate-400 dark:text-stone-500 flex gap-3">
-          <span>↑↓ navigate</span>
-          <span>↵ select</span>
-          <span>esc close</span>
+        <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/60 text-[11px] font-medium text-slate-500 flex items-center justify-between">
+          <div className="flex gap-3">
+            <span><kbd className="font-mono bg-white border border-slate-200 px-1 py-0.5 rounded text-[10px] text-slate-600">↑↓</kbd> navigate</span>
+            <span><kbd className="font-mono bg-white border border-slate-200 px-1 py-0.5 rounded text-[10px] text-slate-600">↵</kbd> select</span>
+            <span><kbd className="font-mono bg-white border border-slate-200 px-1 py-0.5 rounded text-[10px] text-slate-600">esc</kbd> close</span>
+          </div>
+          <span className="text-[10px] font-mono text-slate-400">QRslice Command</span>
         </div>
       </div>
     </div>

@@ -65,27 +65,27 @@ export function ImpersonationBar({
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-stone-950 px-4 py-2 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-base font-black">🕵️‍♂️ IMPERSONATING</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-black bg-amber-500/20 text-amber-950 font-bold border border-amber-500/30">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-amber-950 px-4 py-2.5 shadow-md border-b border-amber-600">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-black uppercase tracking-wider bg-amber-950 text-amber-100 px-2 py-0.5 rounded-md">
+              🕵️ Live Impersonation
+            </span>
+            <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-400/60 text-amber-950 border border-amber-600/30">
               {tenantName}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-950 border border-amber-500/30">
-              {tenantSlug}
+            <span className="px-2 py-0.5 rounded-md text-xs font-mono text-amber-900 bg-amber-400/40">
+              /c/{tenantSlug}
             </span>
-            <span className="text-xs text-amber-950/80 font-medium">Viewing in live owner mode</span>
             {remainingMs !== null && (
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-black border ${
+                className={`px-2 py-0.5 rounded-md text-[11px] font-mono font-bold border ${
                   expired
-                    ? "bg-red-600 text-white border-red-700"
-                    : "bg-stone-950 text-amber-400 border-stone-950"
+                    ? "bg-rose-100 text-rose-800 border-rose-300"
+                    : "bg-amber-100 text-amber-900 border-amber-300"
                 }`}
-                title="Advisory reminder only — session does not auto-revoke. Exit when done."
               >
-                ⏳ {expired ? "Reminder elapsed — exit when done" : `${formatRemaining(remainingMs)} reminder — exit when done`}
+                ⏳ {expired ? "Session elapsed" : `${formatRemaining(remainingMs)} remaining`}
               </span>
             )}
           </div>
@@ -94,31 +94,19 @@ export function ImpersonationBar({
             <button
               type="button"
               onClick={() => navigator.clipboard.writeText(window.location.href)}
-              className="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-stone-950 text-xs font-bold border border-stone-950/20 cursor-pointer transition-all active:scale-95"
+              className="px-3 py-1 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 text-amber-950 text-xs font-bold border border-amber-700/20 cursor-pointer transition-all"
             >
-              <span className="text-xs font-bold">📋 Copy URL</span>
+              Copy Session Link
             </button>
             <button
               type="button"
               onClick={handleExit}
               disabled={exiting}
-              className="px-3 py-1.5 rounded-xl bg-stone-950 hover:bg-stone-900 text-amber-400 text-xs font-black shadow-md cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-amber-950 hover:bg-amber-900 text-white text-xs font-bold shadow cursor-pointer transition-all disabled:opacity-50"
             >
-              {exiting ? "Exiting…" : "✕ Exit Impersonation"}
+              {exiting ? "Exiting…" : "✕ Exit Session"}
             </button>
           </div>
-        </div>
-      </div>
-
-      <div className="fixed bottom-4 right-4 z-50">
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 shadow-xl flex items-center gap-2 max-w-sm animate-slide-in">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-xs font-bold text-amber-800">Live Impersonation Active</span>
-          </div>
-          <span className="text-xs text-amber-800/80">
-            {remainingMs !== null ? `Advisory session — exit when done (${formatRemaining(remainingMs)} reminder)` : "Advisory session — exit when done to return to admin"}
-          </span>
         </div>
       </div>
 

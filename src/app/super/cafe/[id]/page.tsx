@@ -74,7 +74,7 @@ export default async function ImpersonateCafePage({
   const revenue = paid.reduce((s, o) => s + (o.total_paise || 0), 0);
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col pt-12">
+    <div className="min-h-screen bg-[#FAF9F6] text-slate-900 flex flex-col pt-12">
       {/* Impersonation Banner */}
       <ImpersonationBanner
         tenantName={tenant.name}

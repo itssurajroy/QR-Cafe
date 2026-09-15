@@ -1,48 +1,30 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React from 'react';
-import { useSuperAdmin } from '../SuperAdminContext';
-import Link from 'next/link';
-import { tenantsToCsv } from '@/lib/platform-csv';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+import React from "react";
+import { useSuperAdmin } from "../SuperAdminContext";
+import Link from "next/link";
+import { tenantsToCsv } from "@/lib/platform-csv";
 
 export function TenantsTab() {
   const ctx = useSuperAdmin();
-  
-  const handleImpersonate = async (cafeId: string) => {
-    try {
-      const res = await fetch('/api/super/impersonate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cafeId })
-      });
-      const data = await res.json();
-      if (data.ok && data.url) {
-        window.open(data.url, '_blank');
-      } else {
-        alert(data.error || 'Failed to impersonate');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
+  const {
+    kpis,
+    applyFilter,
+    openDrawer,
+    totalPages,
+    cafes,
+    page,
+    totalCafes,
+    searchQuery,
+    selectedPlan,
+    handleFastToggleStatus,
+    handleFastExtendTrial,
+    setSearchQuery,
+    setSelectedPlan,
+  } = ctx;
 
-  const { kpis, charts, applyFilter, openDrawer, totalPages, tab, cafes, page, pageSize, totalCafes, searchQuery, selectedPlan, handleFastToggleStatus, handleFastExtendTrial, handleDeleteCafe, staff, platformConfig, savingConfigKey, handleSaveConfig, auditRows, auditActionFilter, loadFilteredAudit, auditLoading, setAuditActionFilter, setSearchQuery, setSelectedPlan, setDrawerCafeId, setDrawerTab, setDrawerData, setShowNewCafeModal } = ctx;
-
-  // Bulk selection + bulk actions (real actions: extend_trial / set_plan; audit logged server-side)
+  // Bulk selection + bulk actions
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [bulkBusy, setBulkBusy] = React.useState(false);
   const toggleSelect = (id: string) =>
@@ -76,7 +58,6 @@ export function TenantsTab() {
     }
   }
 
-  // CSV export via shared helper (qrslice-tenants-YYYY-MM-DD.csv)
   function handleExportLocal() {
     const csv = tenantsToCsv(
       (cafes as any[]).map((c: any) => ({
@@ -102,276 +83,296 @@ export function TenantsTab() {
     URL.revokeObjectURL(url);
   }
 
+  const plansList = [
+    { id: "", label: "All Cafés", count: totalCafes },
+    { id: "active", label: "Active Paying", count: kpis?.active || 0 },
+    { id: "trial", label: "Free Trial", count: kpis?.trial || 0 },
+    { id: "suspended", label: "Suspended", count: kpis?.suspended || 0 },
+  ];
+
   return (
-    <>
-{/* TAB 2: CAFES & TENANTS LIST WITH SERVER SEARCH & FILTER */}
-          
-            <div className="space-y-4">
-              {/* Search & Filter Toolbar */}
-              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-4 rounded-2xl">
-                <div className="flex-1 w-full sm:w-auto flex items-center gap-2 bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs">
-                  <span>🔍</span>
+    <div className="space-y-4 select-none">
+      {/* Search & Filter Toolbar */}
+      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="flex-1 w-full flex items-center gap-2.5 bg-[#FAF9F6] border border-slate-200/80 rounded-xl px-3.5 py-2.5 text-xs">
+            <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search café name, slug or outlet…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") applyFilter(searchQuery, selectedPlan);
+              }}
+              className="bg-transparent text-slate-900 placeholder-slate-400 focus:outline-none flex-1 text-xs font-medium"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  applyFilter("", selectedPlan);
+                }}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => applyFilter(searchQuery, selectedPlan)}
+              className="px-4 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#492ee0] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+            >
+              Search
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportLocal}
+              className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-200/80 shadow-2xs transition-colors"
+              title="Export filtered records to CSV"
+            >
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Filter Pills */}
+        <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-slate-100">
+          {plansList.map((p) => {
+            const isSelected = selectedPlan === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setSelectedPlan(p.id);
+                  applyFilter(searchQuery, p.id);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+                  isSelected
+                    ? "bg-[#5738F5] text-white shadow-xs"
+                    : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/60"
+                }`}
+              >
+                <span>{p.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  isSelected ? "bg-white/20 text-white" : "bg-white text-slate-500 border border-slate-200"
+                }`}>
+                  {p.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-violet-50 border border-violet-200 p-3.5 rounded-2xl text-xs animate-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold text-[#5738F5]">
+              {selectedIds.length} café{selectedIds.length > 1 ? "s" : ""} selected
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => runBulk("extend")}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              Extend Trial +14d
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => runBulk("activate")}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              Set Active
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="px-3 py-1.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 border border-slate-200 font-bold text-xs cursor-pointer shadow-2xs"
+            >
+              Deselect All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tenants Table */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-400 uppercase tracking-wider text-[11px] font-bold">
+                <th className="p-4 w-10">
                   <input
-                    type="text"
-                    placeholder="Search by café name or slug…"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") applyFilter(searchQuery, selectedPlan);
-                    }}
-                    className="bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none flex-1"
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all cafés"
+                    className="rounded border-slate-300 text-[#5738F5] focus:ring-[#5738F5] cursor-pointer"
                   />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery("");
-                        applyFilter("", selectedPlan);
-                      }}
-                      className="text-slate-400 dark:text-stone-500 hover:text-slate-900 dark:hover:text-white"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
+                </th>
+                <th className="p-4">Café & Slug</th>
+                <th className="p-4">Tier</th>
+                <th className="p-4">Plan Status</th>
+                <th className="p-4">Expiry Date</th>
+                <th className="p-4">Pricing</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {cafes.map((c: any) => {
+                const isTrial = c.plan === "trial";
+                const isActive = c.plan === "active";
+                const isSuspended = c.plan === "suspended";
 
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <select
-                    value={selectedPlan}
-                    onChange={(e) => {
-                      setSelectedPlan(e.target.value);
-                      applyFilter(searchQuery, e.target.value);
-                    }}
-                    className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-stone-300 focus:outline-none"
+                return (
+                  <tr
+                    key={c.id}
+                    onClick={() => openDrawer(c.id)}
+                    className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
                   >
-                    <option value="">All Plans (All)</option>
-                    <option value="active">Active Paying</option>
-                    <option value="trial">Free Trial</option>
-                    <option value="expired">Expired</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
+                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(c.id)}
+                        onChange={() => toggleSelect(c.id)}
+                        aria-label={`Select ${c.name}`}
+                        className="rounded border-slate-300 text-[#5738F5] focus:ring-[#5738F5] cursor-pointer"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div className="font-extrabold text-slate-900 group-hover:text-[#5738F5] transition-colors flex items-center gap-1.5">
+                        <span>{c.name}</span>
+                        {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
+                      </div>
+                      <span className="text-[11px] font-mono text-slate-400">
+                        /c/{c.slug}
+                      </span>
+                    </td>
 
-                  <button
-                    type="button"
-                    onClick={() => applyFilter(searchQuery, selectedPlan)}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
-                  >
-                    Search
-                  </button>
+                    <td className="p-4">
+                      <span className="px-2 py-0.5 rounded-md font-bold uppercase text-[10px] bg-slate-100 text-slate-700 border border-slate-200">
+                        {c.tier || "pro"}
+                      </span>
+                    </td>
 
-                  <button
-                    type="button"
-                    onClick={handleExportLocal}
-                    className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-700 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-300 dark:border-stone-700"
-                    title="Export filtered records to CSV"
-                  >
-                    <span>📥 Export CSV</span>
-                  </button>
-                </div>
-              </div>
+                    <td className="p-4">
+                      <span
+                        className={`px-2.5 py-1 rounded-full font-bold uppercase text-[10px] border ${
+                          isActive
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            : isTrial
+                            ? "bg-amber-50 border-amber-200 text-amber-700"
+                            : "bg-rose-50 border-rose-200 text-rose-700"
+                        }`}
+                      >
+                        {c.plan}
+                      </span>
+                    </td>
 
-              {/* Bulk-action bar */}
-              {selectedIds.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 p-3 rounded-2xl text-xs">
-                  <span className="font-bold text-indigo-700 dark:text-indigo-300">
-                    {selectedIds.length} selected
-                  </span>
-                  <button
-                    type="button"
-                    disabled={bulkBusy}
-                    onClick={() => runBulk("extend")}
-                    className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
-                  >
-                    Extend trial +14d
-                  </button>
-                  <button
-                    type="button"
-                    disabled={bulkBusy}
-                    onClick={() => runBulk("activate")}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
-                  >
-                    Activate
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedIds([])}
-                    className="px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 font-bold text-xs cursor-pointer"
-                  >
-                    Clear
-                  </button>
-                </div>
+                    <td className="p-4 text-slate-600 font-mono text-xs">
+                      {isActive
+                        ? c.subscription_ends_at
+                          ? new Date(c.subscription_ends_at).toLocaleDateString("en-IN")
+                          : "Continuous"
+                        : isTrial && c.trial_ends_at
+                        ? `${new Date(c.trial_ends_at).toLocaleDateString("en-IN")}`
+                        : "Expired"}
+                    </td>
+
+                    <td className="p-4 font-mono font-bold text-slate-900 text-xs">
+                      ₹999/mo
+                    </td>
+
+                    <td className="p-4 text-right space-x-1.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={(e) => handleFastExtendTrial(c.id, e)}
+                        title="Add 7 Free Trial Days"
+                        className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold text-xs cursor-pointer shadow-2xs transition-colors"
+                      >
+                        +7d Trial
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleFastToggleStatus(c, e)}
+                        title="Toggle Active / Suspended"
+                        className={`px-2.5 py-1 rounded-lg border font-bold text-xs cursor-pointer shadow-2xs transition-colors ${
+                          c.plan === "suspended"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                            : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                        }`}
+                      >
+                        {c.plan === "suspended" ? "Activate" : "Suspend"}
+                      </button>
+                      <Link
+                        href={`/super/cafe/${c.id}`}
+                        className="px-2.5 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-[#5738F5] border border-violet-200 font-bold text-xs inline-block transition-colors cursor-pointer shadow-2xs"
+                      >
+                        Impersonate
+                      </Link>
+                      <Link
+                        href={`/c/${c.slug}`}
+                        target="_blank"
+                        className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 font-bold text-xs inline-block transition-colors shadow-2xs"
+                      >
+                        View ↗
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+              {cafes.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                    No cafés match the selected filter query.
+                  </td>
+                </tr>
               )}
+            </tbody>
+          </table>
+        </div>
 
-              {/* Tenants Table */}
-              <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-black/50">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-200 dark:border-stone-800 bg-slate-50 dark:bg-stone-950/60 text-slate-500 dark:text-stone-400 uppercase tracking-wider text-xs">
-                        <th className="p-4">
-                          <input
-                            type="checkbox"
-                            checked={allSelected}
-                            onChange={toggleSelectAll}
-                            aria-label="Select all cafés"
-                            className="cursor-pointer"
-                          />
-                        </th>
-                        <th className="p-4">Café & Domain</th>
-                        <th className="p-4">Tier</th>
-                        <th className="p-4">Plan Status</th>
-                        <th className="p-4">Trial / Sub Expiry</th>
-                        <th className="p-4">Last Active</th>
-                        <th className="p-4">Pricing</th>
-                        <th className="p-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-stone-800/60">
-                      {cafes.map((c: any) => {
-                        const isTrial = c.plan === "trial";
-                        const isActive = c.plan === "active";
-                        const isSuspended = c.plan === "suspended";
+        {/* Pagination Controls */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs">
+          <span className="text-slate-500 font-medium">
+            Showing <strong className="text-slate-900">{cafes.length}</strong> of <strong className="text-slate-900">{totalCafes}</strong> cafés (Page {page} of {totalPages})
+          </span>
 
-                        return (
-                          <tr
-                            key={c.id}
-                            onClick={() => openDrawer(c.id)}
-                            className="hover:bg-slate-50 dark:hover:bg-stone-800/40 transition-colors cursor-pointer group"
-                          >
-                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                              <input
-                                type="checkbox"
-                                checked={selectedIds.includes(c.id)}
-                                onChange={() => toggleSelect(c.id)}
-                                aria-label={`Select ${c.name}`}
-                                className="cursor-pointer"
-                              />
-                            </td>
-                            <td className="p-4">
-                              <div className="font-black text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
-                                {c.name}
-                              </div>
-                              <span className="text-xs font-mono text-slate-500 dark:text-stone-400">
-                                /c/{c.slug}
-                              </span>
-                            </td>
-
-                            <td className="p-4">
-                              <span className="px-2.5 py-1 rounded-full font-black uppercase text-xs bg-slate-100 dark:bg-stone-800 border border-slate-200 dark:border-stone-700 text-slate-700 dark:text-stone-300">
-                                {c.tier || "pro"}
-                              </span>
-                            </td>
-
-                            <td className="p-4">
-                              <span
-                                className={`px-2.5 py-1 rounded-full font-black uppercase text-xs border ${
-                                  isActive
-                                    ? "bg-emerald-50 border-emerald-300 text-emerald-700"
-                                    : isTrial
-                                    ? "bg-amber-50 border-amber-300 text-amber-800"
-                                    : "bg-red-50 border-red-300 text-red-700"
-                                }`}
-                              >
-                                {c.plan}
-                              </span>
-                            </td>
-
-                            <td className="p-4 text-slate-600 dark:text-stone-400 font-mono text-xs">
-                              {isActive
-                                ? c.subscription_ends_at
-                                  ? new Date(c.subscription_ends_at).toLocaleDateString("en-IN")
-                                  : "Continuous"
-                                : isTrial && c.trial_ends_at
-                                ? `${new Date(c.trial_ends_at).toLocaleDateString("en-IN")}`
-                                : "Expired"}
-                            </td>
-
-                            <td className="p-4 text-slate-600 dark:text-stone-400 font-mono text-xs">
-                              {c.last_active_at
-                                ? new Date(c.last_active_at).toLocaleDateString("en-IN")
-                                : "—"}
-                            </td>
-
-                            <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">
-                              ₹999/mo
-                            </td>
-
-                            <td className="p-4 text-right space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={(e) => handleFastExtendTrial(c.id, e)}
-                                title="Add 7 Free Trial Days"
-                                className="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs cursor-pointer"
-                              >
-                                +7d Trial
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => handleFastToggleStatus(c, e)}
-                                title="Toggle Active / Suspended"
-                                className={`px-2 py-1 rounded-lg border font-bold text-xs cursor-pointer ${
-                                  c.plan === "suspended"
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
-                                    : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                                }`}
-                              >
-                                {c.plan === "suspended" ? "Activate" : "Suspend"}
-                              </button>
-                              <Link
-                                href={`/super/cafe/${c.id}`}
-                                className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-700 dark:text-stone-300 border border-slate-300 dark:border-stone-700 font-bold text-xs inline-block transition-colors cursor-pointer"
-                              >
-                                🕵️ Impersonate
-                              </Link>
-                              <Link
-                                href={`/c/${c.slug}`}
-                                target="_blank"
-                                className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-stone-800 hover:bg-slate-200 dark:hover:bg-stone-700 text-slate-600 dark:text-stone-400 hover:text-slate-900 font-bold text-xs inline-block transition-colors"
-                              >
-                                View ↗
-                              </Link>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {cafes.length === 0 && (
-                        <tr>
-                          <td colSpan={8} className="p-8 text-center text-slate-400 dark:text-stone-500">
-                            No cafés match the selected filter query.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination Controls */}
-                <div className="p-4 border-t border-slate-200 dark:border-stone-800 bg-slate-50 dark:bg-stone-950/40 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-stone-400">
-                    Showing <strong>{cafes.length}</strong> of <strong>{totalCafes}</strong> cafés (Page {page} of {totalPages})
-                  </span>
-
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      disabled={page <= 1}
-                      onClick={() => applyFilter(searchQuery, selectedPlan, page - 1)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-slate-600 dark:text-stone-300 hover:bg-slate-100 dark:hover:bg-stone-800 dark:bg-stone-800 disabled:opacity-30 cursor-pointer"
-                    >
-                      &larr; Previous
-                    </button>
-                    <button
-                      type="button"
-                      disabled={page >= totalPages}
-                      onClick={() => applyFilter(searchQuery, selectedPlan, page + 1)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-slate-600 dark:text-stone-300 hover:bg-slate-100 dark:hover:bg-stone-800 dark:bg-stone-800 disabled:opacity-30 cursor-pointer"
-                    >
-                      Next &rarr;
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-    </>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => applyFilter(searchQuery, selectedPlan, page - 1)}
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none cursor-pointer font-bold shadow-2xs transition-colors"
+            >
+              &larr; Previous
+            </button>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => applyFilter(searchQuery, selectedPlan, page + 1)}
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none cursor-pointer font-bold shadow-2xs transition-colors"
+            >
+              Next &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

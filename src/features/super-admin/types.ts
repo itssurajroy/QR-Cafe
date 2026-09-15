@@ -20,6 +20,7 @@ export interface SuperClientProps {
   charts?: any;
   config?: any;
   recentAudit?: any[];
+  initialTab?: string;
 }
 
 export interface Cafe {

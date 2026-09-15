@@ -46,7 +46,7 @@ export function SettingsTab() {
         });
       } catch {
         if (!cancelled) {
-          setLoadError("Could not load platform settings — showing defaults.");
+          setLoadError("Could not load platform settings — displaying defaults.");
           setSettings(FALLBACK);
         }
       }
@@ -66,7 +66,7 @@ export function SettingsTab() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("save failed");
-      setNotice(`Saved ${key}.`);
+      setNotice(`Successfully saved ${key}.`);
     } catch {
       setNotice(`Could not save ${key}.`);
     } finally {
@@ -77,28 +77,34 @@ export function SettingsTab() {
   if (!settings) {
     return (
       <div className="max-w-3xl space-y-6">
-        <p className="text-xs text-slate-500">{loadError ?? "Loading platform settings…"}</p>
+        <p className="text-xs text-slate-500 font-medium">{loadError ?? "Loading platform settings…"}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 space-y-6 shadow-xl">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 space-y-6 shadow-sm">
         <div>
-          <h3 className="text-base font-black text-slate-900 dark:text-white">Platform Settings</h3>
-          <p className="text-xs text-slate-500 dark:text-stone-400 mt-0.5">
-            Trial defaults, pricing, signups, and maintenance mode stored in `platform_settings`.
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-black text-slate-900 tracking-tight">Platform Core Settings</h3>
+            <span className="px-2 py-0.5 rounded-md bg-violet-50 text-[#5738F5] text-[10px] font-black uppercase tracking-wider border border-violet-100">
+              System Control
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Default evaluation trial duration, subscription tier rates, public onboarding toggles, and global maintenance lock.
           </p>
         </div>
-        {loadError && <p className="text-xs font-bold text-amber-600">{loadError}</p>}
-        {notice && <p className="text-xs font-bold text-emerald-600">{notice}</p>}
+
+        {loadError && <p className="text-xs font-bold text-amber-600 bg-amber-50 p-3 rounded-xl border border-amber-200">{loadError}</p>}
+        {notice && <p className="text-xs font-bold text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200">{notice}</p>}
 
         {/* Trial Length */}
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800">
+        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <div>
-            <div className="font-bold text-xs text-slate-900 dark:text-white">Default Free Trial Duration</div>
-            <p className="text-xs text-slate-500 dark:text-stone-400">Days of full access granted upon onboarding (1–90)</p>
+            <div className="font-bold text-xs text-slate-900">Default Free Trial Duration</div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Evaluation days automatically granted to newly registered cafés</p>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -109,13 +115,14 @@ export function SettingsTab() {
               onChange={(e) =>
                 setSettings((prev) => (prev ? { ...prev, trial_days: { days: Number(e.target.value) } } : prev))
               }
-              className="w-16 bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl px-2.5 py-1 text-xs text-slate-900 dark:text-white text-center font-mono font-bold"
+              className="w-18 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 text-center font-mono font-bold"
             />
+            <span className="text-xs text-slate-500 font-semibold">days</span>
             <button
               type="button"
               onClick={() => postSettings("trial_days", { trial_days: Math.max(1, Math.min(90, Math.round(settings.trial_days.days))) })}
               disabled={savingKey === "trial_days"}
-              className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white font-bold text-xs cursor-pointer shadow-sm ml-2"
             >
               {savingKey === "trial_days" ? "Saving…" : "Save"}
             </button>
@@ -123,15 +130,15 @@ export function SettingsTab() {
         </div>
 
         {/* Pricing */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 space-y-3">
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
           <div>
-            <div className="font-bold text-xs text-slate-900 dark:text-white">Subscription Pricing (INR)</div>
-            <p className="text-xs text-slate-500 dark:text-stone-400">Default recurring rates displayed across the platform</p>
+            <div className="font-bold text-xs text-slate-900">Subscription Pricing (INR)</div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Standard recurring subscription billing defaults</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-stone-500 block">
-                Monthly (₹)
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                Monthly Rate (₹)
               </span>
               <input
                 type="number"
@@ -142,12 +149,12 @@ export function SettingsTab() {
                     prev ? { ...prev, pricing: { ...prev.pricing, monthly_inr: Number(e.target.value) } } : prev
                   )
                 }
-                className="w-full bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white font-mono font-bold"
+                className="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs text-slate-900 font-mono font-bold"
               />
             </label>
             <label className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-stone-500 block">
-                Annual (₹)
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                Annual Rate (₹)
               </span>
               <input
                 type="number"
@@ -158,7 +165,7 @@ export function SettingsTab() {
                     prev ? { ...prev, pricing: { ...prev.pricing, annual_inr: Number(e.target.value) } } : prev
                   )
                 }
-                className="w-full bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white font-mono font-bold"
+                className="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs text-slate-900 font-mono font-bold"
               />
             </label>
           </div>
@@ -173,17 +180,17 @@ export function SettingsTab() {
               })
             }
             disabled={savingKey === "pricing"}
-            className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs cursor-pointer"
+            className="w-full py-2 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
           >
-            {savingKey === "pricing" ? "Saving…" : "Update Pricing"}
+            {savingKey === "pricing" ? "Updating…" : "Update Pricing Rates"}
           </button>
         </div>
 
         {/* Signups Toggle */}
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800">
+        <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <div>
-            <div className="font-bold text-xs text-slate-900 dark:text-white">Self-Serve Signups</div>
-            <p className="text-xs text-slate-500 dark:text-stone-400">Allow new café owners to register via /onboarding</p>
+            <div className="font-bold text-xs text-slate-900">Self-Serve Customer Signups</div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Allow new cafe operators to onboard through the public portal</p>
           </div>
           <button
             type="button"
@@ -193,22 +200,22 @@ export function SettingsTab() {
               setSettings((prev) => (prev ? { ...prev, signups_open: { enabled: next } } : prev));
               postSettings("signups_open", { signups_open: next });
             }}
-            className={`px-4 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer disabled:opacity-50 ${
+            className={`px-4 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer disabled:opacity-50 shadow-sm ${
               settings.signups_open.enabled
-                ? "bg-emerald-500 text-white"
-                : "bg-slate-200 dark:bg-stone-800 text-slate-600 dark:text-stone-400"
+                ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+                : "bg-slate-200 hover:bg-slate-300 text-slate-700"
             }`}
           >
-            {settings.signups_open.enabled ? "Enabled ✓" : "Disabled ✕"}
+            {settings.signups_open.enabled ? "Signups Open ✓" : "Signups Closed ✕"}
           </button>
         </div>
 
         {/* Maintenance Mode */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 space-y-3">
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-bold text-xs text-slate-900 dark:text-white">Maintenance Mode</div>
-              <p className="text-xs text-slate-500 dark:text-stone-400">Show a maintenance notice to customers</p>
+              <div className="font-bold text-xs text-slate-900">Platform Maintenance Mode</div>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">Show a maintenance notice and block customer interactions</p>
             </div>
             <button
               type="button"
@@ -217,18 +224,18 @@ export function SettingsTab() {
                   prev ? { ...prev, maintenance: { ...prev.maintenance, enabled: !prev.maintenance.enabled } } : prev
                 )
               }
-              className={`px-4 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm ${
                 settings.maintenance.enabled
-                  ? "bg-amber-500 text-white"
-                  : "bg-slate-200 dark:bg-stone-800 text-slate-600 dark:text-stone-400"
+                  ? "bg-amber-600 hover:bg-amber-500 text-white"
+                  : "bg-slate-200 hover:bg-slate-300 text-slate-700"
               }`}
             >
-              {settings.maintenance.enabled ? "On" : "Off"}
+              {settings.maintenance.enabled ? "Mode Active (On)" : "Mode Inactive (Off)"}
             </button>
           </div>
           <label className="space-y-1 block">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-stone-500 block">
-              Maintenance message
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Customer maintenance message
             </span>
             <input
               type="text"
@@ -239,8 +246,8 @@ export function SettingsTab() {
                 )
               }
               maxLength={500}
-              placeholder="We are down for scheduled maintenance…"
-              className="w-full bg-white dark:bg-stone-900 border border-slate-300 dark:border-stone-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
+              placeholder="We are upgrading systems. Estimated return: 15 minutes…"
+              className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-[#5738F5]"
             />
           </label>
           <button
@@ -251,9 +258,9 @@ export function SettingsTab() {
               })
             }
             disabled={savingKey === "maintenance"}
-            className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs cursor-pointer"
+            className="w-full py-2 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
           >
-            {savingKey === "maintenance" ? "Saving…" : "Save Maintenance Mode"}
+            {savingKey === "maintenance" ? "Saving…" : "Save Maintenance Configuration"}
           </button>
         </div>
       </div>

@@ -1,11 +1,11 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
-import React, { useState, useEffect } from 'react';
-import { useSuperAdmin } from '../SuperAdminContext';
-import type { TrialEmailDay } from '@/lib/email';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useSuperAdmin } from "../SuperAdminContext";
+import type { TrialEmailDay } from "@/lib/email";
 
 // Read-only preview of the existing trial-email templates in src/lib/email.ts.
-// Sends happen only via the existing sendTrialEmail helper (cron + provisioning) —
-// this section adds no sending paths and no send buttons.
 const EMAIL_TEMPLATES: { day: TrialEmailDay; subject: string; blurb: string }[] = [
   { day: 0, subject: "Welcome to QRslice — your 14-day trial has started 🎉", blurb: "Day-0 welcome: 14-day full-access trial live, 30-minute setup checklist, upgrade CTA." },
   { day: 7, subject: "You're halfway through your QRslice trial", blurb: "Day-7 midpoint: 7 days left plus order/revenue stats when available, upgrade CTA." },
@@ -15,21 +15,21 @@ const EMAIL_TEMPLATES: { day: TrialEmailDay; subject: string; blurb: string }[] 
 
 export function ContentTab() {
   const { tab } = useSuperAdmin();
-  const [heroEyebrow, setHeroEyebrow] = useState('Next-Gen QR Ordering & Kitchen OS');
-  const [heroHeadlineA, setHeroHeadlineA] = useState('Run your café from one system.');
-  const [heroHeadlineB, setHeroHeadlineB] = useState('QR ordering. Live kitchen. Real stock.');
-  const [heroSub, setHeroSub] = useState('Customers scan, order, and pay from the table. Kitchen gets tickets instantly. You control menu, stock, and billing — all in one place.');
+  const [heroEyebrow, setHeroEyebrow] = useState("Next-Gen QR Ordering & Kitchen OS");
+  const [heroHeadlineA, setHeroHeadlineA] = useState("Run your café from one system.");
+  const [heroHeadlineB, setHeroHeadlineB] = useState("QR ordering. Live kitchen. Real stock.");
+  const [heroSub, setHeroSub] = useState("Customers scan, order, and pay from the table. Kitchen gets tickets instantly. You control menu, stock, and billing — all in one place.");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [msg, setMsg] = useState<{text: string, type: 'error'|'success'} | null>(null);
+  const [msg, setMsg] = useState<{ text: string; type: "error" | "success" } | null>(null);
   
   useEffect(() => {
-    if (tab === 'content') {
-      fetch('/api/super/content')
+    if (tab === "content") {
+      fetch("/api/super/content")
         .then(res => res.json())
         .then(data => {
           if (data.ok && data.items) {
-            const heroData = data.items.find((item: any) => item.key === 'cms.hero');
+            const heroData = data.items.find((item: any) => item.key === "cms.hero");
             if (heroData && heroData.value) {
               if (heroData.value.eyebrow) setHeroEyebrow(heroData.value.eyebrow);
               if (heroData.value.headlineA) setHeroHeadlineA(heroData.value.headlineA);
@@ -42,23 +42,22 @@ export function ContentTab() {
     }
   }, [tab]);
 
-  if (tab !== 'content') return null;
+  if (tab !== "content") return null;
 
   const handleSave = async () => {
     setIsSaving(true);
     setMsg(null);
     try {
-      const res = await fetch('/api/super/content', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/super/content", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          key: 'cms.hero',
+          key: "cms.hero",
           value: {
             eyebrow: heroEyebrow,
             headlineA: heroHeadlineA,
             headlineB: heroHeadlineB,
             sub: heroSub,
-            // Retain these defaults so they don't break
             primaryCta: "Start 14-day free trial",
             secondaryCta: "Watch live demo",
             trustLine: "No credit card required · Live in 30 minutes · Cancel anytime",
@@ -66,103 +65,114 @@ export function ContentTab() {
           }
         })
       });
-      if (!res.ok) throw new Error('Failed to save content');
-      setMsg({ text: 'Content saved successfully!', type: 'success' });
+      if (!res.ok) throw new Error("Failed to save content");
+      setMsg({ text: "Landing page copy saved successfully!", type: "success" });
     } catch (err: any) {
-      setMsg({ text: err.message, type: 'error' });
+      setMsg({ text: err.message, type: "error" });
     } finally {
       setIsSaving(false);
     }
   };
 
   if (isLoading) {
-    return <div className="text-slate-500 text-sm">Loading content settings...</div>;
+    return <div className="text-slate-500 text-xs font-medium">Loading CMS configuration…</div>;
   }
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-8 rounded-2xl shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      {/* Hero Content Card */}
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Landing Page Content</h2>
-            <p className="text-slate-500 dark:text-stone-400 mt-1 text-sm">Update copy on your public website. Changes apply immediately.</p>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-black text-slate-900 tracking-tight">Public Website Hero Copy</h2>
+              <span className="px-2 py-0.5 rounded-md bg-violet-50 text-[#5738F5] text-[10px] font-black uppercase tracking-wider border border-violet-100">
+                CMS
+              </span>
+            </div>
+            <p className="text-slate-500 mt-0.5 text-xs font-medium">Configure the live headlines and value proposition on the root landing page.</p>
           </div>
           <button 
+            type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
+            className="px-4 py-2 bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer shrink-0"
           >
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? "Saving…" : "Save Live Copy"}
           </button>
         </div>
 
         {msg && (
-          <div className={`p-3 mb-6 rounded-lg border text-sm font-bold ${msg.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+          <div className={`p-3 rounded-xl border text-xs font-semibold ${msg.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-rose-50 text-rose-800 border-rose-200"}`}>
             {msg.text}
           </div>
         )}
 
-        <div className="space-y-8">
-          {/* Hero Section */}
-          <div className="border border-slate-200 dark:border-stone-800 rounded-xl overflow-hidden">
-            <div className="bg-slate-50 dark:bg-stone-950/50 p-3 border-b border-slate-200 dark:border-stone-800 font-bold text-sm text-slate-700 dark:text-stone-300 flex items-center gap-2">
-              <span>🦸‍♂️</span> Hero Section
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Eyebrow Badge Text</label>
+            <input 
+              type="text" 
+              value={heroEyebrow}
+              onChange={(e) => setHeroEyebrow(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#5738F5] font-semibold"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Headline Part A (Solid Text)</label>
+              <input 
+                type="text" 
+                value={heroHeadlineA}
+                onChange={(e) => setHeroHeadlineA(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#5738F5] font-bold"
+              />
             </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-stone-400 mb-1">Eyebrow (Small text above title)</label>
-                <input 
-                  type="text" 
-                  value={heroEyebrow}
-                  onChange={(e) => setHeroEyebrow(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-stone-400 mb-1">Headline Part A (Black text)</label>
-                <input 
-                  type="text" 
-                  value={heroHeadlineA}
-                  onChange={(e) => setHeroHeadlineA(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-stone-400 mb-1">Headline Part B (Gradient text)</label>
-                <input 
-                  type="text" 
-                  value={heroHeadlineB}
-                  onChange={(e) => setHeroHeadlineB(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-stone-400 mb-1">Subheadline</label>
-                <textarea 
-                  rows={3}
-                  value={heroSub}
-                  onChange={(e) => setHeroSub(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 resize-none"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Headline Part B (Accent Text)</label>
+              <input 
+                type="text" 
+                value={heroHeadlineB}
+                onChange={(e) => setHeroHeadlineB(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#5738F5] font-bold"
+              />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Subheadline Description</label>
+            <textarea 
+              rows={3}
+              value={heroSub}
+              onChange={(e) => setHeroSub(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#5738F5] resize-none font-medium"
+            />
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-8 rounded-2xl shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">Email Templates (preview only)</h2>
-          <p className="text-slate-500 dark:text-stone-400 mt-1 text-sm">Trial lifecycle emails sent via the existing <span className="font-mono">sendTrialEmail</span> helper. Preview only — no sending from here.</p>
+      {/* Email Lifecycle Templates (Preview) */}
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm space-y-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-black text-slate-900 tracking-tight">Automated Trial Email Sequence (Preview)</h2>
+            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider border border-slate-200">
+              Read-Only
+            </span>
+          </div>
+          <p className="text-slate-500 mt-0.5 text-xs font-medium">Lifecycle onboarding and trial reminder emails dispatched automatically by background cron.</p>
         </div>
         <div className="space-y-3">
           {EMAIL_TEMPLATES.map((t) => (
-            <div key={t.day} className="border border-slate-200 dark:border-stone-800 rounded-xl p-4">
+            <div key={t.day} className="border border-slate-200/80 bg-slate-50/50 rounded-xl p-4 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200">Day {t.day}</span>
-                <span className="text-sm font-bold text-slate-900 dark:text-white">{t.subject}</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-violet-50 text-[#5738F5] border border-violet-200">
+                  Day {t.day}
+                </span>
+                <span className="text-xs font-bold text-slate-900">{t.subject}</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-stone-400 mt-1">{t.blurb}</p>
+              <p className="text-[11px] text-slate-500 font-medium">{t.blurb}</p>
             </div>
           ))}
         </div>
@@ -170,4 +180,3 @@ export function ContentTab() {
     </div>
   );
 }
-

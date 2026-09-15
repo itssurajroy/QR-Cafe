@@ -1,3 +1,4 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
 import React from "react";
@@ -133,45 +134,62 @@ export function SupportTab() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-6 rounded-2xl shadow-sm">
-        <h2 className="text-xl font-black text-slate-900 dark:text-white">Support tools</h2>
-        <p className="text-slate-500 dark:text-stone-400 mt-1 text-sm">
-          Search a tenant, then impersonate, resend emails, or manage internal notes. Every action is audit-logged.
-        </p>
-        <div className="mt-4 flex gap-2">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") runSearch(query); }}
-            placeholder="Search by café name or slug…"
-            className="flex-1 bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-          />
+      {/* Search Header */}
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm space-y-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-black text-slate-900 tracking-tight">Support Desk & Tenant Troubleshooting</h2>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider border border-emerald-100">
+              Diagnostic
+            </span>
+          </div>
+          <p className="text-slate-500 mt-0.5 text-xs font-medium">
+            Look up any café tenant to view internal incident notes, trigger transactional emails, or open an authenticated impersonation session.
+          </p>
+        </div>
+
+        <div className="flex gap-2.5">
+          <div className="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs">
+            <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") runSearch(query); }}
+              placeholder="Search tenant by café name or slug…"
+              className="bg-transparent text-slate-900 placeholder-slate-400 focus:outline-none flex-1 font-medium text-xs"
+            />
+          </div>
           <button
             type="button"
             onClick={() => runSearch(query)}
             disabled={searching}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
           >
             {searching ? "Searching…" : "Search"}
           </button>
         </div>
+
         {rows.length > 0 && (
-          <ul className="mt-4 divide-y divide-slate-100 dark:divide-stone-800/60 border border-slate-200 dark:border-stone-800 rounded-xl overflow-hidden">
+          <ul className="divide-y divide-slate-100 border border-slate-200/80 rounded-xl overflow-hidden mt-3">
             {rows.map((r) => (
               <li key={r.id}>
                 <button
                   type="button"
                   onClick={() => openTenant(r)}
-                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between gap-2 cursor-pointer transition-colors ${
-                    selected?.id === r.id ? "bg-indigo-50 dark:bg-indigo-950/40" : "hover:bg-slate-50 dark:hover:bg-stone-800/40"
+                  className={`w-full text-left px-4 py-3 text-xs flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                    selected?.id === r.id ? "bg-violet-50 text-[#5738F5]" : "hover:bg-slate-50"
                   }`}
                 >
-                  <span>
-                    <span className="font-bold text-slate-900 dark:text-white">{r.name}</span>
-                    <span className="ml-2 font-mono text-xs text-slate-400">/c/{r.slug}</span>
+                  <div>
+                    <span className="font-bold text-slate-900">{r.name}</span>
+                    <span className="ml-2 font-mono text-[11px] text-slate-400">/c/{r.slug}</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                    {r.plan}
                   </span>
-                  <span className="text-xs font-bold text-slate-500">{r.plan}</span>
                 </button>
               </li>
             ))}
@@ -179,97 +197,106 @@ export function SupportTab() {
         )}
       </div>
 
+      {/* Selected Tenant Details & Actions */}
       {selected && (
-        <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-6 rounded-2xl shadow-sm space-y-5">
-          <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm space-y-6">
+          <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white">
-                {selected.name} <span className="font-mono font-normal text-slate-400">/c/{selected.slug}</span>
+              <h3 className="text-base font-black text-slate-900">
+                {selected.name} <span className="font-mono text-xs font-normal text-slate-400">/c/{selected.slug}</span>
               </h3>
-              <p className="text-xs text-slate-500">Owner: {selected.owner_email ?? "—"}</p>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                Owner Email: <span className="font-mono text-slate-700">{selected.owner_email ?? "Not configured"}</span>
+              </p>
             </div>
             <button
               type="button"
               onClick={() => supportOp("toggle_priority")}
               disabled={busy !== null}
-              className={`px-3 py-1.5 rounded-xl border font-bold text-xs cursor-pointer disabled:opacity-50 ${
+              className={`px-3 py-1.5 rounded-xl border font-bold text-xs cursor-pointer disabled:opacity-50 transition-all ${
                 priority
-                  ? "bg-red-600 text-white border-red-600 hover:bg-red-500"
-                  : "bg-slate-100 dark:bg-stone-800 text-slate-600 dark:text-stone-300 border-slate-300 dark:border-stone-700"
+                  ? "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                  : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
               }`}
             >
-              {priority ? "★ Priority" : "☆ Mark priority"}
+              {priority ? "★ High Priority Ticket" : "☆ Mark As Priority"}
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             <button
               type="button"
               onClick={handleImpersonate}
               disabled={busy !== null}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 text-amber-400 font-bold text-xs cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-50 text-[#5738F5] border border-violet-200 hover:bg-violet-100 font-bold text-xs cursor-pointer disabled:opacity-50 transition-all shadow-sm"
             >
-              🕵️ Impersonate
+              <span>🕵️</span>
+              <span>Impersonate Café Dashboard</span>
             </button>
             <button
               type="button"
               onClick={() => supportOp("resend_welcome")}
               disabled={busy !== null}
-              className="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 font-bold text-xs cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 font-bold text-xs cursor-pointer disabled:opacity-50 transition-all shadow-sm"
             >
-              ✉️ Resend welcome
+              <span>✉️</span>
+              <span>Resend Welcome Email</span>
             </button>
             <button
               type="button"
               onClick={() => supportOp("resend_trial_ending")}
               disabled={busy !== null}
-              className="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 font-bold text-xs cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 font-bold text-xs cursor-pointer disabled:opacity-50 transition-all shadow-sm"
             >
-              ✉️ Resend trial-ending
+              <span>⏰</span>
+              <span>Resend Trial-Ending Notice</span>
             </button>
           </div>
+
           {lastImpersonation && (
-            <p className="text-xs text-slate-500">
-              Impersonation link opened — session expires at {new Date(lastImpersonation.expires_at).toLocaleString("en-IN")}.
-            </p>
+            <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 text-xs font-medium text-violet-800">
+              Impersonation session established. Token expires at {new Date(lastImpersonation.expires_at).toLocaleTimeString("en-IN")}.
+            </div>
           )}
 
-          <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-stone-400 mb-1">Add internal note (append-only)</label>
+          {/* Internal Notes Section */}
+          <div className="space-y-3 pt-2">
+            <label className="block text-xs font-bold text-slate-700">Internal Incident Log (Append-only record)</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={noteInput}
                 onChange={(e) => setNoteInput(e.target.value)}
                 maxLength={500}
-                placeholder="e.g. Called owner, billing resolved…"
-                className="flex-1 bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Spoke with café manager regarding menu image uploads, issue resolved…"
+                className="flex-1 bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#5738F5] font-medium"
               />
               <button
                 type="button"
                 onClick={() => supportOp("add_note", { note: noteInput.trim() })}
                 disabled={busy !== null || !noteInput.trim()}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white font-bold text-xs cursor-pointer shadow-sm"
               >
-                Add
+                Add Note
               </button>
             </div>
           </div>
 
           <div>
-            <div className="text-xs font-bold text-slate-600 dark:text-stone-400 mb-2">Notes timeline (newest first)</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Timeline History (Newest First)</div>
             {loadingDetail ? (
-              <div className="text-xs text-slate-500">Loading notes…</div>
+              <div className="text-xs text-slate-400">Loading timeline records…</div>
             ) : lines.length === 0 ? (
-              <div className="text-xs text-slate-400">No notes yet.</div>
+              <div className="text-xs text-slate-400 italic">No internal incident notes recorded for this café.</div>
             ) : (
               <ul className="space-y-2">
                 {lines.map((l, i) => (
-                  <li key={`${l.at ?? i}-${i}`} className="text-xs bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2">
-                    <div className="text-slate-800 dark:text-stone-200">{l.note}</div>
+                  <li key={`${l.at ?? i}-${i}`} className="text-xs bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                    <div className="text-slate-800 font-medium">{l.note}</div>
                     {(l.at || l.by) && (
-                      <div className="font-mono text-slate-400 mt-1">
-                        {l.at ? new Date(l.at).toLocaleString("en-IN") : ""}{l.by ? ` · ${String(l.by).slice(0, 8)}` : ""}
+                      <div className="font-mono text-[10px] text-slate-400 mt-1.5 flex items-center gap-2">
+                        {l.at && <span>{new Date(l.at).toLocaleString("en-IN")}</span>}
+                        {l.by && <span>• Admin: {String(l.by).slice(0, 8)}</span>}
                       </div>
                     )}
                   </li>

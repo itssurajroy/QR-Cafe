@@ -24,7 +24,7 @@ type CafeOption = { id: string; name: string; slug: string };
 const STATUSES = ["pending", "confirmed", "preparing", "ready", "served", "completed", "cancelled", "rejected"];
 
 function paiseToRupees(paise: number | null | undefined) {
-  return `₹${((paise ?? 0) / 100).toLocaleString("en-IN")}`;
+  return `₹${Math.round((paise ?? 0) / 100).toLocaleString("en-IN")}`;
 }
 
 export function OrdersTab() {
@@ -89,148 +89,183 @@ export function OrdersTab() {
 
   if (tab !== "orders") return null;
 
+  function getStatusBadge(st: string) {
+    switch (st) {
+      case "completed":
+      case "served":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "preparing":
+      case "ready":
+      case "confirmed":
+        return "bg-violet-50 text-[#5738F5] border-violet-200";
+      case "cancelled":
+      case "rejected":
+        return "bg-rose-50 text-rose-700 border-rose-200";
+      default:
+        return "bg-amber-50 text-amber-700 border-amber-200";
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="px-4 py-3 rounded-2xl border border-slate-200 dark:border-stone-800 bg-slate-50 dark:bg-stone-950/40 text-xs font-bold text-slate-500 dark:text-stone-400">
-        Read-only explorer — orders cannot be changed from here.
+      <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm text-xs text-slate-500 font-medium">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-violet-500"></span>
+          <span>Global Cross-Tenant Order Telemetry (Read-only administrative explorer)</span>
+        </div>
+        <span className="text-[11px] font-mono text-slate-400">Total volume: {total} records</span>
       </div>
 
-      <div className="flex flex-col gap-3 bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-4 rounded-2xl shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="flex-1 w-full flex items-center gap-2 bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs">
-            <span>🔍</span>
+      {/* Filter Controls */}
+      <div className="flex flex-col gap-3 bg-white border border-slate-200/80 p-4 rounded-2xl shadow-sm">
+        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
+          <div className="flex-1 w-full flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs">
+            <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
             <input
               type="text"
-              placeholder="Search by order number or customer..."
+              placeholder="Search by order # or guest name…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") load({ page: 1 }); }}
-              className="bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none flex-1"
+              className="bg-transparent text-slate-900 placeholder-slate-400 focus:outline-none flex-1 font-medium text-xs"
             />
           </div>
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             <select
               value={status}
               onChange={(e) => { setStatus(e.target.value); }}
-              className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-stone-300 focus:outline-none"
+              className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
             >
               <option value="">All Statuses</option>
               {STATUSES.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
+
             <select
               value={restaurantId}
               onChange={(e) => { setRestaurantId(e.target.value); }}
-              className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-stone-300 focus:outline-none max-w-48"
+              className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none max-w-44 truncate"
             >
-              <option value="">All Cafés</option>
+              <option value="">All Tenant Cafés</option>
               {cafes.map((c) => (
-                <option key={c.id} value={c.id}>{c.name} (/c/{c.slug})</option>
+                <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
+
             <input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-stone-300 focus:outline-none"
+              className="bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-2 text-xs text-slate-700 font-medium focus:outline-none"
             />
             <input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-stone-300 focus:outline-none"
+              className="bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-2 text-xs text-slate-700 font-medium focus:outline-none"
             />
+
             <button
               type="button"
               onClick={() => load({ page: 1 })}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
             >
-              Search
+              Filter
             </button>
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-200 dark:border-stone-800 font-black text-sm text-slate-900 dark:text-white">
-          Cross-Tenant Orders ({total})
+      {/* Orders Table */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-slate-200/80 font-black text-sm text-slate-900 flex items-center justify-between">
+          <span>Global Orders Stream ({total})</span>
+          <span className="text-xs font-medium text-slate-400">Page {page} of {totalPages}</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-stone-800 bg-slate-50 dark:bg-stone-950/50 text-slate-500 dark:text-stone-400 uppercase tracking-wider text-[10px]">
-                <th className="p-4 font-bold">Order</th>
-                <th className="p-4 font-bold">Café</th>
-                <th className="p-4 font-bold">Status</th>
-                <th className="p-4 font-bold">Payment</th>
-                <th className="p-4 font-bold">Items</th>
-                <th className="p-4 font-bold">Total</th>
-                <th className="p-4 font-bold">Placed</th>
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-slate-400 uppercase tracking-wider text-[10px] font-bold">
+                <th className="p-4">Order #</th>
+                <th className="p-4">Tenant Café</th>
+                <th className="p-4">Kitchen Status</th>
+                <th className="p-4">Payment</th>
+                <th className="p-4">Items</th>
+                <th className="p-4">Total Amount</th>
+                <th className="p-4">Created Time</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-stone-800/60">
+            <tbody className="divide-y divide-slate-100">
               {rows.map((o) => (
-                <tr key={o.id} className="hover:bg-slate-50/50 dark:hover:bg-stone-800/30 transition-colors">
+                <tr key={o.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="p-4">
-                    <div className="font-mono font-bold text-slate-900 dark:text-white">{o.order_number}</div>
-                    {o.customer_name && <div className="text-slate-500 text-[10px]">{o.customer_name}</div>}
+                    <div className="font-mono font-bold text-slate-900">#{o.order_number}</div>
+                    {o.customer_name && <div className="text-slate-500 text-[10px] mt-0.5">{o.customer_name}</div>}
                   </td>
                   <td className="p-4">
                     {o.restaurant_name ? (
                       <>
-                        <div className="font-bold text-slate-900 dark:text-white">{o.restaurant_name}</div>
-                        <div className="text-slate-500 text-[10px]">/c/{o.restaurant_slug}</div>
+                        <div className="font-bold text-slate-900">{o.restaurant_name}</div>
+                        <div className="text-slate-400 text-[10px] font-mono">/c/{o.restaurant_slug}</div>
                       </>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400 italic">Unassigned</span>
                     )}
                   </td>
                   <td className="p-4">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-slate-100 text-slate-600 dark:bg-stone-800 dark:text-stone-300">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusBadge(o.status)}`}>
                       {o.status}
                     </span>
                   </td>
-                  <td className="p-4 text-slate-500 dark:text-stone-400">
-                    {o.payment_status ?? "—"}
-                    {o.payment_method && <span className="text-[10px]"> · {o.payment_method}</span>}
+                  <td className="p-4 text-slate-600 font-medium">
+                    <span className="font-semibold">{o.payment_status ?? "—"}</span>
+                    {o.payment_method && <span className="text-[10px] text-slate-400 ml-1 font-mono">({o.payment_method})</span>}
                   </td>
-                  <td className="p-4 font-mono text-slate-700 dark:text-stone-300">{o.item_count}</td>
-                  <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">
+                  <td className="p-4 font-mono font-semibold text-slate-700">{o.item_count} items</td>
+                  <td className="p-4 font-mono font-bold text-slate-900">
                     {paiseToRupees(o.total_paise)}
                   </td>
-                  <td className="p-4 font-mono text-slate-500 dark:text-stone-400">
-                    {new Date(o.created_at).toLocaleString("en-IN")}
+                  <td className="p-4 font-mono text-slate-500 text-[11px]">
+                    {new Date(o.created_at).toLocaleString("en-IN", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </td>
                 </tr>
               ))}
               {!loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 dark:text-stone-500">
+                  <td colSpan={7} className="p-12 text-center text-slate-400 font-medium">
                     {loadError || "No orders match the selected filters."}
                   </td>
                 </tr>
               )}
               {loading && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 dark:text-stone-500">
-                    Loading orders…
+                  <td colSpan={7} className="p-12 text-center text-slate-400 font-medium">
+                    Loading cross-tenant orders…
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        <div className="p-4 border-t border-slate-200 dark:border-stone-800 bg-slate-50 dark:bg-stone-950/40 flex items-center justify-between text-xs">
-          <span className="text-slate-500 dark:text-stone-400">
-            Showing <strong>{rows.length}</strong> of <strong>{total}</strong> orders (Page {page} of {totalPages})
+        <div className="p-4 border-t border-slate-200/80 bg-slate-50/60 flex items-center justify-between text-xs">
+          <span className="text-slate-500 font-medium">
+            Showing <strong>{rows.length}</strong> of <strong>{total}</strong> orders
           </span>
           <div className="flex gap-2">
             <button
               type="button"
               disabled={page <= 1 || loading}
               onClick={() => load({ page: page - 1 })}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-slate-600 dark:text-stone-300 hover:bg-slate-100 dark:hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer font-medium shadow-sm"
             >
               &larr; Previous
             </button>
@@ -238,7 +273,7 @@ export function OrdersTab() {
               type="button"
               disabled={page >= totalPages || loading}
               onClick={() => load({ page: page + 1 })}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-slate-600 dark:text-stone-300 hover:bg-slate-100 dark:hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer font-medium shadow-sm"
             >
               Next &rarr;
             </button>

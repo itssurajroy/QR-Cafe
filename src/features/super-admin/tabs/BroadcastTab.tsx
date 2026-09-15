@@ -1,18 +1,20 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
-import React, { useState } from 'react';
-import { useSuperAdmin } from '../SuperAdminContext';
+"use client";
+
+import React, { useState } from "react";
+import { useSuperAdmin } from "../SuperAdminContext";
 
 export function BroadcastTab() {
   const { tab, handleSaveConfig, platformConfig, flash } = useSuperAdmin();
   
   const existing = platformConfig?.global_broadcast;
-  const [subject, setSubject] = useState(existing?.subject || '');
-  const [message, setMessage] = useState(existing?.message || '');
-  const [type, setType] = useState(existing?.type || 'info');
-  const [delivery, setDelivery] = useState(existing?.delivery || 'both');
+  const [subject, setSubject] = useState(existing?.subject || "");
+  const [message, setMessage] = useState(existing?.message || "");
+  const [type, setType] = useState(existing?.type || "info");
+  const [delivery, setDelivery] = useState(existing?.delivery || "both");
   const [isSending, setIsSending] = useState(false);
   
-  if (tab !== 'broadcast') return null;
+  if (tab !== "broadcast") return null;
 
   const handleSend = async () => {
     if (!subject.trim()) {
@@ -29,11 +31,11 @@ export function BroadcastTab() {
         active: true,
         sent_at: new Date().toISOString(),
       };
-      await handleSaveConfig('global_broadcast', payload);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('platform_broadcast', JSON.stringify(payload));
+      await handleSaveConfig("global_broadcast", payload);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("platform_broadcast", JSON.stringify(payload));
       }
-      flash("ok", "📢 Broadcast published to all tenants!");
+      flash("ok", "Broadcast published to all tenants successfully!");
     } catch {
       flash("err", "Failed to publish broadcast");
     } finally {
@@ -44,12 +46,12 @@ export function BroadcastTab() {
   const handleClear = async () => {
     setIsSending(true);
     try {
-      await handleSaveConfig('global_broadcast', { active: false });
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('platform_broadcast');
+      await handleSaveConfig("global_broadcast", { active: false });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("platform_broadcast");
       }
-      setSubject('');
-      setMessage('');
+      setSubject("");
+      setMessage("");
       flash("ok", "Broadcast revoked and cleared");
     } catch {
       flash("err", "Failed to clear broadcast");
@@ -64,14 +66,14 @@ export function BroadcastTab() {
     <div className="space-y-6 max-w-3xl">
       {/* Current Active Announcement Status */}
       {isActive && (
-        <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 p-5 rounded-2xl flex items-center justify-between">
+        <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50"></span>
             <div>
-              <div className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-300">
-                Active Broadcast Live Across Platform
+              <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                Active Global Broadcast Live Across All Tenant Portals
               </div>
-              <div className="text-sm font-bold text-slate-800 dark:text-stone-200 mt-0.5">
+              <div className="text-sm font-bold text-slate-900 mt-0.5">
                 {existing.subject}
               </div>
             </div>
@@ -80,75 +82,84 @@ export function BroadcastTab() {
             type="button"
             onClick={handleClear}
             disabled={isSending}
-            className="px-3 py-1.5 rounded-xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-bold transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all cursor-pointer shadow-sm"
           >
             Revoke Broadcast ✕
           </button>
         </div>
       )}
 
-      <div className="bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 p-8 rounded-2xl shadow-sm">
-        <h2 className="text-xl font-black text-slate-900 dark:text-white">Compose Global Announcement</h2>
-        <p className="text-slate-500 dark:text-stone-400 mt-2 text-sm">Send a message to all café tenants and staff across the platform.</p>
+      <div className="bg-white border border-slate-200/80 p-8 rounded-2xl shadow-sm space-y-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Compose Global Platform Broadcast</h2>
+            <span className="px-2 py-0.5 rounded-md bg-violet-50 text-[#5738F5] text-[10px] font-black uppercase tracking-wider border border-violet-100">
+              Cross-Tenant
+            </span>
+          </div>
+          <p className="text-slate-500 mt-1 text-xs font-medium">
+            Broadcast emergency alerts, maintenance windows, or feature updates to all restaurant owners and staff.
+          </p>
+        </div>
         
-        <div className="mt-8 space-y-5">
+        <div className="space-y-5">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-stone-300 mb-1">Subject / Headline</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Subject / Headline</label>
             <input 
               type="text" 
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g., Scheduled Maintenance or New Feature Release" 
-              className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+              placeholder="e.g., Scheduled Core Maintenance: Sept 18 at 02:00 IST" 
+              className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#5738F5] font-semibold"
             />
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-stone-300 mb-1">Message Content</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Announcement Body</label>
             <textarea 
               rows={4}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your announcement details here..." 
-              className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 resize-none"
+              placeholder="Provide complete details, impact assessment, and next steps for restaurant operators…" 
+              className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#5738F5] resize-none font-medium"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-stone-300 mb-1">Message Type</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Message Severity</label>
               <select 
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-medium focus:outline-none"
               >
-                <option value="info">Information (Blue)</option>
-                <option value="success">Feature Release (Green)</option>
-                <option value="warning">Warning / Alert (Yellow)</option>
-                <option value="danger">Critical (Red)</option>
+                <option value="info">General Info (Slate / Violet)</option>
+                <option value="success">Feature Release (Emerald)</option>
+                <option value="warning">System Advisory (Amber)</option>
+                <option value="danger">Critical Outage / Urgent (Rose)</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-stone-300 mb-1">Delivery Method</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Delivery Channels</label>
               <select 
                 value={delivery}
                 onChange={(e) => setDelivery(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-medium focus:outline-none"
               >
                 <option value="banner">In-App Banner Only</option>
                 <option value="email">Email Broadcast Only</option>
-                <option value="both">Both Banner & Email</option>
+                <option value="both">Both In-App Banner & Email</option>
               </select>
             </div>
           </div>
 
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-stone-800/50">
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
             {isActive && (
               <button
                 type="button"
                 onClick={handleClear}
                 disabled={isSending}
-                className="px-5 py-2.5 text-sm font-bold text-red-600 hover:text-red-700 transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
               >
                 Clear Broadcast
               </button>
@@ -157,31 +168,31 @@ export function BroadcastTab() {
               type="button"
               onClick={handleSend}
               disabled={isSending || !subject.trim()}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer"
             >
-              <span>{isSending ? "Publishing…" : "Send Broadcast"}</span>
-              <span>🚀</span>
+              <span>{isSending ? "Publishing Broadcast…" : "Publish Global Broadcast"}</span>
+              <span>→</span>
             </button>
           </div>
         </div>
       </div>
       
-      {/* Preview Section */}
+      {/* Live Preview Section */}
       {subject && (
-        <div className="bg-slate-50 dark:bg-stone-950 border border-slate-200 dark:border-stone-800 p-6 rounded-2xl shadow-sm border-dashed">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Live In-App Banner Preview</h3>
-          <div className={`p-4 rounded-xl border flex gap-3 ${
-            type === 'info' ? 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-200' :
-            type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-200' :
-            type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-900/50 dark:text-amber-200' :
-            'bg-red-50 border-red-200 text-red-900 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-200'
+        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm space-y-3">
+          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live In-App Banner Preview</h3>
+          <div className={`p-4 rounded-xl border flex items-start gap-3 ${
+            type === "info" ? "bg-violet-50 border-violet-200 text-violet-950" :
+            type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-950" :
+            type === "warning" ? "bg-amber-50 border-amber-200 text-amber-950" :
+            "bg-rose-50 border-rose-200 text-rose-950"
           }`}>
-            <div className="text-lg mt-0.5">
-              {type === 'info' ? 'ℹ️' : type === 'success' ? '✨' : type === 'warning' ? '⚠️' : '🚨'}
-            </div>
+            <span className="text-base mt-0.5">
+              {type === "info" ? "ℹ️" : type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚨"}
+            </span>
             <div>
-              <div className="font-bold text-sm">{subject}</div>
-              {message && <div className="text-sm opacity-80 mt-1 whitespace-pre-wrap">{message}</div>}
+              <div className="font-bold text-xs">{subject}</div>
+              {message && <div className="text-xs opacity-90 mt-1 whitespace-pre-wrap font-medium">{message}</div>}
             </div>
           </div>
         </div>
@@ -189,4 +200,3 @@ export function BroadcastTab() {
     </div>
   );
 }
-

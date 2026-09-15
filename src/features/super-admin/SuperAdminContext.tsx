@@ -11,10 +11,18 @@ const SuperAdminContext = createContext<SuperAdminContextType | null>(null);
 export function SuperAdminProvider({ children, initialData }: { children: React.ReactNode, initialData: SuperClientProps }) {
   const router = useRouter();
   
-  // Destructure initialData to match what hooks expect
-  const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit } = initialData as any;
+  const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit, initialTab } = initialData as any;
 
-  const [tab, setTab] = useState<"dashboard" | "cafes" | "config" | "audit" | "staff" | "system-health" | "users" | "billing" | "orders" | "analytics" | "settings" | "announcements" | "support">("dashboard");
+  const [tab, setTabState] = useState<string>(initialTab || "dashboard");
+
+  const setTab = (newTab: any) => {
+    setTabState(newTab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", newTab);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   // Global Platform Broadcast Banner
   const [broadcastMsg, setBroadcastMsg] = useState(
