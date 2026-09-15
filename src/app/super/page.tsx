@@ -17,7 +17,9 @@ export default async function SuperPage({
     redirect("/login");
   }
 
-  const { page = "1", q = "", plan = "", status = "", tab = "dashboard" } = await searchParams;
+  const { page = "1", q = "", plan = "", status = "", tab: rawTab = "dashboard" } = await searchParams;
+  // Legacy alias: the old "health" tab id was consolidated into "system-health".
+  const tab = rawTab === "health" ? "system-health" : rawTab;
   const currentPage = Math.max(1, parseInt(page, 10));
   const pageSize = 15;
 

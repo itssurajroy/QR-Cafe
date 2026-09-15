@@ -142,7 +142,7 @@ export function PosCatalogGrid({
       )}
 
       {/* Grid of Dishes */}
-      <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 pr-1 pb-16 md:pb-0">
+      <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 pr-1 pb-16 md:pb-0 content-start">
         {filteredItems.map((it) => (
           <div
             key={it.id}

@@ -21,10 +21,10 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Quick fill helper for testing/demos
-  function fillDemo(roleEmail: string) {
+  // Quick fill helper for testing/demos (must match seeded demo accounts)
+  function fillDemo(roleEmail: string, rolePassword: string) {
     setEmail(roleEmail);
-    setPassword("password123");
+    setPassword(rolePassword);
   }
 
   async function login(e: React.FormEvent) {
@@ -197,7 +197,7 @@ export default function LoginPage() {
                       type="email"
                       required
                       autoComplete="username"
-                      placeholder="e.g. admin@qrslice.com"
+                      placeholder="e.g. owner@tableandgrain.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#5738F5] focus:ring-4 focus:ring-[#5738F5]/10 transition-all shadow-xs"
@@ -286,14 +286,14 @@ export default function LoginPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => fillDemo("admin@qrslice.com")}
+                    onClick={() => fillDemo("super@qrslice.test", "QrSliceDev123!")}
                     className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-violet-50 hover:border-violet-200 text-slate-700 hover:text-[#5738F5] text-[11px] font-bold border border-slate-200 transition-colors text-left cursor-pointer truncate"
                   >
                     👑 Admin Demo
                   </button>
                   <button
                     type="button"
-                    onClick={() => fillDemo("owner@tableandgrain.com")}
+                    onClick={() => fillDemo("owner@tableandgrain.com", "password123")}
                     className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-violet-50 hover:border-violet-200 text-slate-700 hover:text-[#5738F5] text-[11px] font-bold border border-slate-200 transition-colors text-left cursor-pointer truncate"
                   >
                     ☕ Cafe Owner

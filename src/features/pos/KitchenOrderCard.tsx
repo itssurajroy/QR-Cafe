@@ -126,7 +126,8 @@ export function KitchenOrderCard({
     }
   };
 
-  const tableLabel = order.table_label || "Takeaway";
+  const tableLabel = order.table_label || null;
+  const headerLabel = tableLabel ? `${tableLabel} · ${typeShort(order)}` : typeShort(order);
 
   return (
     <div
@@ -137,7 +138,7 @@ export function KitchenOrderCard({
         <div className="flex justify-between items-start border-b border-slate-100 pb-2">
           <div className="min-w-0">
             <p className="font-extrabold text-sm text-slate-900 tracking-tight truncate">
-              {tableLabel} <span className="text-slate-300 font-bold">·</span> {typeShort(order)}{" "}
+              {headerLabel}{" "}
               <span className="text-slate-300 font-bold">·</span>{" "}
               <span className={`font-mono ${isOverdue ? "text-red-600" : "text-slate-500"}`}>
                 {elapsedMins} min

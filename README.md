@@ -54,7 +54,7 @@ The host and auth states are securely parsed in `middleware.ts` at the edge, inj
 
 ## Demo credentials
 - `super@qrslice.test` / `QrSliceDev123!` → super-admin (`/super`)
-- `owner@curryleaf.test` / `QrSliceDev123!` → Curry Leaf owner (`/admin`, `/pos`)
+- `owner@tableandgrain.com` / `password123` → Table & Grain owner (`/admin`, `/pos`)
 - Staff logins can be created from the super-admin console; the temp password is shown once.
 
 ## Shared-project caveats (important)
