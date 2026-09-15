@@ -34,6 +34,7 @@ export function CommandPalette() {
     { id: "go-health", label: "Go to System Health", hint: "Tab", run: () => go("system-health") },
     { id: "go-audit", label: "Go to Audit logs", hint: "Tab", run: () => go("audit") },
     { id: "go-billing", label: "Go to Billing", hint: "Tab", run: () => go("billing") },
+    { id: "go-api-keys", label: "Go to API Keys", hint: "Tab", run: () => go("api-keys") },
   ];
 
   // Cmd/Ctrl+K toggles the palette.

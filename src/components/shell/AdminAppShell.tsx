@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { QrSliceLogo, QrSliceIcon } from "@/components/brand/QrSliceLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   DashboardIcon,
   ClipboardListIcon,
@@ -177,6 +178,7 @@ export function AdminAppShell({
         </div>
 
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <Link
             href={`/c/${restaurantSlug}`}
             target="_blank"
@@ -393,6 +395,8 @@ export function AdminAppShell({
                   </span>
                 </div>
               </div>
+
+              <NotificationBell />
 
               <button
                 type="button"

@@ -7,6 +7,7 @@ import { useSuperAdmin } from "../SuperAdminContext";
 type UserRow = {
   id: string;
   email: string;
+  last_sign_in_at: string | null;
   restaurant_id: string | null;
   restaurant_name: string | null;
   restaurant_slug: string | null;
@@ -241,6 +242,7 @@ export function UsersTab() {
                 <th className="p-4">User</th>
                 <th className="p-4">Assigned Café</th>
                 <th className="p-4">Role</th>
+                <th className="p-4">Last Sign-In</th>
                 <th className="p-4">Status</th>
                 <th className="p-4 text-right">Administrative Actions</th>
               </tr>
@@ -275,6 +277,11 @@ export function UsersTab() {
                       }`}>
                         {r.role}
                       </span>
+                    </td>
+                    <td className="p-4 text-slate-600 font-mono text-[11px] whitespace-nowrap">
+                      {r.last_sign_in_at
+                        ? new Date(r.last_sign_in_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+                        : <span className="text-slate-400 italic font-sans">Never</span>}
                     </td>
                     <td className="p-4">
                       <span
@@ -323,14 +330,14 @@ export function UsersTab() {
               })}
               {!loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center text-slate-400 font-medium">
+                  <td colSpan={6} className="p-12 text-center text-slate-400 font-medium">
                     {loadError || "No users match the selected filters."}
                   </td>
                 </tr>
               )}
               {loading && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center text-slate-400 font-medium">
+                  <td colSpan={6} className="p-12 text-center text-slate-400 font-medium">
                     Loading users…
                   </td>
                 </tr>
@@ -365,3 +372,4 @@ export function UsersTab() {
     </div>
   );
 }
+

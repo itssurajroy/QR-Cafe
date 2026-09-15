@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 function AdminHeader({ title }: { title: string }) {
   return (
@@ -18,6 +19,9 @@ function AdminHeader({ title }: { title: string }) {
           </Link>
           <span className="text-slate-300">/</span>
           <span className="text-sm font-medium text-slate-900">{title}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
         </div>
       </div>
     </header>

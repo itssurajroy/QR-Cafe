@@ -17,6 +17,7 @@ import { AnnouncementsTab } from '../features/super-admin/tabs/AnnouncementsTab'
 import { SupportTab } from '../features/super-admin/tabs/SupportTab';
 import { AnalyticsTab } from '../features/super-admin/tabs/AnalyticsTab';
 import { SystemHealthTab } from '../features/super-admin/tabs/SystemHealthTab';
+import { ApiKeysTab } from '../features/super-admin/tabs/ApiKeysTab';
 import { CommandPalette } from '../features/super-admin/CommandPalette';
 import { UsersTab } from '../features/super-admin/tabs/UsersTab';
 import { OrdersTab } from '../features/super-admin/tabs/OrdersTab';
@@ -45,6 +46,7 @@ function TabRenderer() {
     case 'announcements': return <AnnouncementsTab />;
     case 'support': return <SupportTab />;
     case 'system-health': return <SystemHealthTab />;
+    case 'api-keys': return <ApiKeysTab />;
     default: return <DashboardTab />;
   }
 }

@@ -9,13 +9,13 @@ import { logAudit } from "@/lib/audit";
 
 const PAGE_SIZE = 50;
 
-// Emails live in auth.users — resolve via the admin API matched by id.
-// Any failure degrades to "Unknown Email" rather than failing the request.
+// Emails + last sign-ins live in auth.users — resolve via the admin API matched by id.
+// Any failure degrades to "Unknown Email" / null rather than failing the request.
 async function resolveEmails(
   db: ReturnType<typeof createSupabaseAdmin>,
   ids: string[]
-): Promise<Record<string, string>> {
-  const map: Record<string, string> = {};
+): Promise<Record<string, { email: string; last_sign_in_at: string | null }>> {
+  const map: Record<string, { email: string; last_sign_in_at: string | null }> = {};
   const missing = new Set(ids);
   try {
     for (let page = 1; page <= 10 && missing.size > 0; page++) {
@@ -23,7 +23,7 @@ async function resolveEmails(
       if (error || !data?.users?.length) break;
       for (const u of data.users) {
         if (u.id && missing.has(u.id)) {
-          map[u.id] = u.email ?? "Unknown Email";
+          map[u.id] = { email: u.email ?? "Unknown Email", last_sign_in_at: u.last_sign_in_at ?? null };
           missing.delete(u.id);
         }
       }
@@ -87,11 +87,12 @@ export async function GET(req: NextRequest) {
     total = withJoin.count ?? 0;
   }
 
-  const emails = await resolveEmails(db, (profiles ?? []).map((p: any) => p.id));
+  const authInfo = await resolveEmails(db, (profiles ?? []).map((p: any) => p.id));
 
   const rows = (profiles ?? []).map((p: any) => ({
     id: p.id,
-    email: emails[p.id] ?? "Unknown Email",
+    email: authInfo[p.id]?.email ?? "Unknown Email",
+    last_sign_in_at: authInfo[p.id]?.last_sign_in_at ?? null,
     restaurant_id: p.restaurant_id ?? null,
     restaurant_name: p.restaurants?.name ?? null,
     restaurant_slug: p.restaurants?.slug ?? null,

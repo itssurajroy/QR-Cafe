@@ -90,6 +90,14 @@ function ClipboardListIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
+function KeyIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 13l-5.586-5.586a2 2 0 00-2.828 0L12 15l-1.5-1.5 2.586-2.586M15 7h6m-3-3v6" />
+    </svg>
+  );
+}
+
 function LifebuoyIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -143,6 +151,7 @@ export function SuperSidebar() {
         { id: "broadcast", label: "Broadcast Banner", icon: MegaphoneIcon },
         { id: "announcements", label: "Announcements", icon: MegaphoneIcon },
         { id: "settings", label: "Platform Settings", icon: CogIcon },
+        { id: "api-keys", label: "API Keys", icon: KeyIcon },
       ],
     },
   ];
