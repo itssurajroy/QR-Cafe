@@ -1,5 +1,11 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
+"use client";
+
+import React from "react";
 import { Star, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { fadeUp, slideInLeft, staggerTestimonials, VIEWPORT_ONCE } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const TESTIMONIALS = [
   {
@@ -38,28 +44,59 @@ const TESTIMONIALS = [
 ];
 
 export function Testimonials() {
+  const prefersReducedMotion = useReducedMotion();
+  const noMotion = prefersReducedMotion;
+
+  const headerVariants = noMotion ? { hidden: { opacity: 1 }, visible: { opacity: 1 } } : fadeUp;
+  const cardVariants = noMotion ? { hidden: { opacity: 1 }, visible: { opacity: 1 } } : slideInLeft;
+  const headerContainer = noMotion ? { hidden: {}, visible: {} } : { hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
+  const container = noMotion ? { hidden: {}, visible: {} } : staggerTestimonials;
+
   return (
     <section id="testimonials" className="py-20 sm:py-28 bg-[#FAF9F6] border-b border-slate-100 relative">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+        <motion.div
+          className="text-center max-w-2xl mx-auto"
+          variants={headerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_ONCE}
+        >
+          <motion.div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm"
+            variants={headerVariants}
+          >
             <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
               Proven Across 500+ Outlets
             </span>
-          </div>
-          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+          </motion.div>
+          <motion.h2
+            className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4"
+            variants={headerVariants}
+          >
             Trusted by restaurant & café owners across India
-          </h2>
-          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+          </motion.h2>
+          <motion.p
+            className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed"
+            variants={headerVariants}
+          >
             From Mumbai specialty cafés to Bangalore microbreweries — see why operators rely on QRslice.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+        {/* Testimonial cards — cascade from left */}
+        <motion.div
+          className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3"
+          variants={container}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_ONCE}
+        >
           {TESTIMONIALS.map((t) => (
-            <div
+            <motion.div
               key={t.name}
               className="flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-8 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-1 transition-all duration-200"
+              variants={cardVariants}
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
@@ -91,9 +128,9 @@ export function Testimonials() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

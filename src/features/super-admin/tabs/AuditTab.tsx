@@ -8,6 +8,23 @@ export function AuditTab() {
   const ctx = useSuperAdmin();
   const { auditRows, auditActionFilter, loadFilteredAudit, auditLoading } = ctx;
 
+  const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  function handleExportCsv() {
+    const header = "Timestamp,Entity,Action,Cafe,Details";
+    const lines = (auditRows as any[]).map((a: any) =>
+      [a.created_at, esc(a.entity), esc(a.action), esc(a.restaurants?.name || a.restaurant_id), esc(JSON.stringify(a.metadata || {}))].join(",")
+    );
+    const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `qrslice-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   const filters = [
     { id: "", label: "All Audit Events" },
     { id: "super_impersonate", label: "Impersonation" },
@@ -32,7 +49,16 @@ export function AuditTab() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              disabled={auditRows.length === 0}
+              title="Export currently loaded rows to CSV"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 disabled:opacity-40"
+            >
+              📥 Export CSV
+            </button>
             {filters.map((f) => (
               <button
                 key={f.id}

@@ -1,6 +1,11 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
+"use client";
+
 import React from "react";
 import Link from "next/link";
-
+import { motion } from "framer-motion";
+import { fadeIn, VIEWPORT_ONCE } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const FOOTER_LINKS = {
   Product: [
@@ -23,8 +28,19 @@ const FOOTER_LINKS = {
 };
 
 export function Footer() {
+  const prefersReducedMotion = useReducedMotion();
+  const noMotion = prefersReducedMotion;
+
+  const variants = noMotion ? { hidden: { opacity: 1 }, visible: { opacity: 1 } } : fadeIn;
+
   return (
-    <footer className="bg-white border-t border-slate-200/80 pt-16 pb-12">
+    <motion.footer
+      className="bg-white border-t border-slate-200/80 pt-16 pb-12"
+      variants={variants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={VIEWPORT_ONCE}
+    >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-16">
           {/* Brand Column */}
@@ -78,6 +94,6 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

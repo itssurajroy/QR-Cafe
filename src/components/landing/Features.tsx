@@ -1,3 +1,6 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
+"use client";
+
 import React from "react";
 import {
   QrCode,
@@ -10,6 +13,9 @@ import {
   Package,
   Heart,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { fadeUp, staggerContainer, VIEWPORT_ONCE } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const FEATURES = [
   {
@@ -96,33 +102,61 @@ const FEATURES = [
 ];
 
 export function Features() {
+  const prefersReducedMotion = useReducedMotion();
+  const noMotion = prefersReducedMotion;
+
+  const variants = noMotion ? { hidden: { opacity: 1 }, visible: { opacity: 1 } } : fadeUp;
+  const container = noMotion ? { hidden: {}, visible: {} } : staggerContainer;
+
   return (
     <section id="features" className="py-20 sm:py-28 bg-[#FAF9F6] relative">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+        <motion.div
+          className="text-center max-w-2xl mx-auto mb-16"
+          variants={container}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_ONCE}
+        >
+          <motion.div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm"
+            variants={variants}
+          >
             <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
               Complete Restaurant Suite
             </span>
-          </div>
-          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+          </motion.div>
+          <motion.h2
+            className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4"
+            variants={variants}
+          >
             Everything your restaurant needs.{" "}
             <span className="text-[#5738F5]">Nothing it doesn&apos;t.</span>
-          </h2>
-          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+          </motion.h2>
+          <motion.p
+            className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed"
+            variants={variants}
+          >
             Nine tightly-integrated modules designed specifically for high-volume cafés and restaurants in India.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        {/* Feature Grid: 3×3 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Feature Grid: 3×3 — Staggered wave */}
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={container}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_ONCE}
+        >
           {FEATURES.map((feature, i) => {
             const Icon = feature.icon;
             return (
-              <div
+              <motion.div
                 key={i}
                 className="group relative p-7 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-[#5738F5]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+                variants={variants}
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
@@ -140,10 +174,10 @@ export function Features() {
                     {feature.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

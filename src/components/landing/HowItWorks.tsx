@@ -1,5 +1,11 @@
+// Copyright (c) 2026 QRslice. All rights reserved.
+"use client";
+
 import React from "react";
 import { ClipboardList, QrCode, Rocket } from "lucide-react";
+import { motion } from "framer-motion";
+import { fadeUp, fadeIn, staggerSlow, VIEWPORT_ONCE } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const STEPS = [
   {
@@ -38,6 +44,13 @@ const STEPS = [
 ];
 
 export function HowItWorks() {
+  const prefersReducedMotion = useReducedMotion();
+  const noMotion = prefersReducedMotion;
+
+  const variants = noMotion ? { hidden: { opacity: 1 }, visible: { opacity: 1 } } : fadeUp;
+  const numberVariants = noMotion ? { hidden: { opacity: 1 }, visible: { opacity: 1 } } : fadeIn;
+  const container = noMotion ? { hidden: {}, visible: {} } : staggerSlow;
+
   return (
     <section id="how-it-works" className="py-24 sm:py-32 bg-white relative overflow-hidden border-y border-slate-100">
       {/* Background ambient gradient accents */}
@@ -47,34 +60,59 @@ export function HowItWorks() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm">
+        <motion.div
+          className="text-center max-w-2xl mx-auto mb-16 sm:mb-20"
+          variants={container}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_ONCE}
+        >
+          <motion.div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-violet-50 border border-violet-200/80 rounded-full mb-4 shadow-sm"
+            variants={variants}
+          >
             <Rocket className="w-4 h-4 text-[#5738F5]" />
             <span className="text-xs font-bold text-[#5738F5] uppercase tracking-wider">
               30-Minute Launch
             </span>
-          </div>
-          <h2 className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4">
+          </motion.div>
+          <motion.h2
+            className="text-3xl sm:text-[2.75rem] font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-4"
+            variants={variants}
+          >
             Live in <span className="text-[#5738F5]">three steps</span>. Not three months.
-          </h2>
-          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+          </motion.h2>
+          <motion.p
+            className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed"
+            variants={variants}
+          >
             No expensive hardware to buy, no proprietary terminals, no technician visits needed.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        {/* Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
+        {/* Steps — Staggered reveal with slower timing */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative"
+          variants={container}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_ONCE}
+        >
           {STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
-              <div
+              <motion.div
                 key={i}
                 className="relative p-8 rounded-3xl bg-[#FAF9F6] border border-slate-200/90 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:bg-white hover:border-[#5738F5]/30 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+                variants={variants}
               >
                 {/* Large step number watermark */}
-                <div className="absolute top-4 right-6 text-6xl font-black text-slate-200 font-[family-name:var(--font-plus-jakarta)] select-none pointer-events-none">
+                <motion.div
+                  className="absolute top-4 right-6 text-6xl font-black text-slate-200 font-[family-name:var(--font-plus-jakarta)] select-none pointer-events-none"
+                  variants={numberVariants}
+                >
                   {step.number}
-                </div>
+                </motion.div>
 
                 <div>
                   <div className={`w-14 h-14 rounded-2xl ${step.iconBg} flex items-center justify-center mb-6 relative z-10 border border-black/[0.04]`}>
@@ -88,10 +126,10 @@ export function HowItWorks() {
                     {step.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

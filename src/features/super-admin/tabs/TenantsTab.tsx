@@ -33,15 +33,24 @@ export function TenantsTab() {
   const toggleSelectAll = () =>
     setSelectedIds(allSelected ? [] : cafes.map((c: any) => c.id));
 
-  async function runBulk(kind: "extend" | "activate") {
+  async function runBulk(kind: "extend" | "activate" | "suspend") {
     if (selectedIds.length === 0 || bulkBusy) return;
+    if (
+      kind === "suspend" &&
+      !confirm(
+        `Suspend ${selectedIds.length} café${selectedIds.length > 1 ? "s" : ""}? Guests will stop seeing their menus. This is audited.`
+      )
+    )
+      return;
     setBulkBusy(true);
     try {
       for (const id of selectedIds) {
         const body =
           kind === "extend"
             ? { action: "extend_trial", id, days: 14 }
-            : { action: "set_plan", id, plan: "active" };
+            : kind === "suspend"
+              ? { action: "set_plan", id, plan: "suspended" }
+              : { action: "set_plan", id, plan: "active" };
         const res = await fetch("/api/super/crud", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -56,6 +65,33 @@ export function TenantsTab() {
     } finally {
       setBulkBusy(false);
     }
+  }
+
+  function handleExportSelected() {
+    const rows = (cafes as any[]).filter((c: any) => selectedIds.includes(c.id));
+    if (rows.length === 0) return;
+    const csv = tenantsToCsv(
+      rows.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        plan: c.plan,
+        tier: c.tier,
+        tax_rate: c.tax_rate,
+        created_at: c.created_at,
+        subscription_ends_at: c.subscription_ends_at,
+        trial_ends_at: c.trial_ends_at,
+      }))
+    );
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `qrslice-tenants-selected-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   function handleExportLocal() {
@@ -201,6 +237,22 @@ export function TenantsTab() {
             </button>
             <button
               type="button"
+              disabled={bulkBusy}
+              onClick={() => runBulk("suspend")}
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              Suspend
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={handleExportSelected}
+              className="px-3 py-1.5 rounded-xl bg-white text-slate-700 hover:text-slate-900 border border-slate-200 font-bold text-xs cursor-pointer shadow-2xs disabled:opacity-50"
+            >
+              Export Selected
+            </button>
+            <button
+              type="button"
               onClick={() => setSelectedIds([])}
               className="px-3 py-1.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 border border-slate-200 font-bold text-xs cursor-pointer shadow-2xs"
             >
@@ -321,6 +373,14 @@ export function TenantsTab() {
                       </button>
                       <Link
                         href={`/super/cafe/${c.id}`}
+                        onClick={(e) => {
+                          if (
+                            !confirm(
+                              `Impersonate "${c.name}"? You will act as this tenant. The session is bannered and every action is audit-logged.`
+                            )
+                          )
+                            e.preventDefault();
+                        }}
                         className="px-2.5 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-[#5738F5] border border-violet-200 font-bold text-xs inline-block transition-colors cursor-pointer shadow-2xs"
                       >
                         Impersonate

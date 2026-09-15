@@ -2,8 +2,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useSuperAdmin } from "../SuperAdminContext";
 
 type Health = { failedWebhooks: number; errorAudits: number; failedPayments: number; checked_at: string };
+
+type Alert = { severity: "red" | "amber"; text: string; tab: string };
 
 const ZERO: Health = { failedWebhooks: 0, errorAudits: 0, failedPayments: 0, checked_at: "" };
 
@@ -41,9 +44,22 @@ function Indicator({ label, value, degraded, description }: { label: string; val
 }
 
 export function SystemHealthTab() {
+  const { kpis, setTab } = useSuperAdmin();
   const [health, setHealth] = useState<Health>(ZERO);
   const [loading, setLoading] = useState(true);
   const [degraded, setDegraded] = useState(false);
+
+  const alerts: Alert[] = [];
+  if (health.failedPayments > 0)
+    alerts.push({ severity: "red", text: `${health.failedPayments} failed payment${health.failedPayments > 1 ? "s" : ""} in 24h`, tab: "billing" });
+  if (health.failedWebhooks > 0)
+    alerts.push({ severity: "red", text: `${health.failedWebhooks} failed webhook${health.failedWebhooks > 1 ? "s" : ""} in 24h`, tab: "audit" });
+  if (health.errorAudits > 0)
+    alerts.push({ severity: "amber", text: `${health.errorAudits} error audits in 24h`, tab: "audit" });
+  if ((kpis?.trialsEnding7d ?? 0) > 0)
+    alerts.push({ severity: "amber", text: `${kpis.trialsEnding7d} trial${kpis.trialsEnding7d > 1 ? "s" : ""} expiring within 7 days`, tab: "cafes" });
+  if ((kpis?.suspended ?? 0) > 0)
+    alerts.push({ severity: "amber", text: `${kpis.suspended} suspended tenant${kpis.suspended > 1 ? "s" : ""} need${kpis.suspended > 1 ? "" : "s"} review`, tab: "cafes" });
 
   async function load() {
     setLoading(true);
@@ -115,6 +131,37 @@ export function SystemHealthTab() {
           degraded={degraded}
           description="Subscription payment drops"
         />
+      </div>
+
+      {/* Action Center — items needing a human, derived from live signals */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Action Center</h3>
+          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${alerts.length === 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+            {alerts.length === 0 ? "All clear" : `${alerts.length} open`}
+          </span>
+        </div>
+        {alerts.length === 0 ? (
+          <p className="text-xs text-slate-500 font-medium">No trials expiring, no failures, no suspended tenants. Nothing needs you right now.</p>
+        ) : (
+          <div className="space-y-2">
+            {alerts.map((a, i) => (
+              <div key={i} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${a.severity === "red" ? "bg-rose-500 animate-pulse" : "bg-amber-500"}`}></span>
+                  <span className="text-xs font-semibold text-slate-800 truncate">{a.text}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTab(a.tab)}
+                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-[#5738F5] font-bold text-xs hover:bg-violet-50 shrink-0 cursor-pointer transition-colors"
+                >
+                  Review →
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Platform subsystem status */}
