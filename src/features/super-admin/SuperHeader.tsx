@@ -26,6 +26,7 @@ export function SuperHeader() {
     settings: "Platform Engine Settings",
     announcements: "In-App Announcements",
     support: "Support Inquiries & Desk",
+    "api-keys": "API Keys & Secrets",
   };
 
   const currentTitle = titles[tab] || `${tab.charAt(0).toUpperCase() + tab.slice(1)} Management`;
