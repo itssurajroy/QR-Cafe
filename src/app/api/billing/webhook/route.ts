@@ -23,6 +23,18 @@ export async function POST(req: NextRequest) {
   const eventType = event.event;
   const payload = event.payload;
 
+  // Idempotency: check if this webhook event has already been processed
+  const { data: existingEvent } = await db
+    .from("audit_events")
+    .select("id")
+    .eq("entity", "billing_webhook")
+    .eq("metadata->>event_id", event.id)
+    .maybeSingle();
+  
+  if (existingEvent) {
+    return NextResponse.json({ ok: true, received: true, idempotent: true });
+  }
+
   const notes =
     payload?.subscription?.entity?.notes ||
     payload?.payment_link?.entity?.notes ||
@@ -66,7 +78,7 @@ export async function POST(req: NextRequest) {
         .eq("id", restaurantId);
     }
 
-    // Log to audit events
+    // Log to audit events (this also serves as idempotency record)
     await db.from("audit_events").insert({
       restaurant_id: restaurantId,
       entity: "billing_webhook",

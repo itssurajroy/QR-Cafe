@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const {
+const {
     table_id,
     order_type, // 'dine_in' | 'takeaway' | 'delivery'
     customer_name,
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
     split_cash_paise = 0,
     split_upi_paise = 0,
     notes = "",
+    idempotency_key,
   } = body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -47,6 +48,27 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createSupabaseAdmin();
+
+  // Idempotency: if client provided a key, check for existing order
+  if (idempotency_key) {
+    const { data: existing } = await admin
+      .from("orders")
+      .select("id, status_token, order_number")
+      .eq("idempotency_key", idempotency_key)
+      .eq("restaurant_id", user.restaurantId)
+      .maybeSingle();
+    if (existing) {
+      return NextResponse.json({
+        ok: true,
+        order: {
+          id: existing.id,
+          status_token: existing.status_token,
+          order_number: existing.order_number,
+        },
+        idempotent: true,
+      });
+    }
+  }
 
   // Validate items and calculate subtotal
   const itemIds = items.map((i: any) => i.id);
@@ -90,9 +112,9 @@ export async function POST(req: NextRequest) {
   const finalDiscountPaise = discount_paise + pointsDiscountPaise;
   const totalPaise = Math.max(0, subtotal - finalDiscountPaise);
 
-  // Generate POS Order Number
+// Generate POS Order Number
   const orderNumber = `POS-${Math.floor(Math.random() * 9000) + 1000}`;
-  const validUuid = crypto.randomUUID();
+  const validUuid = idempotency_key || crypto.randomUUID();
 
   let resolvedTableId = table_id || null;
   if (!resolvedTableId) {

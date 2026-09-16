@@ -9,7 +9,8 @@ import { KitchenView } from "@/features/pos/KitchenView";
 import { VisualFloorGrid } from "@/features/pos/VisualFloorGrid";
 import { generateBeautifulBillPdf } from "@/lib/bill-pdf";
 import { api } from "@/lib/api";
-import { getWaLink } from "@/lib/utils";
+import { getWaLink, isValidIndianPhone, normalizeWaPhone } from "@/lib/utils";
+import { renderWhatsAppMessage, buildWhatsAppReceiptVars } from "@/lib/whatsapp-templates";
 import { speakHumanVoice } from "@/lib/tts";
 import { useToast } from "@/components/ToastProvider";
 import type { Category, MenuItem as Item, CartLine, Table } from "@/types";
@@ -174,7 +175,29 @@ export default function PosClient({
     customerPhone: string;
     totalPaise: number;
     statusToken: string;
+    tableLabel?: string;
+    paymentMethod?: string;
   } | null>(null);
+
+  const [waSettings, setWaSettings] = useState<{ message_template?: string; enabled?: boolean } | null>(null);
+  const [recentPhones, setRecentPhones] = useState<string[]>([]);
+  const [blockedWaUrl, setBlockedWaUrl] = useState<string | null>(null);
+  const [isSendingWa, setIsSendingWa] = useState(false);
+
+  useEffect(() => {
+    async function loadWaSettings() {
+      try {
+        const res = await fetch("/api/whatsapp/settings");
+        if (res.ok) {
+          const data = await res.json();
+          setWaSettings(data);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadWaSettings();
+  }, []);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const supabase = getSupabaseBrowserClient();
@@ -184,6 +207,130 @@ export default function PosClient({
     setMsg({ kind, text });
     setTimeout(() => setMsg(null), 3500);
   }, []);
+
+  const handleSendWhatsApp = useCallback(
+    async (
+      phoneToSend: string,
+      orderDetails: {
+        orderId: string;
+        orderNumber: string;
+        totalPaise: number;
+        statusToken: string;
+        tableLabel?: string;
+        paymentMethod?: string;
+      }
+    ) => {
+      const cleanPhone = phoneToSend.trim();
+      if (!cleanPhone || !isValidIndianPhone(cleanPhone)) {
+        flash("err", "Please enter a valid 10-digit mobile number");
+        return;
+      }
+
+      setIsSendingWa(true);
+      flash("ok", `Opening WhatsApp bill for +${normalizeWaPhone(cleanPhone)}...`);
+
+      try {
+        if (orderDetails.orderId && !orderDetails.orderId.startsWith("POS-")) {
+          api.updateOrderCustomer(orderDetails.orderId, cleanPhone).catch(() => {});
+        }
+
+        const host = typeof window !== "undefined" ? window.location.origin : "https://qrslice.com";
+        const receiptUrl = `${host}/receipt/${orderDetails.statusToken}`;
+
+        const vars = buildWhatsAppReceiptVars({
+          restaurantName: restaurant.name || "our café",
+          restaurantGstin: restaurant.gstin,
+          orderNumber: orderDetails.orderNumber,
+          tableLabel: orderDetails.tableLabel,
+          totalPaise: orderDetails.totalPaise,
+          paymentMethod: orderDetails.paymentMethod,
+          receiptUrl,
+        });
+
+        const message = renderWhatsAppMessage(waSettings?.message_template, vars);
+        const waLink = getWaLink(cleanPhone, message);
+
+        // Telemetry logging
+        fetch("/api/whatsapp/log-event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order_id: orderDetails.orderId && !orderDetails.orderId.startsWith("POS-") ? orderDetails.orderId : null,
+            restaurant_id: restaurant.id,
+            event_type: "sent",
+            phone: cleanPhone,
+            meta: { order_number: orderDetails.orderNumber, source: "pos" },
+          }),
+        }).catch(() => {});
+
+        const win = window.open(waLink, "_blank");
+        if (!win || win.closed || typeof win.closed === "undefined") {
+          setBlockedWaUrl(waLink);
+          flash("err", "Pop-up blocked by browser. Please use the Copy Link button below.");
+        } else {
+          setWaModal(null);
+        }
+      } catch {
+        flash("err", "Failed to prepare WhatsApp message");
+      } finally {
+        setTimeout(() => setIsSendingWa(false), 600);
+      }
+    },
+    [restaurant.name, restaurant.gstin, restaurant.id, waSettings, flash]
+  );
+
+  const openWhatsAppModal = useCallback(
+    async (bill: {
+      orderId: string;
+      orderNumber: string;
+      customerPhone: string;
+      totalPaise: number;
+      statusToken: string;
+      tableLabel?: string;
+      paymentMethod?: string;
+    }) => {
+      setBlockedWaUrl(null);
+      let prefilledPhone = bill.customerPhone ? bill.customerPhone.trim() : "";
+
+      try {
+        const { data } = await supabase
+          .from("orders")
+          .select("customer_phone")
+          .eq("restaurant_id", restaurant.id)
+          .not("customer_phone", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(12);
+
+        const unique = Array.from(
+          new Set(
+            (data || [])
+              .map((r: any) => r.customer_phone?.trim())
+              .filter((p: string) => p && isValidIndianPhone(p))
+          )
+        ).slice(0, 5) as string[];
+
+        setRecentPhones(unique);
+
+        if (!prefilledPhone && unique.length === 1) {
+          prefilledPhone = unique[0];
+        }
+      } catch {
+        // ignore
+      }
+
+      setWaModal({
+        isOpen: true,
+        orderId: bill.orderId,
+        orderNumber: bill.orderNumber,
+        customerPhone: prefilledPhone,
+        totalPaise: bill.totalPaise,
+        statusToken: bill.statusToken,
+        tableLabel: bill.tableLabel || "Counter",
+        paymentMethod: bill.paymentMethod || "paid",
+      });
+    },
+    [restaurant.id, supabase]
+  );
 
   const speakVoice = useCallback(
     (text: string) => {
@@ -1101,18 +1248,38 @@ export default function PosClient({
                 >
                   🖨️ Invoice PDF
                 </button>
+                {lastBill.customer_phone && isValidIndianPhone(lastBill.customer_phone) && (
+                  <button
+                    type="button"
+                    disabled={isSendingWa}
+                    onClick={() =>
+                      handleSendWhatsApp(lastBill.customer_phone!, {
+                        orderId: lastBill.id || "",
+                        orderNumber: lastBill.order_number || lastBill.orderNumber || "",
+                        totalPaise: lastBill.finalTotalPaise ?? lastBill.total_paise ?? 0,
+                        statusToken: lastBill.status_token || lastBill.id || "",
+                        tableLabel: lastBill.table_label,
+                        paymentMethod: lastBill.paymentMethod || lastBill.payment_method,
+                      })
+                    }
+                    className="py-2.5 px-3 rounded-xl bg-[#34C759] hover:bg-[#34C759]/90 disabled:opacity-50 text-white font-bold text-xs shadow-xs cursor-pointer active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+                  >
+                    ⚡ 1-Click WhatsApp ({lastBill.customer_phone.slice(-4)})
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => {
-                    setWaModal({
-                      isOpen: true,
+                  onClick={() =>
+                    openWhatsAppModal({
                       orderId: lastBill.id || "",
                       orderNumber: lastBill.order_number || lastBill.orderNumber || "",
                       customerPhone: lastBill.customer_phone || "",
                       totalPaise: lastBill.finalTotalPaise ?? lastBill.total_paise ?? 0,
                       statusToken: lastBill.status_token || lastBill.id || "",
-                    });
-                  }}
+                      tableLabel: lastBill.table_label,
+                      paymentMethod: lastBill.paymentMethod || lastBill.payment_method,
+                    })
+                  }
                   className="py-2.5 px-3 rounded-xl bg-[#34C759]/10 hover:bg-[#34C759]/15 border border-[#34C759]/20 text-[#34C759] font-bold text-xs cursor-pointer active:scale-95 transition-transform"
                 >
                   💬 WhatsApp Bill
@@ -1136,8 +1303,32 @@ export default function PosClient({
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-black/[0.08] space-y-4 animate-in zoom-in-95 duration-200">
             <div>
               <h3 className="font-bold text-lg text-slate-900">Send WhatsApp Bill</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Order #{waModal.orderNumber}</p>
+              <p className="text-xs text-slate-500 mt-0.5">Order #{waModal.orderNumber} • ₹{(waModal.totalPaise / 100).toFixed(2)}</p>
             </div>
+
+            {/* Quick Customer Phone Chips */}
+            {recentPhones.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Recent Customers (Last used)</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {recentPhones.map((phone) => (
+                    <button
+                      key={phone}
+                      type="button"
+                      onClick={() => setWaModal({ ...waModal, customerPhone: phone })}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+                        waModal.customerPhone === phone
+                          ? "bg-[#34C759] text-white font-bold shadow-xs"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      +91 {phone.slice(-10)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Customer Phone Number</label>
               <input
@@ -1147,7 +1338,41 @@ export default function PosClient({
                 onChange={(e) => setWaModal({ ...waModal, customerPhone: e.target.value })}
                 className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#007AFF] focus:bg-white font-mono min-h-[44px] transition-all"
               />
+              <p className="text-[11px] text-slate-400 mt-1">This will open WhatsApp in a new tab with the verified digital receipt.</p>
             </div>
+
+            {/* Browser Popup Blocker Fallback */}
+            {blockedWaUrl && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs text-amber-800 animate-in fade-in">
+                <div className="font-bold flex items-center gap-1.5">
+                  <span>⚠️</span> Pop-up blocked by your browser
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  Your browser prevented WhatsApp from opening automatically. Copy the link below or open directly:
+                </p>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(blockedWaUrl);
+                      flash("ok", "WhatsApp link copied to clipboard! 📋");
+                    }}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer"
+                  >
+                    📋 Copy Link
+                  </button>
+                  <a
+                    href={blockedWaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-white border border-amber-300 text-amber-900 font-bold rounded-lg hover:bg-amber-100 flex items-center gap-1"
+                  >
+                    Open ↗
+                  </a>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-2.5 pt-2">
               <button
                 type="button"
@@ -1158,29 +1383,11 @@ export default function PosClient({
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    const phone = waModal.customerPhone.trim();
-                    if (!phone) {
-                      flash("err", "Please enter a valid phone number");
-                      return;
-                    }
-                    if (waModal.orderId && !waModal.orderId.startsWith("POS-")) {
-                      await api.updateOrderCustomer(waModal.orderId, phone);
-                    }
-                    const host = typeof window !== "undefined" ? window.location.origin : "https://qrslice.com";
-                    const receiptUrl = `${host}/receipt/${waModal.statusToken}`;
-                    const msg = `Thanks for visiting ${restaurant.name}\nOrder #${waModal.orderNumber}\nTotal: ₹${(waModal.totalPaise / 100).toFixed(2)}\n\nView receipt:\n${receiptUrl}`;
-                    window.open(getWaLink(phone, msg), "_blank");
-                    setWaModal(null);
-                    flash("ok", "Opening WhatsApp...");
-                  } catch (e) {
-                    flash("err", "Failed to update customer phone");
-                  }
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-[#34C759] hover:bg-[#34C759]/90 text-white font-bold text-xs shadow-sm min-h-[44px] cursor-pointer active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+                disabled={isSendingWa}
+                onClick={() => handleSendWhatsApp(waModal.customerPhone, waModal)}
+                className="flex-1 py-2.5 rounded-xl bg-[#34C759] hover:bg-[#34C759]/90 disabled:opacity-50 text-white font-bold text-xs shadow-sm min-h-[44px] cursor-pointer active:scale-95 transition-transform flex items-center justify-center gap-1.5"
               >
-                💬 Send
+                {isSendingWa ? "Preparing..." : "💬 Send Bill"}
               </button>
             </div>
           </div>

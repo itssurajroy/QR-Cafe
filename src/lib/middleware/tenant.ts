@@ -17,15 +17,23 @@ export async function resolveTenant(request: NextRequest) {
     }
   }
 
-  // 2. Subdomain-based resolution (e.g. [slug].qrslice.app or [slug].localhost:3000)
+// 2. Subdomain-based resolution (e.g. [slug].qrslice.app or [slug].localhost:3000)
   // Skip if slug already found via path
   if (!slug) {
-    const isLocalhost = hostname.includes("localhost") || hostname.includes("127.0.0.1");
-    const domainParts = hostname.split(".");
+    const hostnameLower = hostname.toLowerCase();
+    const isLocalhost = hostnameLower.includes("localhost") || hostnameLower.includes("127.0.0.1");
+    const domainParts = hostnameLower.split(".");
+    
+    // Check if hostname looks like an IP address (e.g., 127.0.0.1:3000, [::1]:3000)
+    const isIpAddress = /^(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(hostnameLower.replace(/^\[|\](:\d+)?$/g, "")) ||
+      /^\[?[0-9a-f:]+\]?(:\d+)?$/i.test(hostnameLower);
     
     // Only resolve subdomain if there is a subdomain part (e.g., tenant.domain.com)
-    // If it's just 'localhost:3000' or 'qrslice.app', parts length will be small.
-    if (domainParts.length >= 3 || (isLocalhost && domainParts.length >= 2)) {
+    // If it's just 'localhost:3000', '127.0.0.1:3000', or 'qrslice.app', don't treat first part as slug.
+    // For localhost with subdomain (cafe.localhost:3000), parts = ['cafe', 'localhost:3000'] (length=2)
+    // For production (cafe.qrslice.app), parts = ['cafe', 'qrslice', 'app'] (length=3)
+    // For IP addresses, don't resolve subdomain at all.
+    if (!isIpAddress && (domainParts.length >= 3 || (isLocalhost && domainParts.length >= 2))) {
       const potentialSlug = domainParts[0];
       // Don't treat "www" as a tenant slug
       if (potentialSlug !== "www" && potentialSlug !== "qrslice") {

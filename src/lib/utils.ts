@@ -149,38 +149,6 @@ export function getUrgencyColor(minutesElapsed: number): string {
 
 // ─── Menu / Image Helpers ─────────────────────────────────────────────────────
 
-const IMAGE_MAP: Record<string, string> = {
-  coffee: "coffee",
-  latte: "coffee",
-  cappuccino: "coffee",
-  espresso: "coffee",
-  mocha: "coffee",
-  chai: "tea",
-  tea: "herbal-tea",
-  burger: "hamburger",
-  sandwich: "sandwich",
-  wrap: "wrap",
-  pizza: "pizza",
-  pasta: "pasta",
-  noodle: "noodles",
-  biryani: "biryani",
-  rice: "rice",
-  salad: "salad",
-  shake: "milkshake",
-  smoothie: "smoothie",
-  juice: "juice",
-  cake: "cake",
-  dessert: "dessert",
-  ice: "ice-cream",
-  waffle: "waffle",
-  pancake: "pancake",
-  fries: "french-fries",
-  tikka: "chicken-tikka",
-  paneer: "paneer",
-  dosa: "dosa",
-  idli: "idli",
-};
-
 const GOURMET_PHOTO_MAP: Record<string, string> = {
   "paneer tikka": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80",
   "paneer wrap": "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=800&auto=format&fit=crop&q=80",
@@ -307,13 +275,35 @@ export function generateSlug(name: string): string {
 
 /** Normalize an Indian/international phone number for WhatsApp API & wa.me URLs */
 export function normalizeWaPhone(phone: string): string {
-  let digits = phone.replace(/\D/g, "");
-  if (digits.length === 10) {
-    digits = `91${digits}`;
-  } else if (digits.length === 11 && digits.startsWith("0")) {
-    digits = `91${digits.slice(1)}`;
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+
+  // Already has country code
+  if (digits.startsWith("91") && digits.length >= 12) {
+    return digits;
   }
+
+  // 10-digit Indian number
+  if (digits.length === 10) {
+    return `91${digits}`;
+  }
+
+  // 11-digit starting with 0 (e.g., 098...)
+  if (digits.length === 11 && digits.startsWith("0")) {
+    return `91${digits.slice(1)}`;
+  }
+
   return digits;
+}
+
+/** Validate if phone string is a plausible Indian mobile number */
+export function isValidIndianPhone(phone: string): boolean {
+  if (!phone) return false;
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return true;
+  if (digits.length === 12 && digits.startsWith("91")) return true;
+  if (digits.length === 11 && digits.startsWith("0")) return true;
+  return false;
 }
 
 /** Build a valid WhatsApp wa.me link with encoded text message */

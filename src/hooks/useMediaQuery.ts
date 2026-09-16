@@ -3,15 +3,21 @@
 
 import { useState, useEffect } from "react";
 
+function getInitialMatches(query: string): boolean {
+  if (typeof window === "undefined" || typeof window.matchMedia === "undefined") {
+    return false;
+  }
+  return window.matchMedia(query).matches;
+}
+
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(false);
+  const [matches, setMatches] = useState<boolean>(() => getInitialMatches(query));
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia === "undefined") {
       return;
     }
     const mql = window.matchMedia(query);
-    setMatches(mql.matches);
     const listener = (event: MediaQueryListEvent) => {
       setMatches(event.matches);
     };
