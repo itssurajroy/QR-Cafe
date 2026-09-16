@@ -1,6 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QrSliceLogoServer } from "@/components/brand/QrSliceLogoServer";
 
 export const metadata: Metadata = {
   title: { absolute: "Refund Policy | QRslice" },
@@ -14,7 +15,7 @@ export default function RefundPolicyPage() {
     <div className="landing-page min-h-screen">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link href="/"><img src="/logo.png" alt="QRslice" className="h-8 w-auto" /></Link>
+          <Link href="/"><QrSliceLogoServer size="md" variant="full" className="h-8 w-auto" /></Link>
           <Link
             href="/"
             className="text-sm text-slate-500 transition-colors hover:text-slate-800"

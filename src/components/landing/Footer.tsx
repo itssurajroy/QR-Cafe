@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { fadeIn, VIEWPORT_ONCE } from "@/lib/animations";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 
 const FOOTER_LINKS = {
   Product: [
@@ -13,11 +14,19 @@ const FOOTER_LINKS = {
     { label: "Pricing", href: "#pricing" },
     { label: "Live Demo", href: "/c/wah-ji-wah" },
     { label: "Kitchen Display", href: "/pos" },
+    { label: "Integrations", href: "/integrations" },
   ],
   Company: [
     { label: "About", href: "/about" },
-    { label: "Brochure", href: "/marketing/brochure" },
-    { label: "Flyer", href: "/marketing/flyer" },
+    { label: "Blog", href: "/blog" },
+    { label: "Careers", href: "/careers" },
+    { label: "Press", href: "/press" },
+  ],
+  Resources: [
+    { label: "Documentation", href: "/docs" },
+    { label: "API Reference", href: "/api-docs" },
+    { label: "Community", href: "/community" },
+    { label: "Support", href: "/support" },
   ],
   Legal: [
     { label: "Terms of Service", href: "/legal/terms" },
@@ -46,13 +55,10 @@ export function Footer() {
           {/* Brand Column */}
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-              <img src="/favicon.png" alt="QRslice" className="w-8 h-8 rounded-xl shadow-sm group-hover:scale-105 transition-transform" />
-              <span className="text-xl font-black text-slate-900 tracking-tight font-[family-name:var(--font-plus-jakarta)]">
-                QRslice
-              </span>
+              <QrSliceLogo size="md" variant="full" className="group-hover:scale-105 transition-transform" />
             </Link>
             <p className="text-sm text-slate-500 font-medium leading-relaxed max-w-[240px] mb-4">
-              QR ordering, without the chaos. Calm, real-time operating system for Indian hospitality teams.
+              QR ordering, without the chaos. Calm, real-time operating system for hospitality teams.
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200/80 rounded-full text-xs font-semibold text-emerald-800">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -88,9 +94,9 @@ export function Footer() {
             © {new Date().getFullYear()} QRslice. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
-            <span>Made with ☕ in India</span>
+            <span>Built in India</span>
             <span>•</span>
-            <Link href="/c/wah-ji-wah" className="hover:text-[#5738F5] transition-colors">Live Store Demo</Link>
+            <Link href="/c/wah-ji-wah" className="hover:text-[#5738F5] transition-colors">Live Demo</Link>
           </div>
         </div>
       </div>

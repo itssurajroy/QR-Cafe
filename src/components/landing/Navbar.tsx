@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -38,11 +39,7 @@ export function Navbar() {
       <nav className="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <img
-            src="/logo.png"
-            alt="QRslice"
-            className="h-8 sm:h-9 w-auto group-hover:scale-105 transition-transform duration-200"
-          />
+          <QrSliceLogo size="md" variant="full" className="group-hover:scale-105 transition-transform duration-200" />
         </Link>
 
         {/* Desktop Nav */}

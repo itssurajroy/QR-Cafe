@@ -94,11 +94,11 @@ export default function LoginPage() {
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-violet-50 text-[#5738F5] border border-violet-200">
                   <span className="w-2 h-2 rounded-full bg-[#5738F5] animate-pulse" />
-                  Terminal OS 2.4 Live
+                  Platform Live
                 </span>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                   <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-600" />
-                  Cloud Synced
+                  Real-time Sync
                 </span>
               </div>
 
@@ -172,7 +172,7 @@ export default function LoginPage() {
             <div className="bg-white border border-slate-200/90 rounded-[2rem] p-6 sm:p-9 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.06)] space-y-6">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-[#5738F5] block mb-1">
-                  Terminal Authentication
+                  Secure Sign In
                 </span>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">
                   Welcome back
@@ -278,28 +278,7 @@ export default function LoginPage() {
                 </button>
               </form>
 
-              {/* Demo Quick Fill Shortcuts (for instant review & testing) */}
-              <div className="pt-4 border-t border-slate-100">
-                <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 block mb-2">
-                  Quick Demo Accounts (Tap to Fill)
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fillDemo("super@qrslice.test", "QrSliceDev123!")}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-violet-50 hover:border-violet-200 text-slate-700 hover:text-[#5738F5] text-[11px] font-bold border border-slate-200 transition-colors text-left cursor-pointer truncate"
-                  >
-                    👑 Admin Demo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemo("owner@tableandgrain.com", "password123")}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-violet-50 hover:border-violet-200 text-slate-700 hover:text-[#5738F5] text-[11px] font-bold border border-slate-200 transition-colors text-left cursor-pointer truncate"
-                  >
-                    ☕ Cafe Owner
-                  </button>
-                </div>
-              </div>
+              
 
               <div className="pt-2 text-center text-xs text-slate-500">
                 <span>Want to set up your own restaurant? </span>

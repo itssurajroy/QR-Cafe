@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
 
-interface QrSliceLogoProps {
+interface QrSliceLogoServerProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
   variant?: "full" | "icon" | "wordmark";
@@ -23,10 +23,9 @@ const logoSizes = {
 };
 
 /**
- * QRslice Icon - The "W" letter mark in a rounded square
- * Used for favicon, small spaces, and app icons
+ * QRslice Icon - Server-compatible version
  */
-export function QrSliceIcon({ 
+export function QrSliceIconServer({ 
   className = "w-8 h-8", 
   inverted = false 
 }: { className?: string; inverted?: boolean }) {
@@ -56,15 +55,15 @@ export function QrSliceIcon({
 }
 
 /**
- * QRslice Wordmark - "QRslice" text in indigo
+ * QRslice Wordmark - Server-compatible version
  */
-export function QrSliceWordmark({ 
+export function QrSliceWordmarkServer({ 
   className = "", 
   size = "md",
   inverted = false 
 }: { className?: string; size?: "sm" | "md" | "lg" | "xl"; inverted?: boolean }) {
   const textColor = inverted ? "white" : "#5738F5";
-  const sizeClass = logoSizes[size];
+  const sizeClass = { sm: "h-6", md: "h-8", lg: "h-10", xl: "h-12" }[size];
 
   return (
     <svg
@@ -91,28 +90,33 @@ export function QrSliceWordmark({
 }
 
 /**
- * QRslice Full Logo - Icon + Wordmark combined
+ * QRslice Full Logo - Server-compatible version
  */
-export function QrSliceLogo({
+export function QrSliceLogoServer({
   className = "",
   size = "md",
   variant = "full",
   inverted = false,
-}: QrSliceLogoProps) {
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  variant?: "full" | "icon" | "wordmark";
+  inverted?: boolean;
+}) {
   const gap = size === "sm" ? "2" : size === "lg" ? "4" : "3";
 
   if (variant === "icon") {
-    return <QrSliceIcon className={`${iconSizes[size]} ${className}`} inverted={inverted} />;
+    return <QrSliceIconServer className={{ sm: "w-6 h-6", md: "w-8 h-8", lg: "w-10 h-10", xl: "w-12 h-12" }[size]} inverted={inverted} />;
   }
 
   if (variant === "wordmark") {
-    return <QrSliceWordmark className={className} size={size} inverted={inverted} />;
+    return <QrSliceWordmarkServer className={className} size={size} inverted={inverted} />;
   }
 
   return (
-    <div className={`flex items-center gap-${gap} ${className}`} role="img" aria-label="QRslice">
-      <QrSliceIcon className={iconSizes[size]} inverted={inverted} />
-      <QrSliceWordmark size={size} inverted={inverted} />
+    <div className={`flex items-center gap-${size === "sm" ? "2" : size === "lg" ? "4" : "3"} ${className}`} role="img" aria-label="QRslice">
+      <QrSliceIconServer className={{ sm: "w-6 h-6", md: "w-8 h-8", lg: "w-10 h-10", xl: "w-12 h-12" }[size]} inverted={inverted} />
+      <QrSliceWordmarkServer size={size} inverted={inverted} />
     </div>
   );
 }

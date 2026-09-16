@@ -52,11 +52,6 @@ The host and auth states are securely parsed in `middleware.ts` at the edge, inj
 - `POST|PATCH|DELETE /api/super/staff` — super-admin staff lifecycle
 - `POST /api/auth/login` — handles staff/owner sessions
 
-## Demo credentials
-- `super@qrslice.test` / `QrSliceDev123!` → super-admin (`/super`)
-- `owner@tableandgrain.com` / `password123` → Table & Grain owner (`/admin`, `/pos`)
-- Staff logins can be created from the super-admin console; the temp password is shown once.
-
 ## Shared-project caveats (important)
 This app is deployed against a Supabase project that also hosts a separate, unrelated application. To avoid colliding with that app's schema, the migration:
 - names our staff table `cafe_profiles` (instead of `profiles`), and
