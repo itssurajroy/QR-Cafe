@@ -1,5 +1,13 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
+import type { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "QRslice Flyer — QR Table Ordering for Restaurants",
+  description:
+    "Printable QRslice flyer: QR table ordering, kitchen display, POS billing and inventory for independent restaurants.",
+  alternates: { canonical: "/marketing/flyer" },
+};
 
 export default function Flyer() {
   return (

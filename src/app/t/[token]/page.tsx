@@ -24,6 +24,8 @@ export async function generateMetadata({
       description: `Browse dishes, customize your order, and pay seamlessly from your phone.`,
       images: tenant?.logo_url ? [tenant.logo_url] : [],
     },
+    // Per-table capability URLs must never be indexed.
+    robots: { index: false, follow: false },
   };
 }
 

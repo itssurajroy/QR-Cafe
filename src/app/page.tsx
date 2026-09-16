@@ -13,7 +13,7 @@ import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
 
 const JSON_LD = [
   {
@@ -21,7 +21,7 @@ const JSON_LD = [
     "@type": "Organization",
     name: "QRslice",
     url: APP_URL,
-    logo: `${APP_URL}/favicon.png`,
+    logo: `${APP_URL}/logo.png`,
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
@@ -40,15 +40,29 @@ const JSON_LD = [
     "@type": "SoftwareApplication",
     name: "QRslice",
     applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Restaurant Management Software",
     operatingSystem: "Web",
     description:
       "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
     url: APP_URL,
+    featureList: [
+      "QR code table ordering with no app download",
+      "Kitchen Display System (KDS) with live tickets",
+      "Counter POS billing with UPI, card, cash and split bills",
+      "Bluetooth thermal printing for kitchen order tickets",
+      "Inventory with automatic recipe-based ingredient deduction",
+      "Staff roles with 4-digit PIN quick sign-in",
+      "Customer loyalty points and CRM",
+      "Table reservations with shareable booking tickets",
+      "WhatsApp digital bills and receipts",
+    ],
     offers: {
       "@type": "Offer",
       price: "999",
       priceCurrency: "INR",
       description: "QRslice complete plan, per outlet per month. Annual option ₹9,999.",
+      availability: "https://schema.org/InStock",
+      url: `${APP_URL}/pricing`,
     },
   },
   {

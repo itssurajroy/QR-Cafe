@@ -10,23 +10,15 @@ import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 
 const FOOTER_LINKS = {
   Product: [
-    { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/pricing" },
     { label: "Live Demo", href: "/c/wah-ji-wah" },
     { label: "Kitchen Display", href: "/pos" },
-    { label: "Integrations", href: "/integrations" },
   ],
   Company: [
     { label: "About", href: "/about" },
-    { label: "Blog", href: "/blog" },
-    { label: "Careers", href: "/careers" },
-    { label: "Press", href: "/press" },
-  ],
-  Resources: [
-    { label: "Documentation", href: "/docs" },
-    { label: "API Reference", href: "/api-docs" },
-    { label: "Community", href: "/community" },
-    { label: "Support", href: "/support" },
+    { label: "FAQ", href: "/faq" },
+    { label: "Contact", href: "/contact" },
   ],
   Legal: [
     { label: "Terms of Service", href: "/legal/terms" },

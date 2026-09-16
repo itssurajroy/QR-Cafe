@@ -1,5 +1,13 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
+import type { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "QRslice Brochure — Restaurant Operating System",
+  description:
+    "Printable QRslice brochure: digital menus, contactless table ordering, KDS, POS and analytics for cafés and restaurants.",
+  alternates: { canonical: "/marketing/brochure" },
+};
 
 export default function Brochure() {
   return (

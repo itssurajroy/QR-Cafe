@@ -27,6 +27,8 @@ export async function generateMetadata({
       description: 'Order fresh food & beverages directly from your table.',
       images: tenant?.logo_url ? [tenant.logo_url] : [],
     },
+    // Per-table ordering URLs must never be indexed.
+    robots: { index: false, follow: false },
   };
 }
 

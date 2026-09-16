@@ -1,9 +1,16 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { TicketCard } from "@/features/booking/TicketCard";
 
 export const dynamic = "force-dynamic";
+
+// Booking tickets carry per-reservation codes and must never be indexed.
+export const metadata: Metadata = {
+  title: "Your Table Booking",
+  robots: { index: false, follow: false },
+};
 
 export default async function BookingTicketPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
