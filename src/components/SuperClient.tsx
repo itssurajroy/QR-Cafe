@@ -31,7 +31,9 @@ function TabRenderer() {
 
   switch (tab) {
     case 'dashboard': return <DashboardTab />;
-    case 'cafes': return <TenantsTab />;
+    case 'cafes':
+    case 'tenants':
+      return <TenantsTab />;
     case 'config': return <ConfigTab />;
     case 'audit': return <AuditTab />;
     case 'staff': return <StaffTab />;
@@ -45,7 +47,9 @@ function TabRenderer() {
     case 'settings': return <SettingsTab />;
     case 'announcements': return <AnnouncementsTab />;
     case 'support': return <SupportTab />;
-    case 'system-health': return <SystemHealthTab />;
+    case 'system-health':
+    case 'health':
+      return <SystemHealthTab />;
     case 'api-keys': return <ApiKeysTab />;
     default: return <DashboardTab />;
   }

@@ -4,7 +4,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 export type SessionUser = {
   userId: string;
-  role: "super_admin" | "owner" | "staff";
+  role: "super_admin" | "owner" | "manager" | "staff";
   restaurantId: string | null;
 };
 
@@ -25,9 +25,20 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     .maybeSingle();
 
   if (!profile || !profile.active) return null;
+
+  const rawRole = String(profile.role || "staff").toLowerCase();
+  const normalizedRole: SessionUser["role"] =
+    rawRole === "super_admin"
+      ? "super_admin"
+      : rawRole === "owner"
+      ? "owner"
+      : rawRole === "manager" || rawRole === "admin"
+      ? "manager"
+      : "staff";
+
   return {
     userId: user.id,
-    role: profile.role,
+    role: normalizedRole,
     restaurantId: profile.restaurant_id,
   };
 }
@@ -40,4 +51,3 @@ export async function requireSuperAdmin(): Promise<SessionUser | null> {
   if (!user || user.role !== "super_admin") return null;
   return user;
 }
-

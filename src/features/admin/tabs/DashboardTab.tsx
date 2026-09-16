@@ -5,6 +5,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { paise } from "@/lib/utils";
 import { StatusBadge } from "@/components/brand/StatusBadge";
+import { calculateDetailedTableStatus } from "@/features/booking/floorStatus";
 import {
   CreditCardIcon,
   ClipboardListIcon,
@@ -276,27 +277,53 @@ export function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
-                Table Activity
+                Visual Floor Activity
               </h3>
-              <p className="text-[11px] text-[#64748b]">Live floor status & QR readiness</p>
+              <p className="text-[11px] text-[#64748b]">Live seating, kitchen prep & pending bills</p>
             </div>
-            <button
-              type="button"
-              onClick={() => setTab("tables")}
-              className="text-xs font-bold text-[#007AFF] hover:underline cursor-pointer"
+            <Link
+              href="/pos?view=live_tables"
+              className="text-xs font-bold text-[#007AFF] hover:underline cursor-pointer flex items-center gap-1"
             >
-              Manage tables →
-            </button>
+              <span>Floor Grid</span>
+              <ArrowRightIcon className="w-3 h-3 inline" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {tableList.slice(0, 8).map((tbl: any, idx: number) => {
-              // Simulate or assign realistic status
-              const status = idx === 1 ? "ordering" : idx === 3 ? "occupied" : "available";
+              const detailed = calculateDetailedTableStatus(
+                tbl,
+                recentOrders,
+                [],
+                new Set(),
+                new Date(),
+              );
+
+              let badgeText = "Available";
+              let badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200/80";
+              if (detailed.state === "needs_bill") {
+                badgeText = "Needs Bill";
+                badgeStyle = "bg-rose-100 text-rose-800 border-rose-200 font-extrabold animate-pulse";
+              } else if (detailed.state === "cooking") {
+                badgeText = "Cooking";
+                badgeStyle = "bg-amber-100 text-amber-800 border-amber-200 font-bold";
+              } else if (detailed.state === "seated") {
+                badgeText = "Seated";
+                badgeStyle = "bg-blue-100 text-blue-800 border-blue-200 font-bold";
+              } else if (detailed.state === "paid") {
+                badgeText = "Paid";
+                badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
+              } else if (detailed.state === "reserved") {
+                badgeText = "Reserved";
+                badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
+              }
+
               return (
-                <div
+                <Link
                   key={tbl.id || idx}
-                  className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1.5"
+                  href="/pos?view=live_tables"
+                  className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-[#007AFF]/40 hover:bg-slate-100/50 transition-all text-center space-y-1.5 block cursor-pointer"
                 >
                   <div
                     className="font-mono font-black text-sm text-[#0f172a]"
@@ -304,9 +331,15 @@ export function DashboardTab({
                   >
                     TABLE {tbl.label || String(idx + 1).padStart(2, "0")}
                   </div>
-                  <div className="text-[10px] text-[#64748b]">{tbl.seats || 4} Seats</div>
-                  <StatusBadge status={status} type="table" size="sm" />
-                </div>
+                  <div className="text-[10px] text-[#64748b]">
+                    {tbl.seats || 4} Seats{detailed.totalPaise > 0 ? ` • ${paise(detailed.totalPaise)}` : ""}
+                  </div>
+                  <div className="inline-block">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border ${badgeStyle}`}>
+                      {badgeText}
+                    </span>
+                  </div>
+                </Link>
               );
             })}
           </div>

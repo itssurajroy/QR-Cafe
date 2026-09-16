@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { RegisterView } from "@/features/pos/RegisterView";
 import { KitchenView } from "@/features/pos/KitchenView";
+import { VisualFloorGrid } from "@/features/pos/VisualFloorGrid";
 import { generateBeautifulBillPdf } from "@/lib/bill-pdf";
 import { api } from "@/lib/api";
 import { getWaLink } from "@/lib/utils";
@@ -86,8 +87,23 @@ export default function PosClient({
   categories: Category[];
   items: Item[];
   tables: Table[];
-  reservations: { table_ids: string[]; starts_at: string; ends_at: string; status: string }[];
+  reservations: {
+    table_ids: string[];
+    starts_at: string;
+    ends_at: string;
+    status: string;
+    id?: string;
+    code?: string;
+    name?: string;
+    phone?: string;
+    party_size?: number;
+  }[];
 }) {
+  const [reservationList, setReservationList] = useState(reservations);
+  useEffect(() => {
+    setReservationList(reservations);
+  }, [reservations]);
+
   // Deep-linkable view: /pos?view=kitchen lands straight on the KDS.
   const [viewMode, setViewMode] = useState<"catalog" | "kitchen" | "live_tables">(() => {
     if (typeof window === "undefined") return "catalog";
@@ -461,6 +477,87 @@ export default function PosClient({
     }
   };
 
+  const handleSettleExistingOrder = async (orderId: string, table: Table, method: string = "cash") => {
+    try {
+      const res = await fetch("/api/pos/active-orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          payment_status: "paid",
+          payment_method: method,
+          status: "completed",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Settlement failed");
+      toast.success(`Table #${table.label} settled and paid!`);
+      flash("ok", `Table #${table.label} bill settled ✓`);
+      speakVoice(`Table ${table.label} payment received`);
+      fetchLiveOrders();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to settle table";
+      toast.error(message);
+      flash("err", message);
+    }
+  };
+
+  const handleActionReservation = async (
+    id: string,
+    action: "accept" | "seat" | "cancel" | "no_show",
+    tableLabel?: string,
+  ) => {
+    try {
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Reservation update failed");
+
+      setReservationList((prev) =>
+        prev.map((r: any) =>
+          r.id === id
+            ? {
+                ...r,
+                status:
+                  action === "accept"
+                    ? "confirmed"
+                    : action === "seat"
+                      ? "seated"
+                      : action === "cancel"
+                        ? "cancelled"
+                        : "no_show",
+              }
+            : r,
+        ),
+      );
+
+      const actionText =
+        action === "accept"
+          ? "Confirmed"
+          : action === "seat"
+            ? "Seated"
+            : action === "cancel"
+              ? "Cancelled"
+              : "Marked No-Show";
+
+      toast.success(
+        tableLabel
+          ? `Table #${tableLabel} reservation ${actionText}!`
+          : `Reservation ${actionText}!`,
+      );
+      flash("ok", `Booking ${actionText} ✓`);
+      speakVoice(`Booking ${actionText}`);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to update booking";
+      toast.error(message);
+      flash("err", message);
+    }
+  };
+
   // Shift Z-Report calculations
   const zReport = useMemo(() => {
     const paidOrders = liveOrders.filter((o) => o.payment_status === "paid" && o.status !== "cancelled");
@@ -537,10 +634,14 @@ export default function PosClient({
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <span>Live Tables</span>
-              {tables.length > 0 && (
+              <span>Visual Floor</span>
+              {liveOrders.filter((o) => (o.status === "served" || o.status === "ready") && o.payment_status === "unpaid").length > 0 ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white font-mono font-bold text-[9px] animate-pulse" title="Bills pending">
+                  {liveOrders.filter((o) => (o.status === "served" || o.status === "ready") && o.payment_status === "unpaid").length} Bill
+                </span>
+              ) : tables.length > 0 ? (
                 <span className="w-2 h-2 rounded-full bg-[#34C759] animate-pulse"></span>
-              )}
+              ) : null}
             </button>
 
             <button
@@ -702,7 +803,7 @@ export default function PosClient({
           tableOrderCounts={tableOrderCounts}
           mobileCartOpen={mobileCartOpen}
           setMobileCartOpen={setMobileCartOpen}
-          reservations={reservations}
+          reservations={reservationList}
         />
       )}
 
@@ -716,59 +817,36 @@ export default function PosClient({
       )}
 
       {viewMode === "live_tables" && (
-        <div className="flex-1 p-6 bg-[#F5F5F7] overflow-y-auto">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900 tracking-tight">Live Table Floor Status</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Select any table to review live guest orders or start a new tab</p>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 font-medium text-slate-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#34C759]"></span> Available
-                </span>
-                <span className="flex items-center gap-1.5 font-medium text-slate-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF9500]"></span> Active Order
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
-              {tables.map((tbl) => {
-                const count = tableOrderCounts[tbl.id] || 0;
-                return (
-                  <div
-                    key={tbl.id}
-                    onClick={() => {
-                      setSelectedTable(tbl);
-                      setViewMode("catalog");
-                    }}
-                    className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md flex flex-col justify-between min-h-[128px] active:scale-[0.98] ${
-                      count > 0
-                        ? "bg-white border-[#FF9500]/40 ring-1 ring-[#FF9500]/20 text-slate-900"
-                        : "bg-white border-black/[0.06] text-slate-900 hover:border-[#007AFF]/40"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-slate-400">Table</span>
-                        {count > 0 && <span className="w-2 h-2 rounded-full bg-[#FF9500] animate-pulse"></span>}
-                      </div>
-                      <div className="font-bold text-2xl text-slate-900 tracking-tight">#{tbl.label}</div>
-                      <div className="text-[11px] text-slate-500 font-medium mt-0.5">{(tbl as unknown as { capacity?: number }).capacity || 4} Guests</div>
-                    </div>
-                    <div className="pt-2.5 border-t border-black/[0.04] flex items-center justify-between">
-                      <span className={`text-[11px] font-semibold ${count > 0 ? "text-[#FF9500]" : "text-[#34C759]"}`}>
-                        {count > 0 ? `${count} Active` : "Available"}
-                      </span>
-                      <span className="text-xs text-slate-400 font-bold">&rarr;</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <VisualFloorGrid
+          tables={tables}
+          orders={liveOrders}
+          reservations={reservationList}
+          onSelectTable={(tbl) => {
+            setSelectedTable(tbl);
+          }}
+          onOpenRegister={(tbl) => {
+            setSelectedTable(tbl);
+            setViewMode("catalog");
+          }}
+          onSettleOrder={(orderId, tbl) => {
+            handleSettleExistingOrder(orderId, tbl, "cash");
+          }}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onActionReservation={handleActionReservation}
+          onPrintBill={(ord) => {
+            setLastBill({
+              id: ord.id,
+              order_number: ord.order_number,
+              total_paise: ord.total_paise,
+              subtotal_paise: ord.subtotal_paise || ord.total_paise,
+              payment_status: ord.payment_status || "unpaid",
+              payment_method: ord.payment_method || "cash",
+              table_label: ord.table_label || "Table",
+              items: ord.items || ord.order_items || [],
+            });
+            setShowBill(true);
+          }}
+        />
       )}
 
       {/* OPEN / CUSTOM ITEM MODAL (Apple Sheet Style) */}

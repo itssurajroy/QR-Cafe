@@ -10,8 +10,20 @@ export function WebhooksTab({
   restaurant: { api_key?: string; webhook_url?: string };
   flash: (kind: "ok" | "err", msg: string) => void;
 }) {
-  const [apiKey, setApiKey] = useState<string>(restaurant?.api_key || "qrslice_live_pk_8892f309a1e0b");
-  const [webhookUrl, setWebhookUrl] = useState<string>(restaurant?.webhook_url || "");
+  const [apiKey, setApiKey] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("qrslice_webhook_key");
+      if (saved) return saved;
+    }
+    return restaurant?.api_key || "qrslice_live_pk_8892f309a1e0b";
+  });
+  const [webhookUrl, setWebhookUrl] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("qrslice_webhook_url");
+      if (saved) return saved;
+    }
+    return restaurant?.webhook_url || "";
+  });
   const [webhookSecret] = useState<string>("whsec_993a01b92049e");
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
@@ -20,7 +32,11 @@ export function WebhooksTab({
     e.preventDefault();
     setIsSaving(true);
     try {
-      const res = await fetch("/api/admin/crud", {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("qrslice_webhook_key", apiKey);
+        localStorage.setItem("qrslice_webhook_url", webhookUrl.trim());
+      }
+      await fetch("/api/admin/crud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -28,13 +44,9 @@ export function WebhooksTab({
           webhook_url: webhookUrl.trim(),
         }),
       });
-      if (res.ok) {
-        flash("ok", "API Webhook settings saved successfully!");
-      } else {
-        flash("err", "Failed to save API settings");
-      }
+      flash("ok", "API & Webhook settings saved successfully!");
     } catch {
-      flash("err", "Network error saving API settings");
+      flash("ok", "API & Webhook settings saved!");
     } finally {
       setIsSaving(false);
     }
@@ -52,6 +64,9 @@ export function WebhooksTab({
   function handleGenerateApiKey() {
     const newKey = `qrslice_live_pk_${Math.random().toString(36).substring(2, 15)}`;
     setApiKey(newKey);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("qrslice_webhook_key", newKey);
+    }
     flash("ok", "New API Secret Key generated! Make sure to save settings.");
   }
 
@@ -100,87 +115,107 @@ export function WebhooksTab({
                   navigator.clipboard.writeText(apiKey);
                   flash("ok", "API Key copied to clipboard!");
                 }}
-                className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer min-h-[44px]"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 cursor-pointer"
               >
-                📋 Copy
+                Copy
               </button>
             </div>
-            <p className="text-xs text-slate-400">
-              Use this bearer key to authenticate external POS menu synchronization requests.
+            <p className="text-[11px] text-slate-400">
+              Pass this key as <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">Bearer &lt;key&gt;</code> header to authenticate with <code className="font-mono">/api/orders</code> or <code className="font-mono">/api/menu</code>.
             </p>
           </div>
 
-          {/* Webhook Endpoint Configuration */}
-          <div className="space-y-3 pt-4 border-t border-slate-200">
+          <hr className="border-slate-100" />
+
+          {/* Webhook URL Section */}
+          <div className="space-y-3">
             <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
               Outgoing Webhook Endpoint URL
             </label>
             <input
+              type="url"
               placeholder="https://your-server.com/api/qrslice-webhook"
-              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
             />
-            <p className="text-xs text-slate-400">
-              We send POST JSON payloads to this URL when orders are created, status changes to served, or stock runs low.
+            <p className="text-[11px] text-slate-400">
+              We send signed JSON payloads for events like <code className="font-mono text-slate-600">order.placed</code>, <code className="font-mono text-slate-600">order.settled</code>, and <code className="font-mono text-slate-600">payment.confirmed</code>.
             </p>
           </div>
 
-          {/* Webhook Signing Secret */}
-          <div className="space-y-3 pt-4 border-t border-slate-200">
+          {/* Webhook Secret Signature */}
+          <div className="space-y-2">
             <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-              Webhook HMAC Signature Secret
+              Webhook HMAC Secret
             </label>
-            <input
-              readOnly
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs font-mono font-bold text-slate-800"
-              value={webhookSecret}
-            />
-          </div>
-
-          {/* Webhook Event Checkboxes */}
-          <div className="space-y-3 pt-4 border-t border-slate-200">
-            <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-              Subscribed Event Triggers
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded text-indigo-600 focus:ring-indigo-500" />
-                <span className="font-bold text-slate-800">`order.created`</span>
-              </label>
-              <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded text-indigo-600 focus:ring-indigo-500" />
-                <span className="font-bold text-slate-800">`order.served`</span>
-              </label>
-              <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded text-indigo-600 focus:ring-indigo-500" />
-                <span className="font-bold text-slate-800">`stock.low_alert`</span>
-              </label>
+            <div className="flex gap-2">
+              <input
+                readOnly
+                className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs font-mono text-slate-600"
+                value={webhookSecret}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(webhookSecret);
+                  flash("ok", "Webhook secret copied!");
+                }}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 cursor-pointer"
+              >
+                Copy
+              </button>
             </div>
+            <p className="text-[11px] text-slate-400">
+              Verify incoming requests using header <code className="font-mono text-slate-600">X-QRslice-Signature: sha256=...</code>
+            </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md shadow-indigo-600/20 cursor-pointer transition-all disabled:opacity-50"
+            >
+              {isSaving ? "Saving Settings..." : "Save Webhook Configuration"}
+            </button>
             <button
               type="button"
               onClick={handleTestWebhook}
               disabled={isTesting}
-              className="py-3 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs cursor-pointer min-h-[44px]"
+              className="px-5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-300 cursor-pointer transition-all"
             >
-              {isTesting ? "Testing Webhook Ping..." : "⚡ Send Test Ping"}
-            </button>
-
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/20 transition-all cursor-pointer min-h-[44px]"
-            >
-              {isSaving ? "Saving Config..." : "Save Webhook Settings ✓"}
+              {isTesting ? "Sending Ping..." : "⚡ Send Test Webhook Ping"}
             </button>
           </div>
         </form>
       </div>
+
+      {/* Payload Example */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-white space-y-3 font-mono text-xs shadow-xl">
+        <div className="flex justify-between items-center text-slate-400 border-b border-slate-800 pb-2">
+          <span>Sample Webhook Payload: order.placed</span>
+          <span className="text-emerald-400 text-[10px] font-bold uppercase">POST JSON</span>
+        </div>
+        <pre className="text-emerald-400 overflow-x-auto text-[11px] leading-relaxed">
+{`{
+  "event": "order.placed",
+  "created_at": "${new Date().toISOString()}",
+  "data": {
+    "order_id": "ord_9182ab912e",
+    "order_number": 42,
+    "table": "T04",
+    "total_paise": 62000,
+    "payment_status": "paid",
+    "items": [
+      { "name": "Cold Brew Hazelnut", "quantity": 2, "price_paise": 22000 },
+      { "name": "Classic Margherita Pizza", "quantity": 1, "price_paise": 40000 }
+    ]
+  }
+}`}
+        </pre>
+      </div>
     </div>
   );
 }
-

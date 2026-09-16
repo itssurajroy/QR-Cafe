@@ -13,14 +13,37 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   
   const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit, initialTab } = initialData as any;
 
-  const [tab, setTabState] = useState<string>(initialTab || "dashboard");
+  const [tab, setTabState] = useState<string>(
+    initialTab === "health" ? "system-health" : initialTab === "tenants" ? "cafes" : (initialTab || "dashboard")
+  );
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setTabState(initialTab === "health" ? "system-health" : initialTab === "tenants" ? "cafes" : initialTab);
+    }
+  }, [initialTab]);
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const urlTab = params.get("tab");
+      if (urlTab) {
+        setTabState(urlTab === "health" ? "system-health" : urlTab === "tenants" ? "cafes" : urlTab);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const setTab = (newTab: any) => {
-    setTabState(newTab);
+    const normalized = newTab === "health" ? "system-health" : newTab === "tenants" ? "cafes" : newTab;
+    setTabState(normalized);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      url.searchParams.set("tab", newTab);
-      window.history.replaceState({}, "", url.toString());
+      if (url.searchParams.get("tab") !== normalized) {
+        url.searchParams.set("tab", normalized);
+        window.history.pushState({}, "", url.toString());
+      }
     }
   };
 

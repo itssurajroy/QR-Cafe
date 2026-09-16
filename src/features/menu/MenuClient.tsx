@@ -110,6 +110,17 @@ export function MenuClient({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-detect booking parameter from URL (e.g. ?booking=MMSMCQ)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      const bCode = p.get("booking");
+      if (bCode) {
+        setCodeInput(bCode.trim().toUpperCase());
+      }
+    }
+  }, []);
+
   // UI states
   const [cartOpen, setCartOpen] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<Item | null>(null);
@@ -341,6 +352,31 @@ export function MenuClient({
             </button>
           </div>
         </div>
+
+        {/* Booking Confirmation Banner if booking query was provided */}
+        {codeInput && (
+          <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 flex items-center justify-between shadow-xs animate-fade-in">
+            <div className="flex items-center gap-3">
+              <span className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm font-black shadow-xs">
+                ✓
+              </span>
+              <div>
+                <div className="text-xs font-black text-emerald-950 flex items-center gap-2">
+                  <span>Table Reservation Confirmed</span>
+                  <span className="font-mono bg-white px-2 py-0.5 rounded-md border border-emerald-300 text-emerald-800 text-[11px] font-bold">
+                    #{codeInput}
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
+                  Your table reservation is confirmed. Dishes you order here will be sent straight to the kitchen.
+                </p>
+              </div>
+            </div>
+            <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-emerald-200/60 text-emerald-800 text-[10px] font-bold">
+              Active Booking
+            </span>
+          </div>
+        )}
       </section>
 
       {/* Chef's Signature Recommendations Carousel (When browsing all & no search) */}

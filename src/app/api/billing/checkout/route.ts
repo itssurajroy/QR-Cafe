@@ -10,6 +10,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (user.role !== "owner" && user.role !== "super_admin") {
+    return NextResponse.json({ error: "Forbidden: Only restaurant owners can manage subscriptions" }, { status: 403 });
+  }
+
   let cycle: "monthly" | "yearly" = "monthly";
   let simulate = false;
   try {

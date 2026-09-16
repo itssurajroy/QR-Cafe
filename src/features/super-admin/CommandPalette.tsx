@@ -31,9 +31,22 @@ export function CommandPalette() {
 
   const staticActions: Action[] = [
     { id: "new-tenant", label: "New tenant…", hint: "Provision", run: () => { setShowNewCafeModal(true); setOpen(false); setQuery(""); } },
+    { id: "go-dashboard", label: "Go to Dashboard", hint: "Tab", run: () => go("dashboard") },
+    { id: "go-cafes", label: "Go to Cafés & Tenants", hint: "Tab", run: () => go("cafes") },
+    { id: "go-orders", label: "Go to Live Orders", hint: "Tab", run: () => go("orders") },
+    { id: "go-analytics", label: "Go to Funnel Analytics", hint: "Tab", run: () => go("analytics") },
+    { id: "go-subscriptions", label: "Go to Subscriptions", hint: "Tab", run: () => go("subscriptions") },
+    { id: "go-billing", label: "Go to Billing & Invoices", hint: "Tab", run: () => go("billing") },
+    { id: "go-staff", label: "Go to Staff Directory", hint: "Tab", run: () => go("staff") },
+    { id: "go-users", label: "Go to User Accounts", hint: "Tab", run: () => go("users") },
+    { id: "go-support", label: "Go to Support Inquiries", hint: "Tab", run: () => go("support") },
     { id: "go-health", label: "Go to System Health", hint: "Tab", run: () => go("system-health") },
-    { id: "go-audit", label: "Go to Audit logs", hint: "Tab", run: () => go("audit") },
-    { id: "go-billing", label: "Go to Billing", hint: "Tab", run: () => go("billing") },
+    { id: "go-config", label: "Go to Platform Config", hint: "Tab", run: () => go("config") },
+    { id: "go-audit", label: "Go to Audit Event Logs", hint: "Tab", run: () => go("audit") },
+    { id: "go-broadcast", label: "Go to Broadcast Banner", hint: "Tab", run: () => go("broadcast") },
+    { id: "go-announcements", label: "Go to Announcements", hint: "Tab", run: () => go("announcements") },
+    { id: "go-content", label: "Go to CMS & Landing Content", hint: "Tab", run: () => go("content") },
+    { id: "go-settings", label: "Go to Platform Settings", hint: "Tab", run: () => go("settings") },
     { id: "go-api-keys", label: "Go to API Keys", hint: "Tab", run: () => go("api-keys") },
   ];
 

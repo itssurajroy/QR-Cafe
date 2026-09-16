@@ -278,8 +278,26 @@ export async function POST(req: NextRequest) {
 
   if (action === "update_config") {
     const { key, value } = data;
-    const { error } = await admin.from("platform_config").update({ value, updated_at: new Date().toISOString() }).eq("key", key);
+    const { error } = await admin
+      .from("platform_config")
+      .upsert(
+        { key, value, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (key === "global_broadcast") {
+      if (value?.active && value?.subject) {
+        await admin.from("platform_announcements").insert({
+          title: value.subject,
+          body: value.message || "",
+          target_plan: "all",
+          starts_at: value.sent_at || new Date().toISOString(),
+          created_by: auth.userId,
+        });
+      }
+    }
+
     await audit(admin, auth.userId, null, "platform", key, "super_update_config", { key });
     return NextResponse.json({ ok: true });
   }

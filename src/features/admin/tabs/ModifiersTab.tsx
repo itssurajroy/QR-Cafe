@@ -67,11 +67,28 @@ const DEFAULT_MODIFIER_GROUPS: ModifierGroup[] = [
 ];
 
 export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: string) => void }) {
-  const [groups, setGroups] = useState<ModifierGroup[]>(DEFAULT_MODIFIER_GROUPS);
+  const [groups, setGroups] = useState<ModifierGroup[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("qrslice_modifiers");
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return DEFAULT_MODIFIER_GROUPS;
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupRequired, setNewGroupRequired] = useState(false);
   const [newGroupMulti, setNewGroupMulti] = useState(false);
+
+  const saveGroups = (updated: ModifierGroup[]) => {
+    setGroups(updated);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("qrslice_modifiers", JSON.stringify(updated));
+      } catch {}
+    }
+  };
 
   const handleAddGroup = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +105,8 @@ export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: strin
       ],
     };
 
-    setGroups((prev) => [...prev, newGroup]);
+    const updated = [...groups, newGroup];
+    saveGroups(updated);
     setNewGroupName("");
     setShowAddModal(false);
     flash("ok", "Modifier group added successfully!");
@@ -96,7 +114,8 @@ export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: strin
 
   const handleDeleteGroup = (id: string) => {
     if (!confirm("Delete this modifier group?")) return;
-    setGroups((prev) => prev.filter((g) => g.id !== id));
+    const updated = groups.filter((g) => g.id !== id);
+    saveGroups(updated);
     flash("ok", "Modifier group removed");
   };
 

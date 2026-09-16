@@ -2,12 +2,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Zap } from "lucide-react";
+import { Zap, Smartphone, Monitor, ShieldCheck, Laptop, Tablet, Flame } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { fadeUp, scaleIn, staggerContainer, VIEWPORT_ONCE } from "@/lib/animations";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-/* ─── Counter Hook ─── */
 function useCountUp(end: number, duration: number = 1500, inView: boolean) {
   const [value, setValue] = useState(0);
   const hasAnimated = useRef(false);
@@ -21,7 +20,6 @@ function useCountUp(end: number, duration: number = 1500, inView: boolean) {
     function tick(now: number) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(eased * end);
 
@@ -39,10 +37,54 @@ function useCountUp(end: number, duration: number = 1500, inView: boolean) {
 }
 
 const STATS = [
-  { end: 30, suffix: " min", label: "Average setup time", badge: "Fast Launch", border: "border-violet-200 hover:border-violet-400", badgeColor: "bg-violet-50 text-[#5738F5]", decimals: 0 },
-  { end: 0, suffix: "", label: "Apps for guests to install", badge: "Zero Friction", border: "border-amber-200 hover:border-amber-400", badgeColor: "bg-amber-50 text-amber-800", decimals: 0, isZero: true },
-  { end: 999, prefix: "₹", suffix: "", label: "Flat per outlet / month", badge: "Zero Commission", border: "border-emerald-200 hover:border-emerald-400", badgeColor: "bg-emerald-50 text-emerald-800", decimals: 0 },
-  { end: 99.9, suffix: "%", label: "Uptime & offline sync", badge: "Always On", border: "border-sky-200 hover:border-sky-400", badgeColor: "bg-sky-50 text-sky-800", decimals: 1 },
+  {
+    end: 15,
+    suffix: " min",
+    label: "Average setup & launch time",
+    badge: "Instant Setup",
+    border: "border-violet-200/80 hover:border-violet-400",
+    badgeColor: "bg-violet-50 text-[#5738F5]",
+    decimals: 0,
+  },
+  {
+    end: 0,
+    prefix: "",
+    suffix: "%",
+    label: "Commission on customer food bills",
+    badge: "Zero Cuts",
+    border: "border-amber-200/80 hover:border-amber-400",
+    badgeColor: "bg-amber-50 text-amber-800",
+    decimals: 0,
+    isZero: true,
+  },
+  {
+    end: 24,
+    prefix: "+",
+    suffix: "%",
+    label: "Higher average ticket with photos",
+    badge: "Revenue Boost",
+    border: "border-emerald-200/80 hover:border-emerald-400",
+    badgeColor: "bg-emerald-50 text-emerald-800",
+    decimals: 0,
+  },
+  {
+    end: 99.9,
+    suffix: "%",
+    label: "High reliability & offline buffering",
+    badge: "Always Online",
+    border: "border-sky-200/80 hover:border-sky-400",
+    badgeColor: "bg-sky-50 text-sky-800",
+    decimals: 1,
+  },
+];
+
+const VENUE_TYPES = [
+  "Specialty Coffee Cafés",
+  "Casual & Fine Dining",
+  "QSRs & Food Courts",
+  "Rooftop Lounges & Bars",
+  "Bakeries & Dessert Bars",
+  "Drive-thrus & Takeaway",
 ];
 
 export function Intro() {
@@ -71,7 +113,7 @@ export function Intro() {
           >
             <Zap className="w-4 h-4 text-amber-600" />
             <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
-              The Hospitality OS
+              The Restaurant Operating System
             </span>
           </motion.div>
 
@@ -79,19 +121,33 @@ export function Intro() {
             className="text-3xl sm:text-[2.75rem] lg:text-5xl font-black leading-[1.15] tracking-tight text-slate-900 font-[family-name:var(--font-plus-jakarta)] mb-6"
             variants={variants}
           >
-            One platform that connects your{" "}
+            One unified digital spine for your{" "}
             <span className="text-[#5738F5]">tables</span>,{" "}
             <span className="text-amber-600">kitchen</span>, and{" "}
-            <span className="text-emerald-600">business</span>.
+            <span className="text-emerald-600">cashier</span>.
           </motion.h2>
 
           <motion.p
-            className="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto"
+            className="text-lg sm:text-xl text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto mb-8"
             variants={variants}
           >
-            QRslice replaces paper chits, shouting waiters, and lost tickets with a calm, seamless digital spine
-            for your entire restaurant. From scan to serve to settlement — everything flows in real-time.
+            QRslice eliminates paper chits, shouting servers, and misplaced orders with calm, instantaneous digital orchestration. From QR scan to hot kitchen ticket to one-tap payment, every action syncs in real time.
           </motion.p>
+
+          {/* Café Format Badges */}
+          <motion.div
+            className="flex flex-wrap items-center justify-center gap-2.5 max-w-2xl mx-auto"
+            variants={variants}
+          >
+            {VENUE_TYPES.map((type, i) => (
+              <span
+                key={i}
+                className="px-3.5 py-1.5 bg-slate-50 border border-slate-200/90 rounded-full text-xs font-bold text-slate-700 shadow-sm hover:border-[#5738F5]/40 hover:text-[#5738F5] transition-colors"
+              >
+                {type}
+              </span>
+            ))}
+          </motion.div>
         </motion.div>
 
         {/* Stats Row - Animated counters + staggered card entrance */}
@@ -104,53 +160,56 @@ export function Intro() {
           viewport={VIEWPORT_ONCE}
         >
           {STATS.map((stat, i) => (
-            <StatCard
-              key={i}
-              stat={stat}
-              inView={statsInView}
-              noMotion={noMotion}
-              cardVariants={cardVariants}
-            />
+            <StatCard key={i} stat={stat} inView={statsInView} variants={cardVariants} />
           ))}
         </motion.div>
+
+        {/* Zero Hardware Lock-in Bar */}
+        <div className="mt-14 max-w-4xl mx-auto p-5 sm:p-6 bg-gradient-to-r from-violet-50/70 via-purple-50/40 to-slate-50 border border-violet-100 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#5738F5] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#5738F5]/20">
+              <Laptop className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-900">Zero Proprietary Hardware Required</div>
+              <div className="text-xs text-slate-500">Runs directly in any browser on Android tablets, iPads, Windows laptops, or phones.</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-[#5738F5] bg-white px-3 py-1.5 rounded-xl border border-violet-200 shadow-sm shrink-0">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            Bluetooth Thermal Ready
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-function StatCard({
-  stat,
-  inView,
-  noMotion,
-  cardVariants,
-}: {
-  stat: (typeof STATS)[number];
-  inView: boolean;
-  noMotion: boolean;
-  cardVariants: typeof scaleIn;
-}) {
-  const count = useCountUp(stat.end, noMotion ? 0 : 1500, inView);
+function StatCard({ stat, inView, variants }: { stat: (typeof STATS)[0]; inView: boolean; variants: any }) {
+  const count = useCountUp(stat.end, 1500, inView);
 
-  const displayValue = stat.isZero
-    ? "0"
-    : `${stat.prefix || ""}${stat.decimals > 0 ? count.toFixed(stat.decimals) : Math.round(count)}${stat.suffix}`;
+  const display = stat.isZero
+    ? "0%"
+    : stat.decimals > 0
+    ? `${stat.prefix ?? ""}${count.toFixed(stat.decimals)}${stat.suffix}`
+    : `${stat.prefix ?? ""}${Math.round(count)}${stat.suffix}`;
 
   return (
     <motion.div
-      className={`p-6 rounded-3xl bg-[#FAF9F6] border ${stat.border} hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-200 text-center relative flex flex-col justify-between`}
-      variants={cardVariants}
+      className={`p-6 sm:p-7 rounded-3xl border-2 ${stat.border} bg-white shadow-sm hover:shadow-lg transition-all duration-300 text-center flex flex-col items-center justify-between group`}
+      variants={variants}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.2 }}
     >
-      <div className="mb-3">
-        <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${stat.badgeColor}`}>
-          {stat.badge}
-        </span>
+      <span className={`text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full ${stat.badgeColor} mb-4`}>
+        {stat.badge}
+      </span>
+      <div className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-[family-name:var(--font-plus-jakarta)] mb-2 group-hover:scale-105 transition-transform">
+        {display}
       </div>
-      <div className="text-3xl sm:text-4xl font-black text-slate-900 font-[family-name:var(--font-plus-jakarta)] tracking-tight tabular-nums">
-        {displayValue}
-      </div>
-      <div className="text-xs sm:text-sm font-semibold text-slate-600 mt-2">
+      <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
         {stat.label}
-      </div>
+      </p>
     </motion.div>
   );
 }

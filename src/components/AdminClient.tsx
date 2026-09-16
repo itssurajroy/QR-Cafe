@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import QRCode from "qrcode";
+import Image from "next/image";
+import { generateBeautifulQrDataUrl } from "@/lib/qr-designer";
 import Link from "next/link";
 import { DashboardTab } from "@/features/admin/tabs/DashboardTab";
 import { SettingsTab } from "@/features/admin/tabs/SettingsTab";
@@ -10,22 +11,25 @@ import { TablesTab } from "@/features/admin/tabs/TablesTab";
 import { ReservationsTab } from "@/features/admin/tabs/ReservationsTab";
 import { ReportSummary, FloorIntelligence } from "@/features/admin/tabs/AnalyticsTab";
 import { BrandingTab } from "@/features/admin/tabs/BrandingTab";
+import BillingClient from "@/components/BillingClient";
 
 import { InventoryTab } from "@/features/admin/tabs/InventoryTab";
 import { RecipesTab } from "@/features/admin/tabs/RecipesTab";
 import { KdsTab } from "@/features/admin/tabs/KdsTab";
 import { WebhooksTab } from "@/features/admin/tabs/WebhooksTab";
 import { SupportTab } from "@/features/admin/tabs/SupportTab";
-import { OrdersTab } from "@/features/admin/tabs/OrdersTab";
+import { OrdersTab, type OrderData } from "@/features/admin/tabs/OrdersTab";
 import { ModifiersTab } from "@/features/admin/tabs/ModifiersTab";
 import { StaffTab } from "@/features/admin/tabs/StaffTab";
 import { CrmTab } from "@/features/admin/tabs/CrmTab";
 import { AdminAppShell, type AdminSectionId } from "@/components/shell/AdminAppShell";
 import { MultiOutletModal } from "@/features/admin/MultiOutletModal";
-import { AdminTopNav, type AdminTabId } from "@/features/admin/AdminTopNav";
+import type { AdminTabId } from "@/features/admin/AdminTopNav";
+import { PlatformAnnouncementBanner } from "@/components/notifications/PlatformAnnouncementBanner";
 import type { Category, MenuItem as Item, Table } from "@/types";
 import { speakHumanVoice } from "@/lib/tts";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { canAccessTab, getDefaultTabForRole } from "@/lib/role-permissions";
 
 type Report = { orders: number; paid: number; revenue: number; avg: number };
 
@@ -69,6 +73,7 @@ interface BulkImportItem {
 export default function AdminClient({
   restaurantId,
   restaurant,
+  userRole,
   categories,
   items,
   tables,
@@ -76,6 +81,7 @@ export default function AdminClient({
 }: {
   restaurantId: string;
   restaurant?: RestaurantProps;
+  userRole?: string;
   categories: Category[];
   items: Item[];
   tables: Table[];
@@ -83,7 +89,85 @@ export default function AdminClient({
 }) {
   const activeRestaurant: RestaurantProps = restaurant || { id: restaurantId, name: "QRslice", slug: "cafe" };
 
-  const [tab, setTab] = useState<AdminSectionId | AdminTabId>("dashboard");
+  // Toast/Flash Alert
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const flash = useCallback((kind: "ok" | "err", text: string) => {
+    setMsg({ kind, text });
+    setTimeout(() => setMsg(null), 3500);
+  }, []);
+
+  const normalizeTab = (raw: string | null): AdminSectionId | AdminTabId => {
+    if (!raw) return "dashboard";
+    if (raw === "kds") return "kitchen";
+    if (raw === "account") return "branding";
+    if (raw === "webhooks") return "integrations";
+    if (raw === "reservations") return "bookings";
+    if (raw === "report") return "analytics";
+    return raw as AdminSectionId | AdminTabId;
+  };
+
+  const [tab, setTab] = useState<AdminSectionId | AdminTabId>(() => {
+    let initial = "dashboard";
+    if (typeof window !== "undefined") {
+      const urlTab = new URLSearchParams(window.location.search).get("tab");
+      if (urlTab) initial = normalizeTab(urlTab);
+    }
+    if (!canAccessTab(userRole, initial)) {
+      return getDefaultTabForRole(userRole) as AdminSectionId | AdminTabId;
+    }
+    return initial as AdminSectionId | AdminTabId;
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const urlTab = new URLSearchParams(window.location.search).get("tab");
+      if (urlTab) {
+        const norm = normalizeTab(urlTab);
+        if (canAccessTab(userRole, norm)) {
+          setTab(norm);
+        } else {
+          const fallback = getDefaultTabForRole(userRole) as AdminSectionId | AdminTabId;
+          setTab(fallback);
+          flash("err", "Access restricted: Your role does not have permission to view this section.");
+        }
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [userRole, flash]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlTab = new URLSearchParams(window.location.search).get("tab");
+      if (urlTab && !canAccessTab(userRole, normalizeTab(urlTab))) {
+        flash("err", "Access restricted: Redirected to your authorized workspace.");
+      }
+    }
+  }, [userRole, flash]);
+
+  const handleSelectTab = (nextTab: AdminSectionId | AdminTabId) => {
+    const normalized = normalizeTab(nextTab);
+    if (!canAccessTab(userRole, normalized)) {
+      const fallback = getDefaultTabForRole(userRole) as AdminSectionId | AdminTabId;
+      setTab(fallback);
+      flash("err", "Access restricted: Your role does not have permission to view this section.");
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("tab", fallback);
+        window.history.pushState(null, "", url.toString());
+      }
+      return;
+    }
+    setTab(normalized);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("tab") !== nextTab) {
+        url.searchParams.set("tab", nextTab);
+        window.history.pushState(null, "", url.toString());
+      }
+    }
+  };
   const [showMultiOutletModal, setShowMultiOutletModal] = useState(false);
   const [categoryList, setCategoryList] = useState<Category[]>(categories);
   const [itemList, setItemList] = useState<Item[]>(items);
@@ -142,7 +226,7 @@ export default function AdminClient({
   const [bulkQrList, setBulkQrList] = useState<
     { label: string; url: string; directUrl: string; seats: number }[]
   >([]);
-  const [_generatingBulk, setGeneratingBulk] = useState(false);
+  const [generatingBulk, setGeneratingBulk] = useState(false);
 
   // Analytics State
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -151,7 +235,7 @@ export default function AdminClient({
   // Live Revenue Ticker
   const [liveRevenue, setLiveRevenue] = useState<number>(report.revenue);
   const [liveOrders, setLiveOrders] = useState<number>(report.orders);
-  const [recentOrders, setRecentOrders] = useState<unknown[]>([]);
+  const [recentOrders, setRecentOrders] = useState<OrderData[]>([]);
 
   // Bulk Menu Operations
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -163,16 +247,8 @@ export default function AdminClient({
   // Checklist dismissal
   const [dismissChecklist, setDismissChecklist] = useState(false);
 
-  // Toast/Flash Alert
-  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-
-  const flash = useCallback((kind: "ok" | "err", text: string) => {
-    setMsg({ kind, text });
-    setTimeout(() => setMsg(null), 3500);
-  }, []);
 
   const plan = restaurant?.plan || "trial";
-  const tier = restaurant?.tier || "pro";
   const trialEnds = restaurant?.trial_ends_at ? new Date(restaurant.trial_ends_at) : null;
   const daysLeft = trialEnds ? Math.max(0, Math.ceil((trialEnds.getTime() - Date.now()) / (864e5))) : 0;
   const isTrial = plan === "trial";
@@ -287,9 +363,20 @@ export default function AdminClient({
 
   useEffect(() => {
     if (tab === "analytics" && !analytics) {
-      loadAnalytics();
+      let active = true;
+      fetch("/api/analytics")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (active && data) setAnalytics(data);
+        })
+        .catch(() => {
+          if (active) flash("err", "Failed to fetch analytics");
+        });
+      return () => {
+        active = false;
+      };
     }
-  }, [tab, analytics, loadAnalytics]);
+  }, [tab, analytics, flash]);
 
   async function handleToggleAvailable(id: string, current: boolean) {
     try {
@@ -364,8 +451,8 @@ export default function AdminClient({
       setNewItemImageFile(null);
       setShowItemModal(false);
       flash("ok", "Menu item added successfully!");
-    } catch (err: any) {
-      flash("err", err.message || "Error adding item");
+    } catch (err) {
+      flash("err", err instanceof Error ? err.message : "Error adding item");
     } finally {
       setIsUploading(false);
     }
@@ -415,7 +502,7 @@ export default function AdminClient({
   function handleBulkParse(rawText: string) {
     setBulkMenuText(rawText);
     const lines = rawText.split("\n").map((l) => l.trim()).filter(Boolean);
-    const items: any[] = [];
+    const items: BulkImportItem[] = [];
 
     lines.forEach((line) => {
       // Split by comma, tab, or pipe
@@ -529,6 +616,85 @@ export default function AdminClient({
     }
   }
 
+  async function handleUpdateTable(tableId: string, updates: { label?: string; seats?: number; active?: boolean }) {
+    try {
+      const res = await fetch("/api/admin/crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "update_table", tableId, ...updates }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        flash("err", data.error || "Failed to update table");
+        return false;
+      }
+      setTableList((prev) => prev.map((t) => (t.id === tableId ? { ...t, ...data.table } : t)));
+      flash("ok", `Table ${data.table.label} updated!`);
+      return true;
+    } catch {
+      flash("err", "Error updating table");
+      return false;
+    }
+  }
+
+  async function handleToggleTableActive(tableId: string, currentActive: boolean) {
+    const nextActive = !currentActive;
+    try {
+      const res = await fetch("/api/admin/crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "toggle_table_active", tableId, active: nextActive }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        flash("err", data.error || "Failed to update table");
+        return;
+      }
+      setTableList((prev) => prev.map((t) => (t.id === tableId ? { ...t, active: nextActive } : t)));
+      flash("ok", nextActive ? "Table activated" : "Table marked out of service");
+    } catch {
+      flash("err", "Error toggling table status");
+    }
+  }
+
+  async function handleRegenerateQr(tableId: string) {
+    if (!confirm("Regenerate QR token for this table? Any existing printed QR for this table will stop working until replaced with the new one.")) return;
+    try {
+      const res = await fetch("/api/admin/crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "regenerate_qr", tableId }),
+      });
+      const data = await res.json();
+      if (!res.ok) return flash("err", data.error || "Failed to regenerate QR");
+      setTableList((prev) => prev.map((t) => (t.id === tableId ? { ...t, qr_token: data.qr_token } : t)));
+      flash("ok", "New secure QR generated! Please print the updated standee.");
+    } catch {
+      flash("err", "Error regenerating QR");
+    }
+  }
+
+  async function handleBulkCreateTables(params: { prefix: string; start: number; count: number; seats: number }) {
+    try {
+      const res = await fetch("/api/admin/crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "bulk_create_tables", ...params }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        flash("err", data.error || "Failed to create tables");
+        return false;
+      }
+      setTableList((prev) => [...prev, ...(data.tables || [])]);
+      flash("ok", `Successfully added ${data.tables?.length || 0} tables!`);
+      return true;
+    } catch {
+      flash("err", "Error creating tables");
+      return false;
+    }
+  }
+
   async function handleSaveBranding(e: React.FormEvent) {
     e.preventDefault();
     setSavingBranding(true);
@@ -556,25 +722,22 @@ export default function AdminClient({
     }
   }
 
-
-
   async function generateQrDataUrl(tableOrToken: Table | string) {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://qr-cafe-blond.vercel.app";
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://qrslice.app";
     let url = "";
     if (typeof tableOrToken === "string") {
       url = `${origin}/t/${tableOrToken}`;
     } else {
-      const slug = restaurant?.slug || "cafe";
-      url = `${origin}/c/${slug}/t/${encodeURIComponent(tableOrToken.label)}`;
+      url = tableOrToken.qr_token
+        ? `${origin}/t/${tableOrToken.qr_token}`
+        : `${origin}/c/${restaurant?.slug || "cafe"}/t/${encodeURIComponent(tableOrToken.label)}`;
     }
-    const dataUrl = await QRCode.toDataURL(url, {
-      width: 600,
-      margin: 2,
-      errorCorrectionLevel: "H",
-      color: {
-        dark: "#1c1917",
-        light: "#f5f5f4",
-      },
+    const dataUrl = generateBeautifulQrDataUrl({
+      text: url,
+      size: 600,
+      theme: "violet",
+      centerIcon: "utensils",
+      dotShape: "dots",
     });
     return { dataUrl, url };
   }
@@ -628,12 +791,13 @@ export default function AdminClient({
   return (
     <AdminAppShell
       currentSection={tab as AdminSectionId}
-      onSelectSection={(sec) => setTab(sec as any)}
+      onSelectSection={(sec) => handleSelectTab(sec)}
       restaurantName={activeRestaurant.name || "QrSlice Cafe"}
       restaurantSlug={activeRestaurant.slug || "cafe"}
+      userRole={userRole}
       liveRevenue={liveRevenue}
       liveOrders={liveOrders}
-      onOpenSearch={() => setTab("orders")}
+      onOpenSearch={() => handleSelectTab("orders")}
     >
       {/* Trial countdown — trial state only, dismissible per session */}
       {isTrial && !isSuspended && !hideTrialBanner && (
@@ -663,6 +827,9 @@ export default function AdminClient({
       )}
 
       <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-5 no-print flex-1 w-full">
+        {/* Super Admin Platform Broadcast Announcement */}
+        <PlatformAnnouncementBanner />
+
         {/* Onboarding Starter Checklist (Dismissible) */}
         {!dismissChecklist && (() => {
           const doneCount = (itemList.length > 0 ? 1 : 0) + (tableList.length > 0 ? 1 : 0);
@@ -738,7 +905,7 @@ export default function AdminClient({
             itemList={itemList}
             tableList={tableList}
             recentOrders={recentOrders}
-            setTab={setTab}
+            setTab={handleSelectTab}
             restaurant={restaurant}
           />
         )}
@@ -746,7 +913,7 @@ export default function AdminClient({
         {/* TAB: ORDERS MANAGEMENT */}
         {tab === "orders" && (
           <OrdersTab
-            orders={recentOrders as any}
+            orders={recentOrders}
             onUpdateStatus={handleUpdateOrderStatus}
             flash={flash}
           />
@@ -759,7 +926,7 @@ export default function AdminClient({
 
         {/* TAB: STAFF MANAGEMENT */}
         {tab === "staff" && (
-          <StaffTab restaurantId={restaurantId} />
+          <StaffTab restaurantId={restaurantId} userRole={userRole} />
         )}
 
         {/* TAB: CRM & LOYALTY */}
@@ -768,7 +935,7 @@ export default function AdminClient({
         )}
 
         {/* TAB 1: MENU & CATEGORY MANAGEMENT */}
-        {tab === "menu" && (
+        {(tab === "menu" || tab === "categories") && (
           <div className="animate-fade-in-up">
             <MenuTab
               itemList={itemList}
@@ -803,41 +970,43 @@ export default function AdminClient({
               newTableLabel={newTableLabel}
               newTableSeats={newTableSeats}
               showQr={showQr}
+              showBulkQr={showBulkQr}
               handleDeleteTable={handleDeleteTable}
               setNewTableLabel={setNewTableLabel}
               setNewTableSeats={setNewTableSeats}
               handleAddTable={handleAddTable}
+              handleUpdateTable={handleUpdateTable}
+              handleToggleTableActive={handleToggleTableActive}
+              handleRegenerateQr={handleRegenerateQr}
+              handleBulkCreateTables={handleBulkCreateTables}
+              restaurantName={restaurant?.name}
+              restaurantSlug={restaurant?.slug}
+              recentOrders={recentOrders}
             />
           </div>
         )}
 
-        {tab === "bookings" && (
+        {/* TAB: BOOKINGS & RESERVATIONS */}
+        {(tab === "bookings" || (tab as string) === "reservations") && (
           <div className="animate-fade-in-up">
             <ReservationsTab />
           </div>
         )}
 
-
-        {/* TAB 4: REPORT SUMMARY */}
-        {tab === "report" && (
-          <div className="animate-fade-in-up">
-            <ReportSummary report={report} />
-          </div>
-        )}
-
         {/* TAB 4: ADVANCED FLOOR INTELLIGENCE & ANALYTICS */}
-        {tab === "analytics" && (
-          <div className="animate-fade-in-up">
+        {(tab === "analytics" || tab === "report") && (
+          <div className="animate-fade-in-up space-y-6">
             <FloorIntelligence
               loadingAnalytics={loadingAnalytics}
               analytics={analytics}
               loadAnalytics={loadAnalytics}
             />
+            <ReportSummary report={report} />
           </div>
         )}
 
         {/* TAB 5: CUSTOM BRANDING (PRO ONLY) */}
-        {tab === "branding" && (
+        {(tab === "branding" || tab === "account") && (
           <div className="animate-fade-in-up">
             <BrandingTab
               brandingLogoUrl={brandingLogoUrl}
@@ -861,66 +1030,13 @@ export default function AdminClient({
 
         {/* TAB: BILLING & SUBSCRIPTION */}
         {tab === "billing" && (
-          <div className="animate-fade-in-up bg-white border border-[#E7E4F0] rounded-3xl p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-[#E7E4F0] pb-4">
-              <div>
-                <h3 className="text-xl font-black text-[#17142B]">Restaurant Billing & Subscription</h3>
-                <p className="text-xs text-[#6F7185] mt-0.5">Manage your platform plan, invoice history, and settlement methods.</p>
-              </div>
-              <span className="font-mono font-bold text-xs uppercase px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
-                Plan: {plan.toUpperCase()}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="text-xs font-bold text-[#6F7185] uppercase">Plan Tier</div>
-                <div className="text-lg font-black text-[#17142B] mt-1 capitalize">{tier} All-in-One</div>
-                <div className="text-[11px] text-[#6F7185] mt-1">Unlimited QR scans & KDS screens</div>
-              </div>
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="text-xs font-bold text-[#6F7185] uppercase">Trial Days Left</div>
-                <div className="text-lg font-black text-[#5738F5] mt-1">{daysLeft} Days</div>
-                <div className="text-[11px] text-[#6F7185] mt-1">Full access active</div>
-              </div>
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="text-xs font-bold text-[#6F7185] uppercase">Platform Fee</div>
-                <div className="text-lg font-black text-emerald-700 mt-1">0% Commission</div>
-                <div className="text-[11px] text-[#6F7185] mt-1">Flat SaaS subscription</div>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <Link
-                href="/admin/billing"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs shadow-md shadow-[#5738F5]/25 transition-all"
-              >
-                <span>Open Full Billing Portal & Invoices →</span>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* TAB: ACCOUNT */}
-        {tab === "account" && (
           <div className="animate-fade-in-up">
-            <BrandingTab
-              brandingLogoUrl={brandingLogoUrl}
-              brandingTagline={brandingTagline}
-              brandingGoogleReviewUrl={brandingGoogleReviewUrl}
-              brandingAccentColor={brandingAccentColor}
-              savingBranding={savingBranding}
-              setBrandingLogoUrl={setBrandingLogoUrl}
-              setBrandingTagline={setBrandingTagline}
-              setBrandingGoogleReviewUrl={setBrandingGoogleReviewUrl}
-              setBrandingAccentColor={setBrandingAccentColor}
-              handleSaveBranding={handleSaveBranding}
-            />
+            <BillingClient restaurant={activeRestaurant} />
           </div>
         )}
 
-        {/* TAB: INTEGRATIONS */}
-        {tab === "integrations" && (
+        {/* TAB: INTEGRATIONS & WEBHOOKS */}
+        {(tab === "integrations" || tab === "webhooks") && (
           <WebhooksTab restaurant={activeRestaurant} flash={flash} />
         )}
 
@@ -934,11 +1050,6 @@ export default function AdminClient({
           <RecipesTab itemList={itemList} flash={flash} />
         )}
 
-        {/* TAB: MENU SYNC & API/WEBHOOKS */}
-        {tab === "webhooks" && (
-          <WebhooksTab restaurant={activeRestaurant} flash={flash} />
-        )}
-
         {/* TAB: PRIORITY SUPPORT */}
         {tab === "support" && (
           <SupportTab restaurant={activeRestaurant} flash={flash} />
@@ -949,7 +1060,7 @@ export default function AdminClient({
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl max-w-4xl">
             <div className="flex justify-between items-start flex-wrap gap-4 border-b border-slate-200 pb-4">
               <div>
-                <h2 className="text-xl font-black text-white">🏛️ Owner Governance &amp; Operating Manual</h2>
+                <h2 className="text-xl font-black text-slate-900">🏛️ Owner Governance &amp; Operating Manual</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Subscription controls, multi-tenant governance, Google Review setup &amp; hardware diagnostics
                 </p>
@@ -1168,27 +1279,39 @@ export default function AdminClient({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-              <h3 className="text-sm font-black text-white">Table {qrModal.label} QR Stand</h3>
+              <h3 className="text-sm font-black text-slate-900">Table {qrModal.label} QR Stand</h3>
               <button onClick={() => setQrModal(null)} className="text-slate-500 hover:text-slate-900 text-xs">
                 ✕
               </button>
             </div>
 
             <div className="bg-white p-4 rounded-2xl inline-block shadow-lg">
-              <img src={qrModal.url} alt={`QR for Table ${qrModal.label}`} className="w-56 h-56 mx-auto" />
+              <Image src={qrModal.url} alt={`QR for Table ${qrModal.label}`} width={224} height={224} unoptimized className="w-56 h-56 mx-auto" />
             </div>
 
             <p className="text-xs text-slate-500">
               Scan with any mobile camera to launch digital ordering for Table {qrModal.label}
             </p>
 
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs cursor-pointer shadow-md"
-            >
-              Print Stand Card 🖨️
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-xs cursor-pointer shadow-md transition-all"
+              >
+                Print Stand Card 🖨️
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(qrModal.directUrl);
+                  flash("ok", "Table link copied to clipboard!");
+                }}
+                className="py-2.5 px-3.5 rounded-xl bg-[#EEEAFE] hover:bg-purple-100 text-[#5738F5] font-bold text-xs cursor-pointer transition-all"
+              >
+                Copy Link
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1464,7 +1587,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
           >
             <div className="flex justify-between items-center border-b border-slate-200 pb-3 no-print">
               <div>
-                <h3 className="text-base font-black text-white">🖨️ Ready-to-Fold 80mm Table Tent Cards</h3>
+                <h3 className="text-base font-black text-slate-900">🖨️ Ready-to-Fold 80mm Table Tent Cards</h3>
                 <p className="text-xs text-slate-500">
                   Formatted for standard A4 cardstock or 80mm tabletop acrylic stands
                 </p>
@@ -1473,11 +1596,12 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs shadow-md cursor-pointer"
+                  disabled={generatingBulk}
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md cursor-pointer disabled:opacity-50"
                 >
-                  Print All Stand Cards 🖨️
+                  {generatingBulk ? "Generating Cards..." : "Print All Stand Cards 🖨️"}
                 </button>
-                <button onClick={() => setBulkQrModal(false)} className="text-slate-500 hover:text-slate-900 text-xs px-2">
+                <button onClick={() => setBulkQrModal(false)} className="text-slate-500 hover:text-slate-900 text-xs px-2 cursor-pointer">
                   ✕
                 </button>
               </div>
@@ -1500,8 +1624,7 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
                   </div>
 
                   <div className="p-2 bg-stone-50 rounded-2xl inline-block border border-stone-200 shadow-inner">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={t.url} alt={`QR for Table ${t.label}`} className="w-44 h-44 mx-auto" />
+                    <Image src={t.url} alt={`QR for Table ${t.label}`} width={176} height={176} unoptimized className="w-44 h-44 mx-auto" />
                   </div>
 
                   <div className="space-y-1.5 text-xs text-stone-700">

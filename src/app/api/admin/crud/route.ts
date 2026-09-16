@@ -19,6 +19,9 @@ export async function POST(req: NextRequest) {
   const { type, ...data } = body;
   const admin = createSupabaseAdmin();
 
+  const isOwner = user.role === "owner" || user.role === "super_admin";
+  const isManagerOrOwner = isOwner || user.role === "manager";
+
   if (type === "toggle_item" || type === "toggle_item_availability") {
     const { itemId, available } = data;
     const { error } = await admin
@@ -32,6 +35,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "update_settings") {
+    if (!isOwner) {
+      return NextResponse.json({ error: "Forbidden: Owner role required" }, { status: 403 });
+    }
     const { name, currency, taxRate, address, phone, upiId, upiQrUrl } = data;
     const updates: Record<string, any> = {};
 
@@ -53,6 +59,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "update_branding") {
+    if (!isOwner) {
+      return NextResponse.json({ error: "Forbidden: Owner role required" }, { status: 403 });
+    }
     const { logoUrl, tagline, accentColor, googleReviewUrl } = data;
     const { error } = await admin
       .from("restaurants")
@@ -69,6 +78,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "create_item") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
     const { categoryId, name, pricePaise, description, isVeg, imageUrl } = data;
     const { data: item, error } = await admin
       .from("menu_items")
@@ -90,6 +102,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "delete_item") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
     const { itemId } = data;
     const { error } = await admin
       .from("menu_items")
@@ -102,6 +117,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "create_category") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
     const { name, sortOrder } = data;
     const { data: category, error } = await admin
       .from("menu_categories")
@@ -118,6 +136,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "delete_category") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
     const { categoryId } = data;
     const { error } = await admin
       .from("menu_categories")
@@ -131,12 +152,19 @@ export async function POST(req: NextRequest) {
 
   if (type === "create_table") {
     const { label, seats } = data;
+    const cleanLabel = String(label || "").trim();
+    if (!cleanLabel) {
+      return NextResponse.json({ error: "Table label is required" }, { status: 400 });
+    }
+
     const { data: table, error } = await admin
       .from("restaurant_tables")
       .insert({
         restaurant_id: user.restaurantId,
-        label: String(label).trim(),
+        label: cleanLabel,
         seats: Math.max(1, Math.min(50, Number(seats || 4))),
+        active: true,
+        qr_token: crypto.randomUUID(),
       })
       .select()
       .single();
@@ -145,7 +173,112 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, table });
   }
 
+  if (type === "update_table") {
+    const { tableId, label, seats, active } = data;
+    if (!tableId) {
+      return NextResponse.json({ error: "Table ID required" }, { status: 400 });
+    }
+
+    const updates: Record<string, any> = {};
+    if (label !== undefined) {
+      const cleanLabel = String(label).trim();
+      if (!cleanLabel) {
+        return NextResponse.json({ error: "Table label cannot be empty" }, { status: 400 });
+      }
+      updates.label = cleanLabel;
+    }
+    if (seats !== undefined) {
+      updates.seats = Math.max(1, Math.min(50, Number(seats || 4)));
+    }
+    if (active !== undefined) {
+      updates.active = Boolean(active);
+    }
+
+    const { data: table, error } = await admin
+      .from("restaurant_tables")
+      .update(updates)
+      .eq("id", tableId)
+      .eq("restaurant_id", user.restaurantId)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, table });
+  }
+
+  if (type === "toggle_table_active") {
+    const { tableId, active } = data;
+    if (!tableId) {
+      return NextResponse.json({ error: "Table ID required" }, { status: 400 });
+    }
+
+    const { data: table, error } = await admin
+      .from("restaurant_tables")
+      .update({ active: Boolean(active) })
+      .eq("id", tableId)
+      .eq("restaurant_id", user.restaurantId)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, table });
+  }
+
+  if (type === "regenerate_qr") {
+    const { tableId } = data;
+    if (!tableId) {
+      return NextResponse.json({ error: "Table ID required" }, { status: 400 });
+    }
+
+    const newToken = crypto.randomUUID();
+    const { data: table, error } = await admin
+      .from("restaurant_tables")
+      .update({ qr_token: newToken })
+      .eq("id", tableId)
+      .eq("restaurant_id", user.restaurantId)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, table, qr_token: newToken });
+  }
+
+  if (type === "bulk_create_tables") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
+    const { prefix = "T", start = 1, count = 5, seats = 4 } = data;
+    const startNum = Math.max(1, Number(start) || 1);
+    const totalCount = Math.max(1, Math.min(30, Number(count) || 5));
+    const capacity = Math.max(1, Math.min(50, Number(seats) || 4));
+    const cleanPrefix = String(prefix || "").trim();
+
+    const rows = [];
+    for (let i = 0; i < totalCount; i++) {
+      const num = startNum + i;
+      const label = `${cleanPrefix}${num < 10 ? "0" + num : num}`;
+      rows.push({
+        restaurant_id: user.restaurantId,
+        label,
+        seats: capacity,
+        active: true,
+        qr_token: crypto.randomUUID(),
+      });
+    }
+
+    const { data: tables, error } = await admin
+      .from("restaurant_tables")
+      .insert(rows)
+      .select();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, tables });
+  }
+
   if (type === "delete_table") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
     const { tableId } = data;
     const { error } = await admin
       .from("restaurant_tables")
@@ -158,6 +291,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (type === "bulk_import_items") {
+    if (!isManagerOrOwner) {
+      return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
+    }
     const { items: rawItems } = data;
     if (!Array.isArray(rawItems) || rawItems.length === 0) {
       return NextResponse.json({ error: "No items provided for import" }, { status: 400 });

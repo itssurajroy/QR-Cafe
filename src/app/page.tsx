@@ -2,8 +2,10 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { Intro } from "@/components/landing/Intro";
-import { Features } from "@/components/landing/Features";
+import { ProblemSolution } from "@/components/landing/ProblemSolution";
 import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Features } from "@/components/landing/Features";
+import { RoiCalculator } from "@/components/landing/RoiCalculator";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { Statement } from "@/components/landing/Statement";
 import { Pricing } from "@/components/landing/Pricing";
@@ -100,7 +102,7 @@ const JSON_LD = [
 export default async function LandingPage() {
   const { getContent } = await import("@/lib/content");
   const faq = await getContent<{ q: string; a: string }[]>("cms.faq", []);
-  
+
   return (
     <div className="landing-page min-h-screen font-[family-name:var(--font-plus-jakarta)] bg-[#FAF9F6] text-slate-900 selection:bg-[#5738F5] selection:text-white">
       <a
@@ -113,40 +115,46 @@ export default async function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
-      
+
       {/* 1. Header */}
       <Navbar />
-      
+
       <main id="main-content">
-        {/* 2. Hero Section */}
+        {/* 2. Hero Section with Live Interactive Preview */}
         <Hero />
-        
-        {/* 3. Platform Introduction */}
+
+        {/* 3. Platform Introduction & Animated Stats */}
         <Intro />
-        
-        {/* 4. Features Grid */}
-        <Features />
-        
-        {/* 5. How It Works */}
+
+        {/* 4. Chaos vs Calm Comparison */}
+        <ProblemSolution />
+
+        {/* 5. 3-Step Fast Launch Process */}
         <HowItWorks />
-        
-        {/* 6. Testimonials */}
+
+        {/* 6. Modern Bento Grid Features */}
+        <Features />
+
+        {/* 7. Interactive ROI & Table Turnover Calculator */}
+        <RoiCalculator />
+
+        {/* 8. Testimonials & Social Proof */}
         <Testimonials />
 
-        {/* 7. Statement */}
+        {/* 9. Brand Statement */}
         <Statement />
-        
-        {/* 8. Pricing */}
+
+        {/* 10. Transparent All-in-One Pricing */}
         <Pricing />
-        
-        {/* 9. FAQ */}
+
+        {/* 11. FAQ with Smooth Accordion */}
         <FAQ items={faq} />
-        
-        {/* 10. Final CTA */}
+
+        {/* 12. Final High-Impact CTA */}
         <CTA />
       </main>
-      
-      {/* 11. Footer */}
+
+      {/* 13. Footer */}
       <Footer />
     </div>
   );

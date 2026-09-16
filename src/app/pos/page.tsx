@@ -35,7 +35,7 @@ export default async function PosPage() {
         .order("label", { ascending: true }),
       db
         .from("table_reservations")
-        .select("table_ids, starts_at, ends_at, status")
+        .select("id, table_ids, starts_at, ends_at, status, code, name, phone, party_size")
         .eq("restaurant_id", user.restaurantId)
         .in("status", ["confirmed", "pending"])
         .gte("starts_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),

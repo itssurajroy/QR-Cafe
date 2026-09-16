@@ -150,6 +150,7 @@ export function SuperSidebar() {
         { id: "audit", label: "Audit Event Logs", icon: ClipboardListIcon },
         { id: "broadcast", label: "Broadcast Banner", icon: MegaphoneIcon },
         { id: "announcements", label: "Announcements", icon: MegaphoneIcon },
+        { id: "content", label: "CMS & Content", icon: GlobeIcon },
         { id: "settings", label: "Platform Settings", icon: CogIcon },
         { id: "api-keys", label: "API Keys", icon: KeyIcon },
       ],

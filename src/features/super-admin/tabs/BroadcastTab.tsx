@@ -13,6 +13,15 @@ export function BroadcastTab() {
   const [type, setType] = useState(existing?.type || "info");
   const [delivery, setDelivery] = useState(existing?.delivery || "both");
   const [isSending, setIsSending] = useState(false);
+
+  React.useEffect(() => {
+    if (existing?.active) {
+      setSubject(existing.subject || "");
+      setMessage(existing.message || "");
+      setType(existing.type || "info");
+      setDelivery(existing.delivery || "both");
+    }
+  }, [existing]);
   
   if (tab !== "broadcast") return null;
 

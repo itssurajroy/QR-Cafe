@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
+import { generateBeautifulQrDataUrl } from "@/lib/qr-designer";
 
 export type Ticket = {
   code: string; name: string; party_size: number;
@@ -19,7 +20,19 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
   const url = typeof window !== "undefined" ? `${window.location.origin}/bookings/${ticket.code}` : "";
 
   useEffect(() => {
-    QRCode.toDataURL(url, { width: 220, margin: 1 }).then(setQr).catch(() => {});
+    if (!url) return;
+    try {
+      const dataUrl = generateBeautifulQrDataUrl({
+        text: url,
+        size: 260,
+        theme: "violet",
+        centerIcon: "sparkles",
+        dotShape: "dots",
+      });
+      setQr(dataUrl);
+    } catch {
+      QRCode.toDataURL(url, { width: 220, margin: 1 }).then(setQr).catch(() => {});
+    }
   }, [url]);
 
   function downloadJpeg() {

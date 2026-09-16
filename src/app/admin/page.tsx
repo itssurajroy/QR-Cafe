@@ -54,6 +54,7 @@ export default async function AdminPage() {
     <AdminClient
       restaurantId={user.restaurantId}
       restaurant={restaurant}
+      userRole={user.role}
       categories={categories ?? []}
       items={items ?? []}
       tables={tables ?? []}
