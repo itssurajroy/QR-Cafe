@@ -54,7 +54,9 @@ export default async function PublicCafePage({
       .eq("available", true),
     db
       .from("restaurant_tables")
-      .select("id, label, seats, qr_token, active")
+      // qr_token intentionally excluded: never ship tokens in the public HTML
+      // payload. Tokens are resolved lazily via /api/public/resolve-table.
+      .select("id, label, seats, active")
       .eq("restaurant_id", tenant.id)
       .eq("active", true)
       .order("label", { ascending: true }),

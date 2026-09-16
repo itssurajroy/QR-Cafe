@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const ids = (data ?? []).map((r) => r.id);
-  let owners: Record<string, string> = {};
+  const owners: Record<string, string> = {};
   if (ids.length > 0) {
     const { data: profiles } = await db.from("cafe_profiles").select("id, restaurant_id").eq("role", "owner").in("restaurant_id", ids);
     for (const p of profiles ?? []) {

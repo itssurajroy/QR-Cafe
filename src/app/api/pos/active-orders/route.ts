@@ -1,5 +1,6 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
 
@@ -18,10 +19,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const admin = createSupabaseAdmin();
+  // Use the authenticated server client — RLS enforces restaurant_id scoping.
+  const db = await createSupabaseServerClient();
 
-  // Fetch all active orders (including served orders that are UNPAID so cashier can collect bill)
-  const { data: orders, error } = await admin
+  // Fetch all active orders (including served + unpaid so cashier can collect bill)
+  const { data: orders, error } = await db
     .from("orders")
     .select(
       "id, order_number, status, payment_status, payment_method, total_paise, subtotal_paise, created_at, table_id, customer_name, customer_phone, restaurant_tables(id, label, seats), order_items(*)",
@@ -71,14 +73,15 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "orderId required" }, { status: 400 });
   }
 
-  const admin = createSupabaseAdmin();
+  // Use the authenticated server client — RLS enforces restaurant_id scoping.
+  const db = await createSupabaseServerClient();
   const updates: Record<string, any> = {
     payment_status,
     payment_method: normalizePaymentMethod(payment_method),
   };
   if (status) updates.status = status;
 
-  const { data: updated, error } = await admin
+  const { data: updated, error } = await db
     .from("orders")
     .update(updates)
     .eq("id", orderId)
@@ -90,9 +93,10 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Insert payment record if settling
+  // payments RLS requires joining through orders; use admin for this write only.
   if (payment_status === "paid") {
-    await admin.from("payments").insert({
+    const adminDb = createSupabaseAdmin();
+    await adminDb.from("payments").insert({
       order_id: orderId,
       provider: payment_method === "upi" ? "upi_qr" : payment_method === "card" ? "card_pos" : "cash",
       amount_paise: updated.total_paise,

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -15,8 +15,9 @@ export async function GET(req: NextRequest) {
       ? searchParams.get("restaurant_id") || user.restaurantId
       : user.restaurantId;
 
-  const admin = createSupabaseAdmin();
-  const { data: orders, error } = await admin
+  // Use the authenticated server client — RLS enforces tenant isolation.
+  const db = await createSupabaseServerClient();
+  const { data: orders, error } = await db
     .from("orders")
     .select(
       "id, order_number, status, payment_status, created_at, table_id, customer_name, customer_phone, restaurant_tables(label), order_items(id, item_name, quantity, notes)",

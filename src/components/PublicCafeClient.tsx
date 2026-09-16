@@ -26,11 +26,12 @@ import type { Category, MenuItem as Item, CartLine } from "@/types";
 
 interface PublicCafeClientProps {
   restaurant: Tenant;
+  // qr_token is intentionally absent: tokens are fetched lazily via
+  // /api/public/resolve-table and never shipped in the server HTML payload.
   tables: Array<{
     id: string;
     label: string;
     seats: number;
-    qr_token: string;
     active: boolean;
   }>;
   categories: Category[];
@@ -52,11 +53,12 @@ export default function PublicCafeClient({
 }: PublicCafeClientProps) {
   const router = useRouter();
 
-  // Active table state (persisted per-restaurant in localStorage)
+  // Active table state. qr_token is fetched lazily on selection and held
+  // only in React state (not localStorage) so it never persists between sessions.
   const [selectedTable, setSelectedTable] = useState<{
     id: string;
     label: string;
-    qr_token: string;
+    qr_token: string | null; // null until lazily resolved
   } | null>(null);
 
   // Cart state: itemId -> { item, quantity, notes, spiceLevel }
@@ -111,7 +113,9 @@ export default function PublicCafeClient({
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
 
-  // Load last selected table from localStorage on mount
+  // Restore the last-selected table label from localStorage on mount.
+  // We only persist the table label/id, never the qr_token.
+  // The token is re-fetched lazily when the customer starts ordering.
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -120,11 +124,8 @@ export default function PublicCafeClient({
           const parsed = JSON.parse(saved);
           const matched = tables.find((t) => t.id === parsed.id || t.label === parsed.label);
           if (matched) {
-            setSelectedTable({
-              id: matched.id,
-              label: matched.label,
-              qr_token: matched.qr_token,
-            });
+            // Restore selection without the token; it will be resolved on demand.
+            setSelectedTable({ id: matched.id, label: matched.label, qr_token: null });
           }
         }
       } catch {
@@ -133,9 +134,9 @@ export default function PublicCafeClient({
     }
   }, [restaurant.id, tables]);
 
-  // Load/save cart to sessionStorage
+  // Load/save cart to sessionStorage, keyed by table id (not qr_token).
   useEffect(() => {
-    const storageKey = selectedTable ? selectedTable.qr_token : `guest_${restaurant.id}`;
+    const storageKey = selectedTable ? `table:${selectedTable.id}` : `guest_${restaurant.id}`;
     if (typeof window !== "undefined") {
       try {
         const saved = sessionStorage.getItem(`cart:${storageKey}`);
@@ -149,7 +150,7 @@ export default function PublicCafeClient({
   }, [selectedTable, restaurant.id]);
 
   useEffect(() => {
-    const storageKey = selectedTable ? selectedTable.qr_token : `guest_${restaurant.id}`;
+    const storageKey = selectedTable ? `table:${selectedTable.id}` : `guest_${restaurant.id}`;
     if (typeof window !== "undefined") {
       try {
         sessionStorage.setItem(`cart:${storageKey}`, JSON.stringify(cart));
@@ -178,11 +179,13 @@ export default function PublicCafeClient({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [categories]);
 
-  // Table selection handler
-  const handleSelectTable = (table: { id: string; label: string; qr_token: string }) => {
-    setSelectedTable(table);
+  // Table selection handler. Persists label+id to localStorage (never token).
+  // Token is resolved lazily just before the first order/service action.
+  const handleSelectTable = (table: { id: string; label: string }) => {
+    setSelectedTable({ id: table.id, label: table.label, qr_token: null });
     try {
-      localStorage.setItem(`qrslice_table_${restaurant.id}`, JSON.stringify(table));
+      // Only store non-sensitive identifiers in localStorage.
+      localStorage.setItem(`qrslice_table_${restaurant.id}`, JSON.stringify({ id: table.id, label: table.label }));
     } catch {
       // ignore
     }
@@ -192,6 +195,31 @@ export default function PublicCafeClient({
     if (pendingItem) {
       addItemToCart(pendingItem);
       setPendingItem(null);
+    }
+  };
+
+  /**
+   * Lazily resolves the qr_token for the currently selected table.
+   * Returns the token string on success, or null if resolution fails.
+   * Caches the result in component state so subsequent calls are instant.
+   */
+  const resolveQrToken = async (): Promise<string | null> => {
+    if (!selectedTable) return null;
+    if (selectedTable.qr_token) return selectedTable.qr_token; // already resolved
+    try {
+      const res = await fetch("/api/public/resolve-table", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurant_id: restaurant.id, table_id: selectedTable.id }),
+      });
+      if (!res.ok) return null;
+      const { qr_token } = await res.json();
+      if (!qr_token) return null;
+      // Cache token in state for this session
+      setSelectedTable((prev) => prev ? { ...prev, qr_token } : prev);
+      return qr_token as string;
+    } catch {
+      return null;
     }
   };
 
@@ -292,8 +320,16 @@ export default function PublicCafeClient({
     setOrderError(null);
 
     try {
+      // Lazily resolve qr_token only at order time — it is never pre-shipped
+      // in the page HTML, preventing token harvesting from the public menu.
+      const qrToken = await resolveQrToken();
+      if (!qrToken) {
+        setOrderError("Could not verify your table. Please re-select your table and try again.");
+        return;
+      }
+
       const payload = {
-        qrToken: selectedTable.qr_token,
+        qrToken,
         customerName: customerName.trim() || undefined,
         customerPhone: customerPhone.trim() || undefined,
         paymentMethod,
@@ -311,9 +347,9 @@ export default function PublicCafeClient({
         return;
       }
 
-      // Clear cart on successful placement
+      // Clear cart on successful placement (keyed by table id, not token)
       setCart({});
-      sessionStorage.removeItem(`cart:${selectedTable.qr_token}`);
+      sessionStorage.removeItem(`cart:table:${selectedTable.id}`);
 
       const statusToken =
         (res.data as any)?.status_token ||
@@ -325,7 +361,7 @@ export default function PublicCafeClient({
       const qs = loyalty?.pointsEarned ? `?earned=${loyalty.pointsEarned}&total=${loyalty.newTotalPoints}` : "";
 
       if (statusToken) {
-        sessionStorage.setItem(`status:${selectedTable.qr_token}`, statusToken);
+        sessionStorage.setItem(`status:table:${selectedTable.id}`, statusToken);
         router.push(`/order/${statusToken}${qs}`);
       } else {
         setOrderError("Order placed successfully. Please ask your server for your ticket.");
@@ -345,11 +381,17 @@ export default function PublicCafeClient({
     }
     setServiceLoading(true);
     try {
+      // Resolve token lazily — not pre-shipped in HTML payload.
+      const qrToken = await resolveQrToken();
+      if (!qrToken) {
+        setServiceMessage("Could not verify your table. Please re-select and try again.");
+        return;
+      }
       const res = await fetch("/api/table-service", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          qr_token: selectedTable.qr_token,
+          qr_token: qrToken,
           request_type: type,
         }),
       });

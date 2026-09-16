@@ -1,6 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
 
@@ -59,10 +60,11 @@ export async function PATCH(
     );
   }
 
-  const admin = createSupabaseAdmin();
+  // Use the authenticated server client — RLS enforces restaurant_id scoping.
+  const db = await createSupabaseServerClient();
 
-  // Load current order scoped strictly to the caller's restaurant
-  const { data: order, error } = await admin
+  // Load current order; RLS ensures it belongs to the caller's restaurant.
+  const { data: order, error } = await db
     .from("orders")
     .select("id, status, payment_status, restaurant_id")
     .eq("id", id)
@@ -73,10 +75,10 @@ export async function PATCH(
     return NextResponse.json({ error: "Order not found or access denied" }, { status: 404 });
   }
 
-  // Safe lookup of delay_minutes if present
+  // Fetch delay field separately (avoids re-selecting entire row)
   let currentDelay = 0;
   try {
-    const { data: delayData } = await admin
+    const { data: delayData } = await db
       .from("orders")
       .select("delay_minutes")
       .eq("id", id)
@@ -122,7 +124,7 @@ export async function PATCH(
     return NextResponse.json({ ok: true, unchanged: true });
   }
 
-  const { error: updErr } = await admin
+  const { error: updErr } = await db
     .from("orders")
     .update(updates)
     .eq("id", id)
@@ -137,7 +139,9 @@ export async function PATCH(
     req.headers.get("x-real-ip") ||
     "127.0.0.1";
 
-  await admin.from("audit_events").insert({
+  // audit_events has super_admin-only RLS — use admin client for this write only.
+  const adminDb = createSupabaseAdmin();
+  await adminDb.from("audit_events").insert({
     actor_id: user.userId,
     restaurant_id: order.restaurant_id,
     entity: "order",
