@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 import {
   LockIcon,
   EyeIcon,
@@ -14,18 +15,15 @@ import {
 } from "@/components/Icons";
 
 export default function LoginPage() {
+  const [mode, setMode] = useState<"password" | "pin">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [cafeCode, setCafeCode] = useState("");
+  const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Quick fill helper for testing/demos (must match seeded demo accounts)
-  function fillDemo(roleEmail: string, rolePassword: string) {
-    setEmail(roleEmail);
-    setPassword(rolePassword);
-  }
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -54,20 +52,50 @@ export default function LoginPage() {
     }
   }
 
+  function pressDigit(d: string) {
+    setError(null);
+    setPin((prev) => (prev.length >= 4 ? prev : prev + d));
+  }
+
+  function pressBackspace() {
+    setPin((prev) => prev.slice(0, -1));
+  }
+
+  async function pinLogin(pinValue?: string) {
+    const code = pinValue ?? pin;
+    if (!cafeCode.trim() || code.length !== 4) {
+      setError("Enter your café code and 4-digit PIN.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurant_slug: cafeCode.trim(), pin: code }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Invalid café code or PIN.");
+        setPin("");
+        setLoading(false);
+        return;
+      }
+      window.location.href = data.destination || "/pos";
+    } catch {
+      setError("Network error occurred during sign-in. Please retry.");
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-slate-900 font-[family-name:var(--font-plus-jakarta)] flex flex-col justify-between selection:bg-[#5738F5] selection:text-white antialiased">
       {/* Top Simple Header */}
       <header className="px-6 py-4 border-b border-slate-200/80 bg-white">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <img
-              src="/favicon.png"
-              alt="QRslice Logo"
-              className="w-9 h-9 object-contain rounded-xl shadow-sm group-hover:scale-105 transition-transform"
-            />
-            <span className="text-xl font-black tracking-tight text-slate-900">
-              QR<span className="text-[#5738F5]">slice</span>
-            </span>
+          <Link href="/" className="inline-flex items-center group">
+            <QrSliceLogo size="md" className="group-hover:scale-105 transition-transform duration-200" priority />
           </Link>
 
           <div className="flex items-center gap-3">
@@ -182,7 +210,29 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* Form */}
+              {/* Sign-in mode toggle */}
+              <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => { setMode("password"); setError(null); }}
+                  className={`flex-1 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                    mode === "password" ? "bg-white text-slate-900 shadow-xs" : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMode("pin"); setError(null); setPin(""); }}
+                  className={`flex-1 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                    mode === "pin" ? "bg-white text-slate-900 shadow-xs" : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Staff PIN
+                </button>
+              </div>
+
+              {mode === "password" ? (
               <form onSubmit={login} className="space-y-4">
                 <div>
                   <label
@@ -251,7 +301,7 @@ export default function LoginPage() {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="rounded text-[#5738F5] focus:ring-[#5738F5] cursor-pointer"
                     />
-                    <span>Remember terminal</span>
+                    <span>Remember me</span>
                   </label>
                   <a
                     href="mailto:support@qrslice.com?subject=Password%20Reset%20Request"
@@ -274,9 +324,114 @@ export default function LoginPage() {
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-xs sm:text-sm transition-all disabled:opacity-50 shadow-lg shadow-violet-500/25 active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 mt-2"
                 >
                   <LockIcon className="w-4 h-4 text-white" />
-                  <span>{loading ? "Authenticating Terminal…" : "Sign In to Terminal →"}</span>
+                  <span>{loading ? "Signing in…" : "Sign In →"}</span>
                 </button>
               </form>
+              ) : (
+              <form
+                onSubmit={(e) => { e.preventDefault(); pinLogin(); }}
+                className="space-y-4"
+              >
+                <div>
+                  <label
+                    htmlFor="login-cafe-code"
+                    className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                  >
+                    Café Code
+                  </label>
+                  <input
+                    id="login-cafe-code"
+                    type="text"
+                    required
+                    autoComplete="off"
+                    placeholder="e.g. wah-ji-wah"
+                    value={cafeCode}
+                    onChange={(e) => setCafeCode(e.target.value.toLowerCase().trim())}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#5738F5] focus:ring-4 focus:ring-[#5738F5]/10 transition-all shadow-xs font-mono"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Kitchen and waiter staff sign in with a quick 4-digit PIN.
+                  </p>
+                </div>
+
+                <div>
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                    4-Digit PIN
+                  </span>
+                  <div className="flex items-center justify-center gap-2 py-2" aria-label="Entered PIN">
+                    {[0, 1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className={`w-12 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-black font-mono transition-all ${
+                          pin[i]
+                            ? "border-[#5738F5] bg-violet-50 text-slate-900"
+                            : "border-slate-200 bg-slate-50 text-slate-300"
+                        }`}
+                      >
+                        {pin[i] ? "•" : ""}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => {
+                          if (pin.length < 4) {
+                            const next = pin + d;
+                            setPin(next);
+                            setError(null);
+                            if (next.length === 4) pinLogin(next);
+                          }
+                        }}
+                        className="py-3 rounded-xl bg-slate-100 hover:bg-violet-100 hover:text-[#5738F5] text-slate-800 font-black text-base transition-colors cursor-pointer active:scale-95"
+                      >
+                        {d}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={pressBackspace}
+                      className="py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-sm transition-colors cursor-pointer active:scale-95"
+                      aria-label="Backspace"
+                    >
+                      ⌫
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => pressDigit("0")}
+                      className="py-3 rounded-xl bg-slate-100 hover:bg-violet-100 hover:text-[#5738F5] text-slate-800 font-black text-base transition-colors cursor-pointer active:scale-95"
+                    >
+                      0
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPin("")}
+                      className="py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-sm transition-colors cursor-pointer active:scale-95"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-fade-in">
+                    <span>⚠️</span>
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || pin.length !== 4 || !cafeCode.trim()}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-xs sm:text-sm transition-all disabled:opacity-50 shadow-lg shadow-violet-500/25 active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 mt-2"
+                >
+                  <LockIcon className="w-4 h-4 text-white" />
+                  <span>{loading ? "Signing in…" : "Sign In with PIN →"}</span>
+                </button>
+              </form>
+              )}
 
               
 

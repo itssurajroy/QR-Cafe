@@ -74,6 +74,7 @@ export default async function PosPage() {
         items={items ?? []}
         tables={tables ?? []}
         reservations={reservations ?? []}
+        userRole={user.role}
       />
     </PrinterProvider>
   );

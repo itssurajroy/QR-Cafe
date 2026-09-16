@@ -86,6 +86,7 @@ export default function PosClient({
   items,
   tables,
   reservations,
+  userRole,
 }: {
   restaurant: RestaurantProps;
   categories: Category[];
@@ -102,18 +103,29 @@ export default function PosClient({
     phone?: string;
     party_size?: number;
   }[];
+  userRole?: string;
 }) {
+  // Kitchen role is KDS-only: locked to the kitchen view (no billing/floor).
+  const isKitchenLocked = userRole === "kitchen";
   const [reservationList, setReservationList] = useState(reservations);
   useEffect(() => {
     setReservationList(reservations);
   }, [reservations]);
 
   // Deep-linkable view: /pos?view=kitchen lands straight on the KDS.
+  // Kitchen role is locked to KDS-only (PIN quick sign-in).
   const [viewMode, setViewMode] = useState<"catalog" | "kitchen" | "live_tables">(() => {
+    if (isKitchenLocked) return "kitchen";
     if (typeof window === "undefined") return "catalog";
     const v = new URLSearchParams(window.location.search).get("view");
     return v === "kitchen" || v === "live_tables" ? v : "catalog";
   });
+
+  useEffect(() => {
+    if (isKitchenLocked && viewMode !== "kitchen") {
+      setViewMode("kitchen");
+    }
+  }, [isKitchenLocked, viewMode]);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [orderType, setOrderType] = useState<"dine_in" | "takeaway" | "delivery">("dine_in");
   const [selectedTable, setSelectedTable] = useState<Table | null>(tables[0] || null);
@@ -761,7 +773,12 @@ export default function PosClient({
           </Link>
           <div className="h-4 w-px bg-black/[0.08]" />
           
-          {/* Apple Segmented Control */}
+          {/* Apple Segmented Control (hidden for KDS-only kitchen role) */}
+          {isKitchenLocked ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-100 border border-orange-200 text-orange-800 text-xs font-black">
+              👨‍🍳 Kitchen Display Only
+            </span>
+          ) : (
           <div className="flex items-center p-1 rounded-2xl bg-black/[0.05] border border-black/[0.04]">
             <button
               type="button"
@@ -811,6 +828,7 @@ export default function PosClient({
               )}
             </button>
           </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

@@ -15,6 +15,7 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState('staff');
+  const [newPin, setNewPin] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -64,6 +65,56 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
     }
   };
 
+  const handleSetPin = async (user: any) => {
+    const input = window.prompt(
+      `Set 4-digit quick sign-in PIN for ${user.display_name || user.email || 'staff member'} (kitchen/waiter use this on shared terminals):`,
+      ''
+    );
+    if (input === null) return;
+    if (!/^\d{4}$/.test(input.trim())) {
+      alert("PIN must be exactly 4 digits.");
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/staff', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: user.id, pin: input.trim() }),
+      });
+      if (res.ok) {
+        setStaff((prev) =>
+          prev.map((s) => (s.id === user.id ? { ...s, has_pin: true } : s))
+        );
+      } else {
+        const d = await res.json();
+        alert(d.error || "Failed to set PIN");
+      }
+    } catch (e) {
+      console.error("Failed to set PIN", e);
+    }
+  };
+
+  const handleClearPin = async (user: any) => {
+    if (!confirm(`Clear the quick sign-in PIN for ${user.display_name || user.email || 'this member'}?`)) return;
+    try {
+      const res = await fetch('/api/admin/staff', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: user.id, pin: "" }),
+      });
+      if (res.ok) {
+        setStaff((prev) =>
+          prev.map((s) => (s.id === user.id ? { ...s, has_pin: false } : s))
+        );
+      } else {
+        const d = await res.json();
+        alert(d.error || "Failed to clear PIN");
+      }
+    } catch (e) {
+      console.error("Failed to clear PIN", e);
+    }
+  };
+
   const handleDeleteStaff = async (id: string) => {
     if (!confirm("Are you sure you want to remove this team member?")) return;
     try {
@@ -88,6 +139,10 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
     setSuccessMsg('');
 
     try {
+      if (newPin && !/^\d{4}$/.test(newPin.trim())) {
+        throw new Error('PIN must be exactly 4 digits (or leave blank for no PIN).');
+      }
+
       const res = await fetch('/api/admin/staff', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,6 +152,7 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
           email: newEmail,
           password: newPassword,
           role: newRole,
+          ...(newPin.trim() ? { pin: newPin.trim() } : {}),
         }),
       });
 
@@ -111,6 +167,7 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
       setNewEmail('');
       setNewPassword('');
       setNewRole('staff');
+      setNewPin('');
       loadStaff();
       
       setTimeout(() => {
@@ -175,6 +232,7 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px]">
                 <th className="p-4 font-bold">Name & Email</th>
                 <th className="p-4 font-bold">Role</th>
+                <th className="p-4 font-bold">Quick PIN</th>
                 <th className="p-4 font-bold">Status</th>
                 <th className="p-4 font-bold">Created</th>
                 <th className="p-4 font-bold text-right">Actions</th>
@@ -183,13 +241,13 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-400">
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
                     Loading team members...
                   </td>
                 </tr>
               ) : filteredStaff.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-400">
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
                     No team members found.
                   </td>
                 </tr>
@@ -212,6 +270,38 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
                       }`}>
                         {user.role === 'admin' ? 'manager' : user.role}
                       </span>
+                    </td>
+                    <td className="p-4">
+                      {isOwner ? (
+                        user.has_pin ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-100 text-emerald-700">
+                              •••• Set
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleClearPin(user)}
+                              className="text-[11px] font-bold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                              title="Clear PIN"
+                            >
+                              Clear
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleSetPin(user)}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-100 text-slate-600 hover:text-indigo-700 text-[11px] font-bold transition-colors cursor-pointer"
+                            title="Set 4-digit quick sign-in PIN"
+                          >
+                            + Set PIN
+                          </button>
+                        )
+                      ) : (
+                        <span className="text-[11px] font-bold text-slate-400">
+                          {user.has_pin ? "•••• Set" : "—"}
+                        </span>
+                      )}
                     </td>
                     <td className="p-4">
                       {isOwner ? (
@@ -329,9 +419,23 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
                 >
                   <option value="staff">Staff / Server</option>
                   <option value="admin">Manager / Admin</option>
-                  <option value="waiter">Waiter</option>
-                  <option value="kitchen">Kitchen Chef</option>
+                  <option value="waiter">Waiter (order-taking, PIN)</option>
+                  <option value="kitchen">Kitchen Chef (KDS only, PIN)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Quick Sign-in PIN <span className="font-medium text-slate-400">(optional, 4 digits)</span></label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={newPin}
+                  onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 font-mono tracking-widest"
+                  placeholder="••••"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Kitchen and waiter staff use this on shared terminals. Leave blank for no PIN.</p>
               </div>
 
               <div className="flex gap-3 pt-2">

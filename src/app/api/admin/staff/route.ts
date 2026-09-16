@@ -2,7 +2,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
+import { hashPin, validatePinFormat } from "@/lib/pin-auth";
 import { z } from "zod";
+
+const pinField = z
+  .string()
+  .regex(/^\d{4}$/, "PIN must be exactly 4 digits")
+  .optional();
 
 const createStaffSchema = z.object({
   name: z.string().min(2),
@@ -10,6 +16,7 @@ const createStaffSchema = z.object({
   password: z.string().min(6),
   role: z.enum(["admin", "owner", "staff", "waiter", "kitchen"]).default("staff"),
   restaurantId: z.string().uuid().optional(),
+  pin: pinField,
 });
 
 export async function GET() {
@@ -25,7 +32,7 @@ export async function GET() {
   const admin = createSupabaseAdmin();
   const { data: profiles, error } = await admin
     .from("cafe_profiles")
-    .select("id, role, display_name, active, created_at, restaurant_id")
+    .select("id, role, display_name, active, created_at, restaurant_id, pin_hash, pin_updated_at")
     .eq("restaurant_id", user.restaurantId)
     .order("created_at", { ascending: false });
 
@@ -36,8 +43,16 @@ export async function GET() {
   const { data: authData } = await admin.auth.admin.listUsers();
   const emailMap = new Map((authData?.users || []).map((u) => [u.id, u.email]));
 
+  // Never leak pin_hash: expose only whether a PIN is set.
   const staff = (profiles || []).map((p) => ({
-    ...p,
+    id: p.id,
+    role: p.role,
+    display_name: p.display_name,
+    active: p.active,
+    created_at: p.created_at,
+    restaurant_id: p.restaurant_id,
+    has_pin: Boolean(p.pin_hash),
+    pin_updated_at: p.pin_updated_at ?? null,
     email: emailMap.get(p.id) || "—",
   }));
 
@@ -69,7 +84,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, role } = parsed.data;
+  const { name, email, password, role, pin } = parsed.data;
   const restaurantId = user.restaurantId;
   const admin = createSupabaseAdmin();
 
@@ -89,13 +104,19 @@ export async function POST(req: NextRequest) {
 
   const userId = newUser.user.id;
 
-  // 2. Insert into cafe_profiles
+  // 2. Insert into cafe_profiles (with optional quick sign-in PIN)
   const { error: profileErr } = await admin.from("cafe_profiles").insert({
     id: userId,
     restaurant_id: restaurantId,
     role: role,
     display_name: name,
     active: true,
+    ...(pin
+      ? {
+          pin_hash: await hashPin(pin, restaurantId, userId),
+          pin_updated_at: new Date().toISOString(),
+        }
+      : {}),
   });
 
   if (profileErr) {
@@ -130,9 +151,16 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { id, active, role, display_name } = body || {};
+  const { id, active, role, display_name, pin } = body || {};
   if (!id) {
     return NextResponse.json({ error: "Missing staff id" }, { status: 400 });
+  }
+
+  // PIN set/reset/clear (owner-only). Empty string clears the PIN.
+  if (pin !== undefined && pin !== null && pin !== "") {
+    if (!validatePinFormat(String(pin))) {
+      return NextResponse.json({ error: "PIN must be exactly 4 digits" }, { status: 422 });
+    }
   }
 
   const admin = createSupabaseAdmin();
@@ -140,6 +168,19 @@ export async function PATCH(req: NextRequest) {
   if (active !== undefined) updates.active = Boolean(active);
   if (role !== undefined) updates.role = role;
   if (display_name !== undefined) updates.display_name = String(display_name).trim();
+  if (pin !== undefined) {
+    if (pin === "" || pin === null) {
+      updates.pin_hash = null;
+      updates.pin_updated_at = null;
+      updates.pin_failed_attempts = 0;
+      updates.pin_locked_until = null;
+    } else {
+      updates.pin_hash = await hashPin(String(pin), user.restaurantId, String(id));
+      updates.pin_updated_at = new Date().toISOString();
+      updates.pin_failed_attempts = 0;
+      updates.pin_locked_until = null;
+    }
+  }
 
   const { data, error } = await admin
     .from("cafe_profiles")
