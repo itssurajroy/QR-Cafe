@@ -44,7 +44,7 @@ interface KitchenOrderCardProps {
 }
 
 const FRESH_MINS = 2;
-const OVERDUE_MINS = 12;
+const OVERDUE_MINS = 20;
 
 function typeShort(order: OrderRow): string {
   const type = order.order_type || (order.table_label ? "dine_in" : "takeaway");

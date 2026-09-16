@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { canOrder } from "@/lib/tenant";
 import PosClient from "@/components/PosClient";
+import { PrinterProvider } from "@/components/printer/PrinterProvider";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -66,13 +67,15 @@ export default async function PosPage() {
   }
 
   return (
-    <PosClient
-      restaurant={restaurant}
-      categories={categories ?? []}
-      items={items ?? []}
-      tables={tables ?? []}
-      reservations={reservations ?? []}
-    />
+    <PrinterProvider>
+      <PosClient
+        restaurant={restaurant}
+        categories={categories ?? []}
+        items={items ?? []}
+        tables={tables ?? []}
+        reservations={reservations ?? []}
+      />
+    </PrinterProvider>
   );
 }
 

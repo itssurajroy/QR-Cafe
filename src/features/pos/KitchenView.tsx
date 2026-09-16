@@ -49,7 +49,7 @@ const MOBILE_TABS = [
   { status: "ready", label: "Ready" },
 ];
 
-const OVERDUE_MINS = 12;
+const OVERDUE_MINS = 20;
 
 export function KitchenView({
   liveOrders,

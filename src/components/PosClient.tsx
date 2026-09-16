@@ -13,6 +13,9 @@ import { getWaLink, isValidIndianPhone, normalizeWaPhone } from "@/lib/utils";
 import { renderWhatsAppMessage, buildWhatsAppReceiptVars } from "@/lib/whatsapp-templates";
 import { speakHumanVoice } from "@/lib/tts";
 import { useToast } from "@/components/ToastProvider";
+import { usePrinter } from "@/components/printer/PrinterProvider";
+import { submitOrderOnlineFirst } from "@/lib/offline-queue";
+import OfflineQueueStatus from "@/components/printer/OfflineQueueStatus";
 import type { Category, MenuItem as Item, CartLine, Table } from "@/types";
 
 interface RestaurantProps {
