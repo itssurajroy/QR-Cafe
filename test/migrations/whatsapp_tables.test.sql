@@ -15,7 +15,7 @@ SELECT column_name, data_type
 FROM information_schema.columns 
 WHERE table_name = 'whatsapp_sessions'
 ORDER BY ordinal_position;
--- Expect: id, tenant_id, session_data, encryption_key, created_at, updated_at
+-- Expect: id, tenant_id, session_data, encryption_key_id, created_at, updated_at
 
 -- Test whatsapp_messages table exists with unique constraint
 SELECT column_name, data_type 
