@@ -3,7 +3,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { fadeUp, springScaleIn, staggerContainer, VIEWPORT_ONCE } from "@/lib/animations";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -74,11 +74,11 @@ export function CTA() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/c/wah-ji-wah"
+                href="/contact"
                 className="px-8 py-4 text-slate-800 bg-white font-bold rounded-2xl text-base border-2 border-slate-200/90 hover:border-[#5738F5]/40 hover:bg-violet-50/50 hover:text-[#5738F5] transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                See Live Demo
+                <Calendar className="w-4 h-4 text-[#5738F5]" />
+                Book a Demo
               </Link>
             </motion.div>
 

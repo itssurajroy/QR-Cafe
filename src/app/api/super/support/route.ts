@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   if (cafeErr || !cafe) return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
   const row = cafe as { id: string; name: string; slug: string; trial_ends_at: string | null; internal_notes: string | null };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
 
   if (op === "resend_welcome" || op === "resend_trial_ending") {
     const day = op === "resend_welcome" ? 0 : 14;

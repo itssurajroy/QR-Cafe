@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 
 function paise(n: number) {
   return `₹${(n / 100).toLocaleString("en-IN")}`;
@@ -337,7 +338,14 @@ export default function ReceiptPage({
       {/* Powered by tag */}
       <div className="mt-6 text-xs text-slate-400 font-medium flex items-center gap-1.5">
         <span>Powered by</span>
-        <span className="font-bold text-slate-600">QRslice</span>
+        <a
+          href="https://qrslice.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center hover:opacity-80 transition-opacity"
+        >
+          <QrSliceLogo size="sm" />
+        </a>
       </div>
     </main>
   );

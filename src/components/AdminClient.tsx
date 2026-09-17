@@ -723,7 +723,7 @@ export default function AdminClient({
   }
 
   async function generateQrDataUrl(tableOrToken: Table | string) {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://qrslice.app";
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://qrslice.com";
     let url = "";
     if (typeof tableOrToken === "string") {
       url = `${origin}/t/${tableOrToken}`;

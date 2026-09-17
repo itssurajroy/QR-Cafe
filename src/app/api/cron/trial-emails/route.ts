@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
   const db = createSupabaseAdmin();
   const now = Date.now();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
 
   const { data: cafes, error } = await db
     .from("restaurants")

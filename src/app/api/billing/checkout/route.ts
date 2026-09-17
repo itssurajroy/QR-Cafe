@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qr-cafe-blond.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
   const callbackUrl = `${appUrl}/admin/billing?payment=success&cycle=${cycle}`;
 
   // 2. Check if recurring plan ID is configured

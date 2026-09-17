@@ -15,24 +15,44 @@ export const MIDDLEWARE_CONFIG = {
     "/login",
     "/onboarding",
     "/favicon.png",
+    "/favicon.ico",
     "/logo.png",
+    "/apple-touch-icon.png",
+    "/og-image.png",
+    "/icon-192.png",
+    "/icon-512.png",
     "/api/auth/login",
     "/api/auth/logout",
     "/api/billing/webhook",
+    "/api/onboarding",
+    "/api/feedback",
   ],
   // Routes for super admin only
   superPaths: ["/super", "/api/super"],
   // Routes for cafe owners/staff
   adminPaths: ["/admin", "/api/admin", "/pos", "/api/pos", "/api/analytics"],
   // Guest storefront routes (tenant resolved, but no cafe staff auth needed)
-  guestPaths: ["/c/", "/t/", "/order/", "/receipt/", "/api/orders", "/api/order-status", "/api/table-service", "/api/kds", "/api/bookings"],
+  guestPaths: [
+    "/c/",
+    "/t/",
+    "/order/",
+    "/receipt/",
+    "/api/orders",
+    "/api/order-status",
+    "/api/table-service",
+    "/api/kds",
+    "/api/bookings",
+    "/api/public/",
+    "/api/whatsapp/log-event",
+  ],
 };
 
 export function isPublicPath(path: string): boolean {
-  if (MIDDLEWARE_CONFIG.publicPaths.includes(path)) return true;
-  if (MIDDLEWARE_CONFIG.guestPaths.some((p) => path.startsWith(p))) return true;
+  const normalized = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+  if (MIDDLEWARE_CONFIG.publicPaths.includes(normalized)) return true;
+  if (MIDDLEWARE_CONFIG.guestPaths.some((p) => normalized.startsWith(p) || path.startsWith(p))) return true;
   // Match exact marketing paths or simple static extensions not covered by matcher
-  if (path.match(/\.(png|jpg|jpeg|svg|ico)$/)) return true;
+  if (normalized.match(/\.(png|jpg|jpeg|svg|ico|webp)$/)) return true;
   return false;
 }
 

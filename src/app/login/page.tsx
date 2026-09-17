@@ -344,7 +344,7 @@ export default function LoginPage() {
                     type="text"
                     required
                     autoComplete="off"
-                    placeholder="e.g. wah-ji-wah"
+                    placeholder="e.g. table-and-grain"
                     value={cafeCode}
                     onChange={(e) => setCafeCode(e.target.value.toLowerCase().trim())}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#5738F5] focus:ring-4 focus:ring-[#5738F5]/10 transition-all shadow-xs font-mono"

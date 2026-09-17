@@ -3,6 +3,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 import { useSuperAdmin } from "./SuperAdminContext";
 
 type NavItem = {
@@ -163,15 +164,12 @@ export function SuperSidebar() {
     <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between flex-shrink-0 h-full select-none">
       <div className="p-5 border-b border-slate-100 flex items-center justify-between">
         <Link href="/super" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#5738F5] to-[#7C3AED] flex items-center justify-center text-white font-black text-lg shadow-sm shadow-[#5738F5]/30 group-hover:scale-105 transition-transform">
-            ⚡
-          </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-slate-900 text-sm tracking-tight">QR<span className="text-[#5738F5]">slice</span></span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <QrSliceLogo size="md" className="group-hover:scale-105 transition-transform duration-200" priority />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" title="System Live"></span>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mt-0.5">
               Super Console
             </span>
           </div>

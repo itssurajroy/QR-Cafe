@@ -1,118 +1,121 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import React from "react";
+import Image from "next/image";
 
-interface QrSliceLogoProps {
+export interface QrSliceLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
   variant?: "full" | "icon" | "wordmark";
   inverted?: boolean;
+  priority?: boolean;
 }
 
-const iconSizes = {
-  sm: "w-6 h-6",
-  md: "w-8 h-8",
-  lg: "w-10 h-10",
-  xl: "w-12 h-12",
+const logoDimensions = {
+  sm: { w: 72, h: 24, hClass: "h-6" },
+  md: { w: 96, h: 32, hClass: "h-8" },
+  lg: { w: 120, h: 40, hClass: "h-10" },
+  xl: { w: 144, h: 48, hClass: "h-12" },
 };
 
-const logoSizes = {
-  sm: "h-6",
-  md: "h-8",
-  lg: "h-10",
-  xl: "h-12",
+const iconDimensions = {
+  sm: { w: 24, h: 24, class: "w-6 h-6" },
+  md: { w: 32, h: 32, class: "w-8 h-8" },
+  lg: { w: 40, h: 40, class: "w-10 h-10" },
+  xl: { w: 48, h: 48, class: "w-12 h-12" },
 };
 
 /**
- * QRslice Icon - The "W" letter mark in a rounded square
- * Used for favicon, small spaces, and app icons
+ * QRslice Icon - The squircle app icon badge
+ * Used for favicon, collapsed navigation sidebars, and app icons
  */
-export function QrSliceIcon({ 
-  className = "w-8 h-8", 
-  inverted = false 
-}: { className?: string; inverted?: boolean }) {
-  const bgColor = inverted ? "white" : "#5738F5";
-  const iconColor = inverted ? "#5738F5" : "white";
-
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      role="img"
-      aria-label="QRslice"
-    >
-      <rect width="32" height="32" rx="8" fill={bgColor} />
-      <path
-        d="M8 24L12 14L16 20L20 10L24 24"
-        stroke={iconColor}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  );
-}
-
-/**
- * QRslice Wordmark - "QRslice" text in indigo
- */
-export function QrSliceWordmark({ 
-  className = "", 
+export function QrSliceIcon({
+  className = "w-8 h-8",
   size = "md",
-  inverted = false 
-}: { className?: string; size?: "sm" | "md" | "lg" | "xl"; inverted?: boolean }) {
-  const textColor = inverted ? "white" : "#5738F5";
-  const sizeClass = logoSizes[size];
+  inverted = false,
+  priority = true,
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  inverted?: boolean;
+  priority?: boolean;
+}) {
+  const dim = iconDimensions[size] || iconDimensions.md;
 
   return (
-    <svg
-      viewBox="0 0 120 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`${sizeClass} ${className}`}
-      role="img"
-      aria-label="QRslice"
-    >
-      <text
-        x="0"
-        y="18"
-        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-        fontSize="24"
-        fontWeight="800"
-        fill={textColor}
-        letterSpacing="-0.5"
-      >
-        QRslice
-      </text>
-    </svg>
+    <Image
+      src="/favicon.png"
+      alt="QRslice"
+      width={dim.w}
+      height={dim.h}
+      priority={priority}
+      className={`object-contain rounded-xl select-none ${dim.class} ${inverted ? "brightness-110 drop-shadow-sm" : ""} ${className}`}
+    />
   );
 }
 
 /**
- * QRslice Full Logo - Icon + Wordmark combined
+ * QRslice Wordmark - Styled text wordmark
+ */
+export function QrSliceWordmark({
+  className = "",
+  size = "md",
+  inverted = false,
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  inverted?: boolean;
+}) {
+  const sizeClasses = {
+    sm: "text-base tracking-tight",
+    md: "text-lg tracking-tight",
+    lg: "text-xl tracking-tight",
+    xl: "text-2xl tracking-tight",
+  };
+
+  const textColor = inverted ? "text-white" : "text-slate-900";
+  const accentColor = inverted ? "text-[#8B5CF6]" : "text-[#5738F5]";
+
+  return (
+    <span
+      className={`font-black select-none ${sizeClasses[size] || sizeClasses.md} ${textColor} ${className}`}
+      role="img"
+      aria-label="QRslice"
+    >
+      QR<span className={accentColor}>slice</span>
+    </span>
+  );
+}
+
+/**
+ * QRslice Full Logo - Official Brand Logo
  */
 export function QrSliceLogo({
   className = "",
   size = "md",
   variant = "full",
   inverted = false,
+  priority = true,
 }: QrSliceLogoProps) {
-  const gap = size === "sm" ? "2" : size === "lg" ? "4" : "3";
-
   if (variant === "icon") {
-    return <QrSliceIcon className={`${iconSizes[size]} ${className}`} inverted={inverted} />;
+    return <QrSliceIcon size={size} className={className} inverted={inverted} priority={priority} />;
   }
 
   if (variant === "wordmark") {
-    return <QrSliceWordmark className={className} size={size} inverted={inverted} />;
+    return <QrSliceWordmark size={size} className={className} inverted={inverted} />;
   }
 
+  const dim = logoDimensions[size] || logoDimensions.md;
+
   return (
-    <div className={`flex items-center gap-${gap} ${className}`} role="img" aria-label="QRslice">
-      <QrSliceIcon className={iconSizes[size]} inverted={inverted} />
-      <QrSliceWordmark size={size} inverted={inverted} />
+    <div className={`inline-flex items-center select-none ${className}`} role="img" aria-label="QRslice">
+      <Image
+        src="/logo.png"
+        alt="QRslice"
+        width={dim.w}
+        height={dim.h}
+        priority={priority}
+        className={`object-contain w-auto ${dim.hClass} ${inverted ? "filter brightness-0 invert" : ""}`}
+      />
     </div>
   );
 }

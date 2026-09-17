@@ -5,7 +5,7 @@ import { generateBeautifulQrSvg, generateBeautifulQrDataUrl, QR_THEMES } from ".
 describe("qr-designer", () => {
   it("generates a valid SVG string with rounded dots and finder eyes", () => {
     const svg = generateBeautifulQrSvg({
-      text: "https://qrslice.app/t/sample-token",
+      text: "https://qrslice.com/t/sample-token",
       size: 400,
       theme: "violet",
       centerIcon: "utensils",
@@ -23,7 +23,7 @@ describe("qr-designer", () => {
     const themes = Object.keys(QR_THEMES) as (keyof typeof QR_THEMES)[];
     for (const theme of themes) {
       const svg = generateBeautifulQrSvg({
-        text: "https://qrslice.app/c/cafe",
+        text: "https://qrslice.com/c/cafe",
         theme,
         centerIcon: "coffee",
         dotShape: "rounded",
@@ -34,7 +34,7 @@ describe("qr-designer", () => {
 
   it("generates a data URL for direct image rendering", () => {
     const dataUrl = generateBeautifulQrDataUrl({
-      text: "https://qrslice.app/t/test-123",
+      text: "https://qrslice.com/t/test-123",
       theme: "emerald",
     });
 

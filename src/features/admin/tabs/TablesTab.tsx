@@ -127,7 +127,7 @@ export function TablesTab({
     });
   }, [tableList, search, filterStatus, tableOperationalMap]);
 
-  const appUrl = typeof window !== "undefined" ? window.location.origin : "https://qrslice.app";
+  const appUrl = typeof window !== "undefined" ? window.location.origin : "https://qrslice.com";
 
   async function handleSaveTableEdit(e: React.FormEvent) {
     e.preventDefault();

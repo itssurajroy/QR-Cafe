@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Clock,
   Flame,
+  Calendar,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { heroStagger, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
@@ -164,11 +165,11 @@ export function Hero() {
                 <ArrowRight className="w-4 h-4 relative group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/c/wah-ji-wah"
+                href="/contact"
                 className="px-7 py-4 text-slate-800 bg-white/80 backdrop-blur-sm font-bold rounded-2xl text-base border-2 border-slate-200 hover:border-[#5738F5]/50 hover:bg-violet-50/50 hover:text-[#5738F5] transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                Explore Live Demo
+                <Calendar className="w-4 h-4 text-[#5738F5]" />
+                Book a Demo
               </Link>
             </motion.div>
 

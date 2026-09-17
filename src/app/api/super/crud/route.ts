@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
     // (7) Best-effort day-0 welcome email (must never fail provisioning)
     if (input.ownerEmail) {
       try {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
         await sendTrialEmail(input.ownerEmail.toLowerCase().trim(), 0, {
           cafeName: cafe.name,
           daysLeft: 14,

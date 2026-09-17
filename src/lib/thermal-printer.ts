@@ -375,7 +375,7 @@ export function generateTestPrint(config: Partial<PrinterConfig> = {}): ESCPOS {
     .line("Encoding: UTF-8")
     .line("-".repeat(maxChars))
     .setAlign("center")
-    .qrCode("https://qrslice.app", 4)
+    .qrCode("https://qrslice.com", 4)
     .feed(2)
     .cut();
 

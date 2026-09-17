@@ -12,7 +12,7 @@ const FOOTER_LINKS = {
   Product: [
     { label: "Features", href: "/#features" },
     { label: "Pricing", href: "/pricing" },
-    { label: "Live Demo", href: "/c/wah-ji-wah" },
+    { label: "Book a Demo", href: "/contact" },
     { label: "Kitchen Display", href: "/pos" },
   ],
   Company: [
@@ -88,7 +88,7 @@ export function Footer() {
           <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
             <span>Built in India</span>
             <span>•</span>
-            <Link href="/c/wah-ji-wah" className="hover:text-[#5738F5] transition-colors">Live Demo</Link>
+            <Link href="/contact" className="hover:text-[#5738F5] transition-colors">Book a Demo</Link>
           </div>
         </div>
       </div>

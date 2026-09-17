@@ -59,7 +59,7 @@ export function ContentTab() {
             headlineB: heroHeadlineB,
             sub: heroSub,
             primaryCta: "Start 14-day free trial",
-            secondaryCta: "Watch live demo",
+            secondaryCta: "Book a demo",
             trustLine: "No credit card required · Live in 30 minutes · Cancel anytime",
             pills: ["Instant QR Menu", "Multi-station KDS", "Stock & Recipes", "Bluetooth KOT"]
           }

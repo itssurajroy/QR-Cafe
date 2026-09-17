@@ -51,3 +51,4 @@ docs/
 AGENTS.md
 CLAUDE.md
 skills-lock.json
+.playwright-cli/

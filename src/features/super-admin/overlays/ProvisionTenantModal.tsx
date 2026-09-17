@@ -79,7 +79,7 @@ export function ProvisionTenantModal() {
               URL Slug
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3 text-slate-400 font-mono text-xs">qrslice.app/c/</span>
+              <span className="absolute left-3 text-slate-400 font-mono text-xs">qrslice.com/c/</span>
               <input
                 type="text"
                 required

@@ -9,7 +9,8 @@
 - **Pricing:** One plan — ₹999 per outlet per month, or ₹9,999 per year. 14-day free trial, no credit card required. Cancel anytime.
 - **Setup:** Around 30 minutes. Import menu, print table QR codes, invite team. Works on any phone, tablet, or laptop with a browser. Optional Bluetooth thermal printer for kitchen order tickets (KOTs).
 - **Website:** https://qrslice.com
-- **Live demo:** https://qrslice.com/c/wah-ji-wah
+- **Book a demo:** https://qrslice.com/contact
+- **Demo store:** https://qrslice.com/c/table-and-grain
 - **Trial signup:** https://qrslice.com/onboarding
 - **Pricing:** https://qrslice.com/pricing
 - **FAQ:** https://qrslice.com/faq

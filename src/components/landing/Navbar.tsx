@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
@@ -54,11 +54,11 @@ export function Navbar() {
             </a>
           ))}
           <Link
-            href="/c/wah-ji-wah"
-            className="px-3.5 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all duration-150 flex items-center gap-1.5"
+            href="/contact"
+            className="px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-white/80 hover:bg-white hover:text-[#5738F5] border border-slate-200/80 rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-2xs"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Live Demo
+            <Calendar className="w-3.5 h-3.5 text-[#5738F5]" />
+            Book a Demo
           </Link>
         </div>
 
@@ -114,12 +114,12 @@ export function Navbar() {
                 </motion.a>
               ))}
               <Link
-                href="/c/wah-ji-wah"
+                href="/contact"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-amber-800 bg-amber-50 rounded-xl border border-amber-200"
+                className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-slate-800 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                View Wah Ji Wah Demo Store
+                <Calendar className="w-4 h-4 text-[#5738F5]" />
+                Book a Demo
               </Link>
               <div className="pt-4 space-y-3 border-t border-slate-100 mt-4">
                 <Link

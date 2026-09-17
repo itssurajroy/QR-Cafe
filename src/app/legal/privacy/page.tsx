@@ -216,10 +216,10 @@ export default function PrivacyPolicyPage() {
             <p>
               To exercise these rights, contact us at{" "}
               <a
-                href="mailto:privacy@qrslice.app"
+                href="mailto:privacy@qrslice.com"
                 className="text-indigo-600 hover:underline"
               >
-                privacy@qrslice.app
+                privacy@qrslice.com
               </a>
               .
             </p>
@@ -284,10 +284,10 @@ export default function PrivacyPolicyPage() {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:privacy@qrslice.app"
+                  href="mailto:privacy@qrslice.com"
                   className="text-indigo-600 hover:underline"
                 >
-                  privacy@qrslice.app
+                  privacy@qrslice.com
                 </a>
               </li>
               <li>

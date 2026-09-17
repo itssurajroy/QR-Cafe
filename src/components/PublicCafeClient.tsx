@@ -21,6 +21,7 @@ import {
 import { paise, getItemImage } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { BookingWidget } from "@/features/booking/BookingWidget";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 import { Tenant, TierLimits } from "@/lib/tenant";
 import type { Category, MenuItem as Item, CartLine } from "@/types";
 
@@ -1468,8 +1469,16 @@ export default function PublicCafeClient({
 
           <div className="pt-6 border-t border-slate-200/80 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div>© {new Date().getFullYear()} {restaurant.name}. All rights reserved.</div>
-            <div>
-              Powered by <span className="text-slate-900 font-bold">QrSlice</span> • Kitchen OS
+            <div className="flex items-center gap-1.5">
+              <span>Powered by</span>
+              <a
+                href="https://qrslice.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center hover:opacity-80 transition-opacity"
+              >
+                <QrSliceLogo size="sm" />
+              </a>
             </div>
           </div>
         </div>

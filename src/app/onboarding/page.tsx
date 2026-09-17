@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 import { QRCodeDisplay } from "@/components/brand/QRCodeDisplay";
 import {
   CheckCircleIcon,
@@ -125,15 +126,8 @@ export default function OnboardingPage() {
       {/* Top Header */}
       <header className="bg-white border-b border-slate-200/80 px-6 py-4 sticky top-0 z-20 shadow-xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <img
-              src="/favicon.png"
-              alt="QRslice Logo"
-              className="w-8 h-8 object-contain rounded-xl shadow-xs group-hover:scale-105 transition-transform"
-            />
-            <span className="text-xl font-black tracking-tight text-slate-900">
-              QR<span className="text-[#5738F5]">slice</span>
-            </span>
+          <Link href="/" className="inline-flex items-center group">
+            <QrSliceLogo size="md" className="group-hover:scale-105 transition-transform duration-200" priority />
           </Link>
 
           <div className="flex items-center gap-4">
@@ -252,7 +246,7 @@ export default function OnboardingPage() {
                     Subdomain / Web Slug
                   </label>
                   <div className="flex items-center rounded-xl bg-slate-50 border border-slate-200 px-3.5 focus-within:bg-white focus-within:border-[#5738F5] focus-within:ring-4 focus-within:ring-[#5738F5]/10 transition-all">
-                    <span className="text-xs text-slate-400 font-mono select-none">qrslice.app/c/</span>
+                    <span className="text-xs text-slate-400 font-mono select-none">qrslice.com/c/</span>
                     <input
                       type="text"
                       required
@@ -630,7 +624,7 @@ export default function OnboardingPage() {
 
               <div className="p-6 bg-slate-50 border border-slate-200/90 rounded-3xl flex flex-col items-center justify-center space-y-4 shadow-inner">
                 <QRCodeDisplay
-                  url={`https://qrslice.app/c/${slug}?table=01`}
+                  url={`https://qrslice.com/c/${slug}?table=01`}
                   restaurantName={restaurantName}
                   tableLabel="01"
                   seats={4}
@@ -690,7 +684,7 @@ export default function OnboardingPage() {
                     </div>
                   </div>
                   <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Live Demo Mode
+                    Interactive Preview
                   </span>
                 </div>
 

@@ -6,7 +6,7 @@ Built with Next.js 16 (App Router) + TypeScript + Tailwind + Supabase.
 > **Note:** This project has been legally proofed and is protected under a proprietary license. All source code contains copyright headers.
 
 ## Features (full SaaS)
-- **Multi-tenant by subdomain:** each café gets its own address `<slug>.qrslice.app` (locally `<slug>.localhost`). Customer menu is served at the café subdomain root.
+- **Multi-tenant by subdomain:** each café gets its own address `<slug>.qrslice.com` (locally `<slug>.localhost`). Customer menu is served at the café subdomain root.
 - **Production-grade Middleware:** `middleware.ts` dynamically handles tenant isolation, super-admin route protection, staff authorization, subscription gating, and fast in-memory Edge caching.
 - **Customer:** open the café subdomain (or scan a table QR) → pick a table → browse menu → cart → place order (pay at counter or online) → live status page.
 - **KDS:** real-time kitchen board (realtime + offline cache), status transitions, UNPAID badge. Accessible to **owner** and **staff** (staff = kitchen control only).

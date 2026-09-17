@@ -126,7 +126,7 @@ export function MultiOutletModal({
   };
 
   // Base domain derived from the current host — works on localhost
-  // (*.localhost resolves to 127.0.0.1), any dev domain, and qrslice.app
+  // (*.localhost resolves to 127.0.0.1), any dev domain, and qrslice.com
   // without hardcoding an external DNS service.
   const outletBase = (): string | null => {
     if (typeof window === "undefined") return null;

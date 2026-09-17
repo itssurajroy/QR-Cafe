@@ -45,12 +45,17 @@ const ITEMS = [
 
 export async function GET(req: NextRequest) {
   const admin = createSupabaseAdmin();
+  const slug = req.nextUrl.searchParams.get("slug") || "table-and-grain";
   
-  // Find WAH JI WAH restaurant
-  const { data: rest, error: restErr } = await admin.from("restaurants").select("id").eq("slug", "wah-ji-wah").single();
+  // Find target restaurant (table-and-grain or wah-ji-wah fallback)
+  let { data: rest } = await admin.from("restaurants").select("id, name").eq("slug", slug).maybeSingle();
+  if (!rest && slug !== "wah-ji-wah") {
+    const fallback = await admin.from("restaurants").select("id, name").eq("slug", "wah-ji-wah").maybeSingle();
+    rest = fallback.data;
+  }
   
-  if (restErr || !rest) {
-    return NextResponse.json({ error: "WAH JI WAH restaurant not found" }, { status: 404 });
+  if (!rest) {
+    return NextResponse.json({ error: `Restaurant '${slug}' not found` }, { status: 404 });
   }
 
   const rId = rest.id;

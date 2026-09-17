@@ -264,7 +264,7 @@ export async function generateBeautifulBillPdf(opts: BillPdfOptions) {
   doc.setTextColor(100, 116, 139);
   doc.text("Goods once sold will not be returned or exchanged.", W / 2, y, { align: "center" });
   y += 3;
-  doc.text("Powered by QRslice | www.qrslice.app", W / 2, y, { align: "center" });
+  doc.text("Powered by QRslice | www.qrslice.com", W / 2, y, { align: "center" });
 
   return doc;
 }

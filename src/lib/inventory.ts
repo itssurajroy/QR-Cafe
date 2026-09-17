@@ -36,7 +36,7 @@ async function sendLowStockEmail(
     .eq("id", restaurantId)
     .maybeSingle();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
   await sendTrialEmail(user.user.email, 0, {
     cafeName: restaurant?.name || "Your Café",
     daysLeft: 0,
@@ -79,7 +79,7 @@ async function sendLowStockWhatsApp(
       `• ${item.name}: ${item.quantity} ${item.unit} left (min: ${item.min_stock} ${item.unit})`
     ),
     "",
-    `Check inventory: ${(process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.app")}/admin/inventory`,
+    `Check inventory: ${(process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com")}/admin/inventory`,
     "",
     "— QRslice Stock Alert",
   ];
