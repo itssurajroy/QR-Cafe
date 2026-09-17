@@ -18,7 +18,7 @@
  * - /api/* GETs           → NetworkFirst (10s timeout), 5min cache
  */
 
-const SW_VERSION = "qrslice-sw-v2";
+const SW_VERSION = "qrslice-sw-v3";
 const PRECACHE = `${SW_VERSION}-precache`;
 const RUNTIME = `${SW_VERSION}-runtime`;
 const FONTS_CACHE = `${SW_VERSION}-fonts`;
@@ -336,6 +336,78 @@ self.addEventListener("periodicsync", (event) => {
   if (event.tag === PERIODIC_SYNC_ORDERS_TAG) {
     event.waitUntil(replayOfflineQueue());
   }
+});
+
+// ---------------------------------------------------------------------------
+// Web Push: display notifications + handle clicks.
+//
+// Payloads are treated as untrusted input (length-capped, same-origin URLs
+// only). Never logs notification content.
+// ---------------------------------------------------------------------------
+
+const PUSH_DEFAULT_URL = "/";
+const PUSH_MAX_TEXT_LEN = 200;
+
+function sanitizePushText(value, fallback) {
+  if (typeof value !== "string" || !value) return fallback;
+  return value.slice(0, PUSH_MAX_TEXT_LEN);
+}
+
+/** Only same-origin relative paths are allowed as click targets. */
+function sanitizePushUrl(value) {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
+    return PUSH_DEFAULT_URL;
+  }
+  return value.slice(0, 2000);
+}
+
+self.addEventListener("push", (event) => {
+  let title = "QRslice";
+  let body = "You have a new update from QRslice.";
+  let targetUrl = PUSH_DEFAULT_URL;
+  try {
+    const data = event.data ? event.data.json() : null;
+    if (data && typeof data === "object") {
+      title = sanitizePushText(data.title, title);
+      body = sanitizePushText(data.body, body);
+      targetUrl = sanitizePushUrl(data.url);
+    }
+  } catch {
+    // Non-JSON push payload — fall back to defaults.
+  }
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: { url: targetUrl },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const rawUrl = event.notification.data && event.notification.data.url;
+  const targetUrl = sanitizePushUrl(rawUrl);
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of windows) {
+        if ("focus" in client) {
+          try {
+            await client.focus();
+            return;
+          } catch {
+            // fall through to openWindow
+          }
+        }
+      }
+      await self.clients.openWindow(targetUrl);
+    })(),
+  );
 });
 
 self.addEventListener("fetch", (event) => {

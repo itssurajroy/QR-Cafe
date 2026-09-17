@@ -7,6 +7,7 @@
  * never serves stale chunks while iterating.
  */
 import { useEffect } from "react";
+import { registerPeriodicOrderSync } from "@/lib/background-sync";
 
 export function SWRegister() {
   useEffect(() => {
@@ -22,6 +23,9 @@ export function SWRegister() {
         if (!cancelled && registration) {
           // Proactively check for updates on navigation focus.
           registration.update().catch(() => {});
+          // Best-effort periodic replay of the offline order queue.
+          // Guarded + failure-silent inside; fire-and-forget, no UI.
+          void registerPeriodicOrderSync();
         }
       } catch {
         // SW registration is best-effort (e.g. unsupported browser).

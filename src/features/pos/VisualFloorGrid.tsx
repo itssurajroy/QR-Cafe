@@ -38,6 +38,7 @@ interface VisualFloorGridProps {
   onSettleOrder?: (orderId: string, table: Table) => void;
   onUpdateOrderStatus?: (orderId: string, status: string, orderNumber: string, tableLabel: string) => void;
   onPrintBill?: (order: any) => void;
+  onTransferTable?: (sourceTable: Table, destinationTable: Table, activeOrders: any[]) => Promise<void>;
   onActionReservation?: (
     id: string,
     action: "accept" | "seat" | "cancel" | "no_show",
@@ -55,6 +56,7 @@ export function VisualFloorGrid({
   onSettleOrder,
   onUpdateOrderStatus,
   onPrintBill,
+  onTransferTable,
   onActionReservation,
 }: VisualFloorGridProps) {
   const [filterState, setFilterState] = useState<string>("all");
@@ -63,6 +65,9 @@ export function VisualFloorGrid({
     table: Table;
     status: DetailedTableStatus;
   } | null>(null);
+  const [showTransferPicker, setShowTransferPicker] = useState<boolean>(false);
+  const [transferTargetTableId, setTransferTargetTableId] = useState<string>("");
+  const [isTransferring, setIsTransferring] = useState<boolean>(false);
 
   // Compute status for all tables
   const tableStatuses = useMemo(() => {
@@ -709,6 +714,78 @@ export function VisualFloorGrid({
                   <CreditCard className="w-4 h-4" />
                   <span>Settle Bill ({paise(inspectedTable.status.totalPaise)})</span>
                 </button>
+              )}
+
+              {/* Table Transfer Widget (Section 40) */}
+              {inspectedTable.status.activeOrders.length > 0 && onTransferTable && (
+                <div className="pt-3 border-t border-slate-200 space-y-2">
+                  {!showTransferPicker ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowTransferPicker(true)}
+                      className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <span>🔁 Transfer Order to Another Table</span>
+                    </button>
+                  ) : (
+                    <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl space-y-2.5 animate-in fade-in">
+                      <div className="flex items-center justify-between text-xs font-bold text-amber-950">
+                        <span>Transfer Table #{inspectedTable.table.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowTransferPicker(false);
+                            setTransferTargetTableId("");
+                          }}
+                          className="text-amber-700 hover:text-amber-950 font-bold text-xs cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-amber-800">
+                        Select an available destination table to move all active tickets:
+                      </p>
+                      <select
+                        value={transferTargetTableId}
+                        onChange={(e) => setTransferTargetTableId(e.target.value)}
+                        className="w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-amber-500 min-h-[40px]"
+                      >
+                        <option value="">Select Destination Table...</option>
+                        {tables
+                          .filter((t) => t.id !== inspectedTable.table.id)
+                          .map((t) => (
+                            <option key={t.id} value={t.id}>
+                              Table #{t.label} ({t.seats || 2} Seats)
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={!transferTargetTableId || isTransferring}
+                        onClick={async () => {
+                          const dest = tables.find((t) => t.id === transferTargetTableId);
+                          if (!dest || !inspectedTable) return;
+                          setIsTransferring(true);
+                          try {
+                            await onTransferTable(
+                              inspectedTable.table,
+                              dest,
+                              inspectedTable.status.activeOrders
+                            );
+                            setShowTransferPicker(false);
+                            setTransferTargetTableId("");
+                            setInspectedTable(null);
+                          } finally {
+                            setIsTransferring(false);
+                          }
+                        }}
+                        className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <span>{isTransferring ? "Transferring..." : "Confirm Table Transfer 🔁"}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
 
               <button

@@ -36,24 +36,25 @@ export function PosCatalogGrid({
   onOpenMobileCart,
   cartLength,
 }: PosCatalogGridProps) {
-  const filteredItems = items.filter((i) => {
-    const matchesCat = selectedCategory === "all" || i.category_id === selectedCategory;
-    const matchesSearch =
-      !searchQuery.trim() ||
-      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (i.description && i.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesVeg = !vegOnly || i.is_veg;
-    return i.available && matchesCat && matchesSearch && matchesVeg;
-  });
+  const filteredItems = items
+    .filter((i) => {
+      const matchesCat = selectedCategory === "all" || i.category_id === selectedCategory;
+      const matchesSearch =
+        !searchQuery.trim() ||
+        i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (i.description && i.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesVeg = !vegOnly || i.is_veg;
+      return matchesCat && matchesSearch && matchesVeg;
+    })
+    .sort((a, b) => {
+      // In-stock items first, followed by sold-out items
+      if (a.available !== b.available) {
+        return a.available ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
 
-  const soldOutHidden = items.filter((i) => {
-    const matchesCat = selectedCategory === "all" || i.category_id === selectedCategory;
-    const matchesSearch =
-      !searchQuery.trim() ||
-      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (i.description && i.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    return !i.available && matchesCat && matchesSearch;
-  }).length;
+  const soldOutCount = filteredItems.filter((i) => !i.available).length;
 
   return (
     <section className="flex-1 flex flex-col bg-[#F5F5F7] p-3 sm:p-4 overflow-hidden pb-20 md:pb-4 border-r border-black/[0.06]">
@@ -104,8 +105,9 @@ export function PosCatalogGrid({
         <div className="flex-1 relative">
           <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
+            id="pos-search-input"
             type="text"
-            placeholder="Search dishes (F2)..."
+            placeholder="Search menu items (F2)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-black/[0.06] rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/15 min-h-[44px] transition-all shadow-xs font-medium"
@@ -135,43 +137,67 @@ export function PosCatalogGrid({
         </button>
       </div>
 
-      {filteredItems.length === 0 && soldOutHidden > 0 && (
-        <p className="mb-3 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-          {soldOutHidden} matching {soldOutHidden === 1 ? "dish is" : "dishes are"} marked sold out. Enable in Admin → Menu to sell.
-        </p>
+      {soldOutCount > 0 && !searchQuery && (
+        <div className="mb-2.5 flex items-center justify-between text-[11px] text-slate-500 bg-white/70 border border-black/[0.04] rounded-xl px-3 py-1.5">
+          <span>{soldOutCount} item{soldOutCount === 1 ? "" : "s"} marked out of stock by kitchen</span>
+          <span className="font-mono text-[10px] text-rose-600 font-bold uppercase">Sold Out Visible</span>
+        </div>
       )}
 
       {/* Grid of Dishes */}
       <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 pr-1 pb-16 md:pb-0 content-start">
-        {filteredItems.map((it) => (
-          <div
-            key={it.id}
-            onClick={() => onAddToCart(it)}
-            className="bg-white hover:bg-slate-50/80 border border-black/[0.06] hover:border-[#007AFF]/40 rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] shadow-xs hover:shadow-md group min-h-[114px]"
-          >
-            <div>
-              <div className="flex items-start justify-between gap-1.5 mb-1.5">
-                <span
-                  className={`w-2.5 h-2.5 rounded-full border mt-1 shrink-0 ${
-                    it.is_veg ? "border-[#34C759] bg-[#34C759]" : "border-[#FF3B30] bg-[#FF3B30]"
-                  }`}
-                />
-                <span className="font-semibold text-xs text-slate-900 group-hover:text-[#007AFF] transition-colors line-clamp-2 leading-snug">
-                  {it.name}
+        {filteredItems.map((it) => {
+          const isSoldOut = !it.available;
+          return (
+            <div
+              key={it.id}
+              onClick={() => {
+                if (!isSoldOut) {
+                  onAddToCart(it);
+                }
+              }}
+              className={`rounded-2xl p-3.5 flex flex-col justify-between transition-all duration-200 shadow-xs border ${
+                isSoldOut
+                  ? "bg-slate-100/80 border-slate-200 opacity-65 cursor-not-allowed select-none"
+                  : "bg-white hover:bg-slate-50/80 border-black/[0.06] hover:border-[#007AFF]/40 cursor-pointer hover:-translate-y-0.5 active:scale-[0.98] hover:shadow-md group"
+              } min-h-[114px]`}
+            >
+              <div>
+                <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full border mt-1 shrink-0 ${
+                      it.is_veg ? "border-[#34C759] bg-[#34C759]" : "border-[#FF3B30] bg-[#FF3B30]"
+                    }`}
+                  />
+                  <span
+                    className={`font-semibold text-xs line-clamp-2 leading-snug transition-colors ${
+                      isSoldOut
+                        ? "text-slate-500 line-through decoration-slate-300"
+                        : "text-slate-900 group-hover:text-[#007AFF]"
+                    }`}
+                  >
+                    {it.name}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-black/[0.04]">
+                <span className="text-xs font-mono font-bold text-slate-900 tracking-tight">
+                  {paise(it.price_paise)}
                 </span>
+                {isSoldOut ? (
+                  <span className="px-1.5 py-0.5 rounded-md bg-rose-100 border border-rose-200 text-rose-800 text-[10px] font-black uppercase tracking-wider">
+                    SOLD OUT
+                  </span>
+                ) : (
+                  <span className="w-7 h-7 rounded-full bg-[#007AFF]/10 group-hover:bg-[#007AFF] group-hover:text-white text-[#007AFF] text-xs font-bold flex items-center justify-center transition-all duration-200 shadow-xs">
+                    <PlusIcon className="w-3.5 h-3.5" />
+                  </span>
+                )}
               </div>
             </div>
-
-            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-black/[0.04]">
-              <span className="text-xs font-mono font-bold text-slate-900 tracking-tight">
-                {paise(it.price_paise)}
-              </span>
-              <span className="w-7 h-7 rounded-full bg-[#007AFF]/10 group-hover:bg-[#007AFF] group-hover:text-white text-[#007AFF] text-xs font-bold flex items-center justify-center transition-all duration-200 shadow-xs">
-                <PlusIcon className="w-3.5 h-3.5" />
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* MOBILE FLOATING CART ACTION BAR */}

@@ -591,43 +591,54 @@ export function PosCartDrawer({
           )}
         </div>
 
-        {!isSplitTender && (
+        {paymentMethod === "cash" && !isSplitTender && (
           <div className="pt-1">
             <div className="flex justify-between items-center mb-1">
               <label className="text-xs font-semibold text-slate-500 uppercase block">
-                Amount Received (₹)
+                Cash Tender Received (₹)
               </label>
-              {amountReceived && Number(amountReceived) > finalTotalPaise / 100 && (
-                <span className="text-xs text-[#34C759] font-bold font-mono">
-                  Change: ₹{(Number(amountReceived) - finalTotalPaise / 100).toFixed(2)}
-                </span>
-              )}
             </div>
             <input
               type="number"
-              placeholder={`e.g. ${(finalTotalPaise / 100).toFixed(2)}`}
+              placeholder={`Enter cash amount (e.g. ${(finalTotalPaise / 100).toFixed(0)})`}
               value={amountReceived}
               onChange={(e) => setAmountReceived(e.target.value)}
               className="w-full bg-[#F5F5F7] border border-black/[0.06] rounded-xl p-2.5 text-xs text-slate-900 font-mono focus:outline-none focus:border-[#007AFF] focus:bg-white min-h-[44px] transition-all font-bold shadow-xs"
             />
             {amountReceived && Number(amountReceived) > 0 && (
-              <p className="text-[11px] font-semibold text-slate-600">
-                Change due: ₹{Math.max(0, Number(amountReceived) * 100 - finalTotalPaise) / 100}
-                {Number(amountReceived) * 100 < finalTotalPaise ? " (short — collect more)" : ""}
-              </p>
+              <>
+                {Number(amountReceived) * 100 >= finalTotalPaise ? (
+                  <div className="mt-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between text-xs shadow-xs">
+                    <span className="font-bold flex items-center gap-1.5">
+                      <span>💵</span> Change to Return:
+                    </span>
+                    <span className="font-mono text-base font-black text-emerald-700">
+                      ₹{((Number(amountReceived) * 100 - finalTotalPaise) / 100).toFixed(2)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-2 p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between text-xs font-semibold">
+                    <span className="flex items-center gap-1">
+                      <span>⚠️</span> Short Amount:
+                    </span>
+                    <span className="font-mono font-bold text-amber-700">
+                      ₹{((finalTotalPaise - Number(amountReceived) * 100) / 100).toFixed(2)} remaining
+                    </span>
+                  </div>
+                )}
+              </>
             )}
             {/* Quick Cash Tender Pills */}
             <div className="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar">
-              {[
-                Math.ceil(finalTotalPaise / 100),
-                100,
-                200,
-                500,
-                1000,
-                2000,
-              ]
-                .filter((v, i, a) => v >= finalTotalPaise / 100 && a.indexOf(v) === i)
-                .slice(0, 4)
+              <button
+                type="button"
+                onClick={() => setAmountReceived(String(Math.ceil(finalTotalPaise / 100)))}
+                className="px-3 py-1.5 bg-[#007AFF]/10 hover:bg-[#007AFF]/20 border border-[#007AFF]/20 rounded-xl text-xs font-mono font-bold text-[#007AFF] cursor-pointer shrink-0 min-h-[36px] active:scale-95 transition-all"
+              >
+                Exact ₹{Math.ceil(finalTotalPaise / 100)}
+              </button>
+              {[100, 200, 500, 1000, 2000]
+                .filter((v) => v >= finalTotalPaise / 100)
                 .map((val) => (
                   <button
                     key={val}
@@ -642,22 +653,47 @@ export function PosCartDrawer({
           </div>
         )}
 
+        {paymentMethod === "upi" && !isSplitTender && (
+          <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-2xl space-y-1.5 text-xs animate-in fade-in">
+            <div className="flex items-center justify-between text-indigo-900 font-bold">
+              <span className="flex items-center gap-1.5">
+                <span>⚡ UPI Dynamic Counter</span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-mono">
+                Scan & Pay
+              </span>
+            </div>
+            <p className="text-[11px] text-indigo-700 leading-snug">
+              Instruct customer to scan cafe QR code for ₹{(finalTotalPaise / 100).toFixed(2)}. Verify cashier receipt / soundbox before clicking Pay.
+            </p>
+          </div>
+        )}
+
+        {/* Primary Action Buttons: SEND KOT vs PAY */}
         <div className="flex gap-2.5 pt-2">
           <button
             type="button"
             onClick={() => handleSettle("unpaid")}
             disabled={isSettling || cart.length === 0}
-            className="flex-1 py-3.5 rounded-2xl bg-black/[0.05] hover:bg-black/[0.08] text-slate-700 font-semibold text-xs cursor-pointer border border-transparent disabled:opacity-40 min-h-[46px] transition-all active:scale-95"
+            className="flex-1 py-3 px-2 rounded-2xl bg-[#FF9500] hover:bg-[#FF9500]/90 text-white font-black text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[48px] transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
           >
-            KOT & Bill Later
+            <div className="flex items-center gap-1.5">
+              <span>👨‍🍳 SEND KOT</span>
+              <span className="text-[9px] px-1 py-0.2 bg-black/20 rounded font-mono font-semibold">F6</span>
+            </div>
+            <span className="text-[10px] text-white/85 font-normal">Kitchen Ticket Only</span>
           </button>
           <button
             type="button"
             onClick={() => handleSettle("paid")}
             disabled={isSettling || cart.length === 0}
-            className="flex-1 py-3.5 rounded-2xl bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-bold text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[46px] transition-all active:scale-95"
+            className="flex-1 py-3 px-2 rounded-2xl bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-black text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[48px] transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
           >
-            {isSettling ? "Settling..." : `Pay ${paise(finalTotalPaise)} (F4)`}
+            <div className="flex items-center gap-1.5">
+              <span>💳 {isSettling ? "Settling..." : `PAY ${paise(finalTotalPaise)}`}</span>
+              <span className="text-[9px] px-1 py-0.2 bg-white/25 rounded font-mono font-semibold">F7</span>
+            </div>
+            <span className="text-[10px] text-white/85 font-normal">Settle & Receipt</span>
           </button>
         </div>
       </div>

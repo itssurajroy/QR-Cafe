@@ -27,8 +27,7 @@ export default async function PosPage() {
       db
         .from("menu_items")
         .select("id, restaurant_id, category_id, name, description, price_paise, image_url, is_veg, available")
-        .eq("restaurant_id", user.restaurantId)
-        .eq("available", true),
+        .eq("restaurant_id", user.restaurantId),
       db
         .from("restaurant_tables")
         .select("id, restaurant_id, label, seats, qr_token, active")
@@ -75,6 +74,7 @@ export default async function PosPage() {
         tables={tables ?? []}
         reservations={reservations ?? []}
         userRole={user.role}
+        userName={user.role === "owner" ? "Owner" : user.role === "manager" ? "Manager" : "Cashier"}
       />
     </PrinterProvider>
   );
