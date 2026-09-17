@@ -30,14 +30,14 @@ export class BaileysClient implements WhatsAppProvider {
     recipient: string,
     message: string
   ): Promise<WhatsAppMessageResult> {
-    const socket = (this.manager as any).connections?.get(accountId);
+    const socket = this.manager.getSocket(accountId);
     if (!socket) {
       return { success: false, error: "Not connected" };
     }
 
     try {
       const result = await socket.sendMessage(recipient, { text: message });
-      return { success: true, messageId: result?.key?.id };
+      return { success: true, messageId: result?.key?.id ?? undefined };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
@@ -48,7 +48,7 @@ export class BaileysClient implements WhatsAppProvider {
     recipient: string,
     document: DocumentPayload
   ): Promise<WhatsAppMessageResult> {
-    const socket = (this.manager as any).connections?.get(accountId);
+    const socket = this.manager.getSocket(accountId);
     if (!socket) {
       return { success: false, error: "Not connected" };
     }
@@ -64,16 +64,16 @@ export class BaileysClient implements WhatsAppProvider {
         fileName: document.filename,
         caption: document.caption,
       });
-      return { success: true, messageId: result?.key?.id };
+      return { success: true, messageId: result?.key?.id ?? undefined };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
     }
   }
 
   async sendTemplate(
-    accountId: string,
-    recipient: string,
-    template: WhatsAppTemplate
+    _accountId: string,
+    _recipient: string,
+    _template: WhatsAppTemplate
   ): Promise<WhatsAppMessageResult> {
     // Baileys doesn't support template messages directly like Cloud API
     // This would require implementing template message format manually
