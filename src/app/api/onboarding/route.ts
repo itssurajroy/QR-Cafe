@@ -18,16 +18,37 @@ const onboardingSchema = z.object({
   gstin: z.string().max(20).optional(),
   address: z.string().max(300).optional(),
   phone: z.string().max(20).optional(),
+  upiId: z.string().max(60).optional(),
   googleReviewUrl: z.string().url("Please enter a valid Google review URL").optional().or(z.literal("")),
   taxRate: z.number().min(0).max(100).optional(),
   ownerName: z.string().min(2),
   ownerEmail: z.string().email(),
   ownerPassword: z.string().min(6),
   tableCount: z.number().int().min(1).max(50).default(6),
-  preset: z.enum(["coffee", "bistro", "fastfood", "custom"]).default("coffee"),
+  preset: z.enum(["coffee", "indian", "bistro", "fastfood", "pizza", "bar", "custom"]).default("coffee"),
+  firstCategory: z.string().min(1).max(80).optional(),
+  firstItem: z
+    .object({
+      name: z.string().min(1).max(100),
+      price: z.number().min(0),
+      desc: z.string().max(300).optional(),
+      veg: z.boolean().default(true),
+    })
+    .optional(),
 });
 
-const PRESETS = {
+type PresetCategory = {
+  name: string;
+  sort: number;
+  items: Array<{
+    name: string;
+    price: number;
+    desc: string;
+    veg: boolean;
+  }>;
+};
+
+const PRESETS: Record<string, { categories: PresetCategory[] }> = {
   coffee: {
     categories: [
       {
@@ -35,7 +56,7 @@ const PRESETS = {
         sort: 1,
         items: [
           { name: "Espresso Shot", price: 14000, desc: "Rich double shot of arabica blend", veg: true },
-          { name: "Cappuccino", price: 18000, desc: "Fresh espresso with silky steamed milk and foam", veg: true },
+          { name: "Cappuccino", price: 18000, desc: "Fresh espresso with silky steamed milk and microfoam", veg: true },
           { name: "Vanilla Cold Brew", price: 21000, desc: "Steeped for 18 hours with Madagascar vanilla", veg: true },
           { name: "Caramel Macchiato", price: 23000, desc: "Layered espresso with salted caramel drizzle", veg: true },
         ],
@@ -44,9 +65,32 @@ const PRESETS = {
         name: "Fresh Bakes & Bites",
         sort: 2,
         items: [
-          { name: "Butter Croissant", price: 15000, desc: "Flaky golden French pastry", veg: true },
-          { name: "Avocado Sourdough Toast", price: 26000, desc: "Smashed avocado, cherry tomatoes on toasted sourdough", veg: true },
-          { name: "Blueberry Cheesecake", price: 24000, desc: "Classic New York style with berry compote", veg: true },
+          { name: "Butter Croissant", price: 15000, desc: "Flaky golden French pastry baked fresh", veg: true },
+          { name: "Avocado Sourdough Toast", price: 26000, desc: "Smashed avocado, cherry tomatoes and seeds on sourdough", veg: true },
+          { name: "Blueberry Cheesecake", price: 24000, desc: "Classic New York style with wild berry compote", veg: true },
+        ],
+      },
+    ],
+  },
+  indian: {
+    categories: [
+      {
+        name: "Starters & Tandoor",
+        sort: 1,
+        items: [
+          { name: "Paneer Tikka Special", price: 24000, desc: "Charcoal grilled cottage cheese marinated in hung curd and spices", veg: true },
+          { name: "Murgh Malai Tikka", price: 29000, desc: "Tender chicken morsels with cream, cheese, and mild spices", veg: false },
+          { name: "Crispy Corn Pepper Salt", price: 19000, desc: "Sweet corn tossed with scallions and crushed black pepper", veg: true },
+        ],
+      },
+      {
+        name: "Mains & Biryani",
+        sort: 2,
+        items: [
+          { name: "Dal Makhani 24-Hour", price: 26000, desc: "Slow-simmered black lentils with butter and rich cream", veg: true },
+          { name: "Butter Chicken Delhi Style", price: 34000, desc: "Boneless tandoori chicken in velvety tomato-butter gravy", veg: false },
+          { name: "Hyderabadi Dum Biryani", price: 31000, desc: "Fragrant basmati rice layered with spiced marinated meat", veg: false },
+          { name: "Garlic Butter Naan", price: 6000, desc: "Clay oven baked flatbread with roasted garlic", veg: true },
         ],
       },
     ],
@@ -57,16 +101,17 @@ const PRESETS = {
         name: "Starters & Salads",
         sort: 1,
         items: [
-          { name: "Bruschetta Pomodoro", price: 19000, desc: "Toasted baguette with heirloom tomatoes and basil", veg: true },
-          { name: "Crispy Calamari", price: 29000, desc: "Lightly battered squid with garlic aioli", veg: false },
+          { name: "Bruschetta Pomodoro", price: 19000, desc: "Toasted baguette with heirloom tomatoes and fresh basil", veg: true },
+          { name: "Caesar Salad with Herb Croutons", price: 24000, desc: "Crisp romaine, shaved parmesan, garlic dressing", veg: true },
+          { name: "Crispy Calamari", price: 29000, desc: "Lightly battered squid rings with lemon garlic aioli", veg: false },
         ],
       },
       {
-        name: "Handcrafted Pastas & Mains",
+        name: "Pastas & European Mains",
         sort: 2,
         items: [
           { name: "Truffle Mushroom Fettuccine", price: 34000, desc: "Creamy wild mushroom ragu with shaved parmesan", veg: true },
-          { name: "Grilled Herb Chicken", price: 38000, desc: "Sous-vide chicken breast with roasted rosemary potatoes", veg: false },
+          { name: "Grilled Herb Chicken Breast", price: 38000, desc: "Sous-vide chicken with rosemary roasted baby potatoes", veg: false },
         ],
       },
     ],
@@ -77,16 +122,59 @@ const PRESETS = {
         name: "Gourmet Burgers",
         sort: 1,
         items: [
-          { name: "Classic Cheeseburger", price: 22000, desc: "Double patty, aged cheddar, pickles and house sauce", veg: false },
-          { name: "Crispy Paneer Burger", price: 19000, desc: "Spiced paneer patty with mint mayo and coleslaw", veg: true },
+          { name: "Classic Double Smash Cheeseburger", price: 22000, desc: "Double patty, aged cheddar, dill pickles and secret sauce", veg: false },
+          { name: "Crispy Spiced Paneer Burger", price: 19000, desc: "Spiced paneer patty with mint mayo and crisp lettuce", veg: true },
+          { name: "Smoky BBQ Bacon Burger", price: 26000, desc: "Beef patty, crispy bacon, caramelized onion and bbq sauce", veg: false },
         ],
       },
       {
         name: "Loaded Fries & Shakes",
         sort: 2,
         items: [
-          { name: "Peri-Peri Cheesy Fries", price: 14000, desc: "Crispy fries dusted with peri-peri and melted cheese", veg: true },
+          { name: "Peri-Peri Cheesy Fries", price: 14000, desc: "Crisp golden fries dusted with peri-peri and melted cheese sauce", veg: true },
           { name: "Thick Belgian Chocolate Shake", price: 18000, desc: "Rich double chocolate shake with whipped cream", veg: true },
+        ],
+      },
+    ],
+  },
+  pizza: {
+    categories: [
+      {
+        name: "Wood-Fired Pizzas",
+        sort: 1,
+        items: [
+          { name: "Margherita di Bufala", price: 32000, desc: "San Marzano tomato sauce, fresh buffalo mozzarella and sweet basil", veg: true },
+          { name: "Spicy Pepperoni Rustica", price: 39000, desc: "Imported pepperoni, hot honey, mozzarella and oregano", veg: false },
+          { name: "Farmhouse Veggie Supreme", price: 34000, desc: "Bell peppers, mushrooms, red onion, olives and jalapenos", veg: true },
+        ],
+      },
+      {
+        name: "Garlic Breads & Coolers",
+        sort: 2,
+        items: [
+          { name: "Cheesy Garlic Pull-Apart", price: 18000, desc: "Fresh dough baked with roasted garlic herb butter and mozzarella", veg: true },
+          { name: "Peach Basil Iced Tea", price: 15000, desc: "Brewed black tea infused with peach puree and fresh basil", veg: true },
+        ],
+      },
+    ],
+  },
+  bar: {
+    categories: [
+      {
+        name: "Bar Bites & Platters",
+        sort: 1,
+        items: [
+          { name: "Loaded Nachos Supreme", price: 26000, desc: "Corn chips, pico de gallo, cheese sauce, sour cream and jalapenos", veg: true },
+          { name: "Crispy Buffalo Chicken Wings", price: 29000, desc: "Tossed in spicy buffalo glaze with blue cheese dip", veg: false },
+          { name: "Chilli Paneer Dry", price: 23000, desc: "Wok-tossed cottage cheese with bell peppers and dark soy", veg: true },
+        ],
+      },
+      {
+        name: "Signatures & Mocktails",
+        sort: 2,
+        items: [
+          { name: "Classic Mint Mojito", price: 18000, desc: "Crushed mint, fresh lime, simple syrup and sparkling soda", veg: true },
+          { name: "Electric Blue Lagoon", price: 19000, desc: "Blue curacao, lemon juice, sprite and a slice of orange", veg: true },
         ],
       },
     ],
@@ -94,10 +182,10 @@ const PRESETS = {
   custom: {
     categories: [
       {
-        name: "General Menu",
+        name: "Chef Specials",
         sort: 1,
         items: [
-          { name: "Signature Dish", price: 20000, desc: "Chef special specialty item", veg: true },
+          { name: "Signature Dish", price: 20000, desc: "Chef special specialty item prepared fresh", veg: true },
         ],
       },
     ],
@@ -132,7 +220,7 @@ export async function POST(req: NextRequest) {
 
   if (existingSlug) {
     return NextResponse.json(
-      { error: `Café URL slug "/${input.slug}" is already taken. Please choose another.` },
+      { error: `Café URL slug "/c/${input.slug}" is already taken. Please choose another.` },
       { status: 409 },
     );
   }
@@ -146,11 +234,12 @@ export async function POST(req: NextRequest) {
       currency: input.currency,
       timezone: input.timezone,
       logo_url: input.logoUrl || null,
-      accent_color: input.accentColor || "#f59e0b",
+      accent_color: input.accentColor || "#5738F5",
       tagline: input.tagline ? input.tagline.trim() : null,
       gstin: input.gstin ? input.gstin.trim().toUpperCase() : null,
       address: input.address ? input.address.trim() : null,
       phone: input.phone ? input.phone.trim() : null,
+      upi_id: input.upiId ? input.upiId.trim() : null,
       google_review_url: input.googleReviewUrl ? input.googleReviewUrl.trim() : null,
       tax_rate: input.taxRate !== undefined ? input.taxRate : 5,
       plan: "trial",
@@ -208,32 +297,89 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: profErr.message }, { status: 500 });
   }
 
-  // 5. Generate Initial Tables
+  // 5. Generate Initial Tables with standard QR tokens
   const tableInserts = [];
   for (let t = 1; t <= input.tableCount; t++) {
+    const label = `T${t < 10 ? "0" + t : t}`;
     tableInserts.push({
       restaurant_id: restaurant.id,
-      label: `T${t < 10 ? "0" + t : t}`,
+      label,
       seats: t % 2 === 0 ? 4 : 2,
+      active: true,
     });
   }
   await admin.from("restaurant_tables").insert(tableInserts);
 
-  // 6. Populate Starter Menu Preset
+  // 6. Populate Menu (User's custom category & item + complementary starter items)
+  let initialCategoryId: string | null = null;
+
+  // Insert user's customized category and item as Priority #1
+  if (input.firstCategory && input.firstCategory.trim()) {
+    const { data: userCat } = await admin
+      .from("menu_categories")
+      .insert({
+        restaurant_id: restaurant.id,
+        name: input.firstCategory.trim(),
+        sort_order: 1,
+      })
+      .select()
+      .single();
+
+    if (userCat) {
+      initialCategoryId = userCat.id;
+      if (input.firstItem && input.firstItem.name.trim()) {
+        await admin.from("menu_items").insert({
+          restaurant_id: restaurant.id,
+          category_id: userCat.id,
+          name: input.firstItem.name.trim(),
+          description: input.firstItem.desc ? input.firstItem.desc.trim() : null,
+          price_paise: Math.round(Number(input.firstItem.price) * 100),
+          is_veg: Boolean(input.firstItem.veg),
+          available: true,
+          sort_order: 1,
+        });
+      }
+    }
+  }
+
+  // Populate complementary preset items so the restaurant has a complete, working menu
   const presetData = PRESETS[input.preset] || PRESETS.coffee;
+  let nextSortOrder = initialCategoryId ? 2 : 1;
+
   for (const cat of presetData.categories) {
+    // If the preset has the same category name as user's category, append preset items to it
+    if (
+      input.firstCategory &&
+      cat.name.toLowerCase() === input.firstCategory.trim().toLowerCase()
+    ) {
+      if (initialCategoryId) {
+        const itemRows = cat.items.map((it, idx) => ({
+          restaurant_id: restaurant.id,
+          category_id: initialCategoryId!,
+          name: it.name,
+          description: it.desc,
+          price_paise: it.price,
+          is_veg: it.veg,
+          available: true,
+          sort_order: idx + 2,
+        }));
+        await admin.from("menu_items").insert(itemRows);
+      }
+      continue;
+    }
+
     const { data: createdCat } = await admin
       .from("menu_categories")
       .insert({
         restaurant_id: restaurant.id,
         name: cat.name,
-        sort_order: cat.sort,
+        sort_order: nextSortOrder++,
       })
       .select()
       .single();
 
     if (createdCat) {
-      const itemRows = cat.items.map((it) => ({
+      const itemRows = cat.items.map((it, idx) => ({
         restaurant_id: restaurant.id,
         category_id: createdCat.id,
         name: it.name,
@@ -241,6 +387,7 @@ export async function POST(req: NextRequest) {
         price_paise: it.price,
         is_veg: it.veg,
         available: true,
+        sort_order: idx + 1,
       }));
       await admin.from("menu_items").insert(itemRows);
     }
@@ -258,6 +405,8 @@ export async function POST(req: NextRequest) {
       slug: input.slug,
       tables: input.tableCount,
       preset: input.preset,
+      firstCategory: input.firstCategory,
+      firstItem: input.firstItem?.name,
     },
   });
 
@@ -266,7 +415,6 @@ export async function POST(req: NextRequest) {
     restaurant_id: restaurant.id,
     slug: restaurant.slug,
     owner_email: input.ownerEmail,
-    message: "Café tenant provisioned successfully with starter menu and QR tables!",
+    message: "Restaurant provisioned successfully with personalized digital menu and QR tables!",
   });
 }
-
