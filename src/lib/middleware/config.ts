@@ -30,6 +30,7 @@ export const MIDDLEWARE_CONFIG = {
     "/api/billing/webhook",
     "/api/onboarding",
     "/api/feedback",
+    "/api/contact",
   ],
   // Routes for super admin only
   superPaths: ["/super", "/api/super"],

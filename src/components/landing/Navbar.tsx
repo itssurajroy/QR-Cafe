@@ -9,10 +9,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Features", href: "/#features" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 export function Navbar() {

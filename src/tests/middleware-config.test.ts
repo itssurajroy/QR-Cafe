@@ -19,6 +19,7 @@ describe("Middleware Config & Public Routes", () => {
     expect(isPublicPath("/api/auth/logout")).toBe(true);
     expect(isPublicPath("/api/billing/webhook")).toBe(true);
     expect(isPublicPath("/api/feedback")).toBe(true);
+    expect(isPublicPath("/api/contact")).toBe(true);
   });
 
   it("allows guest storefront APIs and assets without authentication", () => {
