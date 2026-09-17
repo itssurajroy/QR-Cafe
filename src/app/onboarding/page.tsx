@@ -23,19 +23,19 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
 
   // Step 1: Restaurant information
-  const [restaurantName, setRestaurantName] = useState("Table & Grain Cafe");
-  const [slug, setSlug] = useState("table-and-grain");
-  const [phone, setPhone] = useState("+91 98765 43210");
-  const [address, setAddress] = useState("Shop 4, Indiranagar, Bengaluru");
+  const [restaurantName, setRestaurantName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [currency, setCurrency] = useState("INR");
 
   // Step 2: First category
-  const [categoryName, setCategoryName] = useState("Beverages & Coffee");
+  const [categoryName, setCategoryName] = useState("");
 
   // Step 3: First menu item
-  const [itemName, setItemName] = useState("Masala Chai Latte");
-  const [itemPrice, setItemPrice] = useState("140");
-  const [itemDesc, setItemDesc] = useState("Aromatic hand-brewed spiced tea with full cream milk.");
+  const [itemName, setItemName] = useState("");
+  const [itemPrice, setItemPrice] = useState("");
+  const [itemDesc, setItemDesc] = useState("");
   const [itemVeg, setItemVeg] = useState(true);
 
   // Step 4: Create tables
@@ -45,7 +45,7 @@ export default function OnboardingPage() {
   const [testOrderPlaced, setTestOrderPlaced] = useState(false);
 
   // Step 7: Ready to Launch / Owner Auth
-  const [ownerName, setOwnerName] = useState("Suraj Roy");
+  const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerPassword, setOwnerPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -254,7 +254,8 @@ export default function OnboardingPage() {
                       onChange={(e) =>
                         setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
                       }
-                      className="w-full bg-transparent py-3 px-1 text-xs sm:text-sm font-mono text-[#5738F5] font-bold focus:outline-none"
+                      placeholder="e.g. coastal-bistro"
+                      className="w-full bg-transparent py-3 px-1 text-xs sm:text-sm font-mono text-[#5738F5] font-bold focus:outline-none placeholder:text-slate-300 placeholder:font-normal"
                     />
                   </div>
                 </div>
@@ -307,8 +308,9 @@ export default function OnboardingPage() {
 
               <button
                 type="button"
+                disabled={!restaurantName.trim() || !slug.trim()}
                 onClick={() => setCurrentStep(2)}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-sm transition-all shadow-lg shadow-violet-500/25 cursor-pointer mt-2 active:scale-[0.99]"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-sm transition-all shadow-lg shadow-violet-500/25 cursor-pointer mt-2 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Next: Create First Category →
               </button>
@@ -385,8 +387,9 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   type="button"
+                  disabled={!categoryName.trim()}
                   onClick={() => setCurrentStep(3)}
-                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-violet-500/25 cursor-pointer active:scale-[0.99]"
+                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-violet-500/25 cursor-pointer active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next: Add First Item →
                 </button>
@@ -500,8 +503,9 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   type="button"
+                  disabled={!itemName.trim() || !itemPrice.trim()}
                   onClick={() => setCurrentStep(4)}
-                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-violet-500/25 cursor-pointer active:scale-[0.99]"
+                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#5738F5] to-[#7C3AED] hover:opacity-95 text-white font-black text-xs sm:text-sm transition-all shadow-lg shadow-violet-500/25 cursor-pointer active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next: Configure Tables →
                 </button>
@@ -624,8 +628,8 @@ export default function OnboardingPage() {
 
               <div className="p-6 bg-slate-50 border border-slate-200/90 rounded-3xl flex flex-col items-center justify-center space-y-4 shadow-inner">
                 <QRCodeDisplay
-                  url={`https://qrslice.com/c/${slug}?table=01`}
-                  restaurantName={restaurantName}
+                  url={`https://qrslice.com/c/${slug.trim() || "your-cafe"}?table=01`}
+                  restaurantName={restaurantName.trim() || "Your Restaurant"}
                   tableLabel="01"
                   seats={4}
                   showSignage={false}
@@ -679,7 +683,7 @@ export default function OnboardingPage() {
                       <CoffeeIcon className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <div className="font-black text-xs text-slate-900">{restaurantName}</div>
+                      <div className="font-black text-xs text-slate-900">{restaurantName.trim() || "Your Restaurant"}</div>
                       <div className="text-[11px] font-mono text-[#5738F5] font-bold">TABLE 01 • DINE-IN</div>
                     </div>
                   </div>
@@ -688,16 +692,16 @@ export default function OnboardingPage() {
                   </span>
                 </div>
 
-                {/* Mock Item Card */}
+                {/* Live Preview Item Card */}
                 <div className="p-4 rounded-2xl bg-white border border-slate-200/90 flex justify-between items-center shadow-xs">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${itemVeg ? "bg-emerald-600" : "bg-rose-600"}`} />
-                      <span className="font-black text-sm text-slate-900">{itemName}</span>
+                      <span className="font-black text-sm text-slate-900">{itemName.trim() || "Signature Dish"}</span>
                     </div>
-                    <p className="text-xs text-slate-500 line-clamp-1">{itemDesc}</p>
+                    <p className="text-xs text-slate-500 line-clamp-1">{itemDesc.trim() || "Freshly prepared specialty dish with house spices"}</p>
                     <div className="font-mono font-black text-[#5738F5] text-sm pt-1">
-                      ₹{itemPrice}
+                      ₹{itemPrice.trim() || "180"}
                     </div>
                   </div>
                   <button
@@ -768,7 +772,7 @@ export default function OnboardingPage() {
                     required
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
-                    placeholder="e.g. Suraj Roy"
+                    placeholder="e.g. John Doe"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-[#5738F5] focus:ring-4 focus:ring-[#5738F5]/10 transition-all shadow-xs"
                   />
                 </div>

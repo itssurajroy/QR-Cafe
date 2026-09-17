@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import OfflineBanner from "@/components/OfflineBanner";
+import { SWRegister } from "@/components/pwa/SWRegister";
+import { SWUpdateToast } from "@/components/pwa/SWUpdateToast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -126,8 +128,10 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ErrorBoundary>
             <ToastProvider>
+              <SWRegister />
               <OfflineBanner />
               {children}
+              <SWUpdateToast />
               <CookieConsent />
             </ToastProvider>
           </ErrorBoundary>

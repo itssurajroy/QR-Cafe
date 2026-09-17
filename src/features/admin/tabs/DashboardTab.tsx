@@ -37,8 +37,6 @@ export function DashboardTab({
   setTab,
   restaurant,
 }: DashboardTabProps) {
-  const isDemo = liveOrders === 0 && (!restaurant?.id || restaurant.slug === "cafe");
-
   // Calculate Average Order Value
   const avgOrderValue = liveOrders > 0 ? Math.round(liveRevenue / liveOrders) : 0;
 
@@ -65,7 +63,7 @@ export function DashboardTab({
     return tableList.filter((t: any) => t.active).length;
   }, [tableList]);
 
-  // Derive top/popular items from recent orders or menu
+  // Derive top/popular items from actual recent orders
   const popularItems = useMemo(() => {
     const counts: Record<string, { name: string; count: number; revenue: number }> = {};
     recentOrders.forEach((o: any) => {
@@ -80,35 +78,11 @@ export function DashboardTab({
     });
 
     const list = Object.values(counts).sort((a, b) => b.count - a.count);
-    if (list.length > 0) return list.slice(0, 4);
-
-    // Fallback realistic demo popular items when no orders have arrived yet
-    return [
-      { name: "Butter Chicken", count: 18, revenue: 18 * 36000 },
-      { name: "Garlic Naan", count: 32, revenue: 32 * 6000 },
-      { name: "Cold Coffee", count: 24, revenue: 24 * 14000 },
-      { name: "Masala Chai", count: 45, revenue: 45 * 4000 },
-    ];
+    return list.slice(0, 4);
   }, [recentOrders]);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Demo Data Banner if in demo mode */}
-      {isDemo && (
-        <div className="p-3.5 rounded-2xl bg-[rgba(0,122,255,0.08)] border border-[#007AFF]/20 flex items-center justify-between text-xs text-[#007AFF]">
-          <div className="flex items-center gap-2">
-            <span className="text-base">💡</span>
-            <span className="font-semibold">
-              Sample Restaurant Mode — Showing preview metrics and sample order activity for{" "}
-              <strong>{restaurant?.name || "Table & Grain"}</strong>.
-            </span>
-          </div>
-          <span className="font-mono text-[10px] uppercase font-bold bg-[#007AFF] text-white px-2 py-0.5 rounded-md">
-            DEMO DATA
-          </span>
-        </div>
-      )}
-
       {/* METRIC CARDS ROW */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Today's Orders */}
@@ -154,7 +128,7 @@ export function DashboardTab({
             </span>
           </div>
           <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
-            {paise(avgOrderValue || 28000)}
+            {paise(avgOrderValue)}
           </div>
           <div className="text-xs font-bold text-[#0f172a] mt-1">Average Order Value</div>
           <div className="text-[11px] text-[#64748b] font-medium">Per table ticket</div>
@@ -171,7 +145,7 @@ export function DashboardTab({
             </span>
           </div>
           <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
-            {activeTablesCount || 8}
+            {activeTablesCount}
           </div>
           <div className="text-xs font-bold text-[#0f172a] mt-1">Active Tables</div>
           <div className="text-[11px] text-[#64748b] font-medium">QR ordering enabled</div>
@@ -253,22 +227,28 @@ export function DashboardTab({
           </div>
 
           <div className="divide-y divide-[rgba(0,0,0,0.06)]">
-            {popularItems.map((item, idx) => (
-              <div key={item.name} className="py-3 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-lg bg-slate-100 text-[#64748b] font-mono font-bold flex items-center justify-center text-[11px]">
-                    0{idx + 1}
-                  </span>
-                  <div>
-                    <div className="font-bold text-[#0f172a]">{item.name}</div>
-                    <div className="text-[11px] text-[#64748b] font-mono">{item.count} orders</div>
+            {popularItems.length === 0 ? (
+              <div className="py-8 text-center text-[#64748b] text-xs">
+                No dish sales recorded yet today. Orders placed will appear here in real time.
+              </div>
+            ) : (
+              popularItems.map((item, idx) => (
+                <div key={item.name} className="py-3 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-lg bg-slate-100 text-[#64748b] font-mono font-bold flex items-center justify-center text-[11px]">
+                      0{idx + 1}
+                    </span>
+                    <div>
+                      <div className="font-bold text-[#0f172a]">{item.name}</div>
+                      <div className="text-[11px] text-[#64748b] font-mono">{item.count} orders</div>
+                    </div>
+                  </div>
+                  <div className="text-right font-mono font-extrabold text-[#0f172a]">
+                    {paise(item.revenue)}
                   </div>
                 </div>
-                <div className="text-right font-mono font-extrabold text-[#0f172a]">
-                  {paise(item.revenue)}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -291,57 +271,71 @@ export function DashboardTab({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {tableList.slice(0, 8).map((tbl: any, idx: number) => {
-              const detailed = calculateDetailedTableStatus(
-                tbl,
-                recentOrders,
-                [],
-                new Set(),
-                new Date(),
-              );
-
-              let badgeText = "Available";
-              let badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200/80";
-              if (detailed.state === "needs_bill") {
-                badgeText = "Needs Bill";
-                badgeStyle = "bg-rose-100 text-rose-800 border-rose-200 font-extrabold animate-pulse";
-              } else if (detailed.state === "cooking") {
-                badgeText = "Cooking";
-                badgeStyle = "bg-amber-100 text-amber-800 border-amber-200 font-bold";
-              } else if (detailed.state === "seated") {
-                badgeText = "Seated";
-                badgeStyle = "bg-blue-100 text-blue-800 border-blue-200 font-bold";
-              } else if (detailed.state === "paid") {
-                badgeText = "Paid";
-                badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
-              } else if (detailed.state === "reserved") {
-                badgeText = "Reserved";
-                badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
-              }
-
-              return (
-                <Link
-                  key={tbl.id || idx}
-                  href="/pos?view=live_tables"
-                  className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-[#007AFF]/40 hover:bg-slate-100/50 transition-all text-center space-y-1.5 block cursor-pointer"
+            {tableList.length === 0 ? (
+              <div className="col-span-full py-8 text-center text-[#64748b] text-xs">
+                No tables configured yet. Set up your dining tables in the{" "}
+                <button
+                  type="button"
+                  onClick={() => setTab("tables")}
+                  className="font-bold text-[#007AFF] hover:underline cursor-pointer"
                 >
-                  <div
-                    className="font-mono font-black text-sm text-[#0f172a]"
-                    style={{ fontFamily: "var(--font-mono)" }}
+                  Tables tab
+                </button>
+                .
+              </div>
+            ) : (
+              tableList.slice(0, 8).map((tbl: any, idx: number) => {
+                const detailed = calculateDetailedTableStatus(
+                  tbl,
+                  recentOrders,
+                  [],
+                  new Set(),
+                  new Date(),
+                );
+
+                let badgeText = "Available";
+                let badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200/80";
+                if (detailed.state === "needs_bill") {
+                  badgeText = "Needs Bill";
+                  badgeStyle = "bg-rose-100 text-rose-800 border-rose-200 font-extrabold animate-pulse";
+                } else if (detailed.state === "cooking") {
+                  badgeText = "Cooking";
+                  badgeStyle = "bg-amber-100 text-amber-800 border-amber-200 font-bold";
+                } else if (detailed.state === "seated") {
+                  badgeText = "Seated";
+                  badgeStyle = "bg-blue-100 text-blue-800 border-blue-200 font-bold";
+                } else if (detailed.state === "paid") {
+                  badgeText = "Paid";
+                  badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
+                } else if (detailed.state === "reserved") {
+                  badgeText = "Reserved";
+                  badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
+                }
+
+                return (
+                  <Link
+                    key={tbl.id || idx}
+                    href="/pos?view=live_tables"
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-[#007AFF]/40 hover:bg-slate-100/50 transition-all text-center space-y-1.5 block cursor-pointer"
                   >
-                    TABLE {tbl.label || String(idx + 1).padStart(2, "0")}
-                  </div>
-                  <div className="text-[10px] text-[#64748b]">
-                    {tbl.seats || 4} Seats{detailed.totalPaise > 0 ? ` • ${paise(detailed.totalPaise)}` : ""}
-                  </div>
-                  <div className="inline-block">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border ${badgeStyle}`}>
-                      {badgeText}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+                    <div
+                      className="font-mono font-black text-sm text-[#0f172a]"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      TABLE {tbl.label || String(idx + 1).padStart(2, "0")}
+                    </div>
+                    <div className="text-[10px] text-[#64748b]">
+                      {tbl.seats || 4} Seats{detailed.totalPaise > 0 ? ` • ${paise(detailed.totalPaise)}` : ""}
+                    </div>
+                    <div className="inline-block">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border ${badgeStyle}`}>
+                        {badgeText}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSessionUser } from "@/lib/auth";
 
 const CATEGORIES = [
   { name: "Chef's Picks", sort_order: 1 },
@@ -44,6 +45,14 @@ const ITEMS = [
 ];
 
 export async function GET(req: NextRequest) {
+  // In production, require super-admin session to prevent unauthorized menu wipes
+  if (process.env.NODE_ENV === "production") {
+    const user = await getSessionUser();
+    if (!user || user.role !== "super_admin") {
+      return NextResponse.json({ error: "Forbidden: Super-Admin authorization required." }, { status: 403 });
+    }
+  }
+
   const admin = createSupabaseAdmin();
   const slug = req.nextUrl.searchParams.get("slug") || "table-and-grain";
   
