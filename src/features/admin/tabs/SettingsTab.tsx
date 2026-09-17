@@ -123,6 +123,12 @@ export function SettingsTab(props: SettingsTabProps) {
   const [includePdfInvoice, setIncludePdfInvoice] = useState(true);
   const [includeOrderAgainBtn, setIncludeOrderAgainBtn] = useState(true);
 
+  // WhatsApp Cloud API Credentials
+  const [waPhoneNumberId, setWaPhoneNumberId] = useState("");
+  const [waAccessToken, setWaAccessToken] = useState("");
+  const [waBusinessAccountId, setWaBusinessAccountId] = useState("");
+  const [testingWaSend, setTestingWaSend] = useState(false);
+
   useEffect(() => {
     async function loadWaSettings() {
       try {
@@ -134,6 +140,9 @@ export function SettingsTab(props: SettingsTabProps) {
           if (data.include_review_cta !== undefined) setWaIncludeReviewCta(data.include_review_cta);
           if (data.include_gstin_line !== undefined) setWaIncludeGstin(data.include_gstin_line);
           if (data.thank_you_line) setWaThankYou(data.thank_you_line);
+          if (data.phone_number_id) setWaPhoneNumberId(data.phone_number_id);
+          if (data.access_token) setWaAccessToken(data.access_token);
+          if (data.business_account_id) setWaBusinessAccountId(data.business_account_id);
         }
       } catch {
         // ignore
@@ -155,6 +164,9 @@ export function SettingsTab(props: SettingsTabProps) {
           include_review_cta: waIncludeReviewCta,
           include_gstin_line: waIncludeGstin,
           thank_you_line: waThankYou,
+          phone_number_id: waPhoneNumberId.trim(),
+          access_token: waAccessToken.trim(),
+          business_account_id: waBusinessAccountId.trim(),
         }),
       });
       const data = await res.json();
@@ -164,6 +176,32 @@ export function SettingsTab(props: SettingsTabProps) {
       props.flash("err", err instanceof Error ? err.message : "Failed to save WhatsApp settings");
     } finally {
       setSavingWa(false);
+    }
+  }
+
+  async function handleTestWaSend() {
+    if (!waPhoneNumberId.trim() || !waAccessToken.trim()) {
+      props.flash("err", "Please configure WhatsApp Cloud API credentials first");
+      return;
+    }
+    setTestingWaSend(true);
+    try {
+      const res = await fetch("/api/whatsapp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: props.restaurant?.phone || "919876543210", // fallback test number
+          template_name: "bill_receipt",
+          template_language: "en",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Test send failed");
+      props.flash("ok", `Test WhatsApp sent successfully! Message ID: ${data.messageId}`);
+    } catch (err: any) {
+      props.flash("err", err.message || "Test send failed");
+    } finally {
+      setTestingWaSend(false);
     }
   }
 
@@ -983,7 +1021,51 @@ export function SettingsTab(props: SettingsTabProps) {
               </div>
 
               <form onSubmit={handleSaveWaSettings} className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
+                        WhatsApp Cloud API - Phone Number ID
+                      </label>
+                      <input
+                        type="text"
+                        value={waPhoneNumberId}
+                        onChange={(e) => setWaPhoneNumberId(e.target.value)}
+                        placeholder="123456789012345"
+                        className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5] font-bold"
+                      />
+                      <p className="text-[10px] text-[#6F7185] mt-1">Get this from Meta Business Manager → WhatsApp → API Setup</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
+                        WhatsApp Cloud API - Access Token
+                      </label>
+                      <input
+                        type="password"
+                        value={waAccessToken}
+                        onChange={(e) => setWaAccessToken(e.target.value)}
+                        placeholder="EAAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5]"
+                      />
+                      <p className="text-[10px] text-[#6F7185] mt-1">Permanent access token from Meta Business Manager (never expires)</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
+                        WhatsApp Business Account ID (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={waBusinessAccountId}
+                        onChange={(e) => setWaBusinessAccountId(e.target.value)}
+                        placeholder="123456789012345"
+                        className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5] font-bold"
+                      />
+                      <p className="text-[10px] text-[#6F7185] mt-1">Your WhatsApp Business Account ID from Meta Business Manager</p>
+                    </div>
+                  </div>
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
@@ -1055,35 +1137,43 @@ export function SettingsTab(props: SettingsTabProps) {
                       </label>
                     </div>
                   </div>
+                </div>
 
-                  {/* Smartphone Preview */}
-                  <div className="bg-[#EFEAE2] border border-[#DDD6C9] rounded-3xl p-4 sm:p-5 shadow-inner space-y-3">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#E0D8CB] text-slate-600">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-[#34C759] text-white flex items-center justify-center text-xs font-bold">
-                          💬
-                        </span>
-                        <div className="text-xs font-bold text-slate-900">
-                          {props.settingsCafeName || "Your Café"}
-                        </div>
-                      </div>
-                      <span className="text-[10px] bg-white/70 px-2 py-0.5 rounded text-slate-600 font-mono">
-                        WhatsApp
+                {/* Smartphone Preview */}
+                <div className="lg:col-span-2 bg-[#EFEAE2] border border-[#DDD6C9] rounded-3xl p-4 sm:p-5 shadow-inner space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#E0D8CB] text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#34C759] text-white flex items-center justify-center text-xs font-bold">
+                        💬
                       </span>
-                    </div>
-
-                    <div className="bg-white rounded-2xl rounded-tl-xs p-3 shadow-xs text-xs font-sans text-slate-800 space-y-2 border border-black/[0.04]">
-                      <pre className="whitespace-pre-wrap font-sans text-xs text-slate-900 leading-relaxed">
-                        {renderedPreview}
-                      </pre>
-                      <div className="text-right text-[10px] text-slate-400 font-mono">
-                        Just now ✓✓
+                      <div className="text-xs font-bold text-slate-900">
+                        {props.settingsCafeName || "Your Café"}
                       </div>
+                    </div>
+                    <span className="text-[10px] bg-white/70 px-2 py-0.5 rounded text-slate-600 font-mono">
+                      WhatsApp
+                    </span>
+                  </div>
+
+                  <div className="bg-white rounded-2xl rounded-tl-xs p-3 shadow-xs text-xs font-sans text-slate-800 space-y-2 border border-black/[0.04]">
+                    <pre className="whitespace-pre-wrap font-sans text-xs text-slate-900 leading-relaxed">
+                      {renderedPreview}
+                    </pre>
+                    <div className="text-right text-[10px] text-slate-400 font-mono">
+                      Just now ✓✓
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-[#E7E4F0] flex justify-end">
+                <div className="lg:col-span-2 pt-4 border-t border-[#E7E4F0] flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={handleTestWaSend}
+                    disabled={testingWaSend || !waPhoneNumberId.trim() || !waAccessToken.trim()}
+                    className="px-5 py-2.5 bg-[#34C759]/10 hover:bg-[#34C759] text-[#34C759] hover:text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {testingWaSend ? "Sending Test…" : "🧪 Send Test WhatsApp"}
+                  </button>
                   <button
                     type="submit"
                     disabled={savingWa}
