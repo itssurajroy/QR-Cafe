@@ -30,10 +30,14 @@ export async function generateMetadata({
 
 export default async function PublicCafePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ table?: string; t?: string }>;
 }) {
   const { slug } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const tableParam = sp.table || sp.t || undefined;
   const tenant = await getRestaurantBySlug(slug);
 
   if (!tenant) {
@@ -69,7 +73,7 @@ export default async function PublicCafePage({
     <div
       style={
         {
-          "--accent": tenant.accent_color || "#f59e0b",
+          "--accent": tenant.accent_color || "#D97706",
         } as React.CSSProperties
       }
     >
@@ -81,6 +85,7 @@ export default async function PublicCafePage({
         canOrder={orderable}
         limits={limits}
         upiQrUrl={tenant.upi_qr_url || undefined}
+        initialTableLabel={tableParam}
       />
     </div>
   );
