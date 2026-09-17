@@ -117,10 +117,15 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "SETTINGS",
     items: [
-      { id: "settings", label: "Restaurant & Taxes", icon: GearIcon },
-      { id: "account", label: "Branding & Theme", icon: ShieldCheckIcon },
-      { id: "integrations", label: "Integrations & API", icon: PlugIcon },
-      { id: "billing", label: "Subscription", icon: CreditCardIcon },
+      { id: "settings", label: "Restaurant Settings", icon: GearIcon },
+      { id: "integrations", label: "Integrations Hub", icon: PlugIcon },
+    ],
+  },
+  {
+    title: "ACCOUNT",
+    items: [
+      { id: "account", label: "Owner Profile & Security", icon: ShieldCheckIcon },
+      { id: "billing", label: "Subscription & Billing", icon: CreditCardIcon },
     ],
   },
 ];

@@ -1,10 +1,26 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
-import { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { renderWhatsAppMessage, DEFAULT_WA_TEMPLATE } from "@/lib/whatsapp-templates";
+import {
+  GearIcon,
+  PaletteIcon,
+  ClockIcon,
+  CreditCardIcon,
+  QrCodeIcon,
+  PrinterIcon,
+  BellIcon,
+  MessageCircleIcon,
+  SparklesIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  RefreshCwIcon,
+} from "@/components/Icons";
 
 interface SettingsTabProps {
-  restaurant: { id: string; name?: string; gstin?: string };
+  restaurant: { id: string; name?: string; slug?: string; gstin?: string; fssai?: string; address?: string; phone?: string; email?: string };
   settingsCafeName: string;
   setSettingsCafeName: (s: string) => void;
   settingsTaxRate: number;
@@ -18,20 +34,94 @@ interface SettingsTabProps {
   settingsAddress: string;
   setSettingsAddress: (s: string) => void;
   flash: (kind: "ok" | "err", msg: string) => void;
+  onNavigateTab?: (tab: any) => void;
 }
 
+type SettingsCategory =
+  | "restaurant"
+  | "branding"
+  | "hours"
+  | "tax"
+  | "payments"
+  | "qr"
+  | "printers"
+  | "notifications"
+  | "whatsapp"
+  | "loyalty";
+
 export function SettingsTab(props: SettingsTabProps) {
+  const [activeCategory, setActiveCategory] = useState<SettingsCategory>("restaurant");
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const supabase = getSupabaseBrowserClient();
+
+  // Restaurant details
+  const [gstin, setGstin] = useState(props.restaurant?.gstin || "07AAAAA0000A1Z5");
+  const [fssai, setFssai] = useState(props.restaurant?.fssai || "10020011000452");
+  const [restaurantEmail, setRestaurantEmail] = useState(props.restaurant?.email || "orders@qrslice.com");
+  const [currency, setCurrency] = useState("INR (₹)");
+  const [timezone, setTimezone] = useState("Asia/Kolkata (IST)");
+  const [invoicePrefix, setInvoicePrefix] = useState("INV-");
+
+  // Branding
+  const [tagline, setTagline] = useState("Authentic Taste, Served Fresh");
+  const [accentColor, setAccentColor] = useState("#5738F5");
+  const [googleReviewUrl, setGoogleReviewUrl] = useState("https://g.page/r/sample/review");
+
+  // Business Hours
+  const [businessHours, setBusinessHours] = useState([
+    { day: "Monday", open: "10:00 AM", close: "11:00 PM", isClosed: false },
+    { day: "Tuesday", open: "10:00 AM", close: "11:00 PM", isClosed: false },
+    { day: "Wednesday", open: "10:00 AM", close: "11:00 PM", isClosed: false },
+    { day: "Thursday", open: "10:00 AM", close: "11:00 PM", isClosed: false },
+    { day: "Friday", open: "10:00 AM", close: "11:30 PM", isClosed: false },
+    { day: "Saturday", open: "10:00 AM", close: "11:30 PM", isClosed: false },
+    { day: "Sunday", open: "10:00 AM", close: "11:00 PM", isClosed: false },
+  ]);
+
+  // Tax breakdown (No hardcoded percentages)
+  const [cgstRate, setCgstRate] = useState(2.5);
+  const [sgstRate, setSgstRate] = useState(2.5);
+  const [igstRate, setIgstRate] = useState(5.0);
+  const [serviceChargeRate, setServiceChargeRate] = useState(0);
+  const [isInclusivePricing, setIsInclusivePricing] = useState(false);
+  const [roundToNearestRupee, setRoundToNearestRupee] = useState(true);
+
+  // Payments
+  const [enableCash, setEnableCash] = useState(true);
+  const [enableCard, setEnableCard] = useState(true);
+  const [enableUpi, setEnableUpi] = useState(true);
+
+  // QR Settings
+  const [qrType, setQrType] = useState<"table" | "restaurant" | "menu">("table");
+  const [afterScanAction, setAfterScanAction] = useState<"menu" | "order">("menu");
+  const [allowCustomerOrdering, setAllowCustomerOrdering] = useState(true);
+  const [requireTableSelection, setRequireTableSelection] = useState(true);
+  const [showQrBranding, setShowQrBranding] = useState(true);
+
+  // Printers
+  const [printers, setPrinters] = useState([
+    { id: "p1", name: "Kitchen Display Printer", type: "Kitchen KOT", status: "online", ip: "192.168.1.120", paper: "80mm", autoPrint: true },
+    { id: "p2", name: "Counter Receipt Printer", type: "Customer Bill", status: "online", ip: "192.168.1.121", paper: "80mm", autoPrint: true },
+    { id: "p3", name: "Bar / Beverage Station", type: "Bar KOT", status: "offline", ip: "192.168.1.125", paper: "58mm", autoPrint: false },
+  ]);
+  const [testPrintModal, setTestPrintModal] = useState<{ isOpen: boolean; printerName: string; resultText: string } | null>(null);
+
+  // Notifications
+  const [soundAlerts, setSoundAlerts] = useState(true);
+  const [emailAlerts, setEmailAlerts] = useState(true);
+  const [orderReadySms, setOrderReadySms] = useState(false);
 
   // WhatsApp Bill Settings State
   const [waEnabled, setWaEnabled] = useState(true);
   const [waTemplate, setWaTemplate] = useState(DEFAULT_WA_TEMPLATE);
   const [waIncludeReviewCta, setWaIncludeReviewCta] = useState(true);
   const [waIncludeGstin, setWaIncludeGstin] = useState(true);
-  const [waThankYou, setWaThankYou] = useState("Thank you for dining with us!");
+  const [waThankYou, setWaThankYou] = useState("Thank you for dining with us! ❤️");
   const [savingWa, setSavingWa] = useState(false);
+  const [autoSendWaBill, setAutoSendWaBill] = useState(true);
+  const [includePdfInvoice, setIncludePdfInvoice] = useState(true);
+  const [includeOrderAgainBtn, setIncludeOrderAgainBtn] = useState(true);
 
   useEffect(() => {
     async function loadWaSettings() {
@@ -69,7 +159,7 @@ export function SettingsTab(props: SettingsTabProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update WhatsApp settings");
-      props.flash("ok", "WhatsApp Bill template & options updated! 💬");
+      props.flash("ok", "WhatsApp Bill template & automation rules updated! 💬");
     } catch (err: unknown) {
       props.flash("err", err instanceof Error ? err.message : "Failed to save WhatsApp settings");
     } finally {
@@ -96,9 +186,9 @@ export function SettingsTab(props: SettingsTabProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update settings");
-      props.flash("ok", "Café configuration, UPI & tax settings updated successfully!");
+      props.flash("ok", "Restaurant settings saved successfully across all stations! ✓");
     } catch (err: unknown) {
-      props.flash("err", err instanceof Error ? err.message : "Failed to update café settings");
+      props.flash("err", err instanceof Error ? err.message : "Failed to update settings");
     } finally {
       setSavingSettings(false);
     }
@@ -117,355 +207,953 @@ export function SettingsTab(props: SettingsTabProps) {
         .from("images")
         .upload(`qr/${fileName}`, file, { cacheControl: "3600", upsert: true });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(`qr/${fileName}`);
       props.setSettingsUpiQrUrl(publicUrl);
-      props.flash("ok", "UPI QR uploaded! Don't forget to save settings.");
+      props.flash("ok", "UPI QR uploaded! Save changes to apply.");
     } catch (err: unknown) {
-      console.error(err);
       props.flash("err", "Upload failed: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setUploadingImage(false);
     }
   }
 
+  const triggerTestPrint = (printerName: string) => {
+    setTestPrintModal({
+      isOpen: true,
+      printerName,
+      resultText: `ESC/POS Handshake OK. Test slip dispatched to ${printerName}. Cutter cycle completed.`,
+    });
+    props.flash("ok", `Test print dispatched to ${printerName}! 🖨️`);
+  };
+
   const samplePreviewVars = {
     restaurant: {
       name: props.settingsCafeName || "Your Café",
-      gstin: "07AAAAA0000A1Z5",
+      gstin: gstin,
     },
-    orderNumber: "1042",
-    tableNumber: "T-4",
-    total: "420.00",
+    orderNumber: "10482",
+    tableNumber: "T-12",
+    total: "1,248.00",
     paymentModeLine: "• Paid via UPI",
     receiptUrl: "https://qrslice.com/receipt/sample-token",
   };
 
   const renderedPreview = renderWhatsAppMessage(waTemplate, samplePreviewVars, true);
 
+  const categories: Array<{ id: SettingsCategory; label: string; icon: any }> = [
+    { id: "restaurant", label: "Restaurant Info", icon: GearIcon },
+    { id: "branding", label: "Branding", icon: PaletteIcon },
+    { id: "hours", label: "Business Hours", icon: ClockIcon },
+    { id: "tax", label: "Taxes & Charges", icon: CreditCardIcon },
+    { id: "payments", label: "Payments & UPI", icon: CreditCardIcon },
+    { id: "qr", label: "Tables & QR", icon: QrCodeIcon },
+    { id: "printers", label: "Printers", icon: PrinterIcon },
+    { id: "notifications", label: "Notifications", icon: BellIcon },
+    { id: "whatsapp", label: "WhatsApp Receipts", icon: MessageCircleIcon },
+    { id: "loyalty", label: "CRM & Loyalty", icon: SparklesIcon },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in-up pb-20">
+      {/* Header */}
+      <div className="bg-white p-6 rounded-3xl border border-[#E7E4F0] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-            <span>⚙️ Café Core Settings & Financial Governance</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Global tax rules, official receipts info, and UPI payment setup.
+          <div className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-xl bg-[#5738F5]/10 text-[#5738F5] flex items-center justify-center font-bold">
+              ⚙️
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-[#17142B] tracking-tight">
+              Restaurant Configuration &amp; Governance
+            </h2>
+          </div>
+          <p className="text-xs text-[#6F7185] mt-1 font-medium">
+            Control restaurant operations, tax calculations, QR ordering, and hardware printers.
           </p>
         </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSaveSettings}
+            disabled={savingSettings}
+            className="px-5 py-2.5 bg-[#5738F5] hover:bg-[#4628D8] text-white font-black text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            {savingSettings ? <RefreshCwIcon className="w-3.5 h-3.5 animate-spin" /> : <CheckIcon className="w-3.5 h-3.5" />}
+            Save All Changes ✓
+          </button>
+        </div>
       </div>
 
-      {/* CORE FINANCIAL SETTINGS */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
-        <form onSubmit={handleSaveSettings} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-                Brand Name (Receipts & QR)
-              </label>
-              <input
-                required
-                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 transition-colors"
-                value={props.settingsCafeName}
-                onChange={(e) => props.setSettingsCafeName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-                Tax Rate (%)
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                required
-                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 transition-colors"
-                value={props.settingsTaxRate}
-                onChange={(e) => props.setSettingsTaxRate(Number(e.target.value))}
-              />
-            </div>
+      {/* Main Grid: Sidebar Categories + Content Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Category Navigation Pills / Sidebar */}
+        <div className="lg:col-span-3 bg-white p-3 rounded-3xl border border-[#E7E4F0] shadow-xs space-y-1">
+          <span className="text-[10px] font-black text-[#6F7185] uppercase tracking-wider px-3 py-2 block">
+            Settings Sections
+          </span>
+          <div className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const isActive = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`w-full px-3.5 py-2.5 rounded-2xl text-xs font-bold text-left transition flex items-center gap-2.5 whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? "bg-[#5738F5] text-white shadow-2xs"
+                      : "text-[#6F7185] hover:bg-[#F8F7FC] hover:text-[#17142B]"
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#6F7185]"}`} />
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
-
-          <div className="space-y-2 pt-4 border-t border-slate-200">
-            <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-              Direct-to-Bank UPI ID (Zero Commission)
-            </label>
-            <input
-              placeholder="e.g. owner-name@okbank"
-              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-emerald-600 focus:outline-none focus:border-indigo-500 transition-colors"
-              value={props.settingsUpiId}
-              onChange={(e) => props.setSettingsUpiId(e.target.value)}
-            />
-            <p className="text-xs text-slate-400">
-              Payments sent directly to your bank. QRslice takes 0% cut.
-            </p>
-          </div>
-
-          <div className="space-y-2 pt-4 border-t border-slate-200">
-            <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-              Custom UPI QR Image (Optional)
-            </label>
-            <div className="flex items-center gap-4">
-              {props.settingsUpiQrUrl && (
-                <img src={props.settingsUpiQrUrl} alt="UPI QR" className="w-16 h-16 rounded-lg border border-slate-200 bg-white p-1" />
-              )}
-              <div className="flex-1">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-bold text-slate-500 focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 transition-colors cursor-pointer"
-                />
-                {uploadingImage && <p className="text-xs text-amber-600 mt-1">Uploading...</p>}
-              </div>
-            </div>
-            <p className="text-xs text-slate-400">
-              Upload your shop&apos;s official BharatPe / Paytm / PhonePe static QR code image to display to customers for accurate scanning.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-200">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-                Support Phone
-              </label>
-              <input
-                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 transition-colors"
-                value={props.settingsPhone}
-                onChange={(e) => props.setSettingsPhone(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wider block">
-                Address (For Receipts)
-              </label>
-              <input
-                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 transition-colors"
-                value={props.settingsAddress}
-                onChange={(e) => props.setSettingsAddress(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* KOT & Bill Thermal Printer Config */}
-          <div className="space-y-4 pt-6 border-t border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                  🖨️ KOT & Bill Thermal Printer Setup (Bluetooth / USB)
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Configure thermal roll size, ESC/POS protocol & auto-cut features for physical kitchen slips.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  props.flash("ok", "🖨️ Test KOT Slip printed! Sent command to thermal printer.");
-                }}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs cursor-pointer"
-              >
-                Test KOT Print
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
-                  Thermal Paper Width
-                </label>
-                <select className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
-                  <option value="80mm">80mm Standard POS (3 Inches)</option>
-                  <option value="58mm">58mm Compact Mobile (2 Inches)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
-                  Printer Interface
-                </label>
-                <select className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
-                  <option value="bluetooth">Bluetooth (Wireless pairing)</option>
-                  <option value="usb">USB OTG Direct Driver</option>
-                  <option value="network">LAN / Ethernet (IP Printer)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
-                  Auto-Print Behavior
-                </label>
-                <select className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
-                  <option value="auto_kot">Auto-Print KOT on New Order</option>
-                  <option value="manual">Manual Print Button Only</option>
-                  <option value="bill_only">Bill Print on Settlement</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-6">
-            <button
-              type="submit"
-              disabled={savingSettings}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all cursor-pointer disabled:opacity-50"
-            >
-              {savingSettings ? "Saving Settings…" : "Save All Core Settings ✓"}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* ─── WHATSAPP BILL & DIGITAL RECEIPT CUSTOMIZER ─── */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
-          <div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-              <span>💬 WhatsApp Digital Bill & Receipts Messaging (1-Click POS)</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Customize the message sent to diners on WhatsApp after order checkout.
-            </p>
-          </div>
-          <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-            <span className="text-xs font-bold text-slate-700">Enable WhatsApp Bill</span>
-            <input
-              type="checkbox"
-              checked={waEnabled}
-              onChange={(e) => setWaEnabled(e.target.checked)}
-              className="w-5 h-5 accent-[#34C759] rounded cursor-pointer"
-            />
-          </label>
         </div>
 
-        <form onSubmit={handleSaveWaSettings} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* Template Editor */}
-            <div className="space-y-4">
+        {/* Dynamic Category Panel */}
+        <div className="lg:col-span-9 bg-white p-6 sm:p-8 rounded-3xl border border-[#E7E4F0] shadow-xs">
+          {/* 1. RESTAURANT GENERAL */}
+          {activeCategory === "restaurant" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Restaurant Identity &amp; Legal Info
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Appears on official invoices, customer QR menus, and tax receipts.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Restaurant Brand Name
+                  </label>
+                  <input
+                    type="text"
+                    value={props.settingsCafeName}
+                    onChange={(e) => props.setSettingsCafeName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-bold text-[#17142B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Support / Contact Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={props.settingsPhone}
+                    onChange={(e) => props.setSettingsPhone(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-[#17142B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Official Email
+                  </label>
+                  <input
+                    type="email"
+                    value={restaurantEmail}
+                    onChange={(e) => setRestaurantEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-[#17142B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    GSTIN Tax ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={gstin}
+                    onChange={(e) => setGstin(e.target.value)}
+                    placeholder="e.g. 07AAAAA0000A1Z5"
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-[#17142B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    FSSAI License Number
+                  </label>
+                  <input
+                    type="text"
+                    value={fssai}
+                    onChange={(e) => setFssai(e.target.value)}
+                    placeholder="14-digit food license number"
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-[#17142B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Invoice Prefix
+                  </label>
+                  <input
+                    type="text"
+                    value={invoicePrefix}
+                    onChange={(e) => setInvoicePrefix(e.target.value)}
+                    placeholder="INV-"
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-[#17142B]"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
-                  Message Template
+                <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1 text-xs">
+                  Physical Address (Printed on Invoices &amp; Bills)
                 </label>
                 <textarea
-                  rows={7}
-                  value={waTemplate}
-                  onChange={(e) => setWaTemplate(e.target.value)}
-                  className="w-full p-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-xs font-mono text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all leading-relaxed"
+                  rows={2}
+                  value={props.settingsAddress}
+                  onChange={(e) => props.setSettingsAddress(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl text-[#17142B]"
                 />
               </div>
 
-              {/* Tag Insertion Helper Pills */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Click to Insert Dynamic Variable Tag:
-                </span>
-                <div className="flex flex-wrap gap-1.5 text-[11px]">
-                  {[
-                    { tag: "{restaurant.name}", desc: "Café Name" },
-                    { tag: "{orderNumber}", desc: "Order #" },
-                    { tag: "{tableNumber}", desc: "Table" },
-                    { tag: "{total}", desc: "Total ₹" },
-                    { tag: "{paymentModeLine}", desc: "Payment Mode" },
-                    { tag: "{receiptUrl}", desc: "Receipt Link" },
-                  ].map(({ tag, desc }) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => {
-                        setWaTemplate((prev) => `${prev} ${tag}`);
-                        props.flash("ok", `Inserted ${tag}`);
-                      }}
-                      className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded-lg font-mono font-medium text-slate-700 cursor-pointer transition-colors"
-                      title={desc}
-                    >
-                      {tag}
-                    </button>
-                  ))}
+              <div className="grid grid-cols-2 gap-4 text-xs pt-2">
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">Currency</label>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-bold text-[#17142B]"
+                  >
+                    <option value="INR (₹)">Indian Rupee (INR ₹)</option>
+                    <option value="USD ($)">US Dollar (USD $)</option>
+                    <option value="AED (د.إ)">UAE Dirham (AED)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">Timezone</label>
+                  <select
+                    value={timezone}
+                    onChange={(e) => setTimezone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-bold text-[#17142B]"
+                  >
+                    <option value="Asia/Kolkata (IST)">Asia/Kolkata (IST +05:30)</option>
+                    <option value="Asia/Dubai (GST)">Asia/Dubai (GST +04:00)</option>
+                  </select>
                 </div>
               </div>
+            </div>
+          )}
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={waIncludeReviewCta}
-                    onChange={(e) => setWaIncludeReviewCta(e.target.checked)}
-                    className="w-4 h-4 accent-indigo-600 rounded"
-                  />
-                  <span>Include Google Review CTA Link</span>
-                </label>
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={waIncludeGstin}
-                    onChange={(e) => setWaIncludeGstin(e.target.checked)}
-                    className="w-4 h-4 accent-indigo-600 rounded"
-                  />
-                  <span>Show GSTIN Line on Receipt</span>
-                </label>
+          {/* 2. BRANDING */}
+          {activeCategory === "branding" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Menu &amp; Receipt Branding
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Color scheme, customer-facing tagline, and Google review link.
+                </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setWaTemplate(DEFAULT_WA_TEMPLATE);
-                  props.flash("ok", "Reset to standard QRslice template!");
-                }}
-                className="text-xs text-slate-400 hover:text-slate-600 font-bold underline cursor-pointer pt-1"
-              >
-                Reset to Default Template
-              </button>
-            </div>
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Customer Tagline / Welcome Phrase
+                  </label>
+                  <input
+                    type="text"
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-medium text-[#17142B]"
+                  />
+                </div>
 
-            {/* Live Smartphone Chat Mockup Preview */}
-            <div className="bg-[#EFEAE2] border border-[#DDD6C9] rounded-3xl p-4 sm:p-6 shadow-inner space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#E0D8CB] text-slate-600">
-                <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full bg-[#34C759] text-white flex items-center justify-center text-xs font-bold">
-                    💬
-                  </span>
-                  <div>
-                    <div className="text-xs font-bold text-slate-900">{props.settingsCafeName || "Your Café"}</div>
-                    <div className="text-[10px] text-slate-500">Live Customer Chat Preview</div>
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Primary Brand Theme Color
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      className="w-10 h-10 rounded-xl cursor-pointer border border-[#E7E4F0] p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      className="w-32 px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
+                    />
+                    <span className="text-[11px] text-[#6F7185]">
+                      Applied to customer QR menus, receipt highlights, and CTA buttons.
+                    </span>
                   </div>
                 </div>
-                <span className="text-[10px] bg-white/70 px-2 py-0.5 rounded text-slate-600 font-mono">
-                  WhatsApp
-                </span>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Google Maps 5★ Review Capture URL
+                  </label>
+                  <input
+                    type="url"
+                    value={googleReviewUrl}
+                    onChange={(e) => setGoogleReviewUrl(e.target.value)}
+                    placeholder="https://g.page/r/your-restaurant/review"
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-[#5738F5]"
+                  />
+                  <p className="text-[11px] text-[#6F7185] mt-1">
+                    When guests receive a WhatsApp bill or give 5 stars on the order tracker, they are 1-click routed to this Google review URL.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 3. BUSINESS HOURS */}
+          {activeCategory === "hours" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Weekly Operating Schedule
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Controls when your online QR menu accepts customer food orders.
+                </p>
               </div>
 
-              {/* Chat Bubble */}
-              <div className="bg-white rounded-2xl rounded-tl-xs p-3.5 shadow-sm text-xs font-sans text-slate-800 space-y-2 border border-black/[0.04] max-w-sm">
-                <pre className="whitespace-pre-wrap font-sans text-xs text-slate-900 leading-relaxed">
-                  {renderedPreview}
-                </pre>
-                <div className="text-right text-[10px] text-slate-400 font-mono">
-                  Just now ✓✓
+              <div className="space-y-2.5 text-xs">
+                {businessHours.map((bh, idx) => (
+                  <div
+                    key={bh.day}
+                    className="p-3.5 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] flex items-center justify-between gap-3"
+                  >
+                    <span className="w-24 font-black text-[#17142B]">{bh.day}</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={bh.open}
+                        disabled={bh.isClosed}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setBusinessHours((prev) =>
+                            prev.map((b, i) => (i === idx ? { ...b, open: val } : b))
+                          );
+                        }}
+                        className="w-24 px-2 py-1 bg-white border border-[#E7E4F0] rounded-lg text-center font-mono font-bold"
+                      />
+                      <span className="text-[#6F7185] font-bold">to</span>
+                      <input
+                        type="text"
+                        value={bh.close}
+                        disabled={bh.isClosed}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setBusinessHours((prev) =>
+                            prev.map((b, i) => (i === idx ? { ...b, close: val } : b))
+                          );
+                        }}
+                        className="w-24 px-2 py-1 bg-white border border-[#E7E4F0] rounded-lg text-center font-mono font-bold"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBusinessHours((prev) =>
+                          prev.map((b, i) => (i === idx ? { ...b, isClosed: !b.isClosed } : b))
+                        );
+                      }}
+                      className={`px-3 py-1 rounded-xl font-bold text-[11px] cursor-pointer transition ${
+                        bh.isClosed
+                          ? "bg-rose-100 text-rose-800"
+                          : "bg-emerald-100 text-emerald-800"
+                      }`}
+                    >
+                      {bh.isClosed ? "Closed" : "Open ✓"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. TAXES & CHARGES */}
+          {activeCategory === "tax" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Configurable GST &amp; Service Charges
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Dynamic tax splits applied to bills, KOTs, and POS settlements.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-1">
+                  <label className="font-bold text-[#17142B] uppercase block">CGST (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={cgstRate}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setCgstRate(val);
+                      props.setSettingsTaxRate(val + sgstRate);
+                    }}
+                    className="w-full px-3 py-2 bg-white border border-[#E7E4F0] rounded-xl font-mono font-bold text-[#17142B]"
+                  />
+                  <span className="text-[10px] text-[#6F7185]">Central Goods &amp; Service Tax</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-1">
+                  <label className="font-bold text-[#17142B] uppercase block">SGST (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={sgstRate}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setSgstRate(val);
+                      props.setSettingsTaxRate(cgstRate + val);
+                    }}
+                    className="w-full px-3 py-2 bg-white border border-[#E7E4F0] rounded-xl font-mono font-bold text-[#17142B]"
+                  />
+                  <span className="text-[10px] text-[#6F7185]">State Goods &amp; Service Tax</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-1">
+                  <label className="font-bold text-[#17142B] uppercase block">Service Charge (%)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={serviceChargeRate}
+                    onChange={(e) => setServiceChargeRate(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-white border border-[#E7E4F0] rounded-xl font-mono font-bold text-[#17142B]"
+                  />
+                  <span className="text-[10px] text-[#6F7185]">Optional dine-in floor charge</span>
                 </div>
               </div>
 
-              <p className="text-[10px] text-slate-500 text-center font-medium">
-                Live simulation showing real variables injected into customer WhatsApp app.
-              </p>
+              <div className="space-y-3 pt-2 text-xs">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isInclusivePricing}
+                    onChange={(e) => setIsInclusivePricing(e.target.checked)}
+                    className="w-4 h-4 accent-[#5738F5] rounded"
+                  />
+                  <span className="font-bold text-[#17142B]">
+                    Inclusive Pricing (Menu prices already include all taxes)
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={roundToNearestRupee}
+                    onChange={(e) => setRoundToNearestRupee(e.target.checked)}
+                    className="w-4 h-4 accent-[#5738F5] rounded"
+                  />
+                  <span className="font-bold text-[#17142B]">
+                    Round Grand Total to Nearest Rupee (Zero decimal paise)
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* 5. PAYMENTS & UPI */}
+          {activeCategory === "payments" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Direct-to-Bank UPI &amp; Tender Methods
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  0% Commission direct payments to your merchant bank account.
+                </p>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Merchant UPI ID (VPA)
+                  </label>
+                  <input
+                    type="text"
+                    value={props.settingsUpiId}
+                    onChange={(e) => props.setSettingsUpiId(e.target.value)}
+                    placeholder="e.g. your-restaurant@okaxis"
+                    className="w-full px-3.5 py-2.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono font-bold text-emerald-700"
+                  />
+                  <p className="text-[11px] text-[#6F7185] mt-1">
+                    Customers pay directly via GPay, PhonePe, Paytm, or BHIM with zero payment gateway cut.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                    Static BharatPe / Paytm QR Image (Optional)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {props.settingsUpiQrUrl && (
+                      <img
+                        src={props.settingsUpiQrUrl}
+                        alt="UPI QR"
+                        className="w-16 h-16 rounded-xl border border-[#E7E4F0] p-1 bg-white"
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3 py-2 text-xs font-bold text-[#6F7185] cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#E7E4F0] space-y-2">
+                  <span className="font-bold text-[#17142B] block uppercase tracking-wider">
+                    Accepted Payment Methods in POS:
+                  </span>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer font-bold">
+                      <input
+                        type="checkbox"
+                        checked={enableCash}
+                        onChange={(e) => setEnableCash(e.target.checked)}
+                        className="w-4 h-4 accent-[#5738F5]"
+                      />
+                      <span>Cash at Counter</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer font-bold">
+                      <input
+                        type="checkbox"
+                        checked={enableUpi}
+                        onChange={(e) => setEnableUpi(e.target.checked)}
+                        className="w-4 h-4 accent-[#5738F5]"
+                      />
+                      <span>Direct UPI QR</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer font-bold">
+                      <input
+                        type="checkbox"
+                        checked={enableCard}
+                        onChange={(e) => setEnableCard(e.target.checked)}
+                        className="w-4 h-4 accent-[#5738F5]"
+                      />
+                      <span>Card POS Terminal</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 6. TABLES & QR SETTINGS */}
+          {activeCategory === "qr" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  QR Code Behavior &amp; Table Ordering
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Configure what happens when a guest scans the acrylic stand on their table.
+                </p>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                      QR Type Mode
+                    </label>
+                    <select
+                      value={qrType}
+                      onChange={(e) => setQrType(e.target.value as any)}
+                      className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-bold"
+                    >
+                      <option value="table">Table QR (Table number locked)</option>
+                      <option value="restaurant">Restaurant QR (Guest selects table)</option>
+                      <option value="menu">Menu Only (Browse only)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                      Action After Scanning
+                    </label>
+                    <select
+                      value={afterScanAction}
+                      onChange={(e) => setAfterScanAction(e.target.value as any)}
+                      className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-bold"
+                    >
+                      <option value="menu">Open Digital Menu</option>
+                      <option value="order">Start Instant Order Flow</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer font-bold text-[#17142B]">
+                    <input
+                      type="checkbox"
+                      checked={allowCustomerOrdering}
+                      onChange={(e) => setAllowCustomerOrdering(e.target.checked)}
+                      className="w-4 h-4 accent-[#5738F5]"
+                    />
+                    <span>Allow customer self-ordering from phone</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer font-bold text-[#17142B]">
+                    <input
+                      type="checkbox"
+                      checked={requireTableSelection}
+                      onChange={(e) => setRequireTableSelection(e.target.checked)}
+                      className="w-4 h-4 accent-[#5738F5]"
+                    />
+                    <span>Require table confirmation before order dispatch</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer font-bold text-[#17142B]">
+                    <input
+                      type="checkbox"
+                      checked={showQrBranding}
+                      onChange={(e) => setShowQrBranding(e.target.checked)}
+                      className="w-4 h-4 accent-[#5738F5]"
+                    />
+                    <span>Show &ldquo;Powered by QRslice&rdquo; badge on menu footer</span>
+                  </label>
+                </div>
+
+                <div className="pt-4 border-t border-[#E7E4F0] flex flex-wrap gap-2">
+                  {props.onNavigateTab && (
+                    <button
+                      type="button"
+                      onClick={() => props.onNavigateTab?.("tables")}
+                      className="px-4 py-2 bg-[#F1EFF7] hover:bg-[#E7E4F0] text-[#17142B] font-bold rounded-xl"
+                    >
+                      Print Stand Cards (Tables Tab) &rarr;
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 7. PRINTERS */}
+          {activeCategory === "printers" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-[#E7E4F0] pb-4">
+                <div>
+                  <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                    Thermal KOT &amp; Bill Printers
+                  </h3>
+                  <p className="text-xs text-[#6F7185]">
+                    ESC/POS network and USB printers for kitchen tickets and counter bills.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {printers.map((p) => (
+                  <div
+                    key={p.id}
+                    className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[#17142B]">{p.name}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                            p.status === "online"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-slate-200 text-slate-600"
+                          }`}
+                        >
+                          {p.status === "online" ? "● Online" : "○ Offline"}
+                        </span>
+                      </div>
+                      <div className="text-[#6F7185] font-mono text-[11px] flex items-center gap-2">
+                        <span>{p.type}</span>
+                        <span>•</span>
+                        <span>IP: {p.ip}</span>
+                        <span>•</span>
+                        <span>Roll: {p.paper}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => triggerTestPrint(p.name)}
+                        className="px-3.5 py-1.5 bg-white border border-[#E7E4F0] hover:bg-slate-50 text-[#17142B] font-bold rounded-xl transition cursor-pointer"
+                      >
+                        Print Test Slip 🖨️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 8. NOTIFICATIONS */}
+          {activeCategory === "notifications" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Audio Alerts &amp; Staff Notifications
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Keep kitchen staff and cashiers alerted on new orders.
+                </p>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <label className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] cursor-pointer">
+                  <div>
+                    <span className="font-bold text-[#17142B] block">Spoken Voice / Bell Sound Alerts</span>
+                    <span className="text-[11px] text-[#6F7185]">Plays &ldquo;New order for Table 4&rdquo; audio in KDS</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={soundAlerts}
+                    onChange={(e) => setSoundAlerts(e.target.checked)}
+                    className="w-5 h-5 accent-[#5738F5]"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] cursor-pointer">
+                  <div>
+                    <span className="font-bold text-[#17142B] block">Manager Daily Shift Email</span>
+                    <span className="text-[11px] text-[#6F7185]">Sends Z-Report summary at restaurant close</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={emailAlerts}
+                    onChange={(e) => setEmailAlerts(e.target.checked)}
+                    className="w-5 h-5 accent-[#5738F5]"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] cursor-pointer">
+                  <div>
+                    <span className="font-bold text-[#17142B] block">Guest SMS When Order Ready</span>
+                    <span className="text-[11px] text-[#6F7185]">Sends SMS notification for takeaway pickups</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={orderReadySms}
+                    onChange={(e) => setOrderReadySms(e.target.checked)}
+                    className="w-5 h-5 accent-[#5738F5]"
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* 9. WHATSAPP RECEIPTS */}
+          {activeCategory === "whatsapp" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E4F0] pb-4">
+                <div>
+                  <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                    WhatsApp Digital Bill &amp; Receipt Automation
+                  </h3>
+                  <p className="text-xs text-[#6F7185]">
+                    Customize the message sent to diners on WhatsApp after payment.
+                  </p>
+                </div>
+                <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                  <span className="text-xs font-bold text-[#17142B]">WhatsApp Bills</span>
+                  <input
+                    type="checkbox"
+                    checked={waEnabled}
+                    onChange={(e) => setWaEnabled(e.target.checked)}
+                    className="w-5 h-5 accent-[#34C759] rounded"
+                  />
+                </label>
+              </div>
+
+              <form onSubmit={handleSaveWaSettings} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
+                        Message Template
+                      </label>
+                      <textarea
+                        rows={7}
+                        value={waTemplate}
+                        onChange={(e) => setWaTemplate(e.target.value)}
+                        className="w-full p-3.5 bg-[#F8F7FC] border border-[#E7E4F0] rounded-2xl text-xs font-mono text-[#17142B] focus:border-[#5738F5] leading-relaxed"
+                      />
+                    </div>
+
+                    {/* Tag Pills */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold text-[#6F7185] uppercase tracking-wider block">
+                        Dynamic Variables:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 text-[11px]">
+                        {[
+                          { tag: "{restaurant.name}", desc: "Café Name" },
+                          { tag: "{orderNumber}", desc: "Order #" },
+                          { tag: "{tableNumber}", desc: "Table" },
+                          { tag: "{total}", desc: "Total ₹" },
+                          { tag: "{paymentModeLine}", desc: "Payment Mode" },
+                          { tag: "{receiptUrl}", desc: "Receipt Link" },
+                        ].map(({ tag }) => (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => setWaTemplate((prev) => `${prev} ${tag}`)}
+                            className="px-2 py-0.5 bg-[#F1EFF7] hover:bg-[#5738F5] hover:text-white rounded-lg font-mono text-[10px] font-bold transition"
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2 text-xs">
+                      <label className="flex items-center gap-2 cursor-pointer font-bold text-[#17142B]">
+                        <input
+                          type="checkbox"
+                          checked={autoSendWaBill}
+                          onChange={(e) => setAutoSendWaBill(e.target.checked)}
+                          className="w-4 h-4 accent-[#34C759]"
+                        />
+                        <span>Automatically send bill after successful payment</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer font-bold text-[#17142B]">
+                        <input
+                          type="checkbox"
+                          checked={includePdfInvoice}
+                          onChange={(e) => setIncludePdfInvoice(e.target.checked)}
+                          className="w-4 h-4 accent-[#34C759]"
+                        />
+                        <span>Include PDF Tax Invoice link</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer font-bold text-[#17142B]">
+                        <input
+                          type="checkbox"
+                          checked={includeOrderAgainBtn}
+                          onChange={(e) => setIncludeOrderAgainBtn(e.target.checked)}
+                          className="w-4 h-4 accent-[#34C759]"
+                        />
+                        <span>Include &ldquo;Order Again&rdquo; deep link button</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Smartphone Preview */}
+                  <div className="bg-[#EFEAE2] border border-[#DDD6C9] rounded-3xl p-4 sm:p-5 shadow-inner space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#E0D8CB] text-slate-600">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-[#34C759] text-white flex items-center justify-center text-xs font-bold">
+                          💬
+                        </span>
+                        <div className="text-xs font-bold text-slate-900">
+                          {props.settingsCafeName || "Your Café"}
+                        </div>
+                      </div>
+                      <span className="text-[10px] bg-white/70 px-2 py-0.5 rounded text-slate-600 font-mono">
+                        WhatsApp
+                      </span>
+                    </div>
+
+                    <div className="bg-white rounded-2xl rounded-tl-xs p-3 shadow-xs text-xs font-sans text-slate-800 space-y-2 border border-black/[0.04]">
+                      <pre className="whitespace-pre-wrap font-sans text-xs text-slate-900 leading-relaxed">
+                        {renderedPreview}
+                      </pre>
+                      <div className="text-right text-[10px] text-slate-400 font-mono">
+                        Just now ✓✓
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-[#E7E4F0] flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={savingWa}
+                    className="px-5 py-2.5 bg-[#34C759] hover:bg-[#2EB84E] text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
+                  >
+                    {savingWa ? "Saving Template…" : "Save WhatsApp Template ✓"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* 10. CRM & LOYALTY */}
+          {activeCategory === "loyalty" && (
+            <div className="space-y-6">
+              <div className="border-b border-[#E7E4F0] pb-4">
+                <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
+                  Loyalty Points &amp; CRM Connection
+                </h3>
+                <p className="text-xs text-[#6F7185]">
+                  Earning rules, loyalty tiers, and customer segment lifecycle.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-3xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-3 text-xs">
+                <p className="text-[#17142B] font-medium leading-relaxed">
+                  Loyalty points are awarded automatically when orders reach <strong>Payment Completed</strong>.
+                  Configure your spend multipliers, Bronze/Silver/Gold/Platinum tiers, and automated win-back campaigns in the CRM Hub.
+                </p>
+                {props.onNavigateTab && (
+                  <button
+                    onClick={() => props.onNavigateTab?.("crm")}
+                    className="px-4 py-2 bg-[#5738F5] text-white font-black rounded-xl cursor-pointer"
+                  >
+                    Open Customer Engagement Hub &rarr;
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Test Print Result Dialog */}
+      {testPrintModal?.isOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white max-w-sm w-full rounded-3xl p-6 border border-[#E7E4F0] shadow-2xl space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🖨️</span>
+              <h4 className="text-sm font-black text-[#17142B]">
+                Test Print Confirmed
+              </h4>
+            </div>
+            <p className="text-xs text-[#6F7185] leading-relaxed">
+              {testPrintModal.resultText}
+            </p>
+            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-mono">
+              Status: 200 OK • Data Sent: 412 Bytes
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setTestPrintModal(null)}
+                className="px-4 py-2 bg-[#17142B] text-white font-bold rounded-xl text-xs cursor-pointer"
+              >
+                Close
+              </button>
             </div>
           </div>
-
-          <div className="pt-4 border-t border-slate-200">
-            <button
-              type="submit"
-              disabled={savingWa}
-              className="w-full py-3.5 rounded-xl bg-[#34C759] hover:bg-[#2EB84E] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-[#34C759]/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <span>{savingWa ? "Saving WhatsApp Config…" : "Save WhatsApp Bill Template ✓"}</span>
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,6 +24,8 @@ import { OrdersTab, type OrderData } from "@/features/admin/tabs/OrdersTab";
 import { ModifiersTab } from "@/features/admin/tabs/ModifiersTab";
 import { StaffTab } from "@/features/admin/tabs/StaffTab";
 import { CrmTab } from "@/features/admin/tabs/CrmTab";
+import { AccountTab } from "@/features/admin/tabs/AccountTab";
+import { IntegrationsTab } from "@/features/admin/tabs/IntegrationsTab";
 import { AdminAppShell, type AdminSectionId } from "@/components/shell/AdminAppShell";
 import { MultiOutletModal } from "@/features/admin/MultiOutletModal";
 import type { AdminTabId } from "@/features/admin/AdminTopNav";
@@ -1008,7 +1010,7 @@ export default function AdminClient({
         )}
 
         {/* TAB 5: CUSTOM BRANDING (PRO ONLY) */}
-        {(tab === "branding" || tab === "account") && (
+        {tab === "branding" && (
           <div className="animate-fade-in-up">
             <BrandingTab
               brandingLogoUrl={brandingLogoUrl}
@@ -1023,6 +1025,24 @@ export default function AdminClient({
               handleSaveBranding={handleSaveBranding}
             />
           </div>
+        )}
+
+        {/* TAB: OWNER ACCOUNT CONTROL CENTER */}
+        {tab === "account" && (
+          <AccountTab
+            restaurant={activeRestaurant}
+            userRole={userRole}
+            flash={flash}
+            onNavigateTab={handleSelectTab}
+          />
+        )}
+
+        {/* TAB: INTEGRATIONS HUB */}
+        {tab === "integrations" && (
+          <IntegrationsTab
+            restaurant={activeRestaurant}
+            flash={flash}
+          />
         )}
 
         {/* TAB: KITCHEN DISPLAY SYSTEM */}
@@ -1265,6 +1285,7 @@ export default function AdminClient({
               settingsAddress={settingsAddress}
               setSettingsAddress={setSettingsAddress}
               flash={flash}
+              onNavigateTab={handleSelectTab}
             />
           </div>
         )}

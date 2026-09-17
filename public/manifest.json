@@ -7,24 +7,67 @@
   "background_color": "#0c0a09",
   "theme_color": "#0c0a09",
   "orientation": "any",
+  "categories": ["business", "productivity", "food"],
   "icons": [
     {
-      "src": "/favicon.png",
-      "sizes": "1254x1254",
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/icon-192.png",
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/icons/icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "shortcuts": [
@@ -32,7 +75,40 @@
       "name": "POS Terminal",
       "short_name": "POS",
       "url": "/pos",
-      "description": "Open the billing POS terminal"
+      "description": "Open the billing POS terminal",
+      "icons": [
+        {
+          "src": "/icons/shortcut-pos.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kitchen Display",
+      "short_name": "Kitchen",
+      "url": "/pos?view=kitchen",
+      "description": "Open the real-time kitchen display",
+      "icons": [
+        {
+          "src": "/icons/shortcut-kds.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "short_name": "Tables",
+      "url": "/pos?view=tables",
+      "description": "Open the table map",
+      "icons": [
+        {
+          "src": "/icons/shortcut-tables.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Admin Dashboard",
