@@ -21,6 +21,7 @@ export function JobsTab() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedErrorJob, setSelectedErrorJob] = useState<Job | null>(null);
   const [jobsList, setJobsList] = useState<Job[]>([]);
+  const [stats, setStats] = useState({ running: 0, queued: 0, failed: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
 
   const loadJobs = useCallback(async (status: string = "all") => {
@@ -32,6 +33,7 @@ export function JobsTab() {
       const data = await res.json().catch(() => null);
       if (data?.ok && Array.isArray(data.rows)) {
         setJobsList(data.rows);
+        if (data.stats) setStats(data.stats);
       }
     } catch {
       flash("err", "Failed to load jobs");
@@ -62,10 +64,10 @@ export function JobsTab() {
     return j.status === filterStatus;
   });
 
-  const runningCount = jobsList.filter((j) => j.status === "running").length;
-  const queuedCount = jobsList.filter((j) => j.status === "queued").length + 28;
-  const failedCount = jobsList.filter((j) => j.status === "failed").length;
-  const completedCount = jobsList.filter((j) => j.status === "completed").length + 8421;
+  const runningCount = stats.running;
+  const queuedCount = stats.queued;
+  const failedCount = stats.failed;
+  const completedCount = stats.completed;
 
   return (
     <div className="space-y-6 select-none">

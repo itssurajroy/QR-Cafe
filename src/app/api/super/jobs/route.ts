@@ -72,11 +72,20 @@ export async function GET(req: NextRequest) {
   const start = (page - 1) * limit;
   const paged = filtered.slice(start, start + limit);
 
+  // Compute stats across all jobs (not just filtered page)
+  const stats = {
+    running: allJobs.filter((j) => j.status === "running").length,
+    queued: allJobs.filter((j) => j.status === "queued").length,
+    failed: allJobs.filter((j) => j.status === "failed").length,
+    completed: allJobs.filter((j) => j.status === "completed").length,
+  };
+
   return NextResponse.json({
     ok: true,
     rows: paged,
     total: filtered.length,
     page,
     totalPages: Math.ceil(filtered.length / limit),
+    stats,
   });
 }
