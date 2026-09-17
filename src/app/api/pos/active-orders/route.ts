@@ -1,6 +1,5 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
 
@@ -19,8 +18,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Use the authenticated server client — RLS enforces restaurant_id scoping.
-  const db = await createSupabaseServerClient();
+  // Use admin client: session is validated by getSessionUser() and scoped by restaurant_id.
+  const db = createSupabaseAdmin();
 
   // Fetch all active orders (including served + unpaid so cashier can collect bill)
   const { data: orders, error } = await db
@@ -73,8 +72,8 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "orderId required" }, { status: 400 });
   }
 
-  // Use the authenticated server client — RLS enforces restaurant_id scoping.
-  const db = await createSupabaseServerClient();
+  // Use admin client: session is validated by getSessionUser() and scoped by restaurant_id.
+  const db = createSupabaseAdmin();
   const updates: Record<string, any> = {
     payment_status,
     payment_method: normalizePaymentMethod(payment_method),

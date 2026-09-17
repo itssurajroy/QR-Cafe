@@ -45,12 +45,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const rawRole = String(profile.role || "").toLowerCase();
   const destination =
-    profile.role === "super_admin"
+    rawRole === "super_admin"
       ? "/super"
-      : profile.role === "owner"
+      : rawRole === "owner" || rawRole === "manager" || rawRole === "admin"
         ? "/admin"
-        : "/pos";
+        : rawRole === "kitchen" || rawRole === "chef"
+          ? "/pos?view=kitchen"
+          : "/pos";
 
   return NextResponse.json({
     ok: true,

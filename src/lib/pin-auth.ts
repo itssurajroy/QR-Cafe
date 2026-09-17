@@ -23,7 +23,7 @@ export type PinSessionPayload = {
 };
 
 function getSecret(override?: string): string {
-  const secret = override ?? process.env.APP_CRYPTO_SECRET;
+  const secret = override ?? process.env.APP_CRYPTO_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!secret) {
     throw new Error(
       "APP_CRYPTO_SECRET is required for PIN operations. Add it to .env.local as APP_CRYPTO_SECRET=<value>",

@@ -15,6 +15,7 @@ describe("Middleware Config & Public Routes", () => {
   it("allows public onboarding and auth APIs without session", () => {
     expect(isPublicPath("/api/onboarding")).toBe(true);
     expect(isPublicPath("/api/auth/login")).toBe(true);
+    expect(isPublicPath("/api/auth/pin")).toBe(true);
     expect(isPublicPath("/api/auth/logout")).toBe(true);
     expect(isPublicPath("/api/billing/webhook")).toBe(true);
     expect(isPublicPath("/api/feedback")).toBe(true);

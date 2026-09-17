@@ -25,6 +25,7 @@ export const MIDDLEWARE_CONFIG = {
     "/icon-192.png",
     "/icon-512.png",
     "/api/auth/login",
+    "/api/auth/pin",
     "/api/auth/logout",
     "/api/billing/webhook",
     "/api/onboarding",

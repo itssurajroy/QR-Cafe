@@ -18,7 +18,8 @@ async function checkPinSession(request: NextRequest) {
 
   // PIN sessions are counter-staff only (kitchen/waiter/staff). Owner,
   // manager, and super_admin must always use email + password.
-  const role = String(payload.role || "staff").toLowerCase();
+  const rawRole = String(payload.role || "staff").toLowerCase();
+  const role = rawRole === "chef" ? "kitchen" : rawRole;
   if (role !== "kitchen" && role !== "waiter" && role !== "staff") {
     return null;
   }
@@ -96,16 +97,17 @@ export async function checkAuthAndProfile(request: NextRequest, response: NextRe
   // 2. Resolve profile
   let profile = profileCache.get(user.id);
   if (!profile) {
-    // Edge-compatible fetch to get cafe_profile
-    // Using service role to bypass RLS, or just anon if it's public.
-    // cafe_profiles usually has RLS requiring auth, we can use the user's JWT.
+    // Edge-compatible fetch to get cafe_profile.
+    // Use service role key if available to bypass RLS lock (staff cannot query cafe_profiles under anon RLS).
     try {
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || supabaseAnonKey;
-      
+      const token = serviceKey || session?.access_token || supabaseAnonKey;
+      const apiKey = serviceKey || supabaseAnonKey;
+
       const res = await fetch(`${supabaseUrl}/rest/v1/cafe_profiles?id=eq.${user.id}&select=role,restaurant_id,active`, {
         headers: {
-          "apikey": supabaseAnonKey,
+          "apikey": apiKey,
           "Authorization": `Bearer ${token}`,
         },
         cache: 'no-store'
@@ -113,7 +115,7 @@ export async function checkAuthAndProfile(request: NextRequest, response: NextRe
 
       if (res.ok) {
         const data = await res.json();
-        if (data && data.length > 0) {
+        if (data && data.length > 0 && data[0].active) {
           profile = data[0];
           profileCache.set(user.id, profile);
         }

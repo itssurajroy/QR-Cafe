@@ -1,7 +1,6 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
 
@@ -60,8 +59,8 @@ export async function PATCH(
     );
   }
 
-  // Use the authenticated server client — RLS enforces restaurant_id scoping.
-  const db = await createSupabaseServerClient();
+  // Use admin client: session is validated by getSessionUser() and scoped by restaurant_id.
+  const db = createSupabaseAdmin();
 
   // Load current order; RLS ensures it belongs to the caller's restaurant.
   const { data: order, error } = await db
