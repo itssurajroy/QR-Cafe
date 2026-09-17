@@ -19,10 +19,12 @@ export async function middleware(request: NextRequest) {
   response.headers.set("x-frame-options", "DENY");
   response.headers.set("x-content-type-options", "nosniff");
   response.headers.set("referrer-policy", "strict-origin-when-cross-origin");
-  // Basic CSP (can be tightened later)
+  // Baseline CSP: default deny-by-default with explicit image sources.
+  // images.unsplash.com serves menu/dish photography (seed data + fallbacks).
   response.headers.set(
     "content-security-policy",
-    "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com data: blob:;"
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; " +
+      "img-src 'self' https://*.supabase.co https://images.unsplash.com data: blob:;"
   );
 
   // Strip spoofable incoming custom context headers
