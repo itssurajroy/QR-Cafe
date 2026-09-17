@@ -911,6 +911,7 @@ export default function AdminClient({
             recentOrders={recentOrders}
             setTab={handleSelectTab}
             restaurant={restaurant}
+            restaurantId={restaurantId}
           />
         )}
 

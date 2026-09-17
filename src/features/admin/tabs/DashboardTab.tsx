@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { paise } from "@/lib/utils";
 import { calculateDetailedTableStatus } from "@/features/booking/floorStatus";
@@ -23,6 +23,7 @@ interface DashboardTabProps {
   recentOrders: any[];
   setTab: (tab: any) => void;
   restaurant: any;
+  restaurantId: string;
 }
 
 export function DashboardTab({
@@ -33,8 +34,29 @@ export function DashboardTab({
   recentOrders,
   setTab,
   restaurant,
+  restaurantId,
 }: DashboardTabProps) {
   const [salesPeriod, setSalesPeriod] = useState<"today" | "yesterday" | "7d" | "30d">("today");
+  const [deltas, setDeltas] = useState<{
+    revenue: number;
+    orders: number;
+    avg: number;
+  }>({ revenue: 0, orders: 0, avg: 0 });
+  const [loadingDeltas, setLoadingDeltas] = useState(true);
+
+  // Fetch real deltas from analytics API
+  useEffect(() => {
+    setLoadingDeltas(true);
+    fetch(`/api/analytics/dashboard`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (d?.ok && d.deltas?.vsYesterday) {
+          setDeltas(d.deltas.vsYesterday);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingDeltas(false));
+  }, [restaurantId]);
 
   // Greeting
   const hour = new Date().getHours();
@@ -175,7 +197,7 @@ export function DashboardTab({
             {paise(liveRevenue)}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
-            <span>↑ +12.4%</span>
+            <span>{deltas.revenue >= 0 ? "↑" : "↓"} {Math.abs(deltas.revenue).toFixed(1)}%</span>
             <span className="text-slate-400 font-normal">vs yesterday</span>
           </div>
         </div>
@@ -194,7 +216,7 @@ export function DashboardTab({
             {liveOrders}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
-            <span>↑ +8.2%</span>
+            <span>{deltas.orders >= 0 ? "↑" : "↓"} {Math.abs(deltas.orders).toFixed(1)}%</span>
             <span className="text-slate-400 font-normal">pace</span>
           </div>
         </div>
@@ -213,7 +235,7 @@ export function DashboardTab({
             {paise(avgOrderValue)}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
-            <span>↑ +3.1%</span>
+            <span>{deltas.avg >= 0 ? "↑" : "↓"} {Math.abs(deltas.avg).toFixed(1)}%</span>
             <span className="text-slate-400 font-normal">per guest ticket</span>
           </div>
         </div>

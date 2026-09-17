@@ -1,22 +1,22 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
 
 type Health = { failedWebhooks: number; errorAudits: number; failedPayments: number; checked_at: string };
 
-type Alert = { severity: "red" | "amber"; text: string; tab: string };
+type Subsystem = { name: string; status: string; ping: string };
 
-const ZERO: Health = { failedWebhooks: 0, errorAudits: 0, failedPayments: 0, checked_at: "" };
+type Alert = { severity: "red" | "amber"; text: string; tab: string };
 
 function Indicator({ label, value, degraded, description }: { label: string; value: number; degraded: boolean; description: string }) {
   const bad = value > 0;
   const statusColor = degraded
     ? "bg-slate-100 text-slate-600 border-slate-200"
     : bad
-      ? "bg-rose-50 text-rose-700 border-rose-200"
-      : "bg-emerald-50 text-emerald-700 border-emerald-200";
+    ? "bg-rose-50 text-rose-700 border-rose-200"
+    : "bg-emerald-50 text-emerald-700 border-emerald-200";
 
   const dot = degraded ? "bg-slate-400" : bad ? "bg-rose-500 animate-pulse" : "bg-emerald-500";
 
@@ -45,41 +45,46 @@ function Indicator({ label, value, degraded, description }: { label: string; val
 
 export function SystemHealthTab() {
   const { kpis, setTab } = useSuperAdmin();
-  const [health, setHealth] = useState<Health>(ZERO);
+  const [health, setHealth] = useState<Health>({ failedWebhooks: 0, errorAudits: 0, failedPayments: 0, checked_at: "" });
+  const [subsystems, setSubsystems] = useState<Subsystem[]>([]);
   const [loading, setLoading] = useState(true);
   const [degraded, setDegraded] = useState(false);
 
-  const alerts: Alert[] = [];
-  if (health.failedPayments > 0)
-    alerts.push({ severity: "red", text: `${health.failedPayments} failed payment${health.failedPayments > 1 ? "s" : ""} in 24h`, tab: "billing" });
-  if (health.failedWebhooks > 0)
-    alerts.push({ severity: "red", text: `${health.failedWebhooks} failed webhook${health.failedWebhooks > 1 ? "s" : ""} in 24h`, tab: "audit" });
-  if (health.errorAudits > 0)
-    alerts.push({ severity: "amber", text: `${health.errorAudits} error audits in 24h`, tab: "audit" });
-  if ((kpis?.trialsEnding7d ?? 0) > 0)
-    alerts.push({ severity: "amber", text: `${kpis.trialsEnding7d} trial${kpis.trialsEnding7d > 1 ? "s" : ""} expiring within 7 days`, tab: "cafes" });
-  if ((kpis?.suspended ?? 0) > 0)
-    alerts.push({ severity: "amber", text: `${kpis.suspended} suspended tenant${kpis.suspended > 1 ? "s" : ""} need${kpis.suspended > 1 ? "" : "s"} review`, tab: "cafes" });
-
-  async function load() {
+  const loadHealth = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/super/health");
+      const res = await fetch("/api/super/system-health");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setHealth(data.health ?? ZERO);
+      setHealth(data.health);
+      setSubsystems(data.subsystems || []);
       setDegraded(false);
     } catch {
-      setHealth(ZERO);
+      setHealth({ failedWebhooks: 0, errorAudits: 0, failedPayments: 0, checked_at: "" });
       setDegraded(true);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    loadHealth();
+  }, [loadHealth]);
+
+  const alerts: Alert[] = React.useMemo(() => {
+    const a: Alert[] = [];
+    if (health.failedPayments > 0)
+      a.push({ severity: "red", text: `${health.failedPayments} failed payment${health.failedPayments > 1 ? "s" : ""} in 24h`, tab: "billing" });
+    if (health.failedWebhooks > 0)
+      a.push({ severity: "red", text: `${health.failedWebhooks} failed webhook${health.failedWebhooks > 1 ? "s" : ""} in 24h`, tab: "audit" });
+    if (health.errorAudits > 0)
+      a.push({ severity: "amber", text: `${health.errorAudits} error audits in 24h`, tab: "audit" });
+    if ((kpis?.trialsEnding7d ?? 0) > 0)
+      a.push({ severity: "amber", text: `${kpis.trialsEnding7d} trial${kpis.trialsEnding7d > 1 ? "s" : ""} expiring within 7 days`, tab: "cafes" });
+    if ((kpis?.suspended ?? 0) > 0)
+      a.push({ severity: "amber", text: `${kpis.suspended} suspended tenant${kpis.suspended > 1 ? "s" : ""} need${kpis.suspended > 1 ? "" : "s"} review`, tab: "cafes" });
+    return a;
+  }, [health, kpis]);
 
   return (
     <div className="space-y-6">
@@ -95,13 +100,13 @@ export function SystemHealthTab() {
             {loading
               ? "Checking telemetry signals & endpoints…"
               : degraded
-                ? "Health telemetry signals unavailable — running on degraded fallback."
-                : `Last verified at ${health.checked_at ? new Date(health.checked_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}`}
+              ? "Health telemetry signals unavailable — running on degraded fallback."
+              : `Last verified at ${health.checked_at ? new Date(health.checked_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}`}
           </p>
         </div>
         <button
           type="button"
-          onClick={load}
+          onClick={loadHealth}
           disabled={loading}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4828E0] disabled:opacity-50 text-white text-xs font-bold transition-all shadow-sm hover:shadow active:scale-98 cursor-pointer"
         >
@@ -168,18 +173,13 @@ export function SystemHealthTab() {
       <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-4">
         <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Subsystem Connectivity</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { name: "Supabase PostgreSQL", status: "Operational", ping: "14ms" },
-            { name: "Supabase Storage", status: "Operational", ping: "28ms" },
-            { name: "Razorpay Webhooks", status: "Operational", ping: "42ms" },
-            { name: "Edge Realtime", status: "Operational", ping: "9ms" },
-          ].map((s) => (
+          {subsystems.map((s) => (
             <div key={s.name} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-slate-800">{s.name}</div>
                 <div className="text-[10px] font-mono text-slate-400 mt-0.5">{s.ping} latency</div>
               </div>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+              <span className={`w-2 h-2 rounded-full ${s.status === "Operational" ? "bg-emerald-500" : "bg-rose-500"} shadow-sm ${s.status === "Operational" ? "shadow-emerald-500/50" : ""}`}></span>
             </div>
           ))}
         </div>
