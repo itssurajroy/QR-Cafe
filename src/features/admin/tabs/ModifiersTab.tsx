@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { paise } from "@/lib/utils";
 import { SlidersIcon, PlusIcon, CheckCircleIcon } from "@/components/Icons";
 
@@ -19,74 +19,50 @@ export interface ModifierGroup {
   options: ModifierOption[];
 }
 
-const DEFAULT_MODIFIER_GROUPS: ModifierGroup[] = [
-  {
-    id: "mod-size",
-    name: "Portion Size",
-    required: true,
-    multi_select: false,
-    options: [
-      { id: "opt-reg", name: "Regular", price_adjustment_paise: 0 },
-      { id: "opt-large", name: "Large", price_adjustment_paise: 6000 },
-      { id: "opt-jumbo", name: "Jumbo / Family Pack", price_adjustment_paise: 12000 },
-    ],
-  },
-  {
-    id: "mod-spice",
-    name: "Spice Level",
-    required: true,
-    multi_select: false,
-    options: [
-      { id: "opt-mild", name: "Mild", price_adjustment_paise: 0 },
-      { id: "opt-med", name: "Medium", price_adjustment_paise: 0 },
-      { id: "opt-hot", name: "Spicy / Desi Hot", price_adjustment_paise: 0 },
-    ],
-  },
-  {
-    id: "mod-extras",
-    name: "Add-ons & Extras",
-    required: false,
-    multi_select: true,
-    options: [
-      { id: "opt-cheese", name: "Extra Mozzarella Cheese", price_adjustment_paise: 4000 },
-      { id: "opt-gravy", name: "Extra Makhani Gravy", price_adjustment_paise: 5000 },
-      { id: "opt-dip", name: "Garlic Mint Mayo Dip", price_adjustment_paise: 2500 },
-    ],
-  },
-  {
-    id: "mod-milk",
-    name: "Milk / Base Option",
-    required: false,
-    multi_select: false,
-    options: [
-      { id: "opt-dairy", name: "Full Cream Milk", price_adjustment_paise: 0 },
-      { id: "opt-oat", name: "Oat Milk (Dairy-Free)", price_adjustment_paise: 3500 },
-      { id: "opt-almond", name: "Almond Milk", price_adjustment_paise: 4000 },
-    ],
-  },
-];
-
 export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: string) => void }) {
-  const [groups, setGroups] = useState<ModifierGroup[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("qrslice_modifiers");
-        if (saved) return JSON.parse(saved);
-      } catch {}
-    }
-    return DEFAULT_MODIFIER_GROUPS;
-  });
+  const [groups, setGroups] = useState<ModifierGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupRequired, setNewGroupRequired] = useState(false);
   const [newGroupMulti, setNewGroupMulti] = useState(false);
 
-  const saveGroups = (updated: ModifierGroup[]) => {
-    setGroups(updated);
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("qrslice_modifiers", JSON.stringify(updated));
-      } catch {}
+  // Fetch modifiers from API
+  const fetchModifiers = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/modifiers");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.groups)) {
+          setGroups(data.groups);
+        }
+      }
+    } catch {
+      flash("err", "Failed to load modifiers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchModifiers();
+  }, []);
+
+  const saveGroups = async (updated: ModifierGroup[]) => {
+    try {
+      const res = await fetch("/api/admin/modifiers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groups: updated }),
+      });
+      if (res.ok) {
+        setGroups(updated);
+      } else {
+        flash("err", "Failed to save modifiers");
+      }
+    } catch {
+      flash("err", "Network error saving modifiers");
     }
   };
 
@@ -119,6 +95,50 @@ export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: strin
     flash("ok", "Modifier group removed");
   };
 
+  const handleUpdateGroup = (groupId: string, groupData: Partial<ModifierGroup>) => {
+    const updated = groups.map((g) => (g.id === groupId ? { ...g, ...groupData } : g));
+    saveGroups(updated);
+  };
+
+  const handleAddOption = (groupId: string) => {
+    const updated = groups.map((g) => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          options: [
+            ...g.options,
+            { id: `opt-${Date.now()}`, name: "New Option", price_adjustment_paise: 0 },
+          ],
+        };
+      }
+      return g;
+    });
+    saveGroups(updated);
+  };
+
+  const handleUpdateOption = (groupId: string, optionId: string, optionData: Partial<ModifierOption>) => {
+    const updated = groups.map((g) => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          options: g.options.map((opt) => (opt.id === optionId ? { ...opt, ...optionData } : opt)),
+        };
+      }
+      return g;
+    });
+    saveGroups(updated);
+  };
+
+  const handleDeleteOption = (groupId: string, optionId: string) => {
+    const updated = groups.map((g) => {
+      if (g.id === groupId) {
+        return { ...g, options: g.options.filter((opt) => opt.id !== optionId) };
+      }
+      return g;
+    });
+    saveGroups(updated);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-[#E7E4F0] shadow-xs">
@@ -140,135 +160,165 @@ export function ModifiersTab({ flash }: { flash: (kind: "ok" | "err", msg: strin
         </button>
       </div>
 
-      {/* Modifier Groups Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {groups.map((group) => (
-          <div
-            key={group.id}
-            className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-extrabold text-base text-[#17142B]">{group.name}</h3>
-                <div className="flex gap-2 mt-1">
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                      group.required
-                        ? "bg-amber-100 text-amber-800 font-black"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
+      {loading ? (
+        <div className="p-12 text-center text-xs text-slate-400 font-mono">
+          Loading modifiers…
+        </div>
+      ) : (
+        <>
+          {/* Modifier Groups Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-base text-[#17142B]">{group.name}</h3>
+                    <div className="flex gap-2 mt-1">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                          group.required
+                            ? "bg-amber-100 text-amber-800 font-black"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {group.required ? "REQUIRED" : "OPTIONAL"}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">
+                        {group.multi_select ? "MULTI SELECT" : "SINGLE CHOICE"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteGroup(group.id)}
+                    className="text-slate-400 hover:text-rose-600 text-xs font-bold"
                   >
-                    {group.required ? "REQUIRED" : "OPTIONAL"}
-                  </span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">
-                    {group.multi_select ? "MULTI SELECT" : "SINGLE CHOICE"}
-                  </span>
+                    Delete
+                  </button>
+                </div>
+
+                {/* Options List */}
+                <div className="divide-y divide-slate-100 border-t border-b border-slate-100 py-1">
+                  {group.options.map((opt) => (
+                    <div key={opt.id} className="py-2 flex items-center justify-between text-xs">
+                      <input
+                        type="text"
+                        value={opt.name}
+                        onChange={(e) => handleUpdateOption(group.id, opt.id, { name: e.target.value })}
+                        className="flex-1 bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-[#5738F5] text-xs font-semibold text-[#17142B] pr-2"
+                      />
+                      <input
+                        type="number"
+                        step={100}
+                        value={opt.price_adjustment_paise}
+                        onChange={(e) => handleUpdateOption(group.id, opt.id, { price_adjustment_paise: Number(e.target.value) })}
+                        className="w-28 text-right bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-[#5738F5] text-xs font-mono text-[#5738F5] font-bold"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteOption(group.id, opt.id)}
+                        className="text-slate-400 hover:text-rose-600 text-xs font-bold p-1"
+                        title="Delete option"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => handleAddOption(group.id)}
+                    className="w-full mt-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5" />
+                    <span>Add Option</span>
+                  </button>
+                </div>
+
+                <div className="text-[11px] text-[#6F7185] flex items-center gap-1">
+                  <span>✓ Live in customer ordering drawer</span>
                 </div>
               </div>
-
-              <button
-                type="button"
-                onClick={() => handleDeleteGroup(group.id)}
-                className="text-slate-400 hover:text-rose-600 text-xs font-bold"
-              >
-                Delete
-              </button>
-            </div>
-
-            {/* Options List */}
-            <div className="divide-y divide-slate-100 border-t border-b border-slate-100 py-1">
-              {group.options.map((opt) => (
-                <div key={opt.id} className="py-2 flex items-center justify-between text-xs">
-                  <span className="font-semibold text-[#17142B]">{opt.name}</span>
-                  <span className="font-mono text-[#5738F5] font-bold">
-                    {opt.price_adjustment_paise > 0
-                      ? `+${paise(opt.price_adjustment_paise)}`
-                      : "Free"}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-[11px] text-[#6F7185] flex items-center gap-1">
-              <span>✓ Live in customer ordering drawer</span>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Add Modifier Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <form
-            onSubmit={handleAddGroup}
-            className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4"
-          >
-            <div className="flex justify-between items-center pb-2 border-b border-[#E7E4F0]">
-              <h3 className="text-base font-black text-[#17142B]">Create Modifier Group</h3>
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold"
+          {/* Add Modifier Modal */}
+          {showAddModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+              <form
+                onSubmit={handleAddGroup}
+                className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4"
               >
-                ✕
-              </button>
-            </div>
+                <div className="flex justify-between items-center pb-2 border-b border-[#E7E4F0]">
+                  <h3 className="text-base font-black text-[#17142B]">Create Modifier Group</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-[#6F7185] block mb-1">
-                Group Name
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Cheese Crust, Milk Choice"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#17142B] focus:outline-none focus:border-[#5738F5]"
-              />
-            </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#6F7185] block mb-1">
+                    Group Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Cheese Crust, Milk Choice"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#17142B] focus:outline-none focus:border-[#5738F5]"
+                  />
+                </div>
 
-            <div className="flex items-center gap-4 text-xs font-bold text-[#17142B]">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={newGroupRequired}
-                  onChange={(e) => setNewGroupRequired(e.target.checked)}
-                  className="rounded text-[#5738F5]"
-                />
-                <span>Mandatory (Required)</span>
-              </label>
+                <div className="flex items-center gap-4 text-xs font-bold text-[#17142B]">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newGroupRequired}
+                      onChange={(e) => setNewGroupRequired(e.target.checked)}
+                      className="rounded text-[#5738F5]"
+                    />
+                    <span>Mandatory (Required)</span>
+                  </label>
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={newGroupMulti}
-                  onChange={(e) => setNewGroupMulti(e.target.checked)}
-                  className="rounded text-[#5738F5]"
-                />
-                <span>Multiple Selection</span>
-              </label>
-            </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newGroupMulti}
+                      onChange={(e) => setNewGroupMulti(e.target.checked)}
+                      className="rounded text-[#5738F5]"
+                    />
+                    <span>Multiple Selection</span>
+                  </label>
+                </div>
 
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#17142B] font-bold text-xs cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs cursor-pointer shadow-md shadow-[#5738F5]/20"
-              >
-                Save Group
-              </button>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#17142B] font-bold text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs cursor-pointer shadow-md shadow-[#5738F5]/20"
+                  >
+                    Save Group
+                  </button>
+                </div>
+              </form>
             </div>
-          </form>
-        </div>
+          )}
+        </>
       )}
     </div>
   );
 }
-

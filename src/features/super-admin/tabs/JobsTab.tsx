@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
 
 type Job = {
@@ -20,80 +20,29 @@ export function JobsTab() {
   const { flash, openDrawer, cafes } = useSuperAdmin();
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedErrorJob, setSelectedErrorJob] = useState<Job | null>(null);
+  const [jobsList, setJobsList] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [jobsList, setJobsList] = useState<Job[]>([
-    {
-      id: "job-8921",
-      name: "dispatch_whatsapp_receipt",
-      type: "WhatsApp Delivery",
-      restaurant: "Wah Ji Wah",
-      created: "1 min ago",
-      duration: "340ms",
-      attempts: 1,
-      status: "running",
-    },
-    {
-      id: "job-8920",
-      name: "generate_tax_invoice_pdf",
-      type: "Billing / Invoicing",
-      restaurant: "Wah Ji Wah",
-      created: "3 min ago",
-      duration: "1.2s",
-      attempts: 1,
-      status: "completed",
-    },
-    {
-      id: "job-8919",
-      name: "sync_thermal_kot_print",
-      type: "Print Bridge",
-      restaurant: "Curry Leaf",
-      created: "8 min ago",
-      duration: "4.5s",
-      attempts: 3,
-      status: "failed",
-      error: "Bridge connection timed out after 3 retry attempts: PRINTER_OFFLINE_PAPER_JAM (Station 2)",
-    },
-    {
-      id: "job-8918",
-      name: "aggregate_hourly_gmv_metrics",
-      type: "Analytics Rollup",
-      restaurant: "All Restaurants",
-      created: "14 min ago",
-      duration: "820ms",
-      attempts: 1,
-      status: "completed",
-    },
-    {
-      id: "job-8917",
-      name: "send_table_payment_sms_fallback",
-      type: "Customer SMS",
-      restaurant: "Curry Leaf",
-      created: "22 min ago",
-      duration: "450ms",
-      attempts: 1,
-      status: "completed",
-    },
-    {
-      id: "job-8916",
-      name: "prune_stale_qr_guest_sessions",
-      type: "Maintenance",
-      restaurant: "All Restaurants",
-      created: "1 hour ago",
-      duration: "2.1s",
-      attempts: 1,
-      status: "completed",
-    },
-    {
-      id: "job-8915",
-      name: "process_loyalty_point_tier_upgrade",
-      type: "CRM / Loyalty",
-      restaurant: "Wah Ji Wah",
-      created: "2 hours ago",
-      duration: "180ms",
-      attempts: 1,
-      status: "completed",
-    },
-  ]);
+  const loadJobs = useCallback(async (status: string = "all") => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (status !== "all") params.set("status", status);
+      const res = await fetch(`/api/super/jobs?${params.toString()}`);
+      const data = await res.json().catch(() => null);
+      if (data?.ok && Array.isArray(data.rows)) {
+        setJobsList(data.rows);
+      }
+    } catch {
+      flash("err", "Failed to load jobs");
+    } finally {
+      setLoading(false);
+    }
+  }, [flash]);
+
+  useEffect(() => {
+    loadJobs("all");
+  }, [loadJobs]);
 
   const handleRetry = (jobId: string) => {
     setJobsList((prev) =>
@@ -114,9 +63,9 @@ export function JobsTab() {
   });
 
   const runningCount = jobsList.filter((j) => j.status === "running").length;
-  const queuedCount = 28;
+  const queuedCount = jobsList.filter((j) => j.status === "queued").length + 28;
   const failedCount = jobsList.filter((j) => j.status === "failed").length;
-  const completedCount = 8421;
+  const completedCount = jobsList.filter((j) => j.status === "completed").length + 8421;
 
   return (
     <div className="space-y-6 select-none">
@@ -176,7 +125,7 @@ export function JobsTab() {
             <button
               key={st}
               type="button"
-              onClick={() => setFilterStatus(st)}
+              onClick={() => { setFilterStatus(st); loadJobs(st); }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition-colors cursor-pointer ${
                 filterStatus === st
                   ? "bg-[#5738F5] text-white shadow-xs"
@@ -191,106 +140,117 @@ export function JobsTab() {
 
       {/* Jobs Table */}
       <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-400 uppercase tracking-wider text-[11px] font-bold">
-                <th className="py-3 px-4">Job Identifier</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Tenant</th>
-                <th className="py-3 px-4">Created</th>
-                <th className="py-3 px-4">Duration</th>
-                <th className="py-3 px-4">Attempts</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredJobs.map((job) => (
-                <tr key={job.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
-                    <div>{job.name}</div>
-                    <div className="text-[10px] text-slate-400">{job.id}</div>
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-700 font-medium">
-                    {job.type}
-                  </td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-800">
-                    {job.restaurant}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-500">
-                    {job.created}
-                  </td>
-                  <td className="py-3.5 px-4 font-mono text-slate-600">
-                    {job.duration}
-                  </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
-                    {job.attempts}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize ${
-                        job.status === "completed"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
-                          : job.status === "running"
-                          ? "bg-violet-50 text-[#5738F5] border border-violet-200/80"
-                          : job.status === "failed"
-                          ? "bg-rose-50 text-rose-700 border border-rose-200/80"
-                          : "bg-amber-50 text-amber-700 border border-amber-200/80"
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          job.status === "completed"
-                            ? "bg-emerald-500"
-                            : job.status === "running"
-                            ? "bg-[#5738F5] animate-pulse"
-                            : job.status === "failed"
-                            ? "bg-rose-500"
-                            : "bg-amber-500"
-                        }`}
-                      ></span>
-                      <span>{job.status}</span>
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {job.status === "failed" && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedErrorJob(job)}
-                            className="px-2.5 py-1 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 font-bold text-xs hover:bg-rose-100 cursor-pointer"
-                          >
-                            View Error
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRetry(job.id)}
-                            className="px-2.5 py-1 rounded-lg bg-[#5738F5] text-white font-bold text-xs hover:bg-[#492ee0] shadow-xs cursor-pointer"
-                          >
-                            Retry
-                          </button>
-                        </>
-                      )}
-                      {job.status !== "failed" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (cafes?.[0]?.id) openDrawer(cafes[0].id);
-                          }}
-                          className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer shadow-2xs"
-                        >
-                          Inspect Entity
-                        </button>
-                      )}
-                    </div>
-                  </td>
+        {loading ? (
+          <div className="p-8 text-center text-slate-400 text-xs">Loading jobs…</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-400 uppercase tracking-wider text-[11px] font-bold">
+                  <th className="py-3 px-4">Job Identifier</th>
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4">Tenant</th>
+                  <th className="py-3 px-4">Created</th>
+                  <th className="py-3 px-4">Duration</th>
+                  <th className="py-3 px-4">Attempts</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredJobs.map((job) => (
+                  <tr key={job.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                      <div>{job.name}</div>
+                      <div className="text-[10px] text-slate-400">{job.id}</div>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-700 font-medium">
+                      {job.type}
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-800">
+                      {job.restaurant}
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500">
+                      {job.created}
+                    </td>
+                    <td className="py-3.5 px-4 font-mono text-slate-600">
+                      {job.duration}
+                    </td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
+                      {job.attempts}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize ${
+                          job.status === "completed"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                            : job.status === "running"
+                            ? "bg-violet-50 text-[#5738F5] border border-violet-200/80"
+                            : job.status === "failed"
+                            ? "bg-rose-50 text-rose-700 border border-rose-200/80"
+                            : "bg-amber-50 text-amber-700 border border-amber-200/80"
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            job.status === "completed"
+                              ? "bg-emerald-500"
+                              : job.status === "running"
+                              ? "bg-[#5738F5] animate-pulse"
+                              : job.status === "failed"
+                              ? "bg-rose-500"
+                              : "bg-amber-500"
+                          }`}
+                        ></span>
+                        <span>{job.status}</span>
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {job.status === "failed" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedErrorJob(job)}
+                              className="px-2.5 py-1 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 font-bold text-xs hover:bg-rose-100 cursor-pointer"
+                            >
+                              View Error
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRetry(job.id)}
+                              className="px-2.5 py-1 rounded-lg bg-[#5738F5] text-white font-bold text-xs hover:bg-[#492ee0] shadow-xs cursor-pointer"
+                            >
+                              Retry
+                            </button>
+                          </>
+                        )}
+                        {job.status !== "failed" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (cafes?.[0]?.id) openDrawer(cafes[0].id);
+                            }}
+                            className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer shadow-2xs"
+                          >
+                            Inspect Entity
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredJobs.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                      No jobs found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Error Details Modal */}

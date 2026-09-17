@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ShieldCheckIcon,
   LockIcon,
@@ -37,37 +37,51 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
   const [showPassText, setShowPassText] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
-  // Active Sessions
-  const [sessions, setSessions] = useState([
-    {
-      id: "sess_1",
-      device: "Chrome on Windows 11 (Current Workstation)",
-      ip: "103.120.45.18",
-      location: "New Delhi, India",
-      lastActive: "Active now",
-      isCurrent: true,
-    },
-    {
-      id: "sess_2",
-      device: "Safari on iPhone 15 Pro",
-      ip: "103.120.45.22",
-      location: "New Delhi, India",
-      lastActive: "28 minutes ago",
-      isCurrent: false,
-    },
-    {
-      id: "sess_3",
-      device: "Chrome on iPad (Counter POS Terminal)",
-      ip: "192.168.1.105",
-      location: "Restaurant Floor WiFi",
-      lastActive: "2 hours ago",
-      isCurrent: false,
-    },
-  ]);
+  // Active Sessions - now from API
+  const [sessions, setSessions] = useState<Array<{
+    id: string;
+    device: string;
+    ip: string;
+    location: string;
+    lastActive: string;
+    isCurrent: boolean;
+  }>>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
 
   // Modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
+  // Load sessions from API
+  useEffect(() => {
+    async function loadSessions() {
+      setLoadingSessions(true);
+      try {
+        const res = await fetch("/api/admin/sessions");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && Array.isArray(data.sessions)) {
+            setSessions(data.sessions);
+          }
+        }
+      } catch {
+        // fallback to mock if API fails
+        setSessions([
+          {
+            id: "sess_1",
+            device: "Chrome on Windows 11 (Current Workstation)",
+            ip: "103.120.45.18",
+            location: "New Delhi, India",
+            lastActive: "Active now",
+            isCurrent: true,
+          },
+        ]);
+      } finally {
+        setLoadingSessions(false);
+      }
+    }
+    loadSessions();
+  }, []);
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,9 +106,23 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
     flash("ok", "Password changed successfully across all devices! 🔒");
   };
 
-  const handleLogoutOtherSessions = () => {
-    setSessions((prev) => prev.filter((s) => s.isCurrent));
-    flash("ok", "Logged out 2 active sessions on other devices! ✓");
+  const handleLogoutOtherSessions = async () => {
+    try {
+      const otherSessions = sessions.filter((s) => !s.isCurrent);
+      await Promise.all(
+        otherSessions.map((s) =>
+          fetch("/api/admin/sessions", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: s.id }),
+          })
+        )
+      );
+      setSessions((prev) => prev.filter((s) => s.isCurrent));
+      flash("ok", "Logged out other devices! ✓");
+    } catch {
+      flash("err", "Failed to logout other sessions");
+    }
   };
 
   return (
@@ -107,7 +135,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               👤
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-[#17142B] tracking-tight">
-              Owner Account &amp; Security Control Center
+              Owner Account & Security Control Center
             </h2>
           </div>
           <p className="text-xs text-[#6F7185] mt-1 font-medium">
@@ -236,7 +264,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E7E4F0] shadow-xs space-y-6">
         <div className="border-b border-[#E7E4F0] pb-4">
           <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
-            Security &amp; Authentication
+            Security & Authentication
           </h3>
           <p className="text-xs text-[#6F7185]">
             Manage passwords, two-factor authentication, and station locks.
@@ -298,7 +326,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#E7E4F0] pb-4 gap-2">
           <div>
             <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
-              Active Sessions &amp; Devices ({sessions.length})
+              Active Sessions & Devices ({sessions.length})
             </h3>
             <p className="text-xs text-[#6F7185]">
               Terminals, phones, and browsers currently logged into this owner account.
@@ -314,44 +342,50 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
           )}
         </div>
 
-        <div className="space-y-3">
-          {sessions.map((sess) => (
-            <div
-              key={sess.id}
-              className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#17142B]">{sess.device}</span>
-                  {sess.isCurrent && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800">
-                      Current Device
-                    </span>
-                  )}
+        {loadingSessions ? (
+          <div className="p-8 text-center text-slate-400 text-xs font-mono">
+            Loading sessions…
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((sess) => (
+              <div
+                key={sess.id}
+                className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-[#17142B]">{sess.device}</span>
+                    {sess.isCurrent && (
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800">
+                        Current Device
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[#6F7185] flex items-center gap-3 text-[11px] font-mono">
+                    <span>IP: {sess.ip}</span>
+                    <span>•</span>
+                    <span>{sess.location}</span>
+                    <span>•</span>
+                    <span className="text-[#5738F5] font-semibold">{sess.lastActive}</span>
+                  </div>
                 </div>
-                <div className="text-[#6F7185] flex items-center gap-3 text-[11px] font-mono">
-                  <span>IP: {sess.ip}</span>
-                  <span>•</span>
-                  <span>{sess.location}</span>
-                  <span>•</span>
-                  <span className="text-[#5738F5] font-semibold">{sess.lastActive}</span>
-                </div>
-              </div>
 
-              {!sess.isCurrent && (
-                <button
-                  onClick={() => {
-                    setSessions((prev) => prev.filter((s) => s.id !== sess.id));
-                    flash("ok", "Session terminated");
-                  }}
-                  className="px-3 py-1.5 bg-white border border-[#E7E4F0] hover:bg-rose-50 hover:text-rose-700 text-[#6F7185] font-bold rounded-xl cursor-pointer"
-                >
-                  Revoke
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+                {!sess.isCurrent && (
+                  <button
+                    onClick={() => {
+                      setSessions((prev) => prev.filter((s) => s.id !== sess.id));
+                      flash("ok", "Session terminated");
+                    }}
+                    className="px-3 py-1.5 bg-white border border-[#E7E4F0] hover:bg-rose-50 hover:text-rose-700 text-[#6F7185] font-bold rounded-xl cursor-pointer"
+                  >
+                    Revoke
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 4. RESTAURANT & SUBSCRIPTION AT-A-GLANCE */}
@@ -359,7 +393,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
         <div className="flex items-center justify-between border-b border-[#E7E4F0] pb-4">
           <div>
             <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
-              Restaurant Ownership &amp; Subscription Plan
+              Restaurant Ownership & Subscription Plan
             </h3>
             <p className="text-xs text-[#6F7185]">
               Licensing status and billing tier for {restaurant?.name || "this café"}.
@@ -494,13 +528,13 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
                 <button
                   type="button"
                   onClick={() => setShowPasswordModal(false)}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#5738F5] text-white font-black rounded-xl"
+                  className="px-4 py-2 bg-[#5738F5] text-white font-black rounded-xl text-xs"
                 >
                   Update Password
                 </button>

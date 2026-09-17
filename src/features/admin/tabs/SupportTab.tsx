@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
 export function SupportTab({
   restaurant,
@@ -15,19 +15,32 @@ export function SupportTab({
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ticketSent, setTicketSent] = useState(false);
+  const [ticketId, setTicketId] = useState("");
 
   async function handleSubmitTicket(e: React.FormEvent) {
     e.preventDefault();
     if (!subject.trim() || !message.trim()) return flash("err", "Please fill in all ticket details");
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/admin/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, category, message }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to submit ticket");
+      
       setIsSubmitting(false);
       setTicketSent(true);
-      flash("ok", "💎 Priority Support Ticket submitted successfully! SLA Response < 15 mins.");
+      setTicketId(data.ticketId || `TICK-${Date.now().toString().slice(-6)}`);
+      flash("ok", `💎 Priority Support Ticket ${data.ticketId || "submitted"}! SLA Response < 15 mins.`);
       setSubject("");
       setMessage("");
-    }, 1000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      flash("err", err.message || "Failed to submit ticket");
+    }
   }
 
   return (
@@ -63,10 +76,10 @@ export function SupportTab({
 
         {ticketSent && (
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex justify-between items-center">
-            <span>✓ Ticket #TICK-8841 open! Our engineers are reviewing your inquiry.</span>
+            <span>✓ Ticket {ticketId} open! Our engineers are reviewing your inquiry.</span>
             <button
               type="button"
-              onClick={() => setTicketSent(false)}
+              onClick={() => { setTicketSent(false); setTicketId(""); }}
               className="text-slate-400 hover:text-slate-600 font-bold"
             >
               New Ticket ✕
@@ -134,7 +147,7 @@ export function SupportTab({
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
             <span className="text-xs font-bold text-slate-500 block">Direct Email Support</span>
             <span className="text-sm font-mono font-bold text-indigo-600 block">support@qrslice.com</span>
-            <span className="text-[11px] text-slate-400 block">Response time: &lt; 1 hour</span>
+            <span className="text-[11px] text-slate-400 block">Response time: {"<"} 1 hour</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
@@ -147,4 +160,3 @@ export function SupportTab({
     </div>
   );
 }
-

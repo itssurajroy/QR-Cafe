@@ -1,52 +1,62 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export function WebhooksTab({
-  restaurant,
-  flash,
-}: {
-  restaurant: { api_key?: string; webhook_url?: string };
+interface WebhooksTabProps {
+  restaurant: { api_key?: string; webhook_url?: string; webhook_secret?: string };
   flash: (kind: "ok" | "err", msg: string) => void;
-}) {
-  const [apiKey, setApiKey] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("qrslice_webhook_key");
-      if (saved) return saved;
-    }
-    return restaurant?.api_key || "qrslice_live_pk_8892f309a1e0b";
-  });
-  const [webhookUrl, setWebhookUrl] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("qrslice_webhook_url");
-      if (saved) return saved;
-    }
-    return restaurant?.webhook_url || "";
-  });
-  const [webhookSecret] = useState<string>("whsec_993a01b92049e");
+}
+
+export function WebhooksTab({ restaurant, flash }: WebhooksTabProps) {
+  const [apiKey, setApiKey] = useState<string>("");
+  const [webhookUrl, setWebhookUrl] = useState<string>("");
+  const [webhookSecret, setWebhookSecret] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+
+  // Load from API on mount
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/admin/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok) {
+            setApiKey(data.api_key || restaurant?.api_key || "");
+            setWebhookUrl(data.webhook_url || restaurant?.webhook_url || "");
+            setWebhookSecret(data.webhook_secret || restaurant?.webhook_secret || "");
+          }
+        }
+      } catch {
+        // fallback to props
+        setApiKey(restaurant?.api_key || "");
+        setWebhookUrl(restaurant?.webhook_url || "");
+        setWebhookSecret(restaurant?.webhook_secret || "");
+      }
+    }
+    loadSettings();
+  }, [restaurant]);
 
   async function handleSaveWebhooks(e: React.FormEvent) {
     e.preventDefault();
     setIsSaving(true);
     try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("qrslice_webhook_key", apiKey);
-        localStorage.setItem("qrslice_webhook_url", webhookUrl.trim());
-      }
-      await fetch("/api/admin/crud", {
+      const res = await fetch("/api/admin/crud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "update_settings",
+          api_key: apiKey.trim(),
           webhook_url: webhookUrl.trim(),
+          webhook_secret: webhookSecret.trim(),
         }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save settings");
       flash("ok", "API & Webhook settings saved successfully!");
-    } catch {
-      flash("ok", "API & Webhook settings saved!");
+    } catch (err: any) {
+      flash("err", err.message || "Failed to save settings");
     } finally {
       setIsSaving(false);
     }
@@ -55,18 +65,25 @@ export function WebhooksTab({
   async function handleTestWebhook() {
     if (!webhookUrl) return flash("err", "Please enter a valid Webhook URL first");
     setIsTesting(true);
-    setTimeout(() => {
-      setIsTesting(false);
+    try {
+      const res = await fetch("/api/admin/webhooks/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhookUrl, secret: webhookSecret }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Test failed");
       flash("ok", "⚡ Test ping dispatched successfully! Received HTTP 200 OK.");
-    }, 1200);
+    } catch (err: any) {
+      flash("err", err.message || "Test webhook failed");
+    } finally {
+      setIsTesting(false);
+    }
   }
 
   function handleGenerateApiKey() {
     const newKey = `qrslice_live_pk_${Math.random().toString(36).substring(2, 15)}`;
     setApiKey(newKey);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("qrslice_webhook_key", newKey);
-    }
     flash("ok", "New API Secret Key generated! Make sure to save settings.");
   }
 
@@ -121,7 +138,7 @@ export function WebhooksTab({
               </button>
             </div>
             <p className="text-[11px] text-slate-400">
-              Pass this key as <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">Bearer &lt;key&gt;</code> header to authenticate with <code className="font-mono">/api/orders</code> or <code className="font-mono">/api/menu</code>.
+              Pass this key as <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">Bearer {"<"}key{">"}</code> header to authenticate with <code className="font-mono">/api/orders</code> or <code className="font-mono">/api/menu</code>.
             </p>
           </div>
 

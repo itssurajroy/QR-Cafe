@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
 
 type RoleDef = {
@@ -17,16 +17,25 @@ type PermissionGroup = {
 };
 
 export function RolesTab() {
-  const { flash } = useSuperAdmin();
+  const { staff, flash } = useSuperAdmin();
 
-  const roles: RoleDef[] = [
-    { id: "owner", name: "Platform Owner", description: "Unrestricted platform governance, billing, and root configuration.", userCount: 1 },
-    { id: "admin", name: "Platform Admin", description: "Daily operations, tenant provisioning, and platform triaging.", userCount: 2 },
-    { id: "finance", name: "Finance & Accounting", description: "Subscription reconciliations, invoice management, and payment refunds.", userCount: 1 },
-    { id: "support", name: "Customer Support", description: "Tenant investigation, customer tickets, and staff assistance.", userCount: 3 },
-    { id: "operations", name: "Live Operations", description: "Live order monitor, kitchen display bridge, and outlet health.", userCount: 2 },
-    { id: "engineering", name: "Site Reliability / Dev", description: "System health monitoring, background jobs, logs, and feature flags.", userCount: 2 },
-  ];
+  const roles: RoleDef[] = useMemo(() => {
+    const staffList = staff ?? [];
+    const roleCounts: Record<string, number> = {};
+    for (const s of staffList) {
+      const r = s?.role ?? "staff";
+      roleCounts[r] = (roleCounts[r] ?? 0) + 1;
+    }
+    const roleDefs: RoleDef[] = [
+      { id: "owner", name: "Platform Owner", description: "Unrestricted platform governance, billing, and root configuration.", userCount: roleCounts["owner"] ?? 1 },
+      { id: "admin", name: "Platform Admin", description: "Daily operations, tenant provisioning, and platform triaging.", userCount: roleCounts["super_admin"] ?? roleCounts["admin"] ?? 2 },
+      { id: "finance", name: "Finance & Accounting", description: "Subscription reconciliations, invoice management, and payment refunds.", userCount: roleCounts["finance"] ?? 1 },
+      { id: "support", name: "Customer Support", description: "Tenant investigation, customer tickets, and staff assistance.", userCount: roleCounts["support"] ?? 3 },
+      { id: "operations", name: "Live Operations", description: "Live order monitor, kitchen display bridge, and outlet health.", userCount: roleCounts["operations"] ?? 2 },
+      { id: "engineering", name: "Site Reliability / Dev", description: "System health monitoring, background jobs, logs, and feature flags.", userCount: roleCounts["engineering"] ?? 2 },
+    ];
+    return roleDefs;
+  }, [staff]);
 
   const permissionMatrix: PermissionGroup[] = [
     {
@@ -74,35 +83,23 @@ export function RolesTab() {
     },
   ];
 
-  // Map of [roleId_permissionKey]: boolean
   const [rolePermissions, setRolePermissions] = useState<Record<string, boolean>>({
-    // Platform Owner has all permissions
     "owner_restaurants.view": true, "owner_restaurants.create": true, "owner_restaurants.edit": true, "owner_restaurants.suspend": true,
     "owner_subscriptions.view": true, "owner_subscriptions.edit": true, "owner_billing.view": true, "owner_billing.refund": true,
     "owner_orders.view": true, "owner_support.view": true, "owner_support.manage": true,
     "owner_system.health.view": true, "owner_system.config.edit": true, "owner_integrations.view": true, "owner_integrations.manage": true,
     "owner_audit.view": true, "owner_admins.view": true, "owner_admins.manage": true,
-
-    // Platform Admin
     "admin_restaurants.view": true, "admin_restaurants.create": true, "admin_restaurants.edit": true, "admin_restaurants.suspend": false,
     "admin_subscriptions.view": true, "admin_subscriptions.edit": true, "admin_billing.view": true, "admin_billing.refund": false,
     "admin_orders.view": true, "admin_support.view": true, "admin_support.manage": true,
     "admin_system.health.view": true, "admin_system.config.edit": false, "admin_integrations.view": true, "admin_integrations.manage": false,
     "admin_audit.view": true, "admin_admins.view": true, "admin_admins.manage": false,
-
-    // Finance
     "finance_restaurants.view": true, "finance_subscriptions.view": true, "finance_subscriptions.edit": true,
     "finance_billing.view": true, "finance_billing.refund": true, "finance_audit.view": true,
-
-    // Support
     "support_restaurants.view": true, "support_orders.view": true, "support_support.view": true,
     "support_support.manage": true, "support_integrations.view": true,
-
-    // Operations
     "operations_restaurants.view": true, "operations_orders.view": true, "operations_integrations.view": true,
     "operations_system.health.view": true,
-
-    // Engineering
     "engineering_restaurants.view": true, "engineering_system.health.view": true, "engineering_system.config.edit": true,
     "engineering_integrations.view": true, "engineering_integrations.manage": true, "engineering_audit.view": true,
   });

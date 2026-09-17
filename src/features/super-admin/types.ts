@@ -21,6 +21,7 @@ export interface SuperClientProps {
   config?: any;
   recentAudit?: any[];
   initialTab?: string;
+  authUsers?: Array<{ id: string; email: string; last_sign_in_at: string | null; role: string; app_metadata?: any; user_metadata?: any }>;
 }
 
 export interface Cafe {

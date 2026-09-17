@@ -208,6 +208,14 @@ export default async function SuperPage({
       q={q}
       planFilter={plan || status}
       staff={staffList}
+      authUsers={(authUsersData?.users ?? []).map((u: any) => ({
+        id: u.id,
+        email: u.email,
+        last_sign_in_at: u.last_sign_in_at ?? null,
+        role: (u.app_metadata?.role as string) || (u.user_metadata?.role as string) || "staff",
+        app_metadata: u.app_metadata ?? null,
+        user_metadata: u.user_metadata ?? null,
+      }))}
       kpis={{
         total: all.length,
         active: activeCafes.length,

@@ -15,50 +15,38 @@ type AdminUser = {
 };
 
 export function AdminsTab() {
-  const { flash } = useSuperAdmin();
+  const { tab, authUsers, flash } = useSuperAdmin();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [inviteRole, setInviteRole] = useState<AdminUser["role"]>("Platform Admin");
 
-  const [admins, setAdmins] = useState<AdminUser[]>([
-    {
-      id: "adm-01",
-      name: "Suraj Roy",
-      email: "super@qrslice.test",
-      role: "Platform Owner",
-      lastActive: "Active now",
+  const admins: AdminUser[] = React.useMemo(() => {
+    if (!authUsers || authUsers.length === 0) {
+      return [
+        {
+          id: "adm-01",
+          name: "Super Admin",
+          email: "super@qrslice.test",
+          role: "Platform Owner",
+          lastActive: "Active now",
+          twoFactorEnabled: true,
+          status: "Active",
+        },
+      ];
+    }
+    return authUsers.map((u: { id: string; email: string; last_sign_in_at: string | null; role: string; app_metadata?: any; user_metadata?: any }, idx: number) => ({
+      id: u.id,
+      name: u.user_metadata?.display_name || u.email.split("@")[0],
+      email: u.email,
+      role: (u.user_metadata?.role as AdminUser["role"]) || (idx === 0 ? "Platform Owner" : "Platform Admin"),
+      lastActive: u.last_sign_in_at
+        ? new Date(u.last_sign_in_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+        : "Never",
       twoFactorEnabled: true,
-      status: "Active",
-    },
-    {
-      id: "adm-02",
-      name: "Aman Verma",
-      email: "aman.ops@qrslice.test",
-      role: "Operations",
-      lastActive: "24 min ago",
-      twoFactorEnabled: true,
-      status: "Active",
-    },
-    {
-      id: "adm-03",
-      name: "Priya Sharma",
-      email: "priya.finance@qrslice.test",
-      role: "Finance",
-      lastActive: "2 hours ago",
-      twoFactorEnabled: true,
-      status: "Active",
-    },
-    {
-      id: "adm-04",
-      name: "Rohan Patel",
-      email: "rohan.support@qrslice.test",
-      role: "Support",
-      lastActive: "1 day ago",
-      twoFactorEnabled: false,
-      status: "Active",
-    },
-  ]);
+      status: u.app_metadata?.banned_at ? "Suspended" : "Active",
+    }));
+  }, [authUsers]);
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +60,6 @@ export function AdminsTab() {
       twoFactorEnabled: false,
       status: "Invited",
     };
-    setAdmins((prev) => [newAdmin, ...prev]);
     flash("ok", `Invitation sent to ${inviteEmail} with role ${inviteRole}`);
     setShowInviteModal(false);
     setInviteEmail("");
@@ -209,7 +196,7 @@ export function AdminsTab() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="name@qrslice.test"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-[#5738F5]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:border-[#5738F5]"
                   required
                 />
               </div>

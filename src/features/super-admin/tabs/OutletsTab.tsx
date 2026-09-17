@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
 
 type Outlet = {
@@ -27,62 +27,23 @@ export function OutletsTab() {
   const [search, setSearch] = useState("");
   const [selectedHealth, setSelectedHealth] = useState("all");
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
+  const [outlets, setOutlets] = useState<Outlet[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const initialOutlets: Outlet[] = [
-    {
-      id: "out-01",
-      name: "Wah Ji Wah — Connaught Place",
-      restaurant: "Wah Ji Wah",
-      restaurantSlug: "wah-ji-wah",
-      location: "Block M, Connaught Place, New Delhi",
-      plan: "PRO",
-      tables: 24,
-      ordersToday: 32,
-      gmv30d: 412000,
-      lastActive: "Just now",
-      health: "Healthy",
-      status: "Active",
-      posDevices: 2,
-      kdsDevices: 2,
-      printers: 2,
-    },
-    {
-      id: "out-02",
-      name: "Wah Ji Wah — Cyber Hub",
-      restaurant: "Wah Ji Wah",
-      restaurantSlug: "wah-ji-wah",
-      location: "DLF Cyber Hub, Gurugram",
-      plan: "PRO",
-      tables: 18,
-      ordersToday: 16,
-      gmv30d: 243300,
-      lastActive: "14 min ago",
-      health: "Healthy",
-      status: "Active",
-      posDevices: 1,
-      kdsDevices: 1,
-      printers: 1,
-    },
-    {
-      id: "out-03",
-      name: "Curry Leaf — Indiranagar",
-      restaurant: "Curry Leaf",
-      restaurantSlug: "curry-leaf",
-      location: "100ft Road, Indiranagar, Bengaluru",
-      plan: "TRIAL",
-      tables: 16,
-      ordersToday: 21,
-      gmv30d: 184500,
-      lastActive: "18 min ago",
-      health: "Attention",
-      status: "Active",
-      posDevices: 1,
-      kdsDevices: 1,
-      printers: 1,
-    },
-  ];
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/super/outlets")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.ok && Array.isArray(d.rows)) {
+          setOutlets(d.rows);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  const filtered = initialOutlets.filter((o) => {
+  const filtered = outlets.filter((o) => {
     const matchesSearch =
       o.name.toLowerCase().includes(search.toLowerCase()) ||
       o.restaurant.toLowerCase().includes(search.toLowerCase()) ||
@@ -103,7 +64,7 @@ export function OutletsTab() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-            Total Outlets: <strong className="text-slate-900 font-mono">{initialOutlets.length}</strong>
+            Total Outlets: <strong className="text-slate-900 font-mono">{outlets.length}</strong>
           </span>
         </div>
       </div>
@@ -148,84 +109,95 @@ export function OutletsTab() {
 
       {/* Outlets Table */}
       <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-400 uppercase tracking-wider text-[11px] font-bold">
-                <th className="py-3 px-4">Outlet Name</th>
-                <th className="py-3 px-4">Restaurant</th>
-                <th className="py-3 px-4">Location</th>
-                <th className="py-3 px-4">Tables</th>
-                <th className="py-3 px-4">Today Orders</th>
-                <th className="py-3 px-4">30D GMV</th>
-                <th className="py-3 px-4">Last Active</th>
-                <th className="py-3 px-4">Health</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((outlet) => (
-                <tr key={outlet.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4">
-                    <div className="font-bold text-slate-900">{outlet.name}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">ID: {outlet.id}</div>
-                  </td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-700">
-                    {outlet.restaurant}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-600 max-w-[200px] truncate" title={outlet.location}>
-                    {outlet.location}
-                  </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-800">
-                    {outlet.tables} tables
-                  </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-800">
-                    {outlet.ordersToday}
-                  </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-600">
-                    ₹{(outlet.gmv30d / 100).toLocaleString("en-IN")}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-500 font-medium">
-                    {outlet.lastActive}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        outlet.health === "Healthy"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
-                          : "bg-amber-50 text-amber-700 border border-amber-200/80"
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          outlet.health === "Healthy" ? "bg-emerald-500" : "bg-amber-500"
-                        }`}
-                      ></span>
-                      <span>{outlet.health}</span>
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOutlet(outlet)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#5738F5] font-bold text-xs transition-colors shadow-2xs cursor-pointer inline-flex items-center gap-1"
-                    >
-                      <span>Inspect</span>
-                      <span>→</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400">
-                    No outlets match your search filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <div className="p-8 text-center text-slate-400 text-xs">Loading outlets…</div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-400 uppercase tracking-wider text-[11px] font-bold">
+                    <th className="py-3 px-4">Outlet Name</th>
+                    <th className="py-3 px-4">Restaurant</th>
+                    <th className="py-3 px-4">Location</th>
+                    <th className="py-3 px-4">Tables</th>
+                    <th className="py-3 px-4">Today Orders</th>
+                    <th className="py-3 px-4">30D GMV</th>
+                    <th className="py-3 px-4">Last Active</th>
+                    <th className="py-3 px-4">Health</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filtered.map((outlet) => (
+                    <tr key={outlet.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-slate-900">{outlet.name}</div>
+                        <div className="text-[11px] text-slate-400 font-mono">ID: {outlet.id}</div>
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-slate-700">
+                        {outlet.restaurant}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 max-w-[200px] truncate" title={outlet.location}>
+                        {outlet.location}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-800">
+                        {outlet.tables} tables
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-800">
+                        {outlet.ordersToday}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-600">
+                        ₹{(outlet.gmv30d / 100).toLocaleString("en-IN")}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-500 font-medium">
+                        {outlet.lastActive}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            outlet.health === "Healthy"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                              : "bg-amber-50 text-amber-700 border border-amber-200/80"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              outlet.health === "Healthy" ? "bg-emerald-500" : "bg-amber-500"
+                            }`}
+                          ></span>
+                          <span>{outlet.health}</span>
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedOutlet(outlet)}
+                          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#5738F5] font-bold text-xs transition-colors shadow-2xs cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <span>Inspect</span>
+                          <span>→</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                        No outlets match your search filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs">
+              <span className="text-slate-500 font-medium">
+                Showing <strong>{filtered.length}</strong> outlets
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Outlet Detail Modal */}
