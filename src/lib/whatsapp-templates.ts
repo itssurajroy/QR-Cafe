@@ -12,6 +12,29 @@ export interface TemplateVars {
   receiptUrl: string;
 }
 
+/**
+ * WhatsApp Settings with Cloud API credentials.
+ * Combines behavioral settings (whatsapp_settings table) with
+ * Meta Cloud API credentials (whatsapp_accounts table).
+ */
+export interface WhatsAppSettings {
+  // Behavioral settings (from whatsapp_settings)
+  enabled: boolean;
+  message_template: string;
+  include_review_cta: boolean;
+  include_gstin_line: boolean;
+  thank_you_line: string;
+  // Cloud API credentials (from whatsapp_accounts)
+  phone_number_id: string;
+  access_token: string;
+  business_account_id: string;
+  verify_token: string;
+  webhook_url: string;
+  webhook_secret: string;
+  // Common
+  tenant_id: string;
+}
+
 export const DEFAULT_WA_TEMPLATE = `Thanks for visiting {restaurant.name} 🧾
 
 Order #{orderNumber} • Table {tableNumber}
