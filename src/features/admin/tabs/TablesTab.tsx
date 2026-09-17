@@ -5,6 +5,8 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import type { Table } from "@/types";
 import { QRCodeDisplay } from "@/components/brand/QRCodeDisplay";
+import { printSingleStandCard, printBulkStandCards } from "@/lib/print-standee";
+import { generateBeautifulQrDataUrl } from "@/lib/qr-designer";
 import { calculateDetailedTableStatus, type DetailedTableStatus } from "@/features/booking/floorStatus";
 import { paise } from "@/lib/utils";
 import {
@@ -736,7 +738,30 @@ export function TablesTab({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  onClick={() => {
+                    printBulkStandCards({
+                      restaurantName,
+                      tables: tableList
+                        .filter((t) => t.active !== false)
+                        .map((t) => {
+                          const directUrl = t.qr_token
+                            ? `${appUrl}/t/${t.qr_token}`
+                            : `${appUrl}/c/${restaurantSlug}/t/${encodeURIComponent(t.label)}`;
+                          return {
+                            label: t.label,
+                            seats: t.seats,
+                            qrDataUrl: generateBeautifulQrDataUrl({
+                              text: directUrl,
+                              size: 400,
+                              theme: "violet",
+                              centerIcon: "utensils",
+                              dotShape: "dots",
+                            }),
+                            directUrl,
+                          };
+                        }),
+                    });
+                  }}
                   className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-violet-500/20 cursor-pointer"
                 >
                   <PrinterIcon className="w-3.5 h-3.5" />
@@ -799,7 +824,24 @@ export function TablesTab({
               tableLabel={activeSignageTable.label}
               seats={activeSignageTable.seats}
               showSignage={true}
-              onPrint={() => window.print()}
+              onPrint={() => {
+                const directUrl = activeSignageTable.qr_token
+                  ? `${appUrl}/t/${activeSignageTable.qr_token}`
+                  : `${appUrl}/c/${restaurantSlug}/t/${encodeURIComponent(activeSignageTable.label)}`;
+                printSingleStandCard({
+                  restaurantName,
+                  tableLabel: activeSignageTable.label,
+                  qrDataUrl: generateBeautifulQrDataUrl({
+                    text: directUrl,
+                    size: 500,
+                    theme: "violet",
+                    centerIcon: "utensils",
+                    dotShape: "dots",
+                  }),
+                  directUrl,
+                  seats: activeSignageTable.seats,
+                });
+              }}
             />
           </div>
         </div>

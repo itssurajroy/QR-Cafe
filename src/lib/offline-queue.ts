@@ -6,6 +6,7 @@
  */
 
 import { openDB, DBSchema, IDBPDatabase } from "idb";
+import { registerOrderSync } from "./background-sync";
 
 interface OfflineOrder {
   id: string;
@@ -78,6 +79,9 @@ export async function queueOrder(
 
   await db.put("orders", order);
   await updateSyncStatus(db);
+
+  // Fire-and-forget: never throw, never block the POS flow.
+  void registerOrderSync();
 
   return id;
 }
@@ -185,11 +189,13 @@ export async function getSyncStatus(): Promise<{ lastSync: number; pendingCount:
  * React hook for offline queue management
  */
 import { useState, useEffect, useCallback } from "react";
+import { isBackgroundSyncSupported } from "./background-sync";
 
 export function useOfflineQueue() {
   const [pendingCount, setPendingCount] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastSync, setLastSync] = useState(0);
+  const [syncSupported] = useState(isBackgroundSyncSupported);
 
   const refresh = useCallback(async () => {
     const [count, status] = await Promise.all([getPendingCount(), getSyncStatus()]);
@@ -229,6 +235,7 @@ export function useOfflineQueue() {
     pendingCount,
     isProcessing,
     lastSync,
+    syncSupported,
     process,
     clear,
     refresh,
@@ -263,6 +270,9 @@ export async function submitOrderOnlineFirst(
 
   // Queue offline
   const id = await queueOrder(endpoint, payload);
+  // queueOrder already fires registerOrderSync; this covers callers that
+  // reach here via other paths. Fire-and-forget, never throws.
+  void registerOrderSync();
   options.onOffline?.(id);
   return { success: true, online: false, orderId: id };
 }

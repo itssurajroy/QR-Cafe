@@ -13,6 +13,7 @@ import {
   type QrCenterIcon,
   type QrDotShape,
 } from "@/lib/qr-designer";
+import { printSingleStandCard } from "@/lib/print-standee";
 
 interface QRCodeDisplayProps {
   url: string;
@@ -422,7 +423,19 @@ export function QRCodeDisplay({
       <div className="no-print grid grid-cols-3 gap-2.5 pt-2">
         <button
           type="button"
-          onClick={() => (onPrint ? onPrint() : window.print())}
+          onClick={() => {
+            if (onPrint) {
+              onPrint();
+            } else {
+              printSingleStandCard({
+                restaurantName,
+                tableLabel,
+                qrDataUrl: dataUrl,
+                directUrl: url,
+                seats,
+              });
+            }
+          }}
           className="py-2.5 px-3 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-xs shadow-md shadow-violet-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           <span>Print Standee 🖨️</span>

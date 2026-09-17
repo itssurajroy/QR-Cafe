@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { generateBeautifulQrDataUrl } from "@/lib/qr-designer";
+import { printSingleStandCard, printBulkStandCards } from "@/lib/print-standee";
 import Link from "next/link";
 import { DashboardTab } from "@/features/admin/tabs/DashboardTab";
 import { SettingsTab } from "@/features/admin/tabs/SettingsTab";
@@ -1271,14 +1272,14 @@ export default function AdminClient({
       {/* SINGLE QR STAND MODAL */}
       {qrModal && (
         <div
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 print:p-0 print:bg-white print:static"
           onClick={() => setQrModal(null)}
         >
           <div
-            className="bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center"
+            className="qr-stand-print standee-print bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-2 no-print">
               <h3 className="text-sm font-black text-slate-900">Table {qrModal.label} QR Stand</h3>
               <button onClick={() => setQrModal(null)} className="text-slate-500 hover:text-slate-900 text-xs">
                 ✕
@@ -1293,10 +1294,20 @@ export default function AdminClient({
               Scan with any mobile camera to launch digital ordering for Table {qrModal.label}
             </p>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 no-print">
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => {
+                  printSingleStandCard({
+                    restaurantName: activeRestaurant.name || "QRslice",
+                    tableLabel: qrModal.label,
+                    qrDataUrl: qrModal.url,
+                    directUrl: qrModal.directUrl,
+                    seats: qrModal.seats,
+                    wifiSsid: wifiSsid || undefined,
+                    wifiPassword: wifiPassword || undefined,
+                  });
+                }}
                 className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-xs cursor-pointer shadow-md transition-all"
               >
                 Print Stand Card 🖨️
@@ -1595,7 +1606,19 @@ Double Chocolate Brownie, 180, Desserts, Veg, Warm fudgy chocolate brownie with 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  onClick={() => {
+                    printBulkStandCards({
+                      restaurantName: activeRestaurant.name || "QRslice",
+                      tables: bulkQrList.map((t) => ({
+                        label: t.label,
+                        seats: t.seats,
+                        qrDataUrl: t.url,
+                        directUrl: t.directUrl,
+                      })),
+                      wifiSsid: wifiSsid || undefined,
+                      wifiPassword: wifiPassword || undefined,
+                    });
+                  }}
                   disabled={generatingBulk}
                   className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md cursor-pointer disabled:opacity-50"
                 >

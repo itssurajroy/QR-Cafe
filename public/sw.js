@@ -18,7 +18,7 @@
  * - /api/* GETs           → NetworkFirst (10s timeout), 5min cache
  */
 
-const SW_VERSION = "qrslice-sw-v1";
+const SW_VERSION = "qrslice-sw-v2";
 const PRECACHE = `${SW_VERSION}-precache`;
 const RUNTIME = `${SW_VERSION}-runtime`;
 const FONTS_CACHE = `${SW_VERSION}-fonts`;
@@ -184,6 +184,157 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Background Sync: replay the IndexedDB offline order queue.
+//
+// NOTE: the SW cannot import from src/ (separate runtime, no bundler for
+// public/sw.js), so the minimal IndexedDB + replay logic from
+// src/lib/offline-queue.ts is duplicated here. Schema must stay identical:
+// DB "qrslice-offline", v1, stores "orders" (keyPath id, index by-created on
+// createdAt) and "syncStatus" (keyPath key). MAX_RETRIES = 5.
+//
+// Never logs order payloads or PII — only queue counts.
+// ---------------------------------------------------------------------------
+
+const SYNC_ORDERS_TAG = "sync-orders";
+const PERIODIC_SYNC_ORDERS_TAG = "periodic-sync-orders";
+const OFFLINE_DB_NAME = "qrslice-offline";
+const OFFLINE_DB_VERSION = 1;
+const SYNC_MAX_RETRIES = 5;
+
+function openOfflineQueueDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(OFFLINE_DB_NAME, OFFLINE_DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("orders")) {
+        const store = db.createObjectStore("orders", { keyPath: "id" });
+        store.createIndex("by-created", "createdAt");
+      }
+      if (!db.objectStoreNames.contains("syncStatus")) {
+        db.createObjectStore("syncStatus", { keyPath: "key" });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbRequestToPromise(req) {
+  return new Promise((resolve, reject) => {
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function replayOfflineQueue() {
+  let db;
+  try {
+    db = await openOfflineQueueDB();
+  } catch {
+    return;
+  }
+  try {
+    let orders = [];
+    try {
+      const tx = db.transaction("orders", "readonly");
+      const store = tx.objectStore("orders");
+      if (store.indexNames.contains("by-created")) {
+        orders = await idbRequestToPromise(store.index("by-created").getAll());
+      } else {
+        orders = await idbRequestToPromise(store.getAll());
+        orders.sort((a, b) => a.createdAt - b.createdAt);
+      }
+    } catch {
+      return;
+    }
+    if (!orders.length) return;
+
+    for (const order of orders) {
+      try {
+        const response = await fetch(order.endpoint, {
+          method: order.method || "POST",
+          headers: order.headers || { "Content-Type": "application/json" },
+          body: JSON.stringify(order.payload),
+        });
+        if (response.ok) {
+          const tx = db.transaction("orders", "readwrite");
+          tx.objectStore("orders").delete(order.id);
+          await new Promise((resolve) => {
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+            tx.onabort = () => resolve();
+          });
+        } else {
+          order.retryCount = (order.retryCount || 0) + 1;
+          const tx = db.transaction("orders", "readwrite");
+          const store = tx.objectStore("orders");
+          if (order.retryCount >= SYNC_MAX_RETRIES) {
+            store.delete(order.id);
+          } else {
+            store.put(order);
+          }
+          await new Promise((resolve) => {
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+            tx.onabort = () => resolve();
+          });
+        }
+      } catch {
+        order.retryCount = (order.retryCount || 0) + 1;
+        try {
+          const tx = db.transaction("orders", "readwrite");
+          const store = tx.objectStore("orders");
+          if (order.retryCount >= SYNC_MAX_RETRIES) {
+            store.delete(order.id);
+          } else {
+            store.put(order);
+          }
+          await new Promise((resolve) => {
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+            tx.onabort = () => resolve();
+          });
+        } catch {
+          // ignore — next sync will retry
+        }
+      }
+    }
+
+    try {
+      const countReq = db.transaction("orders", "readonly").objectStore("orders").count();
+      const pendingCount = await idbRequestToPromise(countReq);
+      const tx = db.transaction("syncStatus", "readwrite");
+      tx.objectStore("syncStatus").put({ key: "main", lastSync: Date.now(), pendingCount });
+      await new Promise((resolve) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+        tx.onabort = () => resolve();
+      });
+    } catch {
+      // sync status is best-effort metadata
+    }
+  } finally {
+    try {
+      db.close();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+self.addEventListener("sync", (event) => {
+  if (event.tag === SYNC_ORDERS_TAG) {
+    event.waitUntil(replayOfflineQueue());
+  }
+});
+
+self.addEventListener("periodicsync", (event) => {
+  if (event.tag === PERIODIC_SYNC_ORDERS_TAG) {
+    event.waitUntil(replayOfflineQueue());
   }
 });
 
