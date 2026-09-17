@@ -48,7 +48,7 @@ export function SupportTab({
         </div>
 
         <a
-          href="https://wa.me/919876543210?text=Emergency%20QR%20Cafe%20Support%20Needed"
+          href="https://wa.me/918595101297?text=Emergency%20QRslice%20Support%20Needed"
           target="_blank"
           rel="noopener noreferrer"
           className="px-4 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-xs inline-flex items-center gap-2 shadow-lg cursor-pointer transition-all active:scale-95 min-h-[44px]"

@@ -32,10 +32,19 @@ export default function ContactPage() {
       "Hi QRslice Team,\n\nI would like to schedule a personalized demo walkthrough of QRslice for my restaurant/café.\n\nRestaurant Name:\nCity / Location:\nOwner/Manager Name:\nPhone / WhatsApp:\nPreferred Date & Time:\n\nThank you!"
     );
 
+  const WHATSAPP_NUMBER = "918595101297";
+  const WHATSAPP_DISPLAY = "+91 85951 01297";
+
   const whatsappDemoLink =
-    "https://wa.me/?text=" +
+    `https://wa.me/${WHATSAPP_NUMBER}?text=` +
     encodeURIComponent(
       "Hi QRslice Team! I would like to schedule a 1-on-1 demo walkthrough of QRslice for my restaurant."
+    );
+
+  const whatsappSupportLink =
+    `https://wa.me/${WHATSAPP_NUMBER}?text=` +
+    encodeURIComponent(
+      "Hi QRslice Team, I need support / have an enquiry regarding QRslice."
     );
 
   return (
@@ -114,7 +123,7 @@ export default function ContactPage() {
                 className="w-full px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>Book via WhatsApp</span>
+                <span>Chat on WhatsApp ({WHATSAPP_DISPLAY})</span>
               </a>
               <div className="pt-2 text-center">
                 <Link
@@ -131,23 +140,35 @@ export default function ContactPage() {
 
         {/* Secondary Contact & Trial Cards */}
         <div className="grid gap-6 sm:grid-cols-2">
-          <a
-            href="mailto:support@qrslice.com?subject=QRslice%20Support%20Enquiry"
-            className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm transition-all hover:border-[#5738F5]/40 hover:shadow-md group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 mb-4 group-hover:bg-violet-50 group-hover:text-[#5738F5] transition-colors">
-              <Mail className="w-5 h-5" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm transition-all hover:border-[#5738F5]/40 hover:shadow-md flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 mb-4">
+                <Mail className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl font-extrabold text-slate-900">
+                Customer Support & Enquiries
+              </h2>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Have questions regarding table standees, printers, or custom menu integrations? We reply promptly.
+              </p>
             </div>
-            <h2 className="text-xl font-extrabold text-slate-900">
-              Customer Support & Technical Help
-            </h2>
-            <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-              Have questions regarding table standees, printers, or custom menu integrations? We reply within one business day.
-            </p>
-            <span className="mt-4 inline-block font-mono text-sm font-bold text-[#5738F5]">
-              support@qrslice.com
-            </span>
-          </a>
+            <div className="mt-6 pt-4 border-t border-slate-100 space-y-2">
+              <a
+                href="mailto:support@qrslice.com?subject=QRslice%20Support%20Enquiry"
+                className="flex items-center gap-2 text-sm font-bold text-[#5738F5] hover:underline font-mono"
+              >
+                <Mail className="w-4 h-4" /> support@qrslice.com
+              </a>
+              <a
+                href={whatsappSupportLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-bold text-emerald-600 hover:underline font-mono"
+              >
+                <MessageSquare className="w-4 h-4" /> WhatsApp: {WHATSAPP_DISPLAY}
+              </a>
+            </div>
+          </div>
 
           <Link
             href="/onboarding"

@@ -126,6 +126,7 @@ Have your phone ready with the demo store ([`table-and-grain.localhost:3000`](ht
 > **14-Day Free Trial (No Card Needed)**.  
 > 📱 Interactive Demo Menu: https://qrslice.com/c/table-and-grain  
 > 📅 1-on-1 Demo Book karein: https://qrslice.com/contact  
+> 💬 Direct WhatsApp: +91 85951 01297  
 > Ya khud 2 minute mein café register karein: https://qrslice.com/onboarding"
 
 ### Template 2: Post-Visit Follow-Up
@@ -133,11 +134,11 @@ Have your phone ready with the demo store ([`table-and-grain.localhost:3000`](ht
 > Jaise humne discuss kiya tha, maine aapki café ke liye 14-day free trial link generate kiya hai:  
 > 🔗 https://qrslice.com/onboarding?slug=[suggested-slug]  
 > 
-> Aapka menu upload karne mein meri help chahiye toh bas menu ki photo yahan bhej dijiye, main karwa dunga. Have a great day!"
+> Aapka menu upload karne mein meri help chahiye toh bas menu ki photo yahan bhej dijiye, main karwa dunga. Kisi bhi help ke liye WhatsApp karein: +91 85951 01297. Have a great day!"
 
 ### Template 3: Trial Expiry Reminder (Day 11 of 14)
 > "Namaste [Owner Name] ji! Aapke [Café Name] par QRslice ka free trial bohot smoothly chal raha hai. Pichle 10 din mein [X] orders bina kisi KOT galti ke process hue! 🚀  
 > 
 > Aapka free trial 3 din mein end ho raha hai. Uninterrupted service ke liye aap ₹999/mo ya ₹9,999/year (Save 17%) plan admin portal se activate kar sakte hain:  
 > 👉 https://qrslice.com/admin/billing  
-> Kisi bhi help ke liye main hamesha available hoon!"
+> Kisi bhi help ke liye WhatsApp/Call karein: +91 85951 01297!"

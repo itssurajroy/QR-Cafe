@@ -79,16 +79,7 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
       <Navbar />
-      <main id="main-content">
-        <div className="mx-auto max-w-4xl px-4 pt-28 sm:px-6">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
-            Frequently asked questions
-          </h1>
-          <p className="mt-3 text-base text-slate-600">
-            Everything restaurants ask before switching to QR table ordering with
-            QRslice.
-          </p>
-        </div>
+      <main id="main-content" className="pt-20">
         <FAQ />
         <CTA />
       </main>
