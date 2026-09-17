@@ -5,6 +5,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import PublicCafeClient from "@/components/PublicCafeClient";
 
 import type { Metadata } from "next";
+import { createRestaurantSchema, createBreadcrumbSchema, getCanonicalUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,8 @@ export async function generateMetadata({
   const tenant = await getRestaurantBySlug(slug);
   if (!tenant) return { title: "Restaurant Not Found" };
 
+  const canonicalUrl = getCanonicalUrl(`/c/${slug}`);
+
   return {
     title: `${tenant.name} — Digital Menu & Contactless Table Ordering`,
     description: `Browse the fresh culinary menu and place contactless table orders at ${tenant.name}. Prepared fresh, delivered right to your table.`,
@@ -24,6 +27,15 @@ export async function generateMetadata({
       title: `${tenant.name} | Digital Menu & Table Ordering`,
       description: `Browse dishes, customize your order, and pay seamlessly from your phone at ${tenant.name}.`,
       images: tenant.logo_url ? [tenant.logo_url] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${tenant.name} | Digital Menu & Table Ordering`,
+      description: `Browse dishes, customize your order, and pay seamlessly from your phone at ${tenant.name}.`,
+      images: tenant.logo_url ? [tenant.logo_url] : [],
+    },
+    alternates: {
+      canonical: canonicalUrl,
     },
   };
 }
@@ -69,6 +81,16 @@ export default async function PublicCafePage({
   const orderable = canOrder(tenant);
   const limits = getTierLimits(tenant.tier);
 
+  // Generate structured data for Restaurant
+  const restaurantSchema = createRestaurantSchema(tenant);
+
+  // Generate breadcrumb schema
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Restaurants", url: "/restaurants" },
+    { name: tenant.name, url: `/c/${tenant.slug}` },
+  ]);
+
   return (
     <div
       style={
@@ -77,6 +99,14 @@ export default async function PublicCafePage({
         } as React.CSSProperties
       }
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <PublicCafeClient
         restaurant={tenant}
         tables={tables ?? []}

@@ -104,6 +104,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   // Trigger search / filter changes via Server URL Params
   function applyFilter(newQ: string, newPlan: string, newPage: number = 1) {
     const params = new URLSearchParams();
+    if (tab) params.set("tab", tab);
     if (newQ) params.set("q", newQ);
     if (newPlan) params.set("plan", newPlan);
     if (newPage > 1) params.set("page", String(newPage));

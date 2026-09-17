@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+
+# Disallow private/admin areas
 Disallow: /admin/
 Disallow: /pos/
 Disallow: /kds/
@@ -12,4 +14,8 @@ Disallow: /receipt/
 Disallow: /bookings/
 Disallow: /c/*/t/
 
+# Allow public restaurant menus (SEO-friendly)
+Allow: /c/
+
 Sitemap: https://qrslice.com/sitemap.xml
+Sitemap: https://qrslice.com/sitemap-restaurants.xml
