@@ -80,6 +80,10 @@ export default function FaqPage() {
       />
       <Navbar />
       <main id="main-content" className="pt-20">
+        {/* Single page H1 for document outline/SEO; the FAQ section keeps its visual h2. */}
+        <h1 className="sr-only">
+          Frequently asked questions about QRslice QR ordering, setup and pricing
+        </h1>
         <FAQ />
         <CTA />
       </main>

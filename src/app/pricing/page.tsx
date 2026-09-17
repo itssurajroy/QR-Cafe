@@ -49,6 +49,10 @@ export default function PricingPage() {
       />
       <Navbar />
       <main id="main-content">
+        {/* Single page H1 for document outline/SEO; the pricing section keeps its visual h2. */}
+        <h1 className="sr-only">
+          QRslice pricing — ₹999 per month restaurant plan, everything included
+        </h1>
         <Pricing />
         <CTA />
       </main>
