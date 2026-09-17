@@ -22,6 +22,13 @@ import { CommandPalette } from '../features/super-admin/CommandPalette';
 import { UsersTab } from '../features/super-admin/tabs/UsersTab';
 import { OrdersTab } from '../features/super-admin/tabs/OrdersTab';
 import { SettingsTab } from '../features/super-admin/tabs/SettingsTab';
+import { OutletsTab } from '../features/super-admin/tabs/OutletsTab';
+import { IntegrationsTab } from '../features/super-admin/tabs/IntegrationsTab';
+import { JobsTab } from '../features/super-admin/tabs/JobsTab';
+import { FeatureFlagsTab } from '../features/super-admin/tabs/FeatureFlagsTab';
+import { RolesTab } from '../features/super-admin/tabs/RolesTab';
+import { AdminsTab } from '../features/super-admin/tabs/AdminsTab';
+import { FunnelTab } from '../features/super-admin/tabs/FunnelTab';
 import { TenantSlideOver } from '../features/super-admin/overlays/TenantSlideOver';
 import { ProvisionTenantModal } from '../features/super-admin/overlays/ProvisionTenantModal';
 import { SuperClientProps } from '../features/super-admin/types';
@@ -33,23 +40,33 @@ function TabRenderer() {
     case 'dashboard': return <DashboardTab />;
     case 'cafes':
     case 'tenants':
+    case 'restaurants':
       return <TenantsTab />;
+    case 'outlets': return <OutletsTab />;
     case 'config': return <ConfigTab />;
     case 'audit': return <AuditTab />;
     case 'staff': return <StaffTab />;
     case 'subscriptions': return <SubscriptionsTab />;
-    case 'broadcast': return <BroadcastTab />;
+    case 'broadcast':
+    case 'notifications':
+      return <BroadcastTab />;
     case 'content': return <ContentTab />;
     case 'users': return <UsersTab />;
     case 'billing': return <BillingTab />;
     case 'orders': return <OrdersTab />;
     case 'analytics': return <AnalyticsTab />;
+    case 'funnel': return <FunnelTab />;
     case 'settings': return <SettingsTab />;
     case 'announcements': return <AnnouncementsTab />;
     case 'support': return <SupportTab />;
     case 'system-health':
     case 'health':
       return <SystemHealthTab />;
+    case 'integrations': return <IntegrationsTab />;
+    case 'jobs': return <JobsTab />;
+    case 'feature-flags': return <FeatureFlagsTab />;
+    case 'admins': return <AdminsTab />;
+    case 'roles': return <RolesTab />;
     case 'api-keys': return <ApiKeysTab />;
     default: return <DashboardTab />;
   }

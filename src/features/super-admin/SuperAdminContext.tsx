@@ -8,18 +8,24 @@ export type SuperAdminContextType = any; // We'll type this as 'any' for the ref
 
 const SuperAdminContext = createContext<SuperAdminContextType | null>(null);
 
+function normalizeTab(t: string | null | undefined): string {
+  if (!t) return "dashboard";
+  if (t === "health") return "system-health";
+  if (t === "tenants" || t === "restaurants") return "cafes";
+  if (t === "notifications") return "broadcast";
+  return t;
+}
+
 export function SuperAdminProvider({ children, initialData }: { children: React.ReactNode, initialData: SuperClientProps }) {
   const router = useRouter();
   
   const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit, initialTab } = initialData as any;
 
-  const [tab, setTabState] = useState<string>(
-    initialTab === "health" ? "system-health" : initialTab === "tenants" ? "cafes" : (initialTab || "dashboard")
-  );
+  const [tab, setTabState] = useState<string>(normalizeTab(initialTab));
 
   React.useEffect(() => {
     if (initialTab) {
-      setTabState(initialTab === "health" ? "system-health" : initialTab === "tenants" ? "cafes" : initialTab);
+      setTabState(normalizeTab(initialTab));
     }
   }, [initialTab]);
 
@@ -28,7 +34,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
       const params = new URLSearchParams(window.location.search);
       const urlTab = params.get("tab");
       if (urlTab) {
-        setTabState(urlTab === "health" ? "system-health" : urlTab === "tenants" ? "cafes" : urlTab);
+        setTabState(normalizeTab(urlTab));
       }
     };
     window.addEventListener("popstate", handlePopState);
@@ -36,7 +42,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   }, []);
 
   const setTab = (newTab: any) => {
-    const normalized = newTab === "health" ? "system-health" : newTab === "tenants" ? "cafes" : newTab;
+    const normalized = normalizeTab(newTab);
     setTabState(normalized);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);

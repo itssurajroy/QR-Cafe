@@ -34,6 +34,14 @@ function BuildingIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
+function StoreIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h18l-2 9H5L3 3zm1 9v8a1 1 0 001 1h14a1 1 0 001-1v-8M9 21v-6h6v6" />
+    </svg>
+  );
+}
+
 function UsersIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -91,18 +99,58 @@ function ClipboardListIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-function KeyIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 13l-5.586-5.586a2 2 0 00-2.828 0L12 15l-1.5-1.5 2.586-2.586M15 7h6m-3-3v6" />
-    </svg>
-  );
-}
-
 function LifebuoyIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  );
+}
+
+function PuzzlePieceIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a2 2 0 012 2v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a2 2 0 01-2 2h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a2 2 0 01-2-2v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V8a2 2 0 012-2h3a1 1 0 001-1V4z" />
+    </svg>
+  );
+}
+
+function CommandLineIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  );
+}
+
+function FlagIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  );
+}
+
+function LockClosedIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    </svg>
+  );
+}
+
+function FunnelIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
     </svg>
   );
 }
@@ -116,21 +164,20 @@ function GlobeIcon({ className = "w-4 h-4" }: { className?: string }) {
 }
 
 export function SuperSidebar() {
-  const { tab, setTab, totalCafes, kpis, staff } = useSuperAdmin();
+  const { tab, setTab, totalCafes, staff } = useSuperAdmin();
 
   const groups: NavGroup[] = [
     {
       title: "Overview",
       items: [
-        { id: "dashboard", label: "KPI & Analytics", icon: ChartBarIcon },
-        { id: "orders", label: "Live Orders", icon: ShoppingBagIcon },
-        { id: "analytics", label: "Funnel Analytics", icon: ChartBarIcon },
+        { id: "dashboard", label: "Dashboard", icon: ChartBarIcon },
       ],
     },
     {
-      title: "Tenancy & Revenue",
+      title: "Business",
       items: [
-        { id: "cafes", label: "Cafés & Tenants", icon: BuildingIcon, count: totalCafes },
+        { id: "cafes", label: "Restaurants", icon: BuildingIcon, count: totalCafes },
+        { id: "outlets", label: "Outlets", icon: StoreIcon },
         { id: "subscriptions", label: "Subscriptions", icon: CreditCardIcon },
         { id: "billing", label: "Billing & Invoices", icon: CreditCardIcon },
       ],
@@ -138,27 +185,45 @@ export function SuperSidebar() {
     {
       title: "Operations",
       items: [
+        { id: "orders", label: "Live Orders", icon: ShoppingBagIcon },
         { id: "staff", label: "Staff Directory", icon: UsersIcon, count: staff?.length || 0 },
         { id: "users", label: "User Accounts", icon: UsersIcon },
-        { id: "support", label: "Support Inquiries", icon: LifebuoyIcon },
+        { id: "support", label: "Support", icon: LifebuoyIcon },
       ],
     },
     {
-      title: "System & Config",
+      title: "Analytics",
+      items: [
+        { id: "analytics", label: "Platform Analytics", icon: ChartBarIcon },
+        { id: "funnel", label: "Funnel Analytics", icon: FunnelIcon },
+      ],
+    },
+    {
+      title: "Platform",
       items: [
         { id: "system-health", label: "System Health", icon: PulseIcon },
-        { id: "config", label: "Platform Config", icon: CogIcon },
-        { id: "audit", label: "Audit Event Logs", icon: ClipboardListIcon },
-        { id: "broadcast", label: "Broadcast Banner", icon: MegaphoneIcon },
+        { id: "integrations", label: "Integrations", icon: PuzzlePieceIcon },
+        { id: "jobs", label: "Background Jobs", icon: CommandLineIcon },
+        { id: "broadcast", label: "Notifications", icon: MegaphoneIcon },
         { id: "announcements", label: "Announcements", icon: MegaphoneIcon },
-        { id: "content", label: "CMS & Content", icon: GlobeIcon },
-        { id: "settings", label: "Platform Settings", icon: CogIcon },
-        { id: "api-keys", label: "API Keys", icon: KeyIcon },
+      ],
+    },
+    {
+      title: "Configuration",
+      items: [
+        { id: "config", label: "Platform Config", icon: CogIcon },
+        { id: "feature-flags", label: "Feature Flags", icon: FlagIcon },
+      ],
+    },
+    {
+      title: "Security",
+      items: [
+        { id: "admins", label: "Admin Users", icon: ShieldCheckIcon },
+        { id: "roles", label: "Roles & Permissions", icon: LockClosedIcon },
+        { id: "audit", label: "Audit Logs", icon: ClipboardListIcon },
       ],
     },
   ];
-
-  const mrrRupees = Math.round((kpis?.mrr || 0) / 100);
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between flex-shrink-0 h-full select-none">
@@ -216,19 +281,13 @@ export function SuperSidebar() {
         ))}
       </div>
 
-      <div className="p-4 border-t border-slate-100 bg-slate-50/50 space-y-3">
-        <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-            Platform MRR
-          </span>
-          <div className="text-base font-black text-slate-900 font-mono tracking-tight flex items-baseline gap-1">
-            <span>₹{mrrRupees.toLocaleString("en-IN")}</span>
-            <span className="text-[10px] font-medium text-slate-400">/ mo</span>
+      <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 space-y-2">
+        <div className="flex items-center justify-between px-2 py-1 text-[11px] font-semibold text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>All systems operational</span>
           </div>
-          <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>{kpis?.active || 0} active subscribers</span>
-          </div>
+          <span className="text-[10px] font-mono text-slate-400">99.98%</span>
         </div>
 
         <Link
