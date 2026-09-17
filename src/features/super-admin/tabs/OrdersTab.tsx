@@ -74,7 +74,6 @@ export function OrdersTab() {
   }, [page, q, status, restaurantId, from, to]);
 
   useEffect(() => {
-    if (tab !== "orders") return;
     load({ page: 1 });
     fetch("/api/super/tenants?page=1")
       .then((r) => (r.ok ? r.json() : null))
@@ -85,9 +84,7 @@ export function OrdersTab() {
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  if (tab !== "orders") return null;
+  }, []);
 
   function getStatusBadge(st: string) {
     switch (st) {

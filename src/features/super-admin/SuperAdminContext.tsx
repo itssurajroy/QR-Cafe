@@ -44,9 +44,11 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   const setTab = (newTab: any) => {
     const normalized = normalizeTab(newTab);
     setTabState(normalized);
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (url.searchParams.get("tab") !== normalized) {
+    try {
+      router.push(`/super?tab=${normalized}`, { scroll: false });
+    } catch {
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
         url.searchParams.set("tab", normalized);
         window.history.pushState({}, "", url.toString());
       }

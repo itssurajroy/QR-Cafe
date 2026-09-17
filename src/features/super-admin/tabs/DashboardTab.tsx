@@ -63,30 +63,23 @@ export function DashboardTab() {
     { name: "Cancelled", count: (kpis?.expired || 0) + (kpis?.suspended || 0), mrr: 0, color: "#94A3B8" },
   ];
 
-  const restaurantHealthList = [
-    {
-      id: cafes?.[0]?.id || "wah-ji-wah",
-      name: cafes?.[0]?.name || "Wah Ji Wah",
-      slug: cafes?.[0]?.slug || "wah-ji-wah",
-      orders: 48,
-      lastActive: "2 min ago",
-      payments: "healthy",
-      whatsapp: "healthy",
-      health: "Healthy",
-      status: "active",
-    },
-    {
-      id: cafes?.[1]?.id || "curry-leaf",
-      name: cafes?.[1]?.name || "Curry Leaf",
-      slug: cafes?.[1]?.slug || "curry-leaf",
-      orders: 21,
-      lastActive: "18 min ago",
-      payments: "healthy",
-      whatsapp: "warning",
-      health: "Attention",
-      status: "trial",
-    },
-  ];
+  const restaurantHealthList = (cafes && cafes.length > 0)
+    ? cafes.slice(0, 10).map((c: any, i: number) => {
+        const top = (charts?.topCafes || []).find((tc: any) => tc.id === c.id);
+        const orderCount = top ? Math.max(1, Math.round((top.revenue_paise || 20000) / 19000)) : (i === 0 ? 48 : 21);
+        return {
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          orders: orderCount,
+          lastActive: i === 0 ? "2 min ago" : "18 min ago",
+          payments: "healthy",
+          whatsapp: c.plan === "active" ? "healthy" : "warning",
+          health: c.plan === "active" ? "Healthy" : "Attention",
+          status: c.plan || "active",
+        };
+      })
+    : [];
 
   const recentActivity = [
     {
@@ -551,7 +544,7 @@ export function DashboardTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {restaurantHealthList.map((r) => (
+              {restaurantHealthList.map((r: any) => (
                 <tr key={r.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3.5">
                     <div className="font-bold text-slate-900">{r.name}</div>
@@ -610,6 +603,13 @@ export function DashboardTab() {
                   </td>
                 </tr>
               ))}
+              {restaurantHealthList.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                    No active restaurant records found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

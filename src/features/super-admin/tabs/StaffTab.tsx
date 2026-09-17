@@ -8,9 +8,7 @@ export function StaffTab() {
   const { staff, tab } = useSuperAdmin();
   const [searchQuery, setSearchQuery] = useState("");
   
-  if (tab !== "staff") return null;
-
-  const filteredStaff = staff.filter((s: any) => {
+  const filteredStaff = (staff || []).filter((s: any) => {
     const q = searchQuery.toLowerCase();
     const nameMatch = s.display_name?.toLowerCase().includes(q) || false;
     const cafeMatch = s.restaurant_name?.toLowerCase().includes(q) || false;

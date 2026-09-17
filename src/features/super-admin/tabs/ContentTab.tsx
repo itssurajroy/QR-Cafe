@@ -40,9 +40,7 @@ export function ContentTab() {
         })
         .finally(() => setIsLoading(false));
     }
-  }, [tab]);
-
-  if (tab !== "content") return null;
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);

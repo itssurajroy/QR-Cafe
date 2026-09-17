@@ -41,7 +41,6 @@ export function AnnouncementsTab() {
   }, [flash]);
 
   React.useEffect(() => {
-    if (tab !== "announcements") return;
     fetch("/api/super/announcements")
       .then((res) => res.json())
       .then((data) => {
@@ -49,9 +48,7 @@ export function AnnouncementsTab() {
       })
       .catch(() => flash("err", "Failed to load announcements"))
       .finally(() => setLoading(false));
-  }, [tab, flash]);
-
-  if (tab !== "announcements") return null;
+  }, [flash]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

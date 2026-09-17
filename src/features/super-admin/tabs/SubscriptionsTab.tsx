@@ -11,14 +11,11 @@ export function SubscriptionsTab() {
 
   // Wire to the same /api/super/billing dataset (paise-accurate server MRR).
   useEffect(() => {
-    if (tab !== "subscriptions") return;
     fetch("/api/super/billing")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (d?.ok && typeof d.mrr_paise === "number") setApiMrrPaise(d.mrr_paise); })
       .catch(() => {});
-  }, [tab]);
-
-  if (tab !== "subscriptions") return null;
+  }, []);
 
   // Calculate stats based on cafe plan & billing_status
   const activeCafes = cafes.filter((c: any) => c.plan === "active" || c.billing_status === "active");

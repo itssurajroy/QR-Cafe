@@ -457,11 +457,30 @@ export default function PublicCafeClient({
             line.notes,
           ].filter(Boolean);
 
+          const modifiers: Array<{ option_name: string; price_delta_paise: number }> = [];
+
+          if (line.portion && line.portion !== "Regular" && line.portionExtraPaise > 0) {
+            modifiers.push({
+              option_name: `Portion: ${line.portion}`,
+              price_delta_paise: line.portionExtraPaise,
+            });
+          }
+
+          if (line.selectedAddOns && line.selectedAddOns.length > 0) {
+            for (const addon of line.selectedAddOns) {
+              modifiers.push({
+                option_name: addon.name,
+                price_delta_paise: addon.pricePaise,
+              });
+            }
+          }
+
           return {
             itemId: line.item.id,
             quantity: line.quantity,
             notes: notesParts.length > 0 ? notesParts.join(" | ") : undefined,
             spiceLevel: line.spiceLevel,
+            modifiers,
           };
         }),
       };

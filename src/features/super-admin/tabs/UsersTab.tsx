@@ -65,7 +65,6 @@ export function UsersTab() {
   }, [page, q, role, active, restaurantId]);
 
   useEffect(() => {
-    if (tab !== "users") return;
     load({ page: 1 });
     fetch("/api/super/tenants?page=1")
       .then((r) => (r.ok ? r.json() : null))
@@ -76,9 +75,7 @@ export function UsersTab() {
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  if (tab !== "users") return null;
+  }, []);
 
   async function runOp(user_id: string, op: "disable" | "enable" | "set_role" | "reset_password", extra?: { role?: string }) {
     if (actingId) return;

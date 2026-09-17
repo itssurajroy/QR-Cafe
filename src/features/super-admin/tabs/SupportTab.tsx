@@ -52,8 +52,6 @@ export function SupportTab() {
 
   const { priority, lines } = React.useMemo(() => parseNotes(internalNotes), [internalNotes]);
 
-  if (tab !== "support") return null;
-
   const runSearch = async (q: string) => {
     setSearching(true);
     try {

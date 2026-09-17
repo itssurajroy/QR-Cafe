@@ -22,8 +22,6 @@ export function BroadcastTab() {
       setDelivery(existing.delivery || "both");
     }
   }, [existing]);
-  
-  if (tab !== "broadcast") return null;
 
   const handleSend = async () => {
     if (!subject.trim()) {

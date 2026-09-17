@@ -65,7 +65,14 @@ export const api = {
 
   placeOrder(payload: {
     qrToken: string;
-    items: Array<{ itemId: string; quantity: number; notes?: string; spiceLevel?: string; sizeVariant?: string }>;
+    items: Array<{
+      itemId: string;
+      quantity: number;
+      notes?: string;
+      spiceLevel?: string;
+      sizeVariant?: string;
+      modifiers?: Array<{ option_name: string; price_delta_paise: number }>;
+    }>;
     customerName?: string;
     customerPhone?: string;
     reservation_code?: string;
@@ -79,8 +86,20 @@ export const api = {
       ...(payload.reservation_code ? { reservation_code: payload.reservation_code } : {}),
       items: payload.items.map((it) => {
         const mods: Array<{ option_name: string; price_delta_paise: number }> = [];
-        if (it.spiceLevel && it.spiceLevel !== "Medium") mods.push({ option_name: `Spice: ${it.spiceLevel}`, price_delta_paise: 0 });
-        if (it.sizeVariant && it.sizeVariant !== "Regular") mods.push({ option_name: `Size: ${it.sizeVariant}`, price_delta_paise: 0 });
+        if (Array.isArray(it.modifiers) && it.modifiers.length > 0) {
+          for (const m of it.modifiers) {
+            mods.push({
+              option_name: m.option_name,
+              price_delta_paise: Math.max(0, m.price_delta_paise || 0),
+            });
+          }
+        }
+        if (it.spiceLevel && it.spiceLevel !== "Medium" && !mods.some((m) => m.option_name.includes("Spice"))) {
+          mods.push({ option_name: `Spice: ${it.spiceLevel}`, price_delta_paise: 0 });
+        }
+        if (it.sizeVariant && it.sizeVariant !== "Regular" && !mods.some((m) => m.option_name.includes("Portion") || m.option_name.includes("Size"))) {
+          mods.push({ option_name: `Size: ${it.sizeVariant}`, price_delta_paise: 0 });
+        }
         const notes = [it.notes, it.spiceLevel ? `Spice:${it.spiceLevel}` : "", it.sizeVariant ? `Size:${it.sizeVariant}` : ""].filter(Boolean).join(" | ").slice(0, 500);
         return { menu_item_id: it.itemId, quantity: it.quantity, notes, modifiers: mods };
       }),

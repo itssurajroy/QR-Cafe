@@ -436,11 +436,29 @@ export default function OrderStatusPage({
             </div>
             <div className="space-y-1.5 pt-1 max-h-48 overflow-y-auto pr-1 divide-y divide-slate-100">
               {data.items.map((it: any) => (
-                <div key={it.id} className="flex justify-between items-center text-xs pt-1.5">
-                  <span className="text-slate-800 font-medium">
-                    {it.item_name} <span className="text-indigo-600 font-bold font-mono">×{it.quantity}</span>
-                  </span>
-                  <span className="text-slate-600 font-mono font-medium">{paise(it.line_total_paise)}</span>
+                <div key={it.id} className="pt-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-800 font-semibold">
+                      {it.item_name} <span className="text-indigo-600 font-bold font-mono">×{it.quantity}</span>
+                    </span>
+                    <span className="text-slate-900 font-mono font-bold">{paise(it.line_total_paise)}</span>
+                  </div>
+                  {it.order_item_modifiers && it.order_item_modifiers.length > 0 ? (
+                    <div className="space-y-0.5 mt-0.5 pl-2 border-l-2 border-slate-200">
+                      {it.order_item_modifiers.map((m: any, mIdx: number) => (
+                        <div key={mIdx} className="flex items-center justify-between text-[11px] text-slate-500">
+                          <span>+ {m.option_name}</span>
+                          {m.price_delta_paise > 0 && (
+                            <span className="font-mono text-slate-600">+{paise(m.price_delta_paise)}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : it.notes ? (
+                    <p className="text-[11px] text-slate-500 mt-0.5 pl-2 border-l-2 border-slate-200 truncate">
+                      {it.notes}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>

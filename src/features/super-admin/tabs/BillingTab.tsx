@@ -59,10 +59,8 @@ export function BillingTab() {
   }, []);
 
   useEffect(() => {
-    if (tab === "billing") load();
-  }, [tab, load]);
-
-  if (tab !== "billing") return null;
+    load();
+  }, [load]);
 
   const failedEvents = events.filter((e) => e.status === "failed");
   const statusOf = (r: BillingRow) => r.subscription_status ?? r.plan ?? "trial";

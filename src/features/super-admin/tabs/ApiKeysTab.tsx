@@ -43,10 +43,8 @@ export function ApiKeysTab() {
   }, []);
 
   useEffect(() => {
-    if (tab === "api-keys") load();
-  }, [tab, load]);
-
-  if (tab !== "api-keys") return null;
+    load();
+  }, [load]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
