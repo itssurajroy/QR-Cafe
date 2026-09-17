@@ -1,22 +1,25 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 
 import type { Metadata } from "next";
+import type { Tenant } from "@/lib/tenant";
 
-export type RestaurantSeoInput = {
-  id?: string;
-  name: string;
-  slug: string;
+export type RestaurantSeoInput = Pick<
+  Tenant,
+  | "id"
+  | "name"
+  | "slug"
+  | "logo_url"
+  | "google_review_url"
+  | "upi_qr_url"
+> & {
   description?: string | null;
-  logo_url?: string | null;
   address?: string | null;
   phone?: string | null;
-  google_review_url?: string | null;
-  upi_qr_url?: string | null;
 };
 
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
 export const SITE_NAME = "QRslice";
-export const SITE_NAME_FULL = "QRslice — QR Ordering & Kitchen OS";
+export const SITE_NAME_FULL = "QRslice — QR Ordering, Restaurant POS & Kitchen OS";
 
 export function getCanonicalUrl(path: string): string {
   const baseUrl = SITE_URL.replace(/\/$/, "");
@@ -32,6 +35,7 @@ export function createPageMetadata({
   title,
   description,
   path,
+  keywords,
   ogImage,
   ogType = "website",
   twitterCard = "summary_large_image",
@@ -41,12 +45,14 @@ export function createPageMetadata({
   title: string;
   description: string;
   path: string;
+  keywords?: string[];
   ogImage?: string;
   ogType?: "website" | "article";
   twitterCard?: "summary" | "summary_large_image";
   noIndex?: boolean;
   noFollow?: boolean;
 }): Metadata {
+  const canonicalUrl = getCanonicalUrl(path);
   const ogImageUrl = ogImage || "/og-image.png";
 
   return {
@@ -55,13 +61,14 @@ export function createPageMetadata({
       template: `%s | ${SITE_NAME}`,
     },
     description,
+    keywords,
     alternates: {
-      canonical: getCanonicalUrl(path),
+      canonical: canonicalUrl,
     },
     openGraph: {
       type: ogType,
       locale: "en_IN",
-      url: getCanonicalUrl(path),
+      url: canonicalUrl,
       title: `${SITE_NAME} — ${title}`,
       description,
       siteName: SITE_NAME_FULL,
@@ -87,6 +94,13 @@ export function createPageMetadata({
     robots: {
       index: !noIndex,
       follow: !noFollow,
+      googleBot: {
+        index: !noIndex,
+        follow: !noFollow,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }
@@ -98,20 +112,22 @@ export function createRestaurantMetadata({
   restaurant: RestaurantSeoInput;
   path: string;
 }): Metadata {
+  const canonicalUrl = getCanonicalUrl(path);
   const description = `Browse the fresh culinary menu and place contactless table orders at ${restaurant.name}. Prepared fresh, delivered right to your table.`;
 
   return {
     title: `${restaurant.name} — Digital Menu & Contactless Table Ordering`,
     description,
     alternates: {
-      canonical: getCanonicalUrl(path),
+      canonical: canonicalUrl,
     },
     openGraph: {
       type: "website",
       locale: "en_IN",
-      url: getCanonicalUrl(path),
+      url: canonicalUrl,
       title: `${restaurant.name} | Digital Menu & Table Ordering`,
       description: `Browse dishes, customize your order, and pay seamlessly from your phone at ${restaurant.name}.`,
+      siteName: SITE_NAME_FULL,
       images: restaurant.logo_url ? [restaurant.logo_url] : [],
     },
     twitter: {
@@ -176,8 +192,8 @@ export function createBreadcrumbSchema(
   };
 }
 
-export function createSoftwareApplicationSchema(): object {
-  return {
+export function createSoftwareApplicationSchema(): object[] {
+  return [{
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "QRslice",
@@ -206,7 +222,7 @@ export function createSoftwareApplicationSchema(): object {
       availability: "https://schema.org/InStock",
       url: "https://qrslice.com/pricing",
     },
-  };
+  }];
 }
 
 export function createOrganizationSchema(): object {
@@ -244,8 +260,8 @@ export function createWebSiteSchema(): object {
 
 export function createFAQSchema(
   faqs: Array<{ question: string; answer: string }>
-): object {
-  return {
+): object[] {
+  const faqPage = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((faq) => ({
@@ -257,6 +273,7 @@ export function createFAQSchema(
       },
     })),
   };
+  return [faqPage];
 }
 
 export function createBreadcrumbJsonLd(

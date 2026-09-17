@@ -37,32 +37,36 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com",
   ),
-title: {
-    default: "QRslice — QR Ordering & Kitchen OS",
+  title: {
+    default: "QRslice — All-in-One QR Ordering, Restaurant POS & Kitchen OS",
     template: "%s | QRslice",
   },
   description:
-    "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
+    "QRslice connects QR code table ordering, digital menus, real-time Kitchen Display System (KDS), counter POS billing, and automated inventory in one simple restaurant platform.",
   keywords: [
-    "QR ordering",
-    "restaurant ordering",
-    "kitchen display system",
-    "digital menu",
-    "table ordering",
-    "restaurant POS",
-    "cafe management",
-    "QR code ordering",
-    "kitchen OS",
-    "restaurant technology",
+    "QR code restaurant ordering",
+    "digital menu for restaurants",
+    "kitchen display system KDS",
+    "restaurant POS software",
+    "contactless table ordering",
+    "kitchen order ticket KOT system",
+    "self ordering QR menu",
+    "cafe POS billing software",
+    "restaurant inventory management",
+    "WhatsApp restaurant receipts",
+    "UPI payment restaurant menu",
+    "table reservation software",
+    "cloud restaurant OS",
+    "restaurant management system India",
   ],
-openGraph: {
+  openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "QRslice",
+    siteName: "QRslice — QR Ordering & Kitchen OS",
     url: "/",
-    title: "QRslice — QR Ordering & Kitchen OS",
+    title: "QRslice — All-in-One QR Ordering, Restaurant POS & Kitchen OS",
     description:
-      "QRslice connects table ordering, digital menus and kitchen operations in one simple restaurant platform.",
+      "QRslice connects QR code table ordering, digital menus, real-time Kitchen Display System (KDS), counter POS billing, and automated inventory in one simple restaurant platform.",
     images: [
       {
         url: "/og-image.png",

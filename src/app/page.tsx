@@ -13,7 +13,73 @@ import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
 
+import { createFAQSchema, createSoftwareApplicationSchema } from "@/lib/seo";
+import type { Metadata } from "next";
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
+
+export const metadata: Metadata = {
+  title: "QRslice — All-in-One QR Code Restaurant Ordering, POS & Kitchen OS",
+  description:
+    "Transform your restaurant with QR code table ordering, real-time Kitchen Display System (KDS), counter POS, automated inventory deduction, WhatsApp bills, and instant UPI payments. Zero app download needed for diners.",
+  keywords: [
+    "QR code table ordering",
+    "restaurant ordering system",
+    "digital menu QR code",
+    "contactless dining software",
+    "kitchen display system KDS",
+    "restaurant POS software India",
+    "kitchen order ticket KOT printer",
+    "table ordering system",
+    "restaurant billing system",
+    "cafe management system",
+    "WhatsApp bill restaurant",
+    "UPI payment QR menu",
+    "self ordering kiosk alternative",
+    "restaurant inventory deduction",
+    "cloud restaurant POS",
+    "table reservation software",
+    "restaurant CRM loyalty program",
+  ],
+  alternates: {
+    canonical: "https://qrslice.com",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://qrslice.com",
+    title: "QRslice — All-in-One QR Code Restaurant Ordering, POS & Kitchen OS",
+    description:
+      "Transform your restaurant with QR code table ordering, real-time Kitchen Display System (KDS), counter POS, automated inventory deduction, WhatsApp bills, and instant UPI payments. Zero app download needed.",
+    siteName: "QRslice — QR Ordering, Restaurant POS & Kitchen OS",
+    images: [
+      {
+        url: `${APP_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "QRslice — QR Code Table Ordering & Kitchen OS for Modern Restaurants",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "QRslice — All-in-One QR Code Restaurant Ordering, POS & Kitchen OS",
+    description:
+      "Zero app downloads for diners. Real-time KDS, counter POS, instant UPI checkout, and automated inventory. Start your 14-day free trial today.",
+    images: [`${APP_URL}/og-image.png`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
 
 const JSON_LD = [
   {
@@ -65,52 +131,14 @@ const JSON_LD = [
       url: `${APP_URL}/pricing`,
     },
   },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Do guests need to download an app?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "No. QRslice opens in the guest’s browser, so they can scan, browse, and order in seconds without an app or account.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What hardware do I need?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Any phone, tablet, or laptop with a browser works. Add a Bluetooth thermal printer for KOTs or a tablet / TV for the kitchen display.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Can I use my existing POS?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. QRslice is designed to sit alongside your current setup, with exports, webhooks, and a flexible API for the workflows you already trust.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How long does setup take?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Most cafés can go live in around 30 minutes. Import your menu, print table QR codes, and invite your team.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What happens after the free trial?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "You get the full system for 14 days with no credit card required. Continue for ₹999 per month per outlet, or cancel anytime.",
-        },
-      },
-    ],
-  },
+  ...createFAQSchema([
+    { question: "Do guests need to download an app?", answer: "No. QRslice opens in the guest's browser, so they can scan, browse, and order in seconds without an app or account." },
+    { question: "What hardware do I need?", answer: "Any phone, tablet, or laptop with a browser works. Add a Bluetooth thermal printer for KOTs or a tablet / TV for the kitchen display." },
+    { question: "Can I use my existing POS?", answer: "Yes. QRslice is designed to sit alongside your current setup, with exports, webhooks, and a flexible API for the workflows you already trust." },
+    { question: "How long does setup take?", answer: "Most cafés can go live in around 30 minutes. Import your menu, print table QR codes, and invite your team." },
+    { question: "What happens after the free trial?", answer: "You get the full system for 14 days with no credit card required. Continue for ₹999 per month per outlet, or cancel anytime." },
+  ]) as any[],
+  createSoftwareApplicationSchema() as any,
 ];
 
 export default async function LandingPage() {

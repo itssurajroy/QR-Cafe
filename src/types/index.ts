@@ -128,6 +128,15 @@ export type Restaurant = {
   created_at?: string;
 };
 
+export type TierLimits = {
+  maxTables: number | null;
+  maxItems: number | null;
+  kds: boolean;
+  branding: boolean;
+  analytics: boolean;
+  multiLocation: boolean;
+};
+
 // ─── Reports & Analytics ──────────────────────────────────────────────────────
 
 export type DailyReport = {
