@@ -1058,8 +1058,8 @@ export default function AdminClient({
           </div>
         )}
 
-        {/* TAB: INTEGRATIONS & WEBHOOKS */}
-        {(tab === "integrations" || tab === "webhooks") && (
+        {/* TAB: WEBHOOKS */}
+        {tab === "webhooks" && (
           <WebhooksTab restaurant={activeRestaurant} flash={flash} />
         )}
 
