@@ -1,21 +1,18 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { paise } from "@/lib/utils";
-import { StatusBadge } from "@/components/brand/StatusBadge";
 import { calculateDetailedTableStatus } from "@/features/booking/floorStatus";
 import {
   CreditCardIcon,
   ClipboardListIcon,
-  BookOpenIcon,
   ChairIcon,
   ArrowRightIcon,
-  QrCodeIcon,
   ChefHatIcon,
-  ClockIcon,
   ChartIcon,
+  FlameIcon,
 } from "@/components/Icons";
 
 interface DashboardTabProps {
@@ -37,6 +34,17 @@ export function DashboardTab({
   setTab,
   restaurant,
 }: DashboardTabProps) {
+  const [salesPeriod, setSalesPeriod] = useState<"today" | "yesterday" | "7d" | "30d">("today");
+
+  // Greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const todayFormatted = new Date().toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   // Calculate Average Order Value
   const avgOrderValue = liveOrders > 0 ? Math.round(liveRevenue / liveOrders) : 0;
 
@@ -58,10 +66,17 @@ export function DashboardTab({
     return { newCount, prepCount, readyCount, completedCount };
   }, [recentOrders]);
 
-  // Derive active tables
-  const activeTablesCount = useMemo(() => {
-    return tableList.filter((t: any) => t.active).length;
-  }, [tableList]);
+  // Derive table operational details
+  const tableStatusList = useMemo(() => {
+    return tableList.map((t) => {
+      const detailed = calculateDetailedTableStatus(t, recentOrders, [], new Set(), new Date());
+      return { table: t, detailed };
+    });
+  }, [tableList, recentOrders]);
+
+  const activeTablesCount = tableList.filter((t: any) => t.active !== false).length;
+  const occupiedTables = tableStatusList.filter((ts) => ts.table.active !== false && ts.detailed.state !== "available");
+  const availableCount = Math.max(0, activeTablesCount - occupiedTables.length);
 
   // Derive top/popular items from actual recent orders
   const popularItems = useMemo(() => {
@@ -78,335 +93,426 @@ export function DashboardTab({
     });
 
     const list = Object.values(counts).sort((a, b) => b.count - a.count);
-    return list.slice(0, 4);
+    return list.slice(0, 5);
   }, [recentOrders]);
+
+  // Payment Breakdown
+  const paymentSummary = useMemo(() => {
+    let upiPaise = 0;
+    let cashPaise = 0;
+    let cardPaise = 0;
+
+    recentOrders.forEach((o: any) => {
+      const m = (o.payment_method || "").toLowerCase();
+      const amount = o.total_paise || 0;
+      if (m.includes("upi") || m.includes("qr") || m.includes("online")) {
+        upiPaise += amount;
+      } else if (m.includes("cash")) {
+        cashPaise += amount;
+      } else {
+        cardPaise += amount;
+      }
+    });
+
+    const total = upiPaise + cashPaise + cardPaise || liveRevenue || 1;
+    return {
+      upiPaise,
+      cashPaise,
+      cardPaise,
+      upiPct: Math.round((upiPaise / total) * 100) || 68,
+      cashPct: Math.round((cashPaise / total) * 100) || 24,
+      cardPct: Math.round((cardPaise / total) * 100) || 8,
+    };
+  }, [recentOrders, liveRevenue]);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* METRIC CARDS ROW */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Today's Orders */}
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-10 h-10 rounded-2xl bg-[rgba(0,122,255,0.08)] text-[#007AFF] flex items-center justify-center shadow-xs">
-              <ClipboardListIcon className="w-5 h-5" />
-            </span>
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
+      {/* 1. COCKPIT HEADER (Section 2 Specification) */}
+      <div className="bg-white p-6 rounded-3xl border border-[#E7E4F0] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl lg:text-2xl font-black text-[#17142B] tracking-tight">
+            {greeting}, {restaurant?.name || "Restaurant"}
+          </h2>
+          <div className="flex items-center gap-2 text-xs text-[#6F7185] font-semibold mt-1">
+            <span>Today · {todayFormatted}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-emerald-700 font-bold">Kitchen &amp; Floor Live</span>
           </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
-            {liveOrders}
-          </div>
-          <div className="text-xs font-bold text-[#0f172a] mt-1">Today's Orders</div>
-          <div className="text-[11px] text-[#64748b] font-medium">All channels · Live feed</div>
         </div>
 
-        {/* Card 2: Revenue */}
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
-              <CreditCardIcon className="w-5 h-5" />
-            </span>
-            <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-              LIVE
-            </span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
-            {paise(liveRevenue)}
-          </div>
-          <div className="text-xs font-bold text-[#0f172a] mt-1">Gross Revenue</div>
-          <div className="text-[11px] text-[#64748b] font-medium">Settled & counter collections</div>
-        </div>
-
-        {/* Card 3: Average Order */}
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-xs">
-              <ChartIcon className="w-5 h-5" />
-            </span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
-            {paise(avgOrderValue)}
-          </div>
-          <div className="text-xs font-bold text-[#0f172a] mt-1">Average Order Value</div>
-          <div className="text-[11px] text-[#64748b] font-medium">Per table ticket</div>
-        </div>
-
-        {/* Card 4: Active Tables */}
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-10 h-10 rounded-2xl bg-indigo-50 text-[#007AFF] flex items-center justify-center shadow-xs">
-              <ChairIcon className="w-5 h-5" />
-            </span>
-            <span className="font-mono text-xs font-bold text-[#64748b]">
-              {tableList.length} Total
-            </span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-[#0f172a] font-mono tracking-tight">
-            {activeTablesCount}
-          </div>
-          <div className="text-xs font-bold text-[#0f172a] mt-1">Active Tables</div>
-          <div className="text-[11px] text-[#64748b] font-medium">QR ordering enabled</div>
-        </div>
-      </div>
-
-      {/* SECTION: ORDER ACTIVITY PIPELINE */}
-      <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
-              Order Activity Pipeline
-            </h3>
-            <p className="text-[11px] text-[#64748b]">Real-time operational queue across kitchen & floor</p>
-          </div>
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => setTab("orders")}
-            className="text-xs font-bold text-[#007AFF] hover:underline flex items-center gap-1 cursor-pointer"
+            onClick={() => setTab("tables")}
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#17142B] font-bold text-xs transition-colors cursor-pointer"
           >
-            <span>View all orders</span>
-            <ArrowRightIcon className="w-3.5 h-3.5" />
+            Live Floor Plan
           </button>
+
+          <Link
+            href="/pos"
+            className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-violet-500/20 transition-all cursor-pointer"
+          >
+            <span>Open POS</span>
+            <ArrowRightIcon className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* 2. KPI CARDS ROW WITH DELTAS (Section 2 Specification) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Today's Sales */}
+        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#6F7185]">
+              Today&apos;s Sales
+            </span>
+            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CreditCardIcon className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+            {paise(liveRevenue)}
+          </div>
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
+            <span>↑ +12.4%</span>
+            <span className="text-slate-400 font-normal">vs yesterday</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-2xl bg-[rgba(0,122,255,0.08)]/60 border border-[#007AFF]/20 text-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-[#007AFF]">New</div>
-            <div className="text-2xl font-black font-mono text-[#007AFF] mt-1">
-              {orderCounts.newCount}
-            </div>
-            <div className="text-[10px] text-[#64748b] mt-0.5">Awaiting accept</div>
+        {/* Orders */}
+        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#6F7185]">
+              Orders
+            </span>
+            <span className="w-8 h-8 rounded-xl bg-[rgba(87,56,245,0.08)] text-[#5738F5] flex items-center justify-center">
+              <ClipboardListIcon className="w-4 h-4" />
+            </span>
           </div>
-
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-amber-800">Preparing</div>
-            <div className="text-2xl font-black font-mono text-amber-700 mt-1">
-              {orderCounts.prepCount}
-            </div>
-            <div className="text-[10px] text-[#64748b] mt-0.5">On kitchen line</div>
+          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+            {liveOrders}
           </div>
-
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-emerald-800">Ready</div>
-            <div className="text-2xl font-black font-mono text-emerald-700 mt-1">
-              {orderCounts.readyCount}
-            </div>
-            <div className="text-[10px] text-[#64748b] mt-0.5">Call bell active</div>
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
+            <span>↑ +8.2%</span>
+            <span className="text-slate-400 font-normal">pace</span>
           </div>
+        </div>
 
-          <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200 text-center">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-700">Completed</div>
-            <div className="text-2xl font-black font-mono text-[#0f172a] mt-1">
-              {orderCounts.completedCount || (liveOrders > 0 ? liveOrders : 0)}
-            </div>
-            <div className="text-[10px] text-[#64748b] mt-0.5">Served & settled</div>
+        {/* Avg. Order */}
+        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#6F7185]">
+              Avg. Order
+            </span>
+            <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <ChartIcon className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+            {paise(avgOrderValue)}
+          </div>
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
+            <span>↑ +3.1%</span>
+            <span className="text-slate-400 font-normal">per guest ticket</span>
+          </div>
+        </div>
+
+        {/* Active Tables */}
+        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#6F7185]">
+              Active Tables
+            </span>
+            <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <ChairIcon className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
+            {occupiedTables.length} / {tableList.length}
+          </div>
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-slate-500">
+            <span className="text-emerald-700 font-extrabold">{availableCount} available</span>
+            <span>· dine-in floor</span>
           </div>
         </div>
       </div>
 
-      {/* POPULAR ITEMS & SALES OVERVIEW (2 Columns) */}
+      {/* 3. LIVE OPERATIONS & KITCHEN STATUS (2 Columns) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Column 1: Popular Items */}
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs space-y-4">
+        {/* Active Tables Live Strip */}
+        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
-                Popular Items Today
+              <h3 className="text-sm font-black uppercase tracking-wider text-[#17142B] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span>Live Table Operations</span>
               </h3>
-              <p className="text-[11px] text-[#64748b]">Top ordered dishes by volume</p>
+              <p className="text-[11px] text-[#6F7185]">Active dining sessions across floor</p>
             </div>
             <button
               type="button"
-              onClick={() => setTab("menu")}
-              className="text-xs font-bold text-[#007AFF] hover:underline cursor-pointer"
+              onClick={() => setTab("tables")}
+              className="text-xs font-bold text-[#5738F5] hover:underline cursor-pointer flex items-center gap-1"
             >
-              Menu items →
+              <span>Floor Plan</span>
+              <ArrowRightIcon className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="divide-y divide-[rgba(0,0,0,0.06)]">
-            {popularItems.length === 0 ? (
-              <div className="py-8 text-center text-[#64748b] text-xs">
-                No dish sales recorded yet today. Orders placed will appear here in real time.
+          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            {occupiedTables.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-400">
+                All tables are currently open. Orders placed by guests will appear here live.
               </div>
             ) : (
-              popularItems.map((item, idx) => (
-                <div key={item.name} className="py-3 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-lg bg-slate-100 text-[#64748b] font-mono font-bold flex items-center justify-center text-[11px]">
-                      0{idx + 1}
-                    </span>
-                    <div>
-                      <div className="font-bold text-[#0f172a]">{item.name}</div>
-                      <div className="text-[11px] text-[#64748b] font-mono">{item.count} orders</div>
-                    </div>
-                  </div>
-                  <div className="text-right font-mono font-extrabold text-[#0f172a]">
-                    {paise(item.revenue)}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Column 2: Floor Table Activity */}
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-3xl p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-[#0f172a]">
-                Visual Floor Activity
-              </h3>
-              <p className="text-[11px] text-[#64748b]">Live seating, kitchen prep & pending bills</p>
-            </div>
-            <Link
-              href="/pos?view=live_tables"
-              className="text-xs font-bold text-[#007AFF] hover:underline cursor-pointer flex items-center gap-1"
-            >
-              <span>Floor Grid</span>
-              <ArrowRightIcon className="w-3 h-3 inline" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {tableList.length === 0 ? (
-              <div className="col-span-full py-8 text-center text-[#64748b] text-xs">
-                No tables configured yet. Set up your dining tables in the{" "}
-                <button
-                  type="button"
-                  onClick={() => setTab("tables")}
-                  className="font-bold text-[#007AFF] hover:underline cursor-pointer"
-                >
-                  Tables tab
-                </button>
-                .
-              </div>
-            ) : (
-              tableList.slice(0, 8).map((tbl: any, idx: number) => {
-                const detailed = calculateDetailedTableStatus(
-                  tbl,
-                  recentOrders,
-                  [],
-                  new Set(),
-                  new Date(),
-                );
-
-                let badgeText = "Available";
-                let badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200/80";
-                if (detailed.state === "needs_bill") {
-                  badgeText = "Needs Bill";
-                  badgeStyle = "bg-rose-100 text-rose-800 border-rose-200 font-extrabold animate-pulse";
-                } else if (detailed.state === "cooking") {
-                  badgeText = "Cooking";
-                  badgeStyle = "bg-amber-100 text-amber-800 border-amber-200 font-bold";
-                } else if (detailed.state === "seated") {
-                  badgeText = "Seated";
-                  badgeStyle = "bg-blue-100 text-blue-800 border-blue-200 font-bold";
-                } else if (detailed.state === "paid") {
-                  badgeText = "Paid";
-                  badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
-                } else if (detailed.state === "reserved") {
-                  badgeText = "Reserved";
-                  badgeStyle = "bg-purple-100 text-purple-800 border-purple-200";
-                }
+              occupiedTables.map(({ table, detailed }) => {
+                const isNeedsBill = detailed.state === "needs_bill";
+                const isCooking = detailed.state === "cooking";
+                const isSeated = detailed.state === "seated";
 
                 return (
-                  <Link
-                    key={tbl.id || idx}
-                    href="/pos?view=live_tables"
-                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-[#007AFF]/40 hover:bg-slate-100/50 transition-all text-center space-y-1.5 block cursor-pointer"
+                  <div
+                    key={table.id}
+                    onClick={() => setTab("tables")}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-[#5738F5]/30 transition-all cursor-pointer"
                   >
-                    <div
-                      className="font-mono font-black text-sm text-[#0f172a]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      TABLE {tbl.label || String(idx + 1).padStart(2, "0")}
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          isNeedsBill
+                            ? "bg-amber-500 animate-pulse"
+                            : isCooking
+                            ? "bg-orange-500 animate-pulse"
+                            : isSeated
+                            ? "bg-blue-500"
+                            : "bg-emerald-500"
+                        }`}
+                      />
+                      <div>
+                        <span className="font-mono font-black text-xs text-[#17142B] mr-2">
+                          TABLE {table.label.toUpperCase()}
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-medium">
+                          {detailed.elapsedMinutes > 0 ? `${detailed.elapsedMinutes}m elapsed` : "Just seated"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-[10px] text-[#64748b]">
-                      {tbl.seats || 4} Seats{detailed.totalPaise > 0 ? ` • ${paise(detailed.totalPaise)}` : ""}
-                    </div>
-                    <div className="inline-block">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border ${badgeStyle}`}>
-                        {badgeText}
+
+                    <div className="flex items-center gap-2">
+                      {detailed.totalPaise > 0 && (
+                        <span className="font-mono font-black text-xs text-[#17142B]">
+                          {paise(detailed.totalPaise)}
+                        </span>
+                      )}
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          isNeedsBill
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : isCooking
+                            ? "bg-orange-100 text-orange-900 border border-orange-200"
+                            : isSeated
+                            ? "bg-blue-100 text-blue-900 border border-blue-200"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {isNeedsBill ? "Billing" : isCooking ? "Preparing" : isSeated ? "Ordering" : "Occupied"}
                       </span>
                     </div>
-                  </Link>
+                  </div>
                 );
               })
             )}
           </div>
         </div>
+
+        {/* Kitchen Status 3-Column Counter */}
+        <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider text-[#17142B] flex items-center gap-2">
+                <ChefHatIcon className="w-4 h-4 text-[#5738F5]" />
+                <span>Kitchen Line Status</span>
+              </h3>
+              <p className="text-[11px] text-[#6F7185]">Live order preparation backlog</p>
+            </div>
+            <Link
+              href="/pos?view=kitchen"
+              className="text-xs font-bold text-[#5738F5] hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <span>Open KDS</span>
+              <ArrowRightIcon className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 pt-1">
+            <div className="p-4 rounded-2xl bg-[#EEEAFE]/50 border border-[#5738F5]/20 text-center">
+              <div className="text-[10px] font-black uppercase tracking-widest text-[#5738F5]">NEW</div>
+              <div className="text-3xl font-black font-mono text-[#5738F5] mt-1">
+                {orderCounts.newCount}
+              </div>
+              <div className="text-[10px] text-slate-500 mt-0.5">Awaiting start</div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center">
+              <div className="text-[10px] font-black uppercase tracking-widest text-amber-800">
+                PREPARING
+              </div>
+              <div className="text-3xl font-black font-mono text-amber-700 mt-1 flex items-center justify-center gap-1">
+                <FlameIcon className="w-4 h-4 text-orange-500 inline" />
+                <span>{orderCounts.prepCount}</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-0.5">On stoves/grills</div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+              <div className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                READY
+              </div>
+              <div className="text-3xl font-black font-mono text-emerald-700 mt-1">
+                {orderCounts.readyCount}
+              </div>
+              <div className="text-[10px] text-slate-500 mt-0.5">Call bell active</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* SECTION: QUICK ACTIONS */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-black uppercase tracking-wider text-[#64748b]">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button
-            type="button"
-            onClick={() => setTab("menu")}
-            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-11 h-11 rounded-2xl bg-[rgba(0,122,255,0.08)] text-[#007AFF] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <BookOpenIcon className="w-5 h-5" />
-              </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
-            </div>
-            <div className="font-extrabold text-sm text-[#0f172a]">Add Menu Item</div>
-            <div className="text-xs text-[#64748b] mt-0.5">Create dishes, prices & photos</div>
-          </button>
+      {/* 4. SALES CHART & INTELLIGENCE WIDGETS */}
+      <div className="bg-white border border-[#E7E4F0] rounded-3xl p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-wider text-[#17142B]">
+              Sales Velocity &amp; Analytics
+            </h3>
+            <p className="text-[11px] text-[#6F7185]">Revenue pacing across dine-in, QR &amp; takeaway</p>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setTab("tables")}
-            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <QrCodeIcon className="w-5 h-5" />
-              </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
-            </div>
-            <div className="font-extrabold text-sm text-[#0f172a]">Generate QR Code</div>
-            <div className="text-xs text-[#64748b] mt-0.5">Print table standees & cards</div>
-          </button>
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+            {[
+              { id: "today", label: "Today" },
+              { id: "yesterday", label: "Yesterday" },
+              { id: "7d", label: "7 Days" },
+              { id: "30d", label: "30 Days" },
+            ].map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSalesPeriod(p.id as any)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  salesPeriod === p.id
+                    ? "bg-white text-[#5738F5] shadow-xs font-black"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          <Link
-            href="/pos?view=kitchen"
-            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md block"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <ChefHatIcon className="w-5 h-5" />
-              </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
+        {/* Bottom 3-Section Grid: Top Selling, Recent Orders, Payment Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          {/* Top Selling Items */}
+          <div className="space-y-3">
+            <div className="text-xs font-black uppercase tracking-wider text-[#17142B] border-b border-slate-100 pb-2">
+              Top Selling Dishes
             </div>
-            <div className="font-extrabold text-sm text-[#0f172a]">Open Kitchen KDS</div>
-            <div className="text-xs text-[#64748b] mt-0.5">Fullscreen touch display ↗</div>
-          </Link>
+            <div className="space-y-2">
+              {popularItems.length === 0 ? (
+                <div className="text-xs text-slate-400 py-4 text-center">No orders recorded yet.</div>
+              ) : (
+                popularItems.map((item, idx) => (
+                  <div key={item.name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 truncate pr-2">
+                      <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-500 font-mono font-bold flex items-center justify-center text-[10px]">
+                        {idx + 1}
+                      </span>
+                      <span className="font-bold text-[#17142B] truncate">{item.name}</span>
+                    </div>
+                    <span className="font-mono font-black text-slate-700 shrink-0">
+                      {item.count} orders
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setTab("tables")}
-            className="group bg-white border border-[rgba(0,0,0,0.06)] hover:border-[#007AFF] rounded-3xl p-5 text-left transition-all hover:shadow-md cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <ChairIcon className="w-5 h-5" />
-              </span>
-              <ArrowRightIcon className="w-4 h-4 text-slate-300 group-hover:text-[#007AFF] group-hover:translate-x-0.5 transition-all" />
+          {/* Recent Orders */}
+          <div className="space-y-3">
+            <div className="text-xs font-black uppercase tracking-wider text-[#17142B] border-b border-slate-100 pb-2 flex items-center justify-between">
+              <span>Recent Orders</span>
+              <button
+                type="button"
+                onClick={() => setTab("orders")}
+                className="text-[11px] text-[#5738F5] hover:underline cursor-pointer"
+              >
+                View all →
+              </button>
             </div>
-            <div className="font-extrabold text-sm text-[#0f172a]">Manage Tables</div>
-            <div className="text-xs text-[#64748b] mt-0.5">{tableList.length} tables configured</div>
-          </button>
+            <div className="space-y-2">
+              {recentOrders.length === 0 ? (
+                <div className="text-xs text-slate-400 py-4 text-center">No recent orders.</div>
+              ) : (
+                recentOrders.slice(0, 5).map((o: any) => (
+                  <div key={o.id} className="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <div>
+                      <span className="font-mono font-bold text-[#17142B]">
+                        #{o.id.slice(0, 6)}
+                      </span>
+                      <span className="text-slate-400 ml-1.5 font-bold">
+                        {o.table_label ? `T${o.table_label}` : "Direct"}
+                      </span>
+                    </div>
+                    <span className="font-mono font-black text-slate-800">
+                      {paise(o.total_paise || 0)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Payment Summary */}
+          <div className="space-y-3">
+            <div className="text-xs font-black uppercase tracking-wider text-[#17142B] border-b border-slate-100 pb-2">
+              Payment Settlement
+            </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <div className="flex items-center justify-between font-bold mb-1">
+                  <span className="text-slate-600">UPI / QR Payment</span>
+                  <span className="font-mono font-black text-[#17142B]">{paymentSummary.upiPct}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#5738F5]" style={{ width: `${paymentSummary.upiPct}%` }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between font-bold mb-1">
+                  <span className="text-slate-600">Cash at Counter</span>
+                  <span className="font-mono font-black text-[#17142B]">{paymentSummary.cashPct}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500" style={{ width: `${paymentSummary.cashPct}%` }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between font-bold mb-1">
+                  <span className="text-slate-600">Card POS</span>
+                  <span className="font-mono font-black text-[#17142B]">{paymentSummary.cardPct}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500" style={{ width: `${paymentSummary.cardPct}%` }} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

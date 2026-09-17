@@ -28,34 +28,41 @@ import {
 import { canAccessTab, getRoleBadge } from "@/lib/role-permissions";
 
 export type AdminSectionId =
-  // OVERVIEW
+  // DASHBOARD
   | "dashboard"
-  | "orders"
-  | "kitchen"
+  // OPERATIONS
   | "tables"
+  | "orders"
+  | "pos"
+  | "kitchen"
   | "bookings"
-  // MENU
+  // CATALOG
   | "menu"
   | "categories"
   | "modifiers"
-  // OPERATIONS
+  // INVENTORY
   | "inventory"
   | "recipes"
-  | "billing"
-  // BUSINESS
-  | "analytics"
+  // CUSTOMERS
   | "crm"
+  // REPORTS
+  | "analytics"
+  // TEAM
   | "staff"
   // SETTINGS
   | "settings"
   | "account"
-  | "integrations";
+  | "integrations"
+  | "billing"
+  | "support"
+  | "help";
 
 interface NavItem {
   id: AdminSectionId;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  href?: string;
 }
 
 interface NavGroup {
@@ -65,17 +72,17 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    title: "OVERVIEW",
+    title: "OPERATIONS",
     items: [
-      { id: "dashboard", label: "Dashboard", icon: DashboardIcon },
-      { id: "orders", label: "Orders", icon: ClipboardListIcon },
-      { id: "kitchen", label: "Kitchen", icon: ChefHatIcon },
       { id: "tables", label: "Tables", icon: ChairIcon },
-      { id: "bookings", label: "Bookings", icon: CalendarIcon },
+      { id: "orders", label: "Orders", icon: ClipboardListIcon },
+      { id: "pos", label: "POS Terminal", icon: CreditCardIcon, href: "/pos" },
+      { id: "kitchen", label: "Kitchen Display", icon: ChefHatIcon },
+      { id: "bookings", label: "Reservations", icon: CalendarIcon },
     ],
   },
   {
-    title: "MENU",
+    title: "CATALOG",
     items: [
       { id: "menu", label: "Menu Items", icon: BookOpenIcon },
       { id: "categories", label: "Categories", icon: SlidersIcon },
@@ -83,27 +90,37 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: "OPERATIONS",
+    title: "INVENTORY",
     items: [
-      { id: "inventory", label: "Inventory", icon: BoxIcon },
-      { id: "recipes", label: "Recipes", icon: SoupIcon },
-      { id: "billing", label: "Billing", icon: CreditCardIcon },
+      { id: "inventory", label: "Inventory Stock", icon: BoxIcon },
+      { id: "recipes", label: "Recipes & Gravies", icon: SoupIcon },
     ],
   },
   {
-    title: "BUSINESS",
+    title: "CUSTOMERS",
     items: [
-      { id: "analytics", label: "Analytics", icon: ChartIcon },
-      { id: "crm", label: "Loyalty & CRM", icon: UsersIcon },
-      { id: "staff", label: "Staff", icon: UsersIcon },
+      { id: "crm", label: "Customers & Loyalty", icon: UsersIcon },
+    ],
+  },
+  {
+    title: "REPORTS",
+    items: [
+      { id: "analytics", label: "Analytics & Reports", icon: ChartIcon },
+    ],
+  },
+  {
+    title: "TEAM",
+    items: [
+      { id: "staff", label: "Staff & Permissions", icon: UsersIcon },
     ],
   },
   {
     title: "SETTINGS",
     items: [
-      { id: "settings", label: "Restaurant", icon: GearIcon },
-      { id: "account", label: "Account", icon: ShieldCheckIcon },
-      { id: "integrations", label: "Integrations", icon: PlugIcon },
+      { id: "settings", label: "Restaurant & Taxes", icon: GearIcon },
+      { id: "account", label: "Branding & Theme", icon: ShieldCheckIcon },
+      { id: "integrations", label: "Integrations & API", icon: PlugIcon },
+      { id: "billing", label: "Subscription", icon: CreditCardIcon },
     ],
   },
 ];
@@ -264,7 +281,24 @@ export function AdminAppShell({
           )}
 
           {/* Nav Links */}
-          <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-5 scrollbar-thin">
+          <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-thin">
+            {/* Top-level Dashboard Button */}
+            {canAccessTab(userRole, "dashboard") && (
+              <button
+                type="button"
+                onClick={() => onSelectSection("dashboard")}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  currentSection === "dashboard"
+                    ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25 font-extrabold"
+                    : "text-[#6F7185] hover:text-[#17142B] hover:bg-[#EEEAFE]/50"
+                } ${collapsed ? "justify-center px-0" : ""}`}
+                title={collapsed ? "Dashboard" : undefined}
+              >
+                <DashboardIcon className={`w-4 h-4 shrink-0 ${currentSection === "dashboard" ? "text-white" : "text-current"}`} />
+                {!collapsed && <span className="truncate">Dashboard</span>}
+              </button>
+            )}
+
             {visibleGroups.map((group) => (
               <div key={group.title} className="space-y-1">
                 {!collapsed && (
@@ -275,12 +309,29 @@ export function AdminAppShell({
                 {group.items.map((item) => {
                   const isActive = currentSection === item.id;
                   const Icon = item.icon;
+                  if (item.href) {
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                          isActive
+                            ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25 font-extrabold"
+                            : "text-[#6F7185] hover:text-[#17142B] hover:bg-[#EEEAFE]/50"
+                        } ${collapsed ? "justify-center px-0" : ""}`}
+                        title={collapsed ? item.label : undefined}
+                      >
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-current"}`} />
+                        {!collapsed && <span className="truncate">{item.label}</span>}
+                      </Link>
+                    );
+                  }
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => onSelectSection(item.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         isActive
                           ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25 font-extrabold"
                           : "text-[#6F7185] hover:text-[#17142B] hover:bg-[#EEEAFE]/50"
@@ -341,6 +392,23 @@ export function AdminAppShell({
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                {canAccessTab(userRole, "dashboard") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectSection("dashboard");
+                      setMobileDrawerOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      currentSection === "dashboard"
+                        ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25"
+                        : "text-[#6F7185] hover:text-[#17142B] hover:bg-slate-50"
+                    }`}
+                  >
+                    <DashboardIcon className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </button>
+                )}
                 {visibleGroups.map((group) => (
                   <div key={group.title} className="space-y-1">
                     <div className="text-[10px] font-black uppercase tracking-widest text-[#6F7185] px-2">
@@ -349,6 +417,23 @@ export function AdminAppShell({
                     {group.items.map((item) => {
                       const isActive = currentSection === item.id;
                       const Icon = item.icon;
+                      if (item.href) {
+                        return (
+                          <Link
+                            key={item.id}
+                            href={item.href}
+                            onClick={() => setMobileDrawerOpen(false)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              isActive
+                                ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25"
+                                : "text-[#6F7185] hover:text-[#17142B] hover:bg-slate-50"
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      }
                       return (
                         <button
                           key={item.id}

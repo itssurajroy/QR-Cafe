@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { generateBeautifulQrDataUrl } from "@/lib/qr-designer";
 import { printSingleStandCard, printBulkStandCards } from "@/lib/print-standee";
+import { PrintStandCardModal } from "@/components/admin/PrintStandCardModal";
 import Link from "next/link";
 import { DashboardTab } from "@/features/admin/tabs/DashboardTab";
 import { SettingsTab } from "@/features/admin/tabs/SettingsTab";
@@ -1271,60 +1272,16 @@ export default function AdminClient({
 
       {/* SINGLE QR STAND MODAL */}
       {qrModal && (
-        <div
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 print:p-0 print:bg-white print:static"
-          onClick={() => setQrModal(null)}
-        >
-          <div
-            className="qr-stand-print standee-print bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center border-b border-slate-200 pb-2 no-print">
-              <h3 className="text-sm font-black text-slate-900">Table {qrModal.label} QR Stand</h3>
-              <button onClick={() => setQrModal(null)} className="text-slate-500 hover:text-slate-900 text-xs">
-                ✕
-              </button>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl inline-block shadow-lg">
-              <Image src={qrModal.url} alt={`QR for Table ${qrModal.label}`} width={224} height={224} unoptimized className="w-56 h-56 mx-auto" />
-            </div>
-
-            <p className="text-xs text-slate-500">
-              Scan with any mobile camera to launch digital ordering for Table {qrModal.label}
-            </p>
-
-            <div className="flex items-center gap-2 no-print">
-              <button
-                type="button"
-                onClick={() => {
-                  printSingleStandCard({
-                    restaurantName: activeRestaurant.name || "QRslice",
-                    tableLabel: qrModal.label,
-                    qrDataUrl: qrModal.url,
-                    directUrl: qrModal.directUrl,
-                    seats: qrModal.seats,
-                    wifiSsid: wifiSsid || undefined,
-                    wifiPassword: wifiPassword || undefined,
-                  });
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-black text-xs cursor-pointer shadow-md transition-all"
-              >
-                Print Stand Card 🖨️
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(qrModal.directUrl);
-                  flash("ok", "Table link copied to clipboard!");
-                }}
-                className="py-2.5 px-3.5 rounded-xl bg-[#EEEAFE] hover:bg-purple-100 text-[#5738F5] font-bold text-xs cursor-pointer transition-all"
-              >
-                Copy Link
-              </button>
-            </div>
-          </div>
-        </div>
+        <PrintStandCardModal
+          restaurantName={activeRestaurant.name || "QRslice"}
+          tableLabel={qrModal.label}
+          qrDataUrl={qrModal.url}
+          directUrl={qrModal.directUrl}
+          seats={qrModal.seats}
+          wifiSsid={wifiSsid}
+          wifiPassword={wifiPassword}
+          onClose={() => setQrModal(null)}
+        />
       )}
 
       {/* Add Item Modal */}

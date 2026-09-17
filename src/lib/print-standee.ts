@@ -5,6 +5,9 @@
  * to guarantee 100% reliable printing across all browsers and thermal/inkjet printers.
  */
 
+export type StandCardTemplate = "standard" | "minimal" | "premium";
+export type StandCardSize = "A6" | "A5" | "80mm";
+
 export interface PrintStandCardParams {
   restaurantName: string;
   tableLabel: string;
@@ -13,6 +16,8 @@ export interface PrintStandCardParams {
   seats?: number;
   wifiSsid?: string;
   wifiPassword?: string;
+  template?: StandCardTemplate;
+  size?: StandCardSize;
 }
 
 export interface PrintBulkStandCardsParams {
@@ -38,8 +43,25 @@ export function printSingleStandCard({
   seats,
   wifiSsid,
   wifiPassword,
+  template = "standard",
+  size = "A6",
 }: PrintStandCardParams) {
   if (typeof window === "undefined") return;
+
+  const widthMm = size === "A5" ? "140mm" : size === "80mm" ? "76mm" : "105mm";
+  const isPremium = template === "premium";
+  const isMinimal = template === "minimal";
+
+  const bodyBg = isPremium ? "#0B0F19" : "#FFFFFF";
+  const cardBg = isPremium ? "#111827" : "#FFFFFF";
+  const textPrimary = isPremium ? "#F8FAFC" : "#17142B";
+  const textSecondary = isPremium ? "#94A3B8" : "#6F7185";
+  const borderColor = isPremium ? "#F59E0B" : isMinimal ? "#0F172A" : "#17142B";
+  const badgeBg = isPremium ? "#F59E0B" : isMinimal ? "#0F172A" : "#17142B";
+  const badgeText = isPremium ? "#0F172A" : "#FFFFFF";
+  const qrWrapperBg = isPremium ? "#FFFFFF" : "#FFFFFF";
+  const stepsBg = isPremium ? "#1E293B" : isMinimal ? "#FFFFFF" : "#F8FAFC";
+  const stepsBorder = isPremium ? "#334155" : isMinimal ? "#E2E8F0" : "#E2E8F0";
 
   const html = `
     <!DOCTYPE html>
@@ -50,7 +72,7 @@ export function printSingleStandCard({
         <style>
           @page {
             size: auto;
-            margin: 10mm;
+            margin: 6mm;
           }
           * {
             box-sizing: border-box;
@@ -61,42 +83,42 @@ export function printSingleStandCard({
           }
           body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #ffffff;
-            color: #17142B;
+            background: ${bodyBg};
+            color: ${textPrimary};
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 10mm;
+            padding: 6mm;
           }
           .card-container {
-            width: 105mm;
+            width: ${widthMm};
             max-width: 100%;
-            border: 2.5px solid #17142B;
-            border-radius: 24px;
-            padding: 24px 20px;
+            border: 2.5px solid ${borderColor};
+            border-radius: ${size === "80mm" ? "16px" : "24px"};
+            padding: ${size === "80mm" ? "16px 12px" : size === "A5" ? "32px 24px" : "24px 20px"};
             text-align: center;
-            background: #ffffff;
+            background: ${cardBg};
             page-break-inside: avoid;
             break-inside: avoid;
           }
           .tag {
             display: inline-block;
-            background: #EEEAFE;
-            color: #5738F5;
+            background: ${isPremium ? "rgba(245, 158, 11, 0.15)" : isMinimal ? "#F1F5F9" : "#EEEAFE"};
+            color: ${isPremium ? "#F59E0B" : isMinimal ? "#334155" : "#5738F5"};
             font-size: 10px;
             font-weight: 900;
             letter-spacing: 1.5px;
             text-transform: uppercase;
             padding: 4px 12px;
             border-radius: 9999px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
           }
           .restaurant-name {
-            font-size: 20px;
+            font-size: ${size === "A5" ? "24px" : size === "80mm" ? "16px" : "20px"};
             font-weight: 900;
             letter-spacing: -0.5px;
-            color: #17142B;
+            color: ${textPrimary};
             text-transform: uppercase;
             margin-bottom: 6px;
             word-break: break-word;
@@ -105,86 +127,86 @@ export function printSingleStandCard({
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #17142B;
-            color: #ffffff;
+            background: ${badgeBg};
+            color: ${badgeText};
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 14px;
+            font-size: ${size === "80mm" ? "12px" : "15px"};
             font-weight: 900;
             letter-spacing: 1px;
-            padding: 6px 16px;
+            padding: ${size === "80mm" ? "4px 12px" : "6px 18px"};
             border-radius: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
           }
           .seats-text {
             font-size: 11px;
-            color: #6F7185;
+            color: ${textSecondary};
             font-weight: 600;
             margin-bottom: 12px;
           }
           .qr-wrapper {
-            background: #ffffff;
-            border: 1.5px solid #E7E4F0;
+            background: ${qrWrapperBg};
+            border: 1.5px solid ${isPremium ? "#F59E0B" : "#E7E4F0"};
             border-radius: 20px;
             padding: 12px;
             display: inline-block;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
           }
           .qr-image {
-            width: 200px;
-            height: 200px;
+            width: ${size === "A5" ? "240px" : size === "80mm" ? "160px" : "200px"};
+            height: ${size === "A5" ? "240px" : size === "80mm" ? "160px" : "200px"};
             display: block;
             margin: 0 auto;
             border-radius: 12px;
           }
           .cta-headline {
-            font-size: 13px;
+            font-size: ${size === "80mm" ? "11px" : "13px"};
             font-weight: 900;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            color: #17142B;
+            color: ${textPrimary};
             margin-bottom: 4px;
           }
           .cta-subtext {
             font-size: 10px;
-            color: #6F7185;
+            color: ${textSecondary};
             font-weight: 500;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
           }
           .steps-pill {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 14px;
-            padding: 8px 12px;
+            background: ${stepsBg};
+            border: 1px solid ${stepsBorder};
+            border-radius: 12px;
+            padding: 6px 10px;
             font-size: 9px;
             font-weight: 800;
-            color: #475569;
+            color: ${textSecondary};
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
           }
           .wifi-box {
-            background: #FAF9F6;
-            border: 1px dashed #CBD5E1;
-            border-radius: 12px;
-            padding: 6px 10px;
+            background: ${isPremium ? "#1E293B" : "#FAF9F6"};
+            border: 1px dashed ${isPremium ? "#475569" : "#CBD5E1"};
+            border-radius: 10px;
+            padding: 5px 8px;
             font-size: 9px;
             font-family: ui-monospace, SFMono-Regular, monospace;
-            color: #334155;
+            color: ${textSecondary};
             margin-bottom: 10px;
           }
           .footer-strip {
-            border-top: 1px solid #F1F5F9;
+            border-top: 1px solid ${isPremium ? "#1E293B" : "#F1F5F9"};
             padding-top: 8px;
             font-size: 9px;
-            color: #94A3B8;
+            color: ${textSecondary};
             font-family: ui-monospace, SFMono-Regular, monospace;
           }
         </style>
       </head>
       <body>
         <div class="card-container">
-          <div class="tag">TABLE MENU &amp; PAY</div>
+          <div class="tag">${isMinimal ? "SCAN TO ORDER" : "TABLE MENU &amp; PAY"}</div>
           <h1 class="restaurant-name">${escapeHtml(restaurantName)}</h1>
           <div>
             <span class="table-badge">TABLE ${escapeHtml(tableLabel)}</span>
@@ -198,13 +220,18 @@ export function printSingleStandCard({
           <div class="cta-headline">Point Phone Camera to Order</div>
           <div class="cta-subtext">No app download required • Instant kitchen order</div>
 
+          ${
+            !isMinimal
+              ? `
           <div class="steps-pill">
             <span>1. Scan QR</span>
             <span>→</span>
             <span>2. Select Food</span>
             <span>→</span>
             <span>3. Order &amp; Pay</span>
-          </div>
+          </div>`
+              : ""
+          }
 
           ${
             wifiSsid
@@ -215,7 +242,7 @@ export function printSingleStandCard({
           }
 
           <div class="footer-strip">
-            Powered by QRslice • ${escapeHtml(directUrl.replace(/^https?:\/\//, ""))}
+            qrslice.com • ${escapeHtml(directUrl.replace(/^https?:\/\//, ""))}
           </div>
         </div>
       </body>

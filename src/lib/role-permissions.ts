@@ -20,6 +20,7 @@ export const ROLE_BADGES: Record<TenantRole, { label: string; badge: string; ico
 export const ALLOWED_TABS: Record<TenantRole, Set<string>> = {
   staff: new Set([
     "orders",
+    "pos",
     "kitchen",
     "kds",
     "tables",
@@ -36,6 +37,7 @@ export const ALLOWED_TABS: Record<TenantRole, Set<string>> = {
   ]),
   waiter: new Set([
     "orders",
+    "pos",
     "tables",
     "bookings",
     "reservations",
@@ -45,6 +47,7 @@ export const ALLOWED_TABS: Record<TenantRole, Set<string>> = {
   manager: new Set([
     "dashboard",
     "orders",
+    "pos",
     "kitchen",
     "kds",
     "tables",
@@ -63,6 +66,7 @@ export const ALLOWED_TABS: Record<TenantRole, Set<string>> = {
   owner: new Set([
     "dashboard",
     "orders",
+    "pos",
     "kitchen",
     "kds",
     "tables",
