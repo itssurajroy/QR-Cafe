@@ -380,6 +380,7 @@ self.addEventListener("push", (event) => {
       body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
+      image: data && data.image ? data.image : undefined,
       data: { url: targetUrl },
     }),
   );
