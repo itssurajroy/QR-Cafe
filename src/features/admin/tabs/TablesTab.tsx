@@ -70,6 +70,7 @@ export function TablesTab({
     table: Table;
     qrDataUrl: string;
     directUrl: string;
+    mode?: "single" | "bulk";
   } | null>(null);
   const [activeSignageTable, setActiveSignageTable] = useState<Table | null>(null);
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
@@ -227,7 +228,29 @@ export function TablesTab({
 
           <button
             type="button"
-            onClick={() => setShowPrintAllModal(true)}
+            onClick={() => {
+              const firstTable = tableList.find((t) => t.active !== false) || tableList[0] || {
+                id: "1",
+                label: "01",
+                seats: 4,
+                active: true,
+              };
+              const directUrl = firstTable.qr_token
+                ? `${appUrl}/t/${firstTable.qr_token}`
+                : `${appUrl}/c/${restaurantSlug}/t/${encodeURIComponent(firstTable.label)}`;
+              setPrintStandModalTable({
+                table: firstTable,
+                qrDataUrl: generateBeautifulQrDataUrl({
+                  text: directUrl,
+                  size: 500,
+                  theme: "violet",
+                  centerIcon: "utensils",
+                  dotShape: "dots",
+                }),
+                directUrl,
+                mode: "bulk",
+              });
+            }}
             className="px-3.5 py-2 rounded-xl bg-[#EEEAFE] hover:bg-purple-100 text-[#5738F5] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <PrinterIcon className="w-3.5 h-3.5" />
@@ -477,16 +500,17 @@ export function TablesTab({
                         table: t,
                         qrDataUrl: generateBeautifulQrDataUrl({
                           text: directUrl,
-                          size: 450,
+                          size: 500,
                           theme: "violet",
                           centerIcon: "utensils",
                           dotShape: "dots",
                         }),
                         directUrl,
+                        mode: "single",
                       });
                     }}
                     className="text-[#5738F5] hover:underline font-extrabold flex items-center gap-1 cursor-pointer"
-                    title="Print Stand Card"
+                    title="Design & Print Stand Card"
                   >
                     <PrinterIcon className="w-3 h-3" />
                     <span>Card</span>
@@ -496,11 +520,27 @@ export function TablesTab({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      showQr(t);
+                      const directUrl = t.qr_token
+                        ? `${appUrl}/t/${t.qr_token}`
+                        : `${appUrl}/c/${restaurantSlug}/t/${encodeURIComponent(t.label)}`;
+                      setPrintStandModalTable({
+                        table: t,
+                        qrDataUrl: generateBeautifulQrDataUrl({
+                          text: directUrl,
+                          size: 500,
+                          theme: "violet",
+                          centerIcon: "utensils",
+                          dotShape: "dots",
+                        }),
+                        directUrl,
+                        mode: "single",
+                      });
                     }}
-                    className="text-slate-500 hover:text-slate-900 font-bold cursor-pointer"
+                    className="text-slate-600 hover:text-[#5738F5] font-bold cursor-pointer flex items-center gap-1"
+                    title="Quick QR Studio"
                   >
-                    QR 📱
+                    <span>QR Studio</span>
+                    <QrCodeIcon className="w-3 h-3 text-[#5738F5]" />
                   </button>
                 </div>
               </div>
@@ -1077,7 +1117,20 @@ export function TablesTab({
 
                   <button
                     type="button"
-                    onClick={() => showQr(t)}
+                    onClick={() => {
+                      setPrintStandModalTable({
+                        table: t,
+                        qrDataUrl: generateBeautifulQrDataUrl({
+                          text: directUrl,
+                          size: 500,
+                          theme: "violet",
+                          centerIcon: "utensils",
+                          dotShape: "dots",
+                        }),
+                        directUrl,
+                        mode: "single",
+                      });
+                    }}
                     className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs text-center cursor-pointer transition-all"
                   >
                     Generate / View QR
@@ -1097,6 +1150,9 @@ export function TablesTab({
           qrDataUrl={printStandModalTable.qrDataUrl}
           directUrl={printStandModalTable.directUrl}
           seats={printStandModalTable.table.seats}
+          allTables={tableList}
+          restaurantSlug={restaurantSlug}
+          initialMode={printStandModalTable.mode || "single"}
           onClose={() => setPrintStandModalTable(null)}
         />
       )}

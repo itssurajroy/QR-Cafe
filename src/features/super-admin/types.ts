@@ -61,7 +61,7 @@ export interface Table {
   id: string;
   label: string;
   seats: number;
-  qr_token: string;
+  qr_token: string | null;
   active: boolean;
   restaurant_id: string;
   sort_order?: number;

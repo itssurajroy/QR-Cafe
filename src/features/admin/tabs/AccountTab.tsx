@@ -22,12 +22,61 @@ interface AccountTabProps {
   onNavigateTab?: (tab: any) => void;
 }
 
+interface ProfileData {
+  id: string;
+  email: string;
+  display_name: string;
+  phone: string;
+  role: string;
+  active: boolean;
+  email_confirmed: boolean;
+  created_at: string;
+  last_sign_in_at: string | null;
+  pin: boolean;
+}
+
+interface RestaurantData {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  tier: string;
+  trial_ends_at: string | null;
+  subscription_ends_at: string | null;
+  billing_status: string;
+  created_at: string;
+  owner_name: string | null;
+  owner_email: string | null;
+}
+
+interface SubscriptionData {
+  plan: string;
+  isTrial: boolean;
+  isSuspended: boolean;
+  daysLeft: number;
+  trialEndsAt: string | null;
+  subscriptionEndsAt: string | null;
+  billingStatus: string;
+}
+
+interface SessionData {
+  id: string;
+  device: string;
+  ip: string;
+  location: string;
+  lastActive: string;
+  isCurrent: boolean;
+}
+
 export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTab }: AccountTabProps) {
-  // Owner Profile
-  const [ownerName, setOwnerName] = useState(restaurant?.owner_name || "Suraj Roy");
-  const [ownerEmail, setOwnerEmail] = useState(restaurant?.owner_email || "owner@qrslice.com");
-  const [ownerPhone, setOwnerPhone] = useState(restaurant?.phone || "+91 85951 01297");
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [restaurantData, setRestaurantData] = useState<RestaurantData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [ownerPhone, setOwnerPhone] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Security
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -36,23 +85,44 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassText, setShowPassText] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [toggling2FA, setToggling2FA] = useState(false);
 
-  // Active Sessions - now from API
-  const [sessions, setSessions] = useState<Array<{
-    id: string;
-    device: string;
-    ip: string;
-    location: string;
-    lastActive: string;
-    isCurrent: boolean;
-  }>>([]);
+  // Active Sessions
+  const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
 
   // Modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  // Load sessions from API
+  // Load initial data
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/admin/account");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok) {
+            setProfile(data.profile);
+            setRestaurantData(data.restaurant);
+            setSubscription(data.subscription);
+            setOwnerName(data.profile.display_name);
+            setOwnerEmail(data.profile.email);
+            setOwnerPhone(data.profile.phone);
+          }
+        }
+      } catch {
+        flash("err", "Failed to load account data");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Load sessions
   useEffect(() => {
     async function loadSessions() {
       setLoadingSessions(true);
@@ -65,7 +135,6 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
           }
         }
       } catch {
-        // fallback to mock if API fails
         setSessions([
           {
             id: "sess_1",
@@ -83,13 +152,31 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
     loadSessions();
   }, []);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsEditingProfile(false);
-    flash("ok", "Owner profile updated successfully! ✓");
+    try {
+      const res = await fetch("/api/admin/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_profile",
+          display_name: ownerName,
+          phone: ownerPhone,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update profile");
+      
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, display_name: ownerName, phone: ownerPhone } : null);
+      setIsEditingProfile(false);
+      flash("ok", "Owner profile updated successfully! ✓");
+    } catch (err: any) {
+      flash("err", err.message || "Failed to update profile");
+    }
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       flash("err", "New passwords do not match!");
@@ -99,11 +186,54 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
       flash("err", "Password must be at least 8 characters long.");
       return;
     }
-    setShowPasswordModal(false);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    flash("ok", "Password changed successfully across all devices! 🔒");
+    setChangingPassword(true);
+    try {
+      const res = await fetch("/api/admin/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "change_password",
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to change password");
+      
+      setShowPasswordModal(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      flash("ok", "Password changed successfully across all devices! 🔒");
+    } catch (err: any) {
+      flash("err", err.message || "Failed to change password");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleToggle2FA = async () => {
+    const newValue = !twoFactorEnabled;
+    setToggling2FA(true);
+    try {
+      const res = await fetch("/api/admin/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle_2fa",
+          enabled: newValue,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to toggle 2FA");
+      
+      setTwoFactorEnabled(newValue);
+      flash("ok", `Two-Factor Authentication ${newValue ? "ENABLED" : "DISABLED"}`);
+    } catch (err: any) {
+      flash("err", err.message || "Failed to toggle 2FA");
+    } finally {
+      setToggling2FA(false);
+    }
   };
 
   const handleLogoutOtherSessions = async () => {
@@ -124,6 +254,52 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
       flash("err", "Failed to logout other sessions");
     }
   };
+
+  const handleDeactivateAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return;
+    
+    try {
+      const res = await fetch("/api/admin/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "deactivate_account",
+          confirmation: "DELETE",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to deactivate account");
+      
+      setShowDeleteModal(false);
+      flash("ok", "Account deactivation request logged. Support will verify within 24 hours.");
+      // Redirect to login after a delay
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
+    } catch (err: any) {
+      flash("err", err.message || "Failed to deactivate account");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in-up pb-16">
+        <div className="p-8 text-center text-slate-400 text-xs font-mono">
+          Loading account data…
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in-up pb-16">
+        <div className="p-8 text-center text-slate-400 text-xs">
+          Failed to load account data
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in-up pb-16">
@@ -236,7 +412,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
                 Owner Name
               </span>
               <span className="text-sm font-black text-[#17142B] block">{ownerName}</span>
-              <span className="text-[10px] text-emerald-600 font-bold">Role: Super Owner</span>
+              <span className="text-[10px] text-emerald-600 font-bold">Role: {profile.role === "owner" ? "Super Owner" : profile.role}</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-1">
@@ -246,7 +422,9 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               <span className="text-sm font-mono font-bold text-[#17142B] block truncate">
                 {ownerEmail}
               </span>
-              <span className="text-[10px] text-emerald-600 font-bold">Email Verified ✓</span>
+              <span className="text-[10px] text-emerald-600 font-bold">
+                {profile.email_confirmed ? "Email Verified ✓" : "Email Pending"}
+              </span>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-1">
@@ -254,7 +432,9 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
                 Primary Phone
               </span>
               <span className="text-sm font-mono font-bold text-[#17142B] block">{ownerPhone}</span>
-              <span className="text-[10px] text-[#5738F5] font-bold">WhatsApp 2FA Linked</span>
+              <span className="text-[10px] text-[#5738F5] font-bold">
+                {profile.pin ? "WhatsApp 2FA Linked" : "WhatsApp 2FA Not Set"}
+              </span>
             </div>
           </div>
         )}
@@ -305,17 +485,15 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               </div>
             </div>
             <button
-              onClick={() => {
-                setTwoFactorEnabled(!twoFactorEnabled);
-                flash("ok", `Two-Factor Authentication ${!twoFactorEnabled ? "ENABLED" : "DISABLED"}`);
-              }}
+              onClick={handleToggle2FA}
+              disabled={toggling2FA}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                 twoFactorEnabled
                   ? "bg-emerald-600 text-white"
                   : "bg-white border border-[#E7E4F0] text-slate-700 hover:bg-slate-50"
               }`}
             >
-              {twoFactorEnabled ? "2FA Enabled ✓" : "Enable 2FA"}
+              {toggling2FA ? "Updating…" : twoFactorEnabled ? "2FA Enabled ✓" : "Enable 2FA"}
             </button>
           </div>
         </div>
@@ -396,7 +574,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               Restaurant Ownership & Subscription Plan
             </h3>
             <p className="text-xs text-[#6F7185]">
-              Licensing status and billing tier for {restaurant?.name || "this café"}.
+              Licensing status and billing tier for {restaurantData?.name || "this café"}.
             </p>
           </div>
           {onNavigateTab && (
@@ -415,10 +593,10 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               Active Restaurant
             </span>
             <span className="text-sm font-black text-[#17142B] block">
-              {restaurant?.name || "Curry Leaf Express"}
+              {restaurantData?.name || "Curry Leaf Express"}
             </span>
             <span className="text-[10px] text-[#6F7185] font-mono">
-              Slug: /c/{restaurant?.slug || "curryleaf"}
+              Slug: /c/{restaurantData?.slug || "curryleaf"}
             </span>
           </div>
 
@@ -427,16 +605,26 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               Subscription Plan
             </span>
             <span className="text-sm font-black text-[#5738F5] block">
-              Pro Unlimited (Multi-Table)
+              {subscription?.isTrial ? "Free Trial" : subscription?.plan === "active" ? "Pro Unlimited (Multi-Table)" : subscription?.plan === "suspended" ? "Suspended" : "Unknown"}
             </span>
-            <span className="text-[10px] text-emerald-600 font-bold">Renews Monthly ✓</span>
+            {subscription?.isTrial && subscription?.daysLeft !== undefined && (
+              <span className="text-[10px] text-amber-600 font-bold">{subscription.daysLeft} day(s) left in trial</span>
+            )}
+            {subscription?.isSuspended && (
+              <span className="text-[10px] text-rose-600 font-bold">Suspended</span>
+            )}
+            {!subscription?.isTrial && !subscription?.isSuspended && (
+              <span className="text-[10px] text-emerald-600 font-bold">Renews Monthly ✓</span>
+            )}
           </div>
 
           <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-1">
             <span className="text-[10px] font-bold text-[#6F7185] uppercase tracking-wider block">
               Ownership Since
             </span>
-            <span className="text-sm font-black text-[#17142B] block">August 2026</span>
+            <span className="text-sm font-black text-[#17142B] block">
+              {restaurantData?.created_at ? new Date(restaurantData.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Unknown"}
+            </span>
             <span className="text-[10px] text-[#6F7185]">Primary Tenant Admin</span>
           </div>
         </div>
@@ -497,6 +685,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono"
                   required
+                  minLength={8}
                 />
               </div>
 
@@ -510,6 +699,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono"
                   required
+                  minLength={8}
                 />
               </div>
 
@@ -534,9 +724,10 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
                 </button>
                 <button
                   type="submit"
+                  disabled={changingPassword}
                   className="px-4 py-2 bg-[#5738F5] text-white font-black rounded-xl text-xs"
                 >
-                  Update Password
+                  {changingPassword ? "Updating…" : "Update Password"}
                 </button>
               </div>
             </form>
@@ -568,10 +759,7 @@ export function AccountTab({ restaurant, userRole = "owner", flash, onNavigateTa
               </button>
               <button
                 disabled={deleteConfirmText !== "DELETE"}
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  flash("err", "Account deactivation request logged. Support will verify within 24 hours.");
-                }}
+                onClick={handleDeactivateAccount}
                 className="px-4 py-2 bg-rose-600 disabled:opacity-40 text-white font-black rounded-xl text-xs"
               >
                 Confirm Deactivation

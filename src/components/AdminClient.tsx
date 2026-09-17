@@ -1302,6 +1302,9 @@ export default function AdminClient({
           seats={qrModal.seats}
           wifiSsid={wifiSsid}
           wifiPassword={wifiPassword}
+          allTables={tableList}
+          restaurantSlug={restaurant?.slug || "cafe"}
+          initialMode="single"
           onClose={() => setQrModal(null)}
         />
       )}

@@ -1,8 +1,8 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import QRCode from "qrcode";
 
-export type QrStyleTheme = "violet" | "gold" | "emerald" | "sunset" | "obsidian";
-export type QrCenterIcon = "utensils" | "coffee" | "sparkles" | "qrslice" | "none";
+export type QrStyleTheme = "violet" | "gold" | "emerald" | "sunset" | "obsidian" | "terracotta" | "ocean";
+export type QrCenterIcon = "utensils" | "coffee" | "cocktail" | "pizza" | "burger" | "leaf" | "fire" | "sparkles" | "qrslice" | "none";
 export type QrDotShape = "dots" | "rounded" | "classy";
 
 export interface BeautifulQrOptions {
@@ -88,6 +88,30 @@ export const QR_THEMES: Record<QrStyleTheme, ThemeColors> = {
     accent: "#18181B",
     textColor: "#09090B",
   },
+  terracotta: {
+    name: "Artisan Terracotta",
+    bg: "#FFFDF9",
+    dotStart: "#C2410C",
+    dotEnd: "#EA580C",
+    eyeOuter: "#9A3412",
+    eyeInner: "#C2410C",
+    badgeBg: "#C2410C",
+    badgeIcon: "#FFFDF9",
+    accent: "#C2410C",
+    textColor: "#431407",
+  },
+  ocean: {
+    name: "Pacific Indigo",
+    bg: "#FFFFFF",
+    dotStart: "#0284C7",
+    dotEnd: "#2563EB",
+    eyeOuter: "#0369A1",
+    eyeInner: "#0284C7",
+    badgeBg: "#0284C7",
+    badgeIcon: "#FFFFFF",
+    accent: "#0284C7",
+    textColor: "#0C4A6E",
+  },
 };
 
 /**
@@ -105,6 +129,54 @@ function getCenterIconSvg(icon: QrCenterIcon, cx: number, cy: number, iconSize: 
         <line x1="6" y1="2" x2="6" y2="4" />
         <line x1="10" y1="2" x2="10" y2="4" />
         <line x1="14" y1="2" x2="14" y2="4" />
+      </g>
+    `;
+  }
+
+  if (icon === "cocktail") {
+    return `
+      <g transform="translate(${cx - half}, ${cy - half}) scale(${s})" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 22h8" />
+        <path d="M12 11v11" />
+        <path d="m19 3-7 8-7-8Z" />
+      </g>
+    `;
+  }
+
+  if (icon === "pizza") {
+    return `
+      <g transform="translate(${cx - half}, ${cy - half}) scale(${s})" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 11h.01" />
+        <path d="M11 15h.01" />
+        <path d="m2 16 20 6-6-20A20 20 0 0 0 2 16Z" />
+        <path d="M5.71 17.11a17.04 17.04 0 0 1 11.4-11.4" />
+      </g>
+    `;
+  }
+
+  if (icon === "burger") {
+    return `
+      <g transform="translate(${cx - half}, ${cy - half}) scale(${s})" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 11h16a1 1 0 0 0 1-1C20.5 5.5 16.7 3 12 3S3.5 5.5 3 10a1 1 0 0 0 1 1Z" />
+        <path d="M4 18h16a2 2 0 0 1 2 2v0a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v0a2 2 0 0 1 2-2Z" />
+        <path d="M3 14h18" />
+      </g>
+    `;
+  }
+
+  if (icon === "leaf") {
+    return `
+      <g transform="translate(${cx - half}, ${cy - half}) scale(${s})" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+        <path d="M2 21c0-3 1.85-5.36 5.08-6" />
+      </g>
+    `;
+  }
+
+  if (icon === "fire") {
+    return `
+      <g transform="translate(${cx - half}, ${cy - half}) scale(${s})" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
       </g>
     `;
   }
