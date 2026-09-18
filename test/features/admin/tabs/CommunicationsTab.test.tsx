@@ -5,6 +5,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { CommunicationsTab } from "@/features/admin/tabs/CommunicationsTab";
+import { canAccessTab } from "@/lib/role-permissions";
+import { NAV_GROUPS } from "@/components/shell/AdminAppShell";
 
 afterEach(() => {
   cleanup();
@@ -13,6 +15,7 @@ afterEach(() => {
 
 const mockProps = {
   flash: vi.fn(),
+  userRole: "owner",
 };
 
 const mockMessages = [
@@ -83,5 +86,27 @@ describe("CommunicationsTab", () => {
     );
     const body = JSON.parse((resendCall?.[1] as { body?: string })?.body as string);
     expect(body.order_id).toBe(failed[0].order_id);
+  });
+
+  it("is reachable from the sidebar nav for owner and manager roles", () => {
+    expect(canAccessTab("owner", "communications")).toBe(true);
+    expect(canAccessTab("manager", "communications")).toBe(true);
+    expect(canAccessTab("staff", "communications")).toBe(false);
+    const navIds = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.id));
+    expect(navIds).toContain("communications");
+  });
+
+  it("hides the Resend button for roles without send permission (read-only)", async () => {
+    stubFetchOk({ messages: mockMessages, total: 1, page: 1, limit: 20 });
+    render(<CommunicationsTab flash={vi.fn()} userRole="staff" />);
+    await waitFor(() => screen.getByText("Communication History"));
+    await waitFor(() => screen.getByText("Order #1045"));
+    expect(screen.queryByText("Resend")).toBeNull();
+    // Owner view keeps the Resend action.
+    cleanup();
+    stubFetchOk({ messages: mockMessages, total: 1, page: 1, limit: 20 });
+    render(<CommunicationsTab flash={vi.fn()} userRole="owner" />);
+    await waitFor(() => screen.getByText("Resend"));
+    expect(screen.getByText("Resend")).not.toBeNull();
   });
 });

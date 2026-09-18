@@ -32,6 +32,7 @@ export type AdminTabId =
   | "branding"
   | "settings"
   | "staff"
+  | "communications"
   | "support"
   | "report"
   | "help";

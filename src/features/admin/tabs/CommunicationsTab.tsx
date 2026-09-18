@@ -53,9 +53,14 @@ function statusBadge(status: string): string {
 
 export function CommunicationsTab({
   flash,
+  userRole,
 }: {
   flash?: (kind: "ok" | "err", msg: string) => void;
+  userRole?: string;
 }) {
+  // Mirrors POST /api/whatsapp/send owner-only gate (403 for staff/manager):
+  // non-privileged roles get a read-only view with no Resend button.
+  const canResend = userRole === "owner" || userRole === "super_admin";
   const [channel, setChannel] = useState<ChannelFilter>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [messages, setMessages] = useState<CommunicationMessage[]>([]);
@@ -76,11 +81,7 @@ export function CommunicationsTab({
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (channel === "all" || channel === "whatsapp") {
-        params.set("type", channel);
-      } else {
-        params.set("type", channel);
-      }
+      params.set("type", channel);
       if (statusFilter !== "all") params.set("status", statusFilter);
       params.set("limit", "50");
       const res = await fetch(`/api/admin/communications?${params.toString()}`);
@@ -241,14 +242,16 @@ export function CommunicationsTab({
                             >
                               View
                             </button>
-                            <button
-                              type="button"
-                              disabled={resendingId === m.id}
-                              onClick={() => handleResend(m)}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors"
-                            >
-                              {resendingId === m.id ? "Sending…" : "Resend"}
-                            </button>
+                            {canResend && (
+                              <button
+                                type="button"
+                                disabled={resendingId === m.id}
+                                onClick={() => handleResend(m)}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors"
+                              >
+                                {resendingId === m.id ? "Sending…" : "Resend"}
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

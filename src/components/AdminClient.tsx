@@ -941,8 +941,8 @@ export default function AdminClient({
         )}
 
         {/* TAB: COMMUNICATIONS HISTORY (WhatsApp) */}
-        {(tab as string) === "communications" && (
-          <CommunicationsTab flash={flash} />
+        {tab === "communications" && (
+          <CommunicationsTab flash={flash} userRole={userRole} />
         )}
 
         {/* TAB 1: MENU & CATEGORY MANAGEMENT */}

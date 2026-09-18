@@ -23,6 +23,7 @@ import {
   SlidersIcon,
   PlugIcon,
   CalendarIcon,
+  MessageCircleIcon,
 } from "@/components/Icons";
 
 import { canAccessTab, getRoleBadge } from "@/lib/role-permissions";
@@ -45,6 +46,7 @@ export type AdminSectionId =
   | "recipes"
   // CUSTOMERS
   | "crm"
+  | "communications"
   // REPORTS
   | "analytics"
   // TEAM
@@ -70,7 +72,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const NAV_GROUPS: NavGroup[] = [
+export const NAV_GROUPS: NavGroup[] = [
   {
     title: "OPERATIONS",
     items: [
@@ -100,6 +102,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "CUSTOMERS",
     items: [
       { id: "crm", label: "Customers & Loyalty", icon: UsersIcon },
+      { id: "communications", label: "Communications", icon: MessageCircleIcon },
     ],
   },
   {
