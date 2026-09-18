@@ -133,8 +133,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - file extensions (.png, .jpg, .svg)
+     * - robots.txt, sitemap.xml, llms.txt (SEO & AI crawler endpoints)
+     * - file extensions (.png, .jpg, .svg, .txt, .xml, .json, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots\\.txt|sitemap\\.xml|llms\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|json)$).*)",
   ],
 };

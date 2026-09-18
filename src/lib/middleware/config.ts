@@ -17,6 +17,9 @@ export const MIDDLEWARE_CONFIG = {
     "/offline",
     "/sw.js",
     "/manifest.json",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/llms.txt",
     "/favicon.png",
     "/favicon.ico",
     "/logo.png",
@@ -57,7 +60,7 @@ export function isPublicPath(path: string): boolean {
   if (MIDDLEWARE_CONFIG.publicPaths.includes(normalized)) return true;
   if (MIDDLEWARE_CONFIG.guestPaths.some((p) => normalized.startsWith(p) || path.startsWith(p))) return true;
   // Match exact marketing paths or simple static extensions not covered by matcher
-  if (normalized.match(/\.(png|jpg|jpeg|svg|ico|webp)$/)) return true;
+  if (normalized.match(/\.(png|jpg|jpeg|svg|ico|webp|txt|xml|json)$/)) return true;
   return false;
 }
 

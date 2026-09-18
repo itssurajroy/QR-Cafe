@@ -1,7 +1,68 @@
 User-agent: *
 Allow: /
 
-# Disallow private/admin areas
+# Explicit AI & Search Crawler Permissions
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+Disallow: /pos/
+Disallow: /kds/
+Disallow: /super/
+Disallow: /login/
+Disallow: /api/
+Disallow: /t/
+Disallow: /order/
+Disallow: /receipt/
+Disallow: /bookings/
+Disallow: /c/*/t/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin/
+Disallow: /pos/
+Disallow: /kds/
+Disallow: /super/
+Disallow: /login/
+Disallow: /api/
+Disallow: /t/
+Disallow: /order/
+Disallow: /receipt/
+Disallow: /bookings/
+Disallow: /c/*/t/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+Disallow: /pos/
+Disallow: /kds/
+Disallow: /super/
+Disallow: /login/
+Disallow: /api/
+Disallow: /t/
+Disallow: /order/
+Disallow: /receipt/
+Disallow: /bookings/
+Disallow: /c/*/t/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+Disallow: /pos/
+Disallow: /kds/
+Disallow: /super/
+Disallow: /login/
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+Disallow: /pos/
+Disallow: /kds/
+Disallow: /super/
+Disallow: /login/
+Disallow: /api/
+
+# Disallow private/admin areas for all general crawlers
 Disallow: /admin/
 Disallow: /pos/
 Disallow: /kds/
@@ -17,5 +78,6 @@ Disallow: /c/*/t/
 # Allow public restaurant menus (SEO-friendly)
 Allow: /c/
 
+# Sitemaps & AI Context
 Sitemap: https://qrslice.com/sitemap.xml
-Sitemap: https://qrslice.com/sitemap-restaurants.xml
+Sitemap: https://www.qrslice.com/sitemap.xml

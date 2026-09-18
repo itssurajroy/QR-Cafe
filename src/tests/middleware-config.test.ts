@@ -22,7 +22,7 @@ describe("Middleware Config & Public Routes", () => {
     expect(isPublicPath("/api/contact")).toBe(true);
   });
 
-  it("allows guest storefront APIs and assets without authentication", () => {
+  it("allows guest storefront APIs, assets, and SEO crawler files without authentication", () => {
     expect(isPublicPath("/api/public/resolve-table")).toBe(true);
     expect(isPublicPath("/api/public/customer-balance")).toBe(true);
     expect(isPublicPath("/api/whatsapp/log-event")).toBe(true);
@@ -30,6 +30,9 @@ describe("Middleware Config & Public Routes", () => {
     expect(isPublicPath("/logo.png")).toBe(true);
     expect(isPublicPath("/favicon.png")).toBe(true);
     expect(isPublicPath("/og-image.png")).toBe(true);
+    expect(isPublicPath("/robots.txt")).toBe(true);
+    expect(isPublicPath("/sitemap.xml")).toBe(true);
+    expect(isPublicPath("/llms.txt")).toBe(true);
   });
 
   it("protects authenticated admin and pos paths", () => {
