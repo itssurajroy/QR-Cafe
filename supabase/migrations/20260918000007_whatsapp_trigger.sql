@@ -40,96 +40,109 @@ create policy "wa_events_insert" on whatsapp_message_events
   );
 
 -- 2. Trigger Function for Automatic Bill Send
+-- Failure isolation: the body is exception-safe (EXCEPTION WHEN OTHERS =>
+-- RETURN NEW) so a trigger error can NEVER block the orders payment update.
+-- No external calls are made here; the row is only queued into
+-- whatsapp_messages (async outbox) for the worker to consume.
 create or replace function trigger_whatsapp_bill_send()
 returns trigger language plpgsql as $$
 declare
-  wa_settings record;
+  wa_enabled boolean;
+  wa_auto_send boolean;
+  wa_template text;
+  wa_language text;
   customer_phone text;
-  order_record record;
-  message_id uuid;
   restaurant_name text;
-  template_name text;
-  template_language text;
   template_vars jsonb;
+  message_id uuid;
 begin
-  -- Only trigger on payment status change to 'paid'
-  if NEW.payment_status <> 'paid' then
+  -- 1. Fire ONLY on transition INTO 'paid' (NULL-safe on both sides).
+  if NEW.payment_status is distinct from 'paid' then
+    return NEW;
+  end if;
+  if OLD.payment_status is not distinct from 'paid' then
     return NEW;
   end if;
 
-  -- Check if old status was not paid
-  if OLD.payment_status = 'paid' then
+  begin
+    -- 2. Tenant settings gate: enabled AND auto_send_bill (missing row = off).
+    select s.enabled, s.auto_send_bill, s.default_template, s.default_language
+      into wa_enabled, wa_auto_send, wa_template, wa_language
+      from whatsapp_settings s
+      where s.tenant_id = NEW.restaurant_id;
+    if not found then
+      return NEW;
+    end if;
+    if not coalesce(wa_enabled, false) then
+      return NEW;
+    end if;
+    if not coalesce(wa_auto_send, false) then
+      return NEW;
+    end if;
+
+    -- 3. Resolve recipient phone: order phone first (empty string = missing),
+    -- then restaurant_customers via NEW.customer_id where that column exists.
+    customer_phone := nullif(btrim(coalesce(NEW.customer_phone, '')), '');
+    if customer_phone is null then
+      begin
+        select c.phone into customer_phone
+          from restaurant_customers c
+          where c.id = NEW.customer_id;
+      exception when others then
+        -- orders links customers by phone; no customer_id column: skip fallback.
+        customer_phone := null;
+      end;
+      customer_phone := nullif(btrim(coalesce(customer_phone, '')), '');
+    end if;
+    if customer_phone is null then
+      return NEW;
+    end if;
+
+    -- 4. Restaurant name for template vars (missing restaurant leaves null).
+    select r.name into restaurant_name from restaurants r where r.id = NEW.restaurant_id;
+
+    -- 5. Build template variables. status_token is uuid in orders, so cast to
+    -- text before concatenation; coalesce keeps every field NULL-safe.
+    template_vars := jsonb_build_object(
+      'restaurant_name', restaurant_name,
+      'order_number', NEW.order_number,
+      'table_number', coalesce(NEW.table_label, 'Dine-in'),
+      'total', to_char(coalesce(NEW.total_paise, 0) / 100.0, 'FM999999990.00'),
+      'payment_mode', coalesce(NEW.payment_method, 'Unknown'),
+      'receipt_url', 'https://www.qrslice.com/receipt/' || coalesce(NEW.status_token::text, '')
+    );
+
+    -- 6. Queue into the async outbox (idempotent: one bill row per order).
+    insert into whatsapp_messages (
+      tenant_id,
+      order_id,
+      message_type,
+      recipient_phone,
+      template_name,
+      template_language,
+      template_variables,
+      status
+    ) values (
+      NEW.restaurant_id,
+      NEW.id,
+      'bill_receipt',
+      customer_phone,
+      coalesce(wa_template, 'bill_receipt'),
+      coalesce(wa_language, 'en'),
+      template_vars,
+      'pending'
+    ) on conflict (order_id, message_type) do nothing
+    returning id into message_id;
+
+    -- 7. Audit event only when a row was actually inserted.
+    if message_id is not null then
+      insert into whatsapp_message_events (tenant_id, message_id, event_type, payload)
+      values (NEW.restaurant_id, message_id, 'created', jsonb_build_object('trigger', 'payment_paid'));
+    end if;
+  exception when others then
+    -- Failure isolation: never block the payment update.
     return NEW;
-  end if;
-
-  -- Get WhatsApp settings for this restaurant
-  select * into wa_settings
-  from whatsapp_settings
-  where tenant_id = NEW.restaurant_id;
-
-  -- Check if WhatsApp is enabled and auto-send bill is configured
-  if not wa_settings.enabled then
-    return NEW;
-  end if;
-
-  if not wa_settings.auto_send_bill then
-    return NEW;
-  end if;
-
-  -- Get restaurant name
-  select name into restaurant_name from restaurants where id = NEW.restaurant_id;
-
-  -- Get customer phone from order or customer table
-  customer_phone := NEW.customer_phone;
-  if customer_phone is null and NEW.customer_id is not null then
-    select phone into customer_phone from restaurant_customers where id = NEW.customer_id;
-  end if;
-
-  if customer_phone is null then
-    return NEW;
-  end if;
-
-  -- Get template settings
-  template_name := wa_settings.default_template;
-  template_language := wa_settings.default_language;
-
-  -- Build template variables
-  template_vars := jsonb_build_object(
-    'restaurant_name', restaurant_name,
-    'order_number', NEW.order_number,
-    'table_number', NEW.table_label,
-    'total', to_char(NEW.total_paise / 100.0, 'FM999999990.00'),
-    'payment_mode', COALESCE(NEW.payment_method, 'Unknown'),
-    'receipt_url', 'https://www.qrslice.com/receipt/' || NEW.status_token
-  );
-
-  -- Insert outbound message (idempotent via unique constraint on order_id, message_type)
-  insert into whatsapp_messages (
-    tenant_id,
-    order_id,
-    message_type,
-    recipient_phone,
-    template_name,
-    template_language,
-    template_variables,
-    status
-  ) values (
-    NEW.restaurant_id,
-    NEW.id,
-    'bill_receipt',
-    customer_phone,
-    template_name,
-    template_language,
-    template_vars,
-    'pending'
-  ) on conflict (order_id, message_type) do nothing
-  returning id into message_id;
-
-  -- Log event
-  if message_id is not null then
-    insert into whatsapp_message_events (tenant_id, message_id, event_type, payload)
-    values (NEW.restaurant_id, message_id, 'created', jsonb_build_object('trigger', 'payment_paid'));
-  end if;
+  end;
 
   return NEW;
 end;
