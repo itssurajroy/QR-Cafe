@@ -20,19 +20,19 @@ export async function GET(req: NextRequest) {
 
   const db = createSupabaseAdmin();
 
-  // Find the restaurant by verify_token
-  const { data: settings, error } = await db
-    .from("restaurant_whatsapp_settings")
-    .select("verify_token")
+  // Find the restaurant by verify_token in whatsapp_accounts
+  const { data: account, error } = await db
+    .from("whatsapp_accounts")
+    .select("tenant_id, verify_token")
     .eq("verify_token", token)
     .maybeSingle();
 
-  if (error || !settings) {
+  if (error || !account) {
     console.error("[WhatsApp Webhook] Invalid verify token:", token);
     return NextResponse.json({ error: "Invalid verify token" }, { status: 403 });
   }
 
-  console.log("[WhatsApp Webhook] Verification successful for restaurant");
+  console.log("[WhatsApp Webhook] Verification successful for tenant:", account.tenant_id);
   return new NextResponse(challenge, { status: 200, headers: { "Content-Type": "text/plain" } });
 }
 
@@ -47,40 +47,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing signature" }, { status: 401 });
   }
 
-  // Find the restaurant by webhook_secret
-  // We need to check all settings for matching webhook_secret
-  const { data: allSettings, error: settingsError } = await db
-    .from("restaurant_whatsapp_settings")
-    .select("restaurant_id, webhook_secret")
+  // Find all accounts with webhook_secret configured
+  const { data: accounts, error: accountsError } = await db
+    .from("whatsapp_accounts")
+    .select("tenant_id, webhook_secret")
     .not("webhook_secret", "is", null);
 
-  if (settingsError || !allSettings || allSettings.length === 0) {
+  if (accountsError || !accounts || accounts.length === 0) {
     console.error("[WhatsApp Webhook] No webhook secrets configured");
     return NextResponse.json({ error: "Webhook not configured" }, { status: 403 });
   }
 
-  // Find matching webhook secret
-  let matchedSettings = null;
-  for (const setting of allSettings) {
-    if (!setting.webhook_secret) continue;
+  // Find matching webhook secret using timing-safe comparison
+  let matchedAccount = null;
+  for (const account of accounts) {
+    if (!account.webhook_secret) continue;
     
     const expectedSignature = "sha256=" + crypto
-      .createHmac("sha256", setting.webhook_secret)
+      .createHmac("sha256", account.webhook_secret)
       .update(body)
       .digest("hex");
     
     if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
-      matchedSettings = setting;
+      matchedAccount = account;
       break;
     }
   }
 
-  if (!matchedSettings) {
+  if (!matchedAccount) {
     console.error("[WhatsApp Webhook] Invalid signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const restaurantId = matchedSettings.restaurant_id;
+  const tenantId = matchedAccount.tenant_id;
 
   let payload: any;
   try {
@@ -100,14 +99,14 @@ export async function POST(req: NextRequest) {
             // Process status updates
             if (value.statuses && Array.isArray(value.statuses)) {
               for (const status of value.statuses) {
-                await handleStatusUpdate(db, restaurantId, status);
+                await handleStatusUpdate(db, tenantId, status);
               }
             }
 
             // Process incoming messages (optional - for future features)
             if (value.messages && Array.isArray(value.messages)) {
               for (const message of value.messages) {
-                await handleIncomingMessage(db, restaurantId, message);
+                await handleIncomingMessage(db, tenantId, message);
               }
             }
           }
@@ -119,13 +118,13 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-async function handleStatusUpdate(db: any, restaurantId: string, status: any) {
-  const metaMessageId = status.id;
+async function handleStatusUpdate(db: any, tenantId: string, status: any) {
+  const providerMessageId = status.id;
   const statusType = status.status; // sent, delivered, read, failed
   const timestamp = status.timestamp ? new Date(parseInt(status.timestamp) * 1000).toISOString() : new Date().toISOString();
   const error = status.errors ? JSON.stringify(status.errors) : null;
 
-  // Update outbound message log
+  // Update outbound message log using provider_message_id
   const updateData: any = {
     status: statusType === "failed" ? "failed" : statusType,
     meta_response: { status },
@@ -145,41 +144,46 @@ async function handleStatusUpdate(db: any, restaurantId: string, status: any) {
   }
 
   const { error: dbError } = await db
-    .from("whatsapp_outbound_messages")
+    .from("whatsapp_messages")
     .update(updateData)
-    .eq("restaurant_id", restaurantId)
-    .eq("meta_message_id", metaMessageId);
+    .eq("tenant_id", tenantId)
+    .eq("provider_message_id", providerMessageId);
 
   if (dbError) {
     console.error("[WhatsApp Webhook] Failed to update outbound message:", dbError);
   } else {
-    console.log(`[WhatsApp Webhook] Updated message ${metaMessageId} to ${statusType}`);
+    console.log(`[WhatsApp Webhook] Updated message ${providerMessageId} to ${statusType}`);
   }
 
-  // Log the event for analytics
-  await db.from("whatsapp_bill_events").insert({
-    restaurant_id: restaurantId,
-    tenant_id: restaurantId,
-    event_type: statusType,
-    meta: { meta_message_id: metaMessageId, status: statusType, error },
-  });
+  // Get the message_id for event logging
+  const { data: message } = await db
+    .from("whatsapp_messages")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("provider_message_id", providerMessageId)
+    .maybeSingle();
 
   // Log the event for analytics
-  await db.from("whatsapp_bill_events").insert({
-    restaurant_id: restaurantId,
-    tenant_id: restaurantId,
-    event_type: statusType,
-    meta: { meta_message_id: metaMessageId, status: statusType, error },
-  });
+  if (message) {
+    const eventType = statusType === "failed" ? "failed" : statusType;
+    await db.from("whatsapp_message_events").insert({
+      tenant_id: tenantId,
+      message_id: message.id,
+      event_type: eventType,
+      provider_event_id: providerMessageId,
+      payload: { meta_message_id: providerMessageId, status: statusType, error },
+      error_message: error,
+    });
+  }
 }
 
-async function handleIncomingMessage(db: any, restaurantId: string, message: any) {
+async function handleIncomingMessage(db: any, tenantId: string, message: any) {
   // Log incoming message for future features (e.g., customer replies)
-  await db.from("whatsapp_bill_events").insert({
-    restaurant_id: restaurantId,
-    tenant_id: restaurantId,
-    event_type: "incoming_message",
-    phone: message.from,
-    meta: { message },
+  await db.from("whatsapp_message_events").insert({
+    tenant_id: tenantId,
+    message_id: null, // No associated outbound message
+    event_type: "webhook_received",
+    provider_event_id: message.id,
+    payload: { message },
   });
 }
