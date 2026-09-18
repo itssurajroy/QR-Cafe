@@ -119,3 +119,30 @@ export function buildWhatsAppReceiptVars(params: {
     receiptUrl: params.receiptUrl,
   };
 }
+
+/**
+ * Variables for the Order Again deep link.
+ * Consumes `orders.status_token`.
+ */
+export interface OrderAgainVars {
+  statusToken: string;
+}
+
+/**
+ * Normalize raw input into Order Again link variables.
+ * Pure function — no transport calls.
+ */
+export function buildOrderAgainVars(params: {
+  statusToken: string;
+}): OrderAgainVars {
+  return { statusToken: params.statusToken };
+}
+
+/**
+ * Build the Order Again deep link for a status token.
+ * Falls back to the production URL when NEXT_PUBLIC_APP_URL is unset.
+ */
+export function buildOrderAgainLink(vars: { statusToken: string }): string {
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://qrslice.com";
+  return `${base}/order-again/${vars.statusToken}`;
+}

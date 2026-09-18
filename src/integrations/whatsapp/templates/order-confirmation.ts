@@ -2,6 +2,7 @@
 import type {
   WhatsAppTemplate,
 } from "@/integrations/whatsapp/whatsapp.types";
+import { buildOrderAgainLink } from "@/lib/whatsapp-templates";
 
 export const ORDER_CONFIRMED_TEMPLATE_NAME = "order_confirmed" as const;
 
@@ -18,6 +19,7 @@ export interface OrderConfirmationInput {
   totalPaise?: number;
   etaMinutes?: number;
   restaurantName?: string;
+  statusToken?: string;
 }
 
 export interface OrderConfirmationVars {
@@ -27,6 +29,7 @@ export interface OrderConfirmationVars {
   totalPaise?: number;
   etaMinutes?: number;
   restaurantName?: string;
+  statusToken?: string;
 }
 
 /**
@@ -43,6 +46,7 @@ export function buildOrderConfirmationVars(
     totalPaise: input.totalPaise,
     etaMinutes: input.etaMinutes,
     restaurantName: input.restaurantName,
+    statusToken: input.statusToken,
   };
 }
 
@@ -75,6 +79,12 @@ export function renderOrderConfirmationText(vars: OrderConfirmationVars): string
   }
   if (vars.etaMinutes !== undefined && vars.etaMinutes !== null) {
     lines.push(`Ready in ~${vars.etaMinutes} min`);
+  }
+  // Baileys sends plain text only, so the Order Again deep link goes in
+  // as a text line rather than an interactive button.
+  if (vars.statusToken?.trim()) {
+    lines.push("");
+    lines.push(`Order again: ${buildOrderAgainLink({ statusToken: vars.statusToken.trim() })}`);
   }
   return lines.join("\n");
 }
