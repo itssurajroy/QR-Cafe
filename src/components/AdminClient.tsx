@@ -24,6 +24,7 @@ import { OrdersTab, type OrderData } from "@/features/admin/tabs/OrdersTab";
 import { ModifiersTab } from "@/features/admin/tabs/ModifiersTab";
 import { StaffTab } from "@/features/admin/tabs/StaffTab";
 import { CrmTab } from "@/features/admin/tabs/CrmTab";
+import { CommunicationsTab } from "@/features/admin/tabs/CommunicationsTab";
 import { AccountTab } from "@/features/admin/tabs/AccountTab";
 import { IntegrationsTab } from "@/features/admin/tabs/IntegrationsTab";
 import { AdminAppShell, type AdminSectionId } from "@/components/shell/AdminAppShell";
@@ -937,6 +938,11 @@ export default function AdminClient({
         {/* TAB: CRM & LOYALTY */}
         {tab === "crm" && (
           <CrmTab flash={flash} />
+        )}
+
+        {/* TAB: COMMUNICATIONS HISTORY (WhatsApp) */}
+        {(tab as string) === "communications" && (
+          <CommunicationsTab flash={flash} />
         )}
 
         {/* TAB 1: MENU & CATEGORY MANAGEMENT */}
