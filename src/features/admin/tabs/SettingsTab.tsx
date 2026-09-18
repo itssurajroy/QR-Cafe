@@ -132,7 +132,7 @@ export function SettingsTab(props: SettingsTabProps) {
   useEffect(() => {
     async function loadWaSettings() {
       try {
-        const res = await fetch("/api/whatsapp/settings");
+        const res = await fetch("/api/admin/whatsapp/settings");
         if (res.ok) {
           const data = await res.json();
           if (data.message_template) setWaTemplate(data.message_template);
@@ -155,7 +155,7 @@ export function SettingsTab(props: SettingsTabProps) {
     e.preventDefault();
     setSavingWa(true);
     try {
-      const res = await fetch("/api/whatsapp/settings", {
+      const res = await fetch("/api/admin/whatsapp/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1059,7 +1059,7 @@ export function SettingsTab(props: SettingsTabProps) {
                         type="text"
                         value={waBusinessAccountId}
                         onChange={(e) => setWaBusinessAccountId(e.target.value)}
-                        placeholder="123456789012345"
+                        placeholder="987654321098765"
                         className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5] font-bold"
                       />
                       <p className="text-[10px] text-[#6F7185] mt-1">Your WhatsApp Business Account ID from Meta Business Manager</p>
