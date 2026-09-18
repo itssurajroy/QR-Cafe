@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
 import { buildWhatsAppReceiptVars, renderWhatsAppMessage } from "@/lib/whatsapp-templates";
+import { baileysClient } from "@/integrations/whatsapp/baileys/client";
+import type { WhatsAppTemplate, TemplateComponent, TemplateParameter } from "@/integrations/whatsapp/whatsapp.types";
 
 const sendSchema = z.object({
   order_id: z.string().uuid(),
@@ -13,60 +15,22 @@ const sendSchema = z.object({
   variables: z.record(z.string(), z.unknown()).optional(),
 });
 
-const META_API_BASE = "https://graph.facebook.com/v19.0";
+function buildTemplateFromVars(templateName: string, templateLanguage: string, vars: Record<string, unknown>): WhatsAppTemplate {
+  const components: TemplateComponent[] = [
+    {
+      type: "body",
+      parameters: Object.entries(vars).map(([_, value]) => ({
+        type: "text",
+        text: String(value),
+      })) as TemplateParameter[],
+    },
+  ];
 
-async function sendWhatsAppMessage(
-  phoneNumberId: string,
-  accessToken: string,
-  to: string,
-  templateName: string,
-  templateLanguage: string,
-  variables: Record<string, unknown>
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  try {
-    // Format phone number for WhatsApp (remove + and any non-digits)
-    const cleanPhone = to.replace(/\D/g, "");
-    
-    const body = {
-      messaging_product: "whatsapp",
-      to: cleanPhone,
-      type: "template",
-      template: {
-        name: templateName,
-        language: { code: templateLanguage },
-        components: [
-          {
-            type: "body",
-            parameters: Object.entries(variables || {}).map(([key, value]) => ({
-              type: "text",
-              text: String(value),
-            })),
-          },
-        ],
-      },
-    };
-
-    const response = await fetch(`${META_API_BASE}/${phoneNumberId}/messages`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("[WhatsApp Send] Meta API error:", data);
-      return { success: false, error: data.error?.message || "WhatsApp API error" };
-    }
-
-    return { success: true, messageId: data.messages?.[0]?.id };
-  } catch (err: any) {
-    console.error("[WhatsApp Send] Network error:", err);
-    return { success: false, error: err.message || "Network error" };
-  }
+  return {
+    name: templateName,
+    language: templateLanguage,
+    components,
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -93,22 +57,20 @@ export async function POST(req: NextRequest) {
     const { order_id, phone, template_name, template_language, variables } = parsed.data;
 
     // Get WhatsApp settings for this restaurant
-    const { data: waSettings, error: settingsError } = await db
-      .from("restaurant_whatsapp_settings")
-      .select("*")
-      .eq("restaurant_id", restaurantId)
-      .maybeSingle();
+    const [settingsResult, accountsResult] = await Promise.all([
+      db.from("whatsapp_settings").select("*").eq("tenant_id", restaurantId).maybeSingle(),
+      db.from("whatsapp_accounts").select("*").eq("tenant_id", restaurantId).maybeSingle(),
+    ]);
 
-    if (settingsError || !waSettings) {
-      return NextResponse.json({ error: "WhatsApp settings not configured" }, { status: 400 });
+    const { data: waSettings, error: settingsError } = settingsResult;
+    const { data: waAccounts, error: accountsError } = accountsResult;
+
+    if (settingsError || accountsError || !waSettings || !waAccounts) {
+      return NextResponse.json({ error: "WhatsApp not configured for this restaurant" }, { status: 400 });
     }
 
     if (!waSettings.enabled) {
       return NextResponse.json({ error: "WhatsApp is not enabled for this restaurant" }, { status: 400 });
-    }
-
-    if (!waSettings.phone_number_id || !waSettings.access_token) {
-      return NextResponse.json({ error: "WhatsApp Cloud API credentials not configured" }, { status: 400 });
     }
 
     // Get order details for rendering variables
@@ -146,15 +108,26 @@ export async function POST(req: NextRequest) {
     // Merge with any custom variables provided
     const finalVars = { ...defaultVars, ...(parsed.data.variables || {}) };
 
-    // Create outbound message log entry
+    // Render text message from template (for Baileys)
+    const textMessage = renderWhatsAppMessage(waSettings.default_template || "", {
+      restaurant: { name: restaurant?.name || "Your Café", gstin: restaurant?.gstin },
+      orderNumber: String(order.order_number),
+      tableNumber: order.table_label || "Dine-in",
+      total: (order.total_paise / 100).toFixed(2),
+      paymentModeLine: order.payment_method ? `• Paid via ${order.payment_method.toUpperCase()}` : (order.payment_status === "paid" ? "• Paid" : ""),
+      receiptUrl,
+    });
+
+    // Create outbound message log entry in whatsapp_messages table
     const { data: outboundMsg, error: logError } = await db
-      .from("whatsapp_outbound_messages")
+      .from("whatsapp_messages")
       .insert({
-        restaurant_id: restaurantId,
+        tenant_id: restaurantId,
         order_id: order_id,
-        phone,
+        message_type: "bill_receipt",
+        recipient_phone: phone,
         template_name,
-        template_language: template_language,
+        template_language,
         template_variables: finalVars,
         status: "pending",
       })
@@ -163,49 +136,39 @@ export async function POST(req: NextRequest) {
 
     if (logError) {
       console.error("[WhatsApp Send] Failed to log outbound message:", logError);
+      return NextResponse.json({ error: "Failed to queue message" }, { status: 500 });
     }
 
-    // Send the WhatsApp message
-    const result = await sendWhatsAppMessage(
-      waSettings.phone_number_id,
-      waSettings.access_token,
-      phone,
-      template_name,
-      template_language,
-      finalVars
-    );
+    // Build WhatsAppTemplate for BaileysClient
+    const template = buildTemplateFromVars(template_name, template_language, finalVars);
+
+    // Send the WhatsApp message via BaileysClient
+    const result = await baileysClient.sendTemplate(restaurantId, phone, template);
 
     // Update outbound message log with result
-    if (logError) {
-      // If logging failed, we can't update, but we should still return the result
-    } else {
-      await db
-        .from("whatsapp_outbound_messages")
-        .update({
-          status: result.success ? "sent" : "failed",
-          meta_message_id: result.messageId,
-          error_message: result.error,
-          sent_at: result.success ? new Date().toISOString() : null,
-          meta_response: result.success ? { message_id: result.messageId } : { error: result.error },
-        })
-        .eq("id", outboundMsg.id);
-    }
+    await db
+      .from("whatsapp_messages")
+      .update({
+        status: result.success ? "sent" : "failed",
+        provider_message_id: result.messageId,
+        error_message: result.error,
+        sent_at: result.success ? new Date().toISOString() : null,
+      })
+      .eq("id", outboundMsg.id);
+
+    // Log the send event for analytics
+    await db.from("whatsapp_message_events").insert({
+      tenant_id: restaurantId,
+      message_id: outboundMsg.id,
+      event_type: result.success ? "sent" : "failed",
+      payload: { template_name, template_language, provider_message_id: result.messageId, error: result.error },
+    });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || "Failed to send WhatsApp message" }, { status: 500 });
     }
 
-    // Log the send event for analytics
-    await db.from("whatsapp_bill_events").insert({
-      order_id,
-      restaurant_id: restaurantId,
-      tenant_id: restaurantId,
-      event_type: "sent",
-      phone,
-      meta: { template_name, template_language, meta_message_id: result.messageId },
-    });
-
-    return NextResponse.json({ ok: true, messageId: result.messageId });
+    return NextResponse.json({ messageId: result.messageId });
   } catch (err: any) {
     console.error("[WhatsApp Send] Error:", err);
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
