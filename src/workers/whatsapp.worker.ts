@@ -9,6 +9,28 @@ import {
   buildOrderConfirmationVars,
   buildOrderConfirmedTemplate,
 } from "@/integrations/whatsapp/templates/order-confirmation";
+import {
+  ORDER_ACCEPTED_TEMPLATE_NAME,
+  PREPARING_TEMPLATE_NAME,
+  READY_TEMPLATE_NAME,
+  SERVED_TEMPLATE_NAME,
+  buildOrderAcceptedVars,
+  buildPreparingVars,
+  buildReadyVars,
+  buildServedVars,
+  buildOrderAcceptedTemplate,
+  buildPreparingTemplate,
+  buildReadyTemplate,
+  buildServedTemplate,
+} from "@/integrations/whatsapp/templates/order-status";
+import {
+  PAYMENT_RECEIVED_TEMPLATE_NAME,
+  REFUND_PROCESSED_TEMPLATE_NAME,
+  buildPaymentReceivedVars,
+  buildRefundProcessedVars,
+  buildPaymentReceivedTemplate,
+  buildRefundProcessedTemplate,
+} from "@/integrations/whatsapp/templates/payment";
 
 interface SendJobData {
   messageId: string;
@@ -144,6 +166,144 @@ async function processSendJob(job: Job<SendJobData>): Promise<void> {
           : {}),
       });
       const template = buildOrderConfirmedTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (
+      messageType === ORDER_ACCEPTED_TEMPLATE_NAME ||
+      storedTemplateName === ORDER_ACCEPTED_TEMPLATE_NAME
+    ) {
+      // Order accepted: build typed vars via the template builder,
+      // then send through the Baileys transport only.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const vars = buildOrderAcceptedVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        tableLabel:
+          (tv["tableLabel"] as string | undefined) ??
+          (tv["table_number"] as string | undefined) ??
+          undefined,
+        ...(tv["etaMinutes"] !== undefined
+          ? { etaMinutes: Number(tv["etaMinutes"]) }
+          : {}),
+        ...((tv["restaurantName"] ?? tv["restaurant_name"]) !== undefined
+          ? {
+              restaurantName: String(
+                tv["restaurantName"] ?? tv["restaurant_name"],
+              ),
+            }
+          : {}),
+      });
+      const template = buildOrderAcceptedTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (
+      messageType === PREPARING_TEMPLATE_NAME ||
+      storedTemplateName === PREPARING_TEMPLATE_NAME
+    ) {
+      // Preparing: build typed vars via the template builder,
+      // then send through the Baileys transport only.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const vars = buildPreparingVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        tableLabel:
+          (tv["tableLabel"] as string | undefined) ??
+          (tv["table_number"] as string | undefined) ??
+          undefined,
+        ...((tv["itemsSummary"] ?? tv["items_summary"]) !== undefined
+          ? { itemsSummary: String(tv["itemsSummary"] ?? tv["items_summary"]) }
+          : {}),
+      });
+      const template = buildPreparingTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (
+      messageType === READY_TEMPLATE_NAME ||
+      storedTemplateName === READY_TEMPLATE_NAME
+    ) {
+      // Ready: build typed vars via the template builder,
+      // then send through the Baileys transport only.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const vars = buildReadyVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        tableLabel:
+          (tv["tableLabel"] as string | undefined) ??
+          (tv["table_number"] as string | undefined) ??
+          undefined,
+      });
+      const template = buildReadyTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (
+      messageType === SERVED_TEMPLATE_NAME ||
+      storedTemplateName === SERVED_TEMPLATE_NAME
+    ) {
+      // Served: build typed vars via the template builder,
+      // then send through the Baileys transport only.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const vars = buildServedVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        tableLabel:
+          (tv["tableLabel"] as string | undefined) ??
+          (tv["table_number"] as string | undefined) ??
+          undefined,
+      });
+      const template = buildServedTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (
+      messageType === PAYMENT_RECEIVED_TEMPLATE_NAME ||
+      storedTemplateName === PAYMENT_RECEIVED_TEMPLATE_NAME
+    ) {
+      // Payment received: build typed vars via the template builder,
+      // then send through the Baileys transport only.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const vars = buildPaymentReceivedVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        ...(tv["amount"] !== undefined
+          ? { amount: String(tv["amount"]) }
+          : tv["amountPaise"] !== undefined
+            ? { amountPaise: Number(tv["amountPaise"]) }
+            : { amount: "" }),
+        ...((tv["paymentMethod"] ?? tv["payment_method"]) !== undefined
+          ? {
+              paymentMethod: String(
+                tv["paymentMethod"] ?? tv["payment_method"],
+              ),
+            }
+          : {}),
+      });
+      const template = buildPaymentReceivedTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (
+      messageType === REFUND_PROCESSED_TEMPLATE_NAME ||
+      storedTemplateName === REFUND_PROCESSED_TEMPLATE_NAME
+    ) {
+      // Refund processed: build typed vars via the template builder,
+      // then send through the Baileys transport only.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const vars = buildRefundProcessedVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        refundAmount: String(
+          tv["refundAmount"] ?? tv["refund_amount"] ?? tv["amount"] ?? "",
+        ),
+        ...(tv["refundAmountPaise"] !== undefined
+          ? { refundAmountPaise: Number(tv["refundAmountPaise"]) }
+          : {}),
+        ...((tv["refundReason"] ?? tv["refund_reason"] ?? tv["reason"]) !== undefined
+          ? {
+              refundReason: String(
+                tv["refundReason"] ?? tv["refund_reason"] ?? tv["reason"],
+              ),
+            }
+          : {}),
+      });
+      const template = buildRefundProcessedTemplate(vars);
       result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
     } else if (message.template_name && message.template_variables) {
       // Build template from stored variables
