@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
-import { buildWhatsAppReceiptVars, renderWhatsAppMessage } from "@/lib/whatsapp-templates";
+import { buildWhatsAppReceiptVars } from "@/lib/whatsapp-templates";
 import { baileysClient } from "@/integrations/whatsapp/baileys/client";
 import type { WhatsAppTemplate, TemplateComponent, TemplateParameter } from "@/integrations/whatsapp/whatsapp.types";
 
@@ -39,7 +39,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Only owners and super_admins can send WhatsApp messages
   if (auth.role !== "owner" && auth.role !== "super_admin") {
     return NextResponse.json({ error: "Forbidden: Only restaurant owners can send WhatsApp messages" }, { status: 403 });
   }
@@ -56,7 +55,6 @@ export async function POST(req: NextRequest) {
 
     const { order_id, phone, template_name, template_language, variables } = parsed.data;
 
-    // Get WhatsApp settings for this restaurant
     const [settingsResult, accountsResult] = await Promise.all([
       db.from("whatsapp_settings").select("*").eq("tenant_id", restaurantId).maybeSingle(),
       db.from("whatsapp_accounts").select("*").eq("tenant_id", restaurantId).maybeSingle(),
@@ -73,7 +71,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "WhatsApp is not enabled for this restaurant" }, { status: 400 });
     }
 
-    // Get order details for rendering variables
     const { data: order, error: orderError } = await db
       .from("orders")
       .select("*")
@@ -85,14 +82,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Get restaurant info
     const { data: restaurant } = await db
       .from("restaurants")
       .select("name, gstin")
       .eq("id", restaurantId)
       .maybeSingle();
 
-    // Build variables for template
     const receiptUrl = `https://www.qrslice.com/receipt/${order.status_token}`;
     const defaultVars = buildWhatsAppReceiptVars({
       restaurantName: restaurant?.name || "Your Café",
@@ -105,20 +100,27 @@ export async function POST(req: NextRequest) {
       receiptUrl,
     });
 
-    // Merge with any custom variables provided
     const finalVars = { ...defaultVars, ...(parsed.data.variables || {}) };
 
-    // Render text message from template (for Baileys)
-    const textMessage = renderWhatsAppMessage(waSettings.default_template || "", {
-      restaurant: { name: restaurant?.name || "Your Café", gstin: restaurant?.gstin },
-      orderNumber: String(order.order_number),
-      tableNumber: order.table_label || "Dine-in",
-      total: (order.total_paise / 100).toFixed(2),
-      paymentModeLine: order.payment_method ? `• Paid via ${order.payment_method.toUpperCase()}` : (order.payment_status === "paid" ? "• Paid" : ""),
-      receiptUrl,
-    });
+    const template = buildTemplateFromVars(template_name, template_language, finalVars);
 
-    // Create outbound message log entry in whatsapp_messages table
+    const { data: existingMsg, error: existingError } = await db
+      .from("whatsapp_messages")
+      .select("id, status")
+      .eq("tenant_id", restaurantId)
+      .eq("order_id", order_id)
+      .eq("message_type", "bill_receipt")
+      .maybeSingle();
+
+    if (existingError) {
+      console.error("[WhatsApp Send] Failed to check existing message:", existingError);
+      return NextResponse.json({ error: "Failed to check existing message" }, { status: 500 });
+    }
+
+    if (existingMsg) {
+      return NextResponse.json({ messageId: existingMsg.id, status: existingMsg.status, idempotent: true });
+    }
+
     const { data: outboundMsg, error: logError } = await db
       .from("whatsapp_messages")
       .insert({
@@ -131,44 +133,22 @@ export async function POST(req: NextRequest) {
         template_variables: finalVars,
         status: "pending",
       })
-      .select()
+      .select("id")
       .single();
 
     if (logError) {
-      console.error("[WhatsApp Send] Failed to log outbound message:", logError);
+      console.error("[WhatsApp Send] Failed to queue message:", logError);
       return NextResponse.json({ error: "Failed to queue message" }, { status: 500 });
     }
 
-    // Build WhatsAppTemplate for BaileysClient
-    const template = buildTemplateFromVars(template_name, template_language, finalVars);
-
-    // Send the WhatsApp message via BaileysClient
-    const result = await baileysClient.sendTemplate(restaurantId, phone, template);
-
-    // Update outbound message log with result
-    await db
-      .from("whatsapp_messages")
-      .update({
-        status: result.success ? "sent" : "failed",
-        provider_message_id: result.messageId,
-        error_message: result.error,
-        sent_at: result.success ? new Date().toISOString() : null,
-      })
-      .eq("id", outboundMsg.id);
-
-    // Log the send event for analytics
     await db.from("whatsapp_message_events").insert({
       tenant_id: restaurantId,
       message_id: outboundMsg.id,
-      event_type: result.success ? "sent" : "failed",
-      payload: { template_name, template_language, provider_message_id: result.messageId, error: result.error },
+      event_type: "created",
+      payload: { trigger: "manual_send", template_name, template_language },
     });
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error || "Failed to send WhatsApp message" }, { status: 500 });
-    }
-
-    return NextResponse.json({ messageId: result.messageId });
+    return NextResponse.json({ messageId: outboundMsg.id, status: "pending" });
   } catch (err: any) {
     console.error("[WhatsApp Send] Error:", err);
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });

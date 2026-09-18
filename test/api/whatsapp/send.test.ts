@@ -3,7 +3,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { POST } from "@/app/api/whatsapp/send/route";
 import { NextRequest } from "next/server";
 
-// Mock Supabase admin client
 const mockSelect = vi.fn();
 const mockEq = vi.fn();
 const mockMaybeSingle = vi.fn();
@@ -24,12 +23,10 @@ vi.mock("@/lib/supabase/admin", () => ({
   }),
 }));
 
-// Mock getSessionUser
 vi.mock("@/lib/auth", () => ({
   getSessionUser: vi.fn(),
 }));
 
-// Mock BaileysClient
 vi.mock("@/integrations/whatsapp/baileys/client", () => ({
   baileysClient: {
     sendTemplate: vi.fn(),
@@ -43,7 +40,6 @@ import { baileysClient } from "@/integrations/whatsapp/baileys/client";
 describe("WhatsApp Send API /api/whatsapp/send", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Support chained .eq().eq().maybeSingle()
     const chainableEq = vi.fn(() => ({ eq: chainableEq, maybeSingle: mockMaybeSingle }));
     mockSelect.mockReturnValue({ eq: chainableEq });
     mockInsert.mockReturnValue({ select: () => ({ single: mockSingle }) });
@@ -87,10 +83,9 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
       restaurantId: "rest-1",
     });
 
-    // Mock whatsapp_settings - no settings found
     mockMaybeSingle
-      .mockResolvedValueOnce({ data: null, error: null }) // whatsapp_settings
-      .mockResolvedValueOnce({ data: null, error: null }); // whatsapp_accounts
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: null, error: null });
 
     const req = new NextRequest("http://localhost/api/whatsapp/send", {
       method: "POST",
@@ -110,12 +105,10 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
       restaurantId: "rest-1",
     });
 
-    // Mock whatsapp_settings - enabled
     mockMaybeSingle
       .mockResolvedValueOnce({ data: { tenant_id: "rest-1", enabled: true, auto_send_bill: true, default_template: "bill_receipt", default_language: "en" }, error: null })
-      .mockResolvedValueOnce({ data: { tenant_id: "rest-1" }, error: null }); // whatsapp_accounts
+      .mockResolvedValueOnce({ data: { tenant_id: "rest-1" }, error: null });
 
-    // Mock order - not found
     mockMaybeSingle.mockResolvedValueOnce({ data: null, error: null });
 
     const req = new NextRequest("http://localhost/api/whatsapp/send", {
@@ -129,64 +122,7 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
     expect(data.error).toBe("Order not found");
   });
 
-  it("sends WhatsApp template message successfully via BaileysClient", async () => {
-    (getSessionUser as any).mockResolvedValue({
-      userId: "user-1",
-      role: "owner",
-      restaurantId: "rest-1",
-    });
-
-    // Mock whatsapp_settings
-    mockMaybeSingle
-      .mockResolvedValueOnce({ data: { tenant_id: "rest-1", enabled: true, auto_send_bill: true, default_template: "bill_receipt", default_language: "en" }, error: null })
-      .mockResolvedValueOnce({ data: { tenant_id: "rest-1" }, error: null }); // whatsapp_accounts
-
-    // Mock order
-    const mockOrder = {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      restaurant_id: "rest-1",
-      order_number: "ORD-123",
-      table_label: "T5",
-      total_paise: 50000,
-      payment_method: "cash",
-      payment_status: "paid",
-      status_token: "token123",
-    };
-    mockMaybeSingle.mockResolvedValueOnce({ data: mockOrder, error: null });
-
-    // Mock restaurant
-    mockMaybeSingle.mockResolvedValueOnce({ data: { name: "Test Café", gstin: "29ABCDE1234F1Z5" }, error: null });
-
-    // Mock whatsapp_messages insert
-    const mockOutboundMsg = { id: "msg-uuid", restaurant_id: "rest-1", order_id: "123e4567-e89b-12d3-a456-426614174000", status: "pending" };
-    mockSingle.mockResolvedValueOnce({ data: mockOutboundMsg, error: null });
-
-    // Mock BaileysClient.sendTemplate success
-    (baileysClient.sendTemplate as any).mockResolvedValue({ success: true, messageId: "baileys-msg-id" });
-
-    // Mock whatsapp_messages update
-    mockEq.mockReturnValue({ data: null, error: null });
-
-    const req = new NextRequest("http://localhost/api/whatsapp/send", {
-      method: "POST",
-      body: JSON.stringify({ order_id: "123e4567-e89b-12d3-a456-426614174000", phone: "919876543210", template_name: "bill_receipt" }),
-    });
-    const res = await POST(req);
-
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data).toHaveProperty("messageId", "baileys-msg-id");
-    expect(baileysClient.sendTemplate).toHaveBeenCalledWith(
-      "rest-1",
-      "919876543210",
-      expect.objectContaining({
-        name: "bill_receipt",
-        language: "en",
-      })
-    );
-  });
-
-  it("returns 500 when BaileysClient.sendTemplate fails", async () => {
+  it("queues WhatsApp template message asynchronously (async outbox pattern)", async () => {
     (getSessionUser as any).mockResolvedValue({
       userId: "user-1",
       role: "owner",
@@ -208,15 +144,15 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
       status_token: "token123",
     };
     mockMaybeSingle.mockResolvedValueOnce({ data: mockOrder, error: null });
+
     mockMaybeSingle.mockResolvedValueOnce({ data: { name: "Test Café", gstin: "29ABCDE1234F1Z5" }, error: null });
 
-    const mockOutboundMsg = { id: "msg-uuid", restaurant_id: "rest-1", order_id: "123e4567-e89b-12d3-a456-426614174000", status: "pending" };
+    mockMaybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    const mockOutboundMsg = { id: "msg-uuid", status: "pending" };
     mockSingle.mockResolvedValueOnce({ data: mockOutboundMsg, error: null });
 
-    // Mock BaileysClient.sendTemplate failure
-    (baileysClient.sendTemplate as any).mockResolvedValue({ success: false, error: "Not connected" });
-
-    mockEq.mockReturnValue({ data: null, error: null });
+    mockInsert.mockReturnValueOnce({ select: () => ({ single: mockSingle }) });
 
     const req = new NextRequest("http://localhost/api/whatsapp/send", {
       method: "POST",
@@ -224,9 +160,52 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
     });
     const res = await POST(req);
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.error).toBe("Not connected");
+    expect(data).toHaveProperty("messageId", "msg-uuid");
+    expect(data).toHaveProperty("status", "pending");
+    expect(baileysClient.sendTemplate).not.toHaveBeenCalled();
+  });
+
+  it("returns existing message idempotently on duplicate call", async () => {
+    (getSessionUser as any).mockResolvedValue({
+      userId: "user-1",
+      role: "owner",
+      restaurantId: "rest-1",
+    });
+
+    mockMaybeSingle
+      .mockResolvedValueOnce({ data: { tenant_id: "rest-1", enabled: true, auto_send_bill: true, default_template: "bill_receipt", default_language: "en" }, error: null })
+      .mockResolvedValueOnce({ data: { tenant_id: "rest-1" }, error: null });
+
+    const mockOrder = {
+      id: "123e4567-e89b-12d3-a456-426614174000",
+      restaurant_id: "rest-1",
+      order_number: "ORD-123",
+      table_label: "T5",
+      total_paise: 50000,
+      payment_method: "cash",
+      payment_status: "paid",
+      status_token: "token123",
+    };
+    mockMaybeSingle.mockResolvedValueOnce({ data: mockOrder, error: null });
+
+    mockMaybeSingle.mockResolvedValueOnce({ data: { name: "Test Café", gstin: "29ABCDE1234F1Z5" }, error: null });
+
+    mockMaybeSingle.mockResolvedValueOnce({ data: { id: "existing-msg-id", status: "pending" }, error: null });
+
+    const req = new NextRequest("http://localhost/api/whatsapp/send", {
+      method: "POST",
+      body: JSON.stringify({ order_id: "123e4567-e89b-12d3-a456-426614174000", phone: "919876543210", template_name: "bill_receipt" }),
+    });
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toHaveProperty("messageId", "existing-msg-id");
+    expect(data).toHaveProperty("status", "pending");
+    expect(data).toHaveProperty("idempotent", true);
+    expect(baileysClient.sendTemplate).not.toHaveBeenCalled();
   });
 
   it("returns 422 for invalid input", async () => {
