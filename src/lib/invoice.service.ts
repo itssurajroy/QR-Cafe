@@ -35,15 +35,34 @@ export class InvoiceService {
       throw new Error("Restaurant not found");
     }
 
-    const taxRate = order.tax_paise && order.subtotal_paise
-      ? Math.round((order.tax_paise * 100) / order.subtotal_paise)
-      : restaurant.tax_rate || 5;
+    // Tax convention (exclusive model — ONE consistent assumption):
+    // stored `subtotal_paise` is the NET (pre-tax) base. Discount applies to
+    // the base first, then tax is computed on the discounted base:
+    //   taxable = subtotal - discount; tax = round(taxable * rate / 100);
+    //   cgst = floor(tax / 2); sgst = tax - cgst; total = taxable + tax.
+    const discountPaise = order.discount_paise ?? order.discount ?? 0;
 
     const subtotalPaise = order.subtotal_paise || orderItems.reduce((sum, item) => sum + item.line_total_paise, 0);
-    const totalTaxPaise = order.tax_paise || Math.round((subtotalPaise * taxRate) / (100 + taxRate));
-    const cgstPaise = Math.round(totalTaxPaise / 2);
+    const taxableBasePaise = Math.max(0, subtotalPaise - discountPaise);
+
+    const taxRate =
+      order.tax_rate ?? restaurant.tax_rate ?? (order.tax_paise && taxableBasePaise
+        ? Math.round((order.tax_paise * 100) / taxableBasePaise)
+        : 5);
+
+    const totalTaxPaise = Math.round((taxableBasePaise * taxRate) / 100);
+    const cgstPaise = Math.floor(totalTaxPaise / 2);
     const sgstPaise = totalTaxPaise - cgstPaise;
-    const taxableValuePaise = subtotalPaise - totalTaxPaise;
+    const taxableValuePaise = taxableBasePaise;
+
+    // Reconcile: the printed Subtotal/Discount/Taxable/CGST/SGST lines must
+    // sum to Grand Total. Prefer the stored order.total_paise when it agrees
+    // with the recomputed total within 1 paise (rounding tolerance);
+    // otherwise prefer the recomputed total so the breakdown reconciles.
+    const recomputedTotalPaise = taxableValuePaise + totalTaxPaise;
+    const storedTotalPaise = order.total_paise ?? recomputedTotalPaise;
+    const grandTotalPaise =
+      Math.abs(storedTotalPaise - recomputedTotalPaise) > 1 ? recomputedTotalPaise : storedTotalPaise;
 
     const invoiceData: InvoiceData = {
       restaurant: {
@@ -59,10 +78,10 @@ export class InvoiceService {
         table_label: order.table_label || "Counter",
         created_at: order.created_at,
         subtotal_paise: subtotalPaise,
-        discount_paise: 0,
+        discount_paise: discountPaise,
         tax_paise: totalTaxPaise,
         tax_rate: taxRate,
-        total_paise: order.total_paise,
+        total_paise: grandTotalPaise,
         payment_status: order.payment_status,
         payment_method: order.payment_method,
         customer_name: order.customer_name,

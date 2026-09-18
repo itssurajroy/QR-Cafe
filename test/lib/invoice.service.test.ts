@@ -177,7 +177,51 @@ describe("InvoiceService", () => {
     expect(invoice.invoiceData.items[0]).toHaveProperty("line_total_paise");
   });
 
-  it("includes tax breakdown (CGST/SGST) in invoiceData", async () => {
+  it("computes a numerically correct exclusive-tax breakdown", async () => {
+    mockMaybeSingle
+      .mockResolvedValueOnce({ data: mockOrder, error: null }) // order
+      .mockResolvedValueOnce({ data: mockRestaurant, error: null }); // restaurant
+
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // order query
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // restaurant query
+
+    const invoice = await InvoiceService.generateInvoice("order-uuid");
+    const { tax, order } = invoice.invoiceData;
+
+    // Fixture: subtotal 40000 (net base), discount 0, rate 5.
+    // Exclusive model: taxable = subtotal - discount; tax = round(taxable * rate / 100).
+    expect(tax.tax_rate).toBe(5);
+    expect(tax.taxable_value_paise).toBe(40000);
+    expect(tax.total_tax_paise).toBe(2000);
+    expect(tax.cgst_paise).toBe(1000);
+    expect(tax.sgst_paise).toBe(1000);
+    expect(tax.cgst_paise + tax.sgst_paise).toBe(tax.total_tax_paise);
+    // Breakdown reconciles to Grand Total.
+    expect(tax.taxable_value_paise + tax.total_tax_paise).toBe(order.total_paise);
+    expect(order.total_paise).toBe(42000);
+  });
+
+  it("applies order discount to the taxable base", async () => {
+    const discountedOrder = { ...mockOrder, discount_paise: 5000, total_paise: 36750 };
+    mockMaybeSingle
+      .mockResolvedValueOnce({ data: discountedOrder, error: null }) // order
+      .mockResolvedValueOnce({ data: mockRestaurant, error: null }); // restaurant
+
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // order query
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // restaurant query
+
+    const invoice = await InvoiceService.generateInvoice("order-uuid");
+    const { tax, order } = invoice.invoiceData;
+
+    // taxable = 40000 - 5000 = 35000; tax = round(35000 * 5 / 100) = 1750.
+    expect(order.discount_paise).toBe(5000);
+    expect(tax.taxable_value_paise).toBe(35000);
+    expect(tax.total_tax_paise).toBe(1750);
+    expect(tax.cgst_paise + tax.sgst_paise).toBe(tax.total_tax_paise);
+    expect(tax.taxable_value_paise + tax.total_tax_paise).toBe(order.total_paise);
+  });
+
+  it("generates a valid PDF buffer starting with %PDF magic bytes", async () => {
     mockMaybeSingle
       .mockResolvedValueOnce({ data: mockOrder, error: null }) // order
       .mockResolvedValueOnce({ data: mockRestaurant, error: null }); // restaurant
@@ -187,10 +231,9 @@ describe("InvoiceService", () => {
 
     const invoice = await InvoiceService.generateInvoice("order-uuid");
 
-    expect(invoice.invoiceData.tax).toBeDefined();
-    expect(invoice.invoiceData.tax.cgst_paise).toBeDefined();
-    expect(invoice.invoiceData.tax.sgst_paise).toBeDefined();
-    expect(invoice.invoiceData.tax.tax_rate).toBeDefined();
+    expect(invoice.pdfBuffer).toBeInstanceOf(Buffer);
+    expect(invoice.pdfBuffer.length).toBeGreaterThan(0);
+    expect(invoice.pdfBuffer.subarray(0, 4).toString("latin1")).toBe("%PDF");
   });
 
   it("throws error when order not found", async () => {
@@ -200,5 +243,56 @@ describe("InvoiceService", () => {
     mockSelect.mockReturnValueOnce({ eq: mockEq }); // order query
 
     await expect(InvoiceService.generateInvoice("non-existent-order")).rejects.toThrow("Order not found");
+  });
+
+  it("throws error when restaurant not found", async () => {
+    mockMaybeSingle
+      .mockResolvedValueOnce({ data: mockOrder, error: null }) // order
+      .mockResolvedValueOnce({ data: null, error: null }); // restaurant missing
+
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // order query
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // restaurant query
+
+    await expect(InvoiceService.generateInvoice("order-uuid")).rejects.toThrow("Restaurant not found");
+  });
+
+  it("throws error when order items fetch fails", async () => {
+    mockMaybeSingle
+      .mockResolvedValueOnce({ data: mockOrder, error: null }); // order
+
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // order query
+    mockOrderItemsEq.mockReturnValueOnce({
+      eq: mockOrderItemsEq,
+      then: (resolve: (value: { data: typeof mockOrderItems; error: null }) => void) =>
+        resolve({ data: null, error: { message: "db down" } } as unknown as {
+          data: typeof mockOrderItems;
+          error: null;
+        }),
+    });
+
+    await expect(InvoiceService.generateInvoice("order-uuid")).rejects.toThrow("Failed to fetch order items");
+  });
+
+  it("generates a valid PDF when the order has no items", async () => {
+    mockMaybeSingle
+      .mockResolvedValueOnce({ data: mockOrder, error: null }) // order
+      .mockResolvedValueOnce({ data: mockRestaurant, error: null }); // restaurant
+
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // order query
+    mockSelect.mockReturnValueOnce({ eq: mockEq }); // restaurant query
+    mockOrderItemsEq.mockReturnValueOnce({
+      eq: mockOrderItemsEq,
+      then: (resolve: (value: { data: typeof mockOrderItems; error: null }) => void) =>
+        resolve({ data: [], error: null }),
+    });
+
+    const invoice = await InvoiceService.generateInvoice("order-uuid");
+
+    expect(invoice.invoiceData.items).toHaveLength(0);
+    expect(invoice.pdfBuffer.subarray(0, 4).toString("latin1")).toBe("%PDF");
+    // Totals still reconcile (subtotal falls back to the order row).
+    expect(
+      invoice.invoiceData.tax.taxable_value_paise + invoice.invoiceData.tax.total_tax_paise,
+    ).toBe(invoice.invoiceData.order.total_paise);
   });
 });

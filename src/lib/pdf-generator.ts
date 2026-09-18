@@ -51,7 +51,17 @@ export interface InvoiceData {
 export function generateInvoicePDF(data: InvoiceData): Buffer {
   const doc = new jsPDF({ unit: "mm", format: [80, 297] });
   const W = 80;
+  const PAGE_H = 297;
+  const BOTTOM_MARGIN = 12;
   let y = 0;
+
+  // Long item lists spill onto new 80mm pages instead of overflowing.
+  const ensureSpace = (needed: number) => {
+    if (y + needed > PAGE_H - BOTTOM_MARGIN) {
+      doc.addPage();
+      y = 10;
+    }
+  };
 
   const rName = data.restaurant.name || "QRslice";
   const isPaid = data.order.payment_status === "paid";
@@ -122,6 +132,7 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
 
   // Status Banner
   y += 1;
+  ensureSpace(9);
   const statusText = isPaid ? "[PAID] PAYMENT RECEIVED - THANK YOU" : "[UNPAID] PLEASE COLLECT AT COUNTER";
   doc.setFillColor(isPaid ? 16 : 225, isPaid ? 185 : 29, isPaid ? 129 : 72);
   doc.roundedRect(4, y, W - 8, 6, 1, 1, "F");
@@ -133,6 +144,7 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
   y += 9;
 
   // 4. Line Items Table Header
+  ensureSpace(7);
   doc.setFillColor(241, 245, 249); // slate-100
   doc.rect(4, y, W - 8, 5.5, "F");
   doc.setFont("helvetica", "bold");
@@ -149,6 +161,10 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
     const unitPrice = it.unit_price_paise;
     const itemTotalPaise = it.line_total_paise;
     const nameLines = doc.splitTextToSize(it.item_name || "Item", 36);
+
+    // Reserve this item's full block (name lines + optional notes +
+    // divider) so a long list paginates instead of running off the page.
+    ensureSpace(nameLines.length * 3.2 + (it.notes ? 3 : 0) + 1.5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
@@ -183,11 +199,11 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
   y += 2;
   const rawSubtotalPaise = data.order.subtotal_paise || data.items.reduce((s, i) => s + i.line_total_paise, 0);
   const discountPaise = data.order.discount_paise || 0;
-  const netPaise = Math.max(0, rawSubtotalPaise - discountPaise);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6);
 
+  ensureSpace(3.5);
   doc.text("Subtotal:", 6, y);
   doc.text(`${(data.restaurant.currency === "INR" ? "₹" : "")}${(rawSubtotalPaise / 100).toFixed(2)}`, W - 6, y, { align: "right" });
   y += 3.5;
@@ -200,19 +216,23 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
     y += 3.5;
   }
 
+  ensureSpace(3.5);
   doc.text("Taxable Value:", 6, y);
   doc.text(`${(data.restaurant.currency === "INR" ? "₹" : "")}${(data.tax.taxable_value_paise / 100).toFixed(2)}`, W - 6, y, { align: "right" });
   y += 3.5;
 
+  ensureSpace(3.5);
   doc.text(`CGST @ ${(data.tax.tax_rate / 2).toFixed(1)}%:`, 6, y);
   doc.text(`${(data.restaurant.currency === "INR" ? "₹" : "")}${(data.tax.cgst_paise / 100).toFixed(2)}`, W - 6, y, { align: "right" });
   y += 3.5;
 
+  ensureSpace(3.5);
   doc.text(`SGST @ ${(data.tax.tax_rate / 2).toFixed(1)}%:`, 6, y);
   doc.text(`${(data.restaurant.currency === "INR" ? "₹" : "")}${(data.tax.sgst_paise / 100).toFixed(2)}`, W - 6, y, { align: "right" });
   y += 4;
 
   // Grand Total Box
+  ensureSpace(11);
   doc.setFillColor(15, 23, 42);
   doc.rect(4, y, W - 8, 7.5, "F");
   doc.setTextColor(255, 255, 255);
@@ -224,12 +244,14 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
   y += 11;
 
   // 7. Payment Tender Details
+  ensureSpace(4);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6);
   doc.text(`Payment Mode: ${(data.order.payment_method || "CASH").toUpperCase()}`, 6, y);
   y += 3.5;
 
   // 8. Footer & Regulatory Notes
+  ensureSpace(11);
   doc.setDrawColor(203, 213, 225);
   doc.line(4, y, W - 4, y);
   y += 4;
