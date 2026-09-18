@@ -4,6 +4,11 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { baileysClient } from "@/integrations/whatsapp/baileys/client";
 import { redis } from "@/queues/whatsapp.queue";
 import type { WhatsAppTemplate } from "@/integrations/whatsapp/whatsapp.types";
+import {
+  ORDER_CONFIRMED_TEMPLATE_NAME,
+  buildOrderConfirmationVars,
+  buildOrderConfirmedTemplate,
+} from "@/integrations/whatsapp/templates/order-confirmation";
 
 interface SendJobData {
   messageId: string;
@@ -96,7 +101,51 @@ async function processSendJob(job: Job<SendJobData>): Promise<void> {
     await baileysClient.connect(tenantId);
 
     let result;
-    if (message.template_name && message.template_variables) {
+    const messageType = (message.message_type as string) || "";
+    const storedTemplateName = (message.template_name as string) || "";
+    if (
+      messageType === ORDER_CONFIRMED_TEMPLATE_NAME ||
+      storedTemplateName === ORDER_CONFIRMED_TEMPLATE_NAME
+    ) {
+      // Order confirmation: build typed template via the template builder,
+      // then send through the Baileys transport. Template builders never
+      // perform socket calls themselves.
+      const tv = (message.template_variables as Record<string, unknown>) || {};
+      const rawItems = Array.isArray(tv["items"])
+        ? (tv["items"] as Array<{ name?: unknown; qty?: unknown; pricePaise?: unknown }>)
+        : [];
+      const vars = buildOrderConfirmationVars({
+        orderNumber: String(
+          tv["orderNumber"] ?? tv["order_number"] ?? tv["orderNo"] ?? "",
+        ),
+        tableLabel:
+          (tv["tableLabel"] as string | undefined) ??
+          (tv["table_number"] as string | undefined) ??
+          undefined,
+        items: rawItems.map((i) => ({
+          name: String(i.name ?? ""),
+          qty: Number(i.qty ?? 1),
+          ...(i.pricePaise !== undefined
+            ? { pricePaise: Number(i.pricePaise) }
+            : {}),
+        })),
+        ...(tv["totalPaise"] !== undefined
+          ? { totalPaise: Number(tv["totalPaise"]) }
+          : {}),
+        ...(tv["etaMinutes"] !== undefined
+          ? { etaMinutes: Number(tv["etaMinutes"]) }
+          : {}),
+        ...((tv["restaurantName"] ?? tv["restaurant_name"]) !== undefined
+          ? {
+              restaurantName: String(
+                tv["restaurantName"] ?? tv["restaurant_name"],
+              ),
+            }
+          : {}),
+      });
+      const template = buildOrderConfirmedTemplate(vars);
+      result = await baileysClient.sendTemplate(tenantId, message.recipient_phone, template);
+    } else if (message.template_name && message.template_variables) {
       // Build template from stored variables
       const template: WhatsAppTemplate = {
         name: message.template_name,
