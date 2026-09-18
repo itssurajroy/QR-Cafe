@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { RegisterView } from "@/features/pos/RegisterView";
 import { KitchenView } from "@/features/pos/KitchenView";
 import { VisualFloorGrid } from "@/features/pos/VisualFloorGrid";
+import { WhatsAppBillButton } from "@/features/pos/WhatsAppBillButton";
 import { generateBeautifulBillPdf } from "@/lib/bill-pdf";
 import { api } from "@/lib/api";
 import { getWaLink, isValidIndianPhone, normalizeWaPhone } from "@/lib/utils";
@@ -1549,6 +1550,26 @@ export default function PosClient({
                 >
                   <span>💬 WhatsApp</span>
                 </button>
+
+                {/* Queued server-side bill via POST /api/whatsapp/send (async outbox). */}
+                {lastBill.id && (
+                  <WhatsAppBillButton
+                    orderId={lastBill.id}
+                    phone={lastBill.customer_phone || customerPhone || ""}
+                    notify={flash}
+                    onPhoneRequired={() =>
+                      openWhatsAppModal({
+                        orderId: lastBill.id || "",
+                        orderNumber: lastBill.order_number || lastBill.orderNumber || "",
+                        customerPhone: "",
+                        totalPaise: lastBill.finalTotalPaise ?? lastBill.total_paise ?? 0,
+                        statusToken: lastBill.status_token || lastBill.id || "",
+                        tableLabel: lastBill.table_label,
+                        paymentMethod: lastBill.paymentMethod || lastBill.payment_method,
+                      })
+                    }
+                  />
+                )}
 
                 <button
                   type="button"
