@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSuperAdmin } from "./SuperAdminContext";
 
 export function SuperHeader() {
-  const { tab, setShowNewCafeModal } = useSuperAdmin();
+  const { tab, setShowNewCafeModal, setMobileMenuOpen } = useSuperAdmin();
 
   // Tab Title Pretty Formatter
   const titles: Record<string, string> = {
@@ -39,13 +39,23 @@ export function SuperHeader() {
   const currentTitle = titles[tab] || `${tab.charAt(0).toUpperCase() + tab.slice(1)} Management`;
 
   return (
-    <header className="h-16 border-b border-slate-200/80 bg-white px-6 flex items-center justify-between shrink-0 select-none">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center text-xs font-semibold text-slate-400 gap-1.5">
+    <header className="h-16 border-b border-slate-200/80 bg-white px-4 sm:px-6 pt-[env(safe-area-inset-top)] flex items-center justify-between shrink-0 select-none">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          className="lg:hidden p-2 -ml-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors touch-target flex items-center justify-center shrink-0"
+          aria-label="Open Navigation"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div className="hidden sm:flex items-center text-xs font-semibold text-slate-400 gap-1.5 shrink-0">
           <span>Console</span>
           <span>/</span>
         </div>
-        <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">{currentTitle}</h2>
+        <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight truncate">{currentTitle}</h2>
       </div>
 
       <div className="flex items-center gap-3">

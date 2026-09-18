@@ -195,39 +195,36 @@ export function AdminAppShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-slate-900 flex flex-col font-sans selection:bg-[#007AFF] selection:text-white antialiased">
-      {/* Top Mobile Bar */}
-      <div className="lg:hidden bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-        <div className="flex items-center gap-3">
+    <div className="min-h-dvh bg-[#F5F5F7] flex flex-col font-[family-name:var(--font-geist-sans)] selection:bg-[#5738F5] selection:text-white">
+      {/* MOBILE TOP BAR (lg:hidden) */}
+      <div className="lg:hidden bg-white/90 backdrop-blur-xl border-b border-[#E7E4F0] px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] flex items-center justify-between sticky top-0 z-30">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}
-            className="w-10 h-10 rounded-xl bg-black/[0.05] hover:bg-black/[0.08] flex items-center justify-center text-slate-800 cursor-pointer"
-            aria-label="Open Navigation Menu"
+            className="p-2 -ml-1 rounded-xl text-[#6F7185] hover:text-[#17142B] hover:bg-slate-100 transition-colors touch-target flex items-center justify-center"
+            title="Open Menu"
+            aria-label="Open Navigation"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
           <QrSliceLogo size="sm" />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${roleBadge.badge}`}>
-            <span>{roleBadge.icon}</span>
-            <span>{roleBadge.label}</span>
-          </span>
           <NotificationBell />
           <Link
             href={`/c/${restaurantSlug}`}
             target="_blank"
-            className="px-3 py-1.5 rounded-xl bg-[#EEEAFE] text-[#5738F5] font-bold text-xs flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-xl bg-[#EEEAFE] text-[#5738F5] font-bold text-xs flex items-center gap-1 touch-target min-h-[36px]"
           >
             <span>Menu ↗</span>
           </Link>
           <Link
             href="/pos?view=kitchen"
-            className="px-3 py-1.5 rounded-xl bg-[#5738F5] text-white font-bold text-xs"
+            className="px-2.5 py-1.5 rounded-xl bg-[#5738F5] text-white font-bold text-xs touch-target min-h-[36px] flex items-center"
           >
             KDS
           </Link>
@@ -378,25 +375,28 @@ export function AdminAppShell({
           </div>
         </aside>
 
-        {/* MOBILE DRAWER OVERLAY */}
+        {/* MOBILE DRAWER / BOTTOM SHEET OVERLAY */}
         {mobileDrawerOpen && (
-          <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-stretch lg:hidden">
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
               onClick={() => setMobileDrawerOpen(false)}
             />
-            <div className="relative w-72 max-w-full bg-white h-full flex flex-col z-10 shadow-2xl p-4">
-              <div className="flex items-center justify-between pb-4 border-b border-[#E7E4F0]">
+            <div className="relative w-full sm:w-80 max-w-full bg-white rounded-t-3xl sm:rounded-none max-h-[88dvh] sm:max-h-full sm:h-full flex flex-col z-10 shadow-2xl p-4 sm:p-5 pb-safe animate-slide-in-bottom sm:animate-none">
+              {/* Drag Handle for iOS bottom sheet */}
+              <div className="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-3 shrink-0" />
+              <div className="flex items-center justify-between pb-3 border-b border-[#E7E4F0] shrink-0">
                 <QrSliceLogo size="sm" />
                 <button
                   type="button"
                   onClick={() => setMobileDrawerOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold"
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold hover:bg-slate-200 transition-colors"
+                  aria-label="Close navigation"
                 >
                   ✕
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              <div className="flex-1 overflow-y-auto py-3 space-y-4">
                 {canAccessTab(userRole, "dashboard") && (
                   <button
                     type="button"
@@ -404,19 +404,19 @@ export function AdminAppShell({
                       onSelectSection("dashboard");
                       setMobileDrawerOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold transition-all min-h-[44px] ${
                       currentSection === "dashboard"
                         ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25"
                         : "text-[#6F7185] hover:text-[#17142B] hover:bg-slate-50"
                     }`}
                   >
                     <DashboardIcon className="w-4 h-4" />
-                    <span>Dashboard</span>
+                    <span>Dashboard Overview</span>
                   </button>
                 )}
                 {visibleGroups.map((group) => (
                   <div key={group.title} className="space-y-1">
-                    <div className="text-[10px] font-black uppercase tracking-widest text-[#6F7185] px-2">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-[#6F7185] px-2 pt-1">
                       {group.title}
                     </div>
                     {group.items.map((item) => {
@@ -428,7 +428,7 @@ export function AdminAppShell({
                             key={item.id}
                             href={item.href}
                             onClick={() => setMobileDrawerOpen(false)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] ${
                               isActive
                                 ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25"
                                 : "text-[#6F7185] hover:text-[#17142B] hover:bg-slate-50"
@@ -447,7 +447,7 @@ export function AdminAppShell({
                             onSelectSection(item.id);
                             setMobileDrawerOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] ${
                             isActive
                               ? "bg-[#5738F5] text-white shadow-md shadow-[#5738F5]/25"
                               : "text-[#6F7185] hover:text-[#17142B] hover:bg-slate-50"
@@ -460,6 +460,27 @@ export function AdminAppShell({
                     })}
                   </div>
                 ))}
+              </div>
+
+              {/* Sheet Footer */}
+              <div className="pt-3 border-t border-[#E7E4F0] flex items-center justify-between shrink-0">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-xs font-bold text-red-600 hover:text-red-700 py-2 px-3 rounded-xl hover:bg-red-50 flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign Out</span>
+                </button>
+                <Link
+                  href={`/c/${restaurantSlug}`}
+                  target="_blank"
+                  className="text-xs font-bold text-[#5738F5] hover:underline py-2 px-3"
+                >
+                  Guest Menu ↗
+                </Link>
               </div>
             </div>
           </div>
@@ -530,11 +551,70 @@ export function AdminAppShell({
           </header>
 
           {/* Sub-body Content Slot */}
-          <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6">
+          <main className="flex-1 p-3.5 sm:p-6 max-w-7xl w-full mx-auto space-y-6 pb-28 lg:pb-6">
             {children}
           </main>
         </div>
       </div>
+
+      {/* IOS BOTTOM TAB BAR (lg:hidden) */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#E7E4F0] px-2 py-1 pb-safe flex items-center justify-around shadow-lg shadow-black/5"
+      >
+        <button
+          type="button"
+          onClick={() => onSelectSection("dashboard")}
+          className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all touch-target ${
+            currentSection === "dashboard" ? "text-[#5738F5]" : "text-[#6F7185] hover:text-[#17142B]"
+          }`}
+        >
+          <DashboardIcon className="w-5 h-5" />
+          <span className="text-[10px] font-bold mt-0.5 tracking-tight">Overview</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectSection("orders")}
+          className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all touch-target relative ${
+            currentSection === "orders" ? "text-[#5738F5]" : "text-[#6F7185] hover:text-[#17142B]"
+          }`}
+        >
+          <ClipboardListIcon className="w-5 h-5" />
+          <span className="text-[10px] font-bold mt-0.5 tracking-tight">Orders</span>
+          {liveOrders > 0 && (
+            <span className="absolute top-1 right-1/4 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectSection("tables")}
+          className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all touch-target ${
+            currentSection === "tables" ? "text-[#5738F5]" : "text-[#6F7185] hover:text-[#17142B]"
+          }`}
+        >
+          <ChairIcon className="w-5 h-5" />
+          <span className="text-[10px] font-bold mt-0.5 tracking-tight">Tables</span>
+        </button>
+        <Link
+          href="/pos"
+          className="flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all text-[#6F7185] hover:text-[#17142B] touch-target"
+        >
+          <CreditCardIcon className="w-5 h-5" />
+          <span className="text-[10px] font-bold mt-0.5 tracking-tight">POS</span>
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMobileDrawerOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all text-[#6F7185] hover:text-[#17142B] touch-target"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="6" cy="12" r="1.5" />
+            <circle cx="18" cy="12" r="1.5" />
+          </svg>
+          <span className="text-[10px] font-bold mt-0.5 tracking-tight">More</span>
+        </button>
+      </nav>
     </div>
   );
 }

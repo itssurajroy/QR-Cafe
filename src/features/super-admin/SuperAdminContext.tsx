@@ -66,6 +66,9 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   const [searchQuery, setSearchQuery] = useState(initialQ);
   const [selectedPlan, setSelectedPlan] = useState(initialPlanFilter);
 
+  // Mobile Navigation State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   // Tenant Slide-Over Drawer State
   const [drawerCafeId, setDrawerCafeId] = useState<string | null>(null);
   const [drawerData, setDrawerData] = useState<any>(null);
@@ -399,7 +402,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
 
   const value = {
     cafes, totalCafes, page, pageSize, initialQ, initialPlanFilter, staff, kpis, charts, initialConfig, recentAudit, authUsers,
-    tab, setTab, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab,     showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, newCafeOwnerName, setNewCafeOwnerName, newCafeOwnerEmail, setNewCafeOwnerEmail, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
+    tab, setTab, mobileMenuOpen, setMobileMenuOpen, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab,     showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, newCafeOwnerName, setNewCafeOwnerName, newCafeOwnerEmail, setNewCafeOwnerEmail, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
     handleExtendTrial, handleMarkPaid, handleSetPlan, handleAddRefundNote, handleExportCSV, handleSaveBroadcast, handleFastExtendTrial, handleFastToggleStatus, handleDeleteCafe, handleSaveConfig, handleCreateCafeSubmit, loadFilteredAudit, openDrawer, applyFilter, totalPages, flash
   };
 

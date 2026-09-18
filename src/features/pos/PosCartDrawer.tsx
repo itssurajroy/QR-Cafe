@@ -119,7 +119,7 @@ export function PosCartDrawer({
   return (
     <aside
       className={`${
-        mobileCartOpen ? "fixed inset-0 z-50 flex flex-col bg-white p-4" : "hidden"
+        mobileCartOpen ? "fixed inset-0 z-50 flex flex-col bg-white p-3.5 sm:p-4 pb-safe animate-slide-in-bottom" : "hidden"
       } md:flex md:static w-full md:w-80 lg:w-96 bg-white border-l border-black/[0.06] flex-col shrink-0 shadow-xs overflow-y-auto`}
     >
       <div className="p-3.5 border-b border-black/[0.06] flex items-center justify-between bg-[#F5F5F7]/80 backdrop-blur-md shrink-0">
@@ -670,7 +670,7 @@ export function PosCartDrawer({
         )}
 
         {/* Primary Action Buttons: SEND KOT vs PAY */}
-        <div className="flex gap-2.5 pt-2">
+        <div className="flex gap-2.5 pt-2 pb-safe">
           <button
             type="button"
             onClick={() => handleSettle("unpaid")}

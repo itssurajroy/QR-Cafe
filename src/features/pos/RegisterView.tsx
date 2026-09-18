@@ -1,4 +1,4 @@
-// Copyright (c) 2026 QRslice. All rights reserved.
+import { useState } from "react";
 import { PosCatalogGrid } from "./PosCatalogGrid";
 import { PosCartDrawer } from "./PosCartDrawer";
 import { tableFloorState } from "@/features/booking/floorStatus";
@@ -83,59 +83,85 @@ export function RegisterView(props: RegisterViewProps) {
   const effectiveOrderType = props.orderType || "dine_in";
   const pendingCount = props.reservations.filter((r) => r.status === "pending").length;
   const confirmedReservations = props.reservations.filter((r) => r.status === "confirmed");
+  const [mobileActiveTab, setMobileActiveTab] = useState<"tables" | "menu">("menu");
 
   return (
     <div className="flex-1 flex flex-col md:flex-row overflow-hidden no-print relative bg-[#F5F5F7] text-slate-900">
-      {/* Mobile Horizontal Tables & Order Type */}
-      <div className="md:hidden bg-white border-b border-black/[0.06] p-2.5 overflow-x-auto flex flex-col gap-2 shrink-0 no-scrollbar">
-        <div className="flex bg-black/[0.04] p-1 rounded-2xl text-xs font-semibold text-slate-600 shrink-0">
-          <button
-            onClick={() => props.setOrderType("dine_in")}
-            className={`flex-1 py-1.5 rounded-xl transition-all ${effectiveOrderType === "dine_in" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"}`}
-          >
-            Dine-In
-          </button>
-          <button
-            onClick={() => { props.setOrderType("takeaway"); props.setSelectedTable(null); }}
-            className={`flex-1 py-1.5 rounded-xl transition-all ${effectiveOrderType === "takeaway" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"}`}
-          >
-            Pickup
-          </button>
-          <button
-            onClick={() => { props.setOrderType("delivery"); props.setSelectedTable(null); }}
-            className={`flex-1 py-1.5 rounded-xl transition-all ${effectiveOrderType === "delivery" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"}`}
-          >
-            Delivery
-          </button>
-        </div>
-        {effectiveOrderType === "dine_in" && (
-          <div className="flex gap-2">
-          {props.tables.map((t) => {
-            const activeCount = props.tableOrderCounts[t.id] || 0;
-            const fs = tableFloorState(t.id, new Date(), confirmedReservations, new Set(Object.keys(props.tableOrderCounts)));
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => props.setSelectedTable(t)}
-                className={`px-3 py-2 rounded-xl border text-xs font-semibold whitespace-nowrap shrink-0 relative cursor-pointer min-h-[44px] transition-all active:scale-95 ${
-                  props.selectedTable?.id === t.id
-                    ? "bg-[#007AFF] border-[#007AFF] text-white font-bold shadow-sm"
-                    : "bg-white border-black/[0.06] text-slate-700 hover:border-black/[0.12]"
-                }`}
-              >
-                {t.label} ({t.seats}s){fs.detail && fs.state !== "occupied" && fs.state !== "free" && ` • ${fs.detail}`}
-                {activeCount > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#FF3B30] text-white text-[9px] font-bold animate-pulse">
-                    {activeCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      {/* MOBILE TASK VIEW: Full Table Floor Plan */}
+      {mobileActiveTab === "tables" && (
+        <div className="md:hidden flex-1 flex flex-col bg-white overflow-y-auto p-4 pb-28 animate-fade-in">
+          <div className="flex bg-black/[0.04] p-1 rounded-2xl text-xs font-semibold text-slate-600 mb-4 shrink-0">
+            <button
+              onClick={() => props.setOrderType("dine_in")}
+              className={`flex-1 py-2 rounded-xl transition-all ${effectiveOrderType === "dine_in" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"}`}
+            >
+              Dine-In
+            </button>
+            <button
+              onClick={() => { props.setOrderType("takeaway"); props.setSelectedTable(null); setMobileActiveTab("menu"); }}
+              className={`flex-1 py-2 rounded-xl transition-all ${effectiveOrderType === "takeaway" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"}`}
+            >
+              Pickup
+            </button>
+            <button
+              onClick={() => { props.setOrderType("delivery"); props.setSelectedTable(null); setMobileActiveTab("menu"); }}
+              className={`flex-1 py-2 rounded-xl transition-all ${effectiveOrderType === "delivery" ? "bg-white text-slate-900 shadow-xs font-bold" : "hover:text-slate-900"}`}
+            >
+              Delivery
+            </button>
           </div>
-        )}
-      </div>
+
+          <div className="flex items-center justify-between mb-3 px-1">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Select Dining Table
+            </span>
+            {pendingCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-[#FF9500]/15 text-[#FF9500] text-xs font-bold">
+                {pendingCount} waitlist
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {props.tables.map((t) => {
+              const activeCount = props.tableOrderCounts[t.id] || 0;
+              const fs = tableFloorState(t.id, new Date(), confirmedReservations, new Set(Object.keys(props.tableOrderCounts)));
+              const isSelected = props.selectedTable?.id === t.id;
+
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    props.setSelectedTable(t);
+                    setMobileActiveTab("menu");
+                  }}
+                  className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all min-h-[64px] relative active:scale-95 ${
+                    isSelected
+                      ? "bg-[#007AFF] border-[#007AFF] text-white shadow-md font-bold"
+                      : "bg-white border-black/[0.08] hover:border-black/[0.15] text-slate-800"
+                  }`}
+                >
+                  {activeCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#FF3B30] text-white text-[10px] font-bold flex items-center justify-center shadow-xs animate-pulse">
+                      {activeCount}
+                    </span>
+                  )}
+                  <div className="text-sm font-black">{t.label}</div>
+                  <div className={`text-xs mt-0.5 ${isSelected ? "text-white/80 font-medium" : "text-slate-500 font-mono"}`}>
+                    {t.seats} Seats
+                  </div>
+                  {fs.detail && fs.state !== "occupied" && fs.state !== "free" && (
+                    <div className={`text-[10px] font-bold mt-1 ${fs.state === "held" ? "text-white" : "text-[#FF9500]"}`}>
+                      {fs.detail}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* DESKTOP LEFT COLUMN: Tables & Categories */}
       <aside className="hidden md:flex w-52 lg:w-56 bg-white/70 backdrop-blur-md border-r border-black/[0.06] flex-col shrink-0 overflow-y-auto p-3 space-y-4">
@@ -254,22 +280,24 @@ export function RegisterView(props: RegisterViewProps) {
       </aside>
 
       {/* POS CATALOG GRID */}
-      <PosCatalogGrid
-        categories={props.categories}
-        items={props.items}
-        selectedCategory={props.selectedCategory}
-        setSelectedCategory={props.setSelectedCategory}
-        searchQuery={props.searchQuery}
-        setSearchQuery={props.setSearchQuery}
-        vegOnly={props.vegOnly}
-        setVegOnly={props.setVegOnly}
-        onAddToCart={handleAddToCart}
-        msg={props.msg}
-        totalItemCount={props.totalItemCount}
-        finalTotalPaise={props.finalTotalPaise}
-        onOpenMobileCart={() => props.setMobileCartOpen(true)}
-        cartLength={props.cart.length}
-      />
+      <div className={`${mobileActiveTab === "tables" ? "hidden md:flex" : "flex"} flex-1 flex-col overflow-hidden`}>
+        <PosCatalogGrid
+          categories={props.categories}
+          items={props.items}
+          selectedCategory={props.selectedCategory}
+          setSelectedCategory={props.setSelectedCategory}
+          searchQuery={props.searchQuery}
+          setSearchQuery={props.setSearchQuery}
+          vegOnly={props.vegOnly}
+          setVegOnly={props.setVegOnly}
+          onAddToCart={handleAddToCart}
+          msg={props.msg}
+          totalItemCount={props.totalItemCount}
+          finalTotalPaise={props.finalTotalPaise}
+          onOpenMobileCart={() => props.setMobileCartOpen(true)}
+          cartLength={props.cart.length}
+        />
+      </div>
 
       {/* POS CART & BILL DRAWER */}
       <PosCartDrawer
@@ -316,6 +344,60 @@ export function RegisterView(props: RegisterViewProps) {
         handleUpdateOrderStatus={props.handleUpdateOrderStatus}
         onOpenWaModal={props.onOpenWaModal}
       />
+
+      {/* MOBILE BOTTOM TASK BAR (md:hidden) */}
+      <nav
+        aria-label="POS Mobile Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-black/[0.08] px-3 py-1.5 pb-safe flex items-center justify-around shadow-xl shadow-black/5"
+      >
+        <button
+          type="button"
+          onClick={() => {
+            props.setMobileCartOpen(false);
+            setMobileActiveTab("tables");
+          }}
+          className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all touch-target ${
+            mobileActiveTab === "tables" && !props.mobileCartOpen ? "text-[#007AFF] font-bold" : "text-slate-500"
+          }`}
+        >
+          <span className="text-base">🪑</span>
+          <span className="text-[10px] tracking-tight font-bold">
+            {props.selectedTable ? `T-${props.selectedTable.label}` : "Tables"}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            props.setMobileCartOpen(false);
+            setMobileActiveTab("menu");
+          }}
+          className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all touch-target ${
+            mobileActiveTab === "menu" && !props.mobileCartOpen ? "text-[#007AFF] font-bold" : "text-slate-500"
+          }`}
+        >
+          <span className="text-base">📋</span>
+          <span className="text-[10px] tracking-tight font-bold">Catalog</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            props.setMobileCartOpen(true);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all touch-target relative ${
+            props.mobileCartOpen ? "text-[#007AFF] font-bold" : "text-slate-500"
+          }`}
+        >
+          <span className="text-base">🛒</span>
+          <span className="text-[10px] tracking-tight font-bold">
+            Cart {props.cart.length > 0 ? `(${props.cart.length})` : ""}
+          </span>
+          {props.cart.length > 0 && (
+            <span className="absolute top-0.5 right-1/4 px-1.5 py-0.2 rounded-full bg-[#007AFF] text-white text-[9px] font-bold font-mono shadow-2xs">
+              ₹{Math.ceil(props.finalTotalPaise / 100)}
+            </span>
+          )}
+        </button>
+      </nav>
     </div>
   );
 }

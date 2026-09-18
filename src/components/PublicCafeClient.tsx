@@ -579,7 +579,7 @@ export default function PublicCafeClient({
 
       {/* ─── 1. New Mobile-First Header ─── */}
       <header
-        className={`sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-stone-200/80 transition-all duration-200 ${
+        className={`sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-stone-200/80 transition-all duration-200 pt-[env(safe-area-inset-top)] ${
           scrolled ? "py-2.5 shadow-sm" : "py-3 shadow-xs"
         }`}
       >
@@ -876,8 +876,8 @@ export default function PublicCafeClient({
         </section>
       )}
 
-      {/* ─── 4. Category Navigation & Filter Bar (Sticky) ─── */}
-      <div id="category-bar" className="sticky top-[58px] z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/90 py-2.5 shadow-xs transition-all">
+      {/* ─── 4. Sticky Category Bar with Diet Filters ─── */}
+      <div id="category-bar" className="sticky top-[calc(58px+env(safe-area-inset-top))] z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/90 py-2.5 shadow-xs transition-all">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
           {/* Diet Segmented Control */}
           <div className="flex items-center bg-stone-100 p-0.5 rounded-xl shrink-0 border border-stone-200/80">
@@ -1104,7 +1104,7 @@ export default function PublicCafeClient({
 
       {/* ─── 3. Sticky Bottom Order Bar ─── */}
       {totalQty > 0 && (
-        <aside aria-label="Order Cart Bar" className="fixed bottom-4 left-4 right-4 z-40 max-w-xl mx-auto animate-fade-in-up">
+        <aside aria-label="Order Cart Bar" className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-3 sm:left-4 right-3 sm:right-4 z-40 max-w-xl mx-auto animate-fade-in-up">
           <div className="bg-stone-950 text-white p-3 sm:p-3.5 rounded-2xl shadow-xl flex items-center justify-between border border-stone-800">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-black text-sm shadow-sm">
@@ -1127,7 +1127,7 @@ export default function PublicCafeClient({
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs sm:text-sm shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer uppercase tracking-wider"
+              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs sm:text-sm shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer uppercase tracking-wider min-h-[44px]"
             >
               <span>View Cart</span>
               <span>→</span>
@@ -1143,9 +1143,11 @@ export default function PublicCafeClient({
           onClick={() => setCustomizingItem(null)}
         >
           <div
-            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-h-[92vh] flex flex-col animate-slide-in-bottom"
+            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-h-[90dvh] sm:max-h-[85dvh] flex flex-col animate-slide-in-bottom"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* iOS Bottom Sheet Drag Handle */}
+            <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto my-2 shrink-0" />
             {/* Header Image */}
             <div className="relative aspect-[16/9] w-full bg-stone-100 shrink-0">
               <img
@@ -1307,7 +1309,7 @@ export default function PublicCafeClient({
             </div>
 
             {/* Bottom Add Action */}
-            <div className="p-4 border-t border-stone-200 bg-stone-50 shrink-0">
+            <div className="p-4 border-t border-stone-200 bg-stone-50 shrink-0 pb-safe">
               {(() => {
                 const portionPaise = selectedPortion === "Full" ? Math.round(customizingItem.price_paise * 0.4) : 0;
                 const addOnsPaise = selectedAddOns.reduce((sum, a) => sum + a.pricePaise, 0);
@@ -1317,7 +1319,7 @@ export default function PublicCafeClient({
                   <button
                     type="button"
                     onClick={handleAddCustomizedToCart}
-                    className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+                    className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider min-h-[48px]"
                   >
                     <span>Add to Order • {paise(linePrice)}</span>
                   </button>
@@ -1335,9 +1337,11 @@ export default function PublicCafeClient({
           onClick={() => setIsCartOpen(false)}
         >
           <div
-            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-h-[92vh] flex flex-col animate-slide-in-bottom"
+            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-h-[90dvh] sm:max-h-[85dvh] flex flex-col animate-slide-in-bottom"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* iOS Bottom Sheet Drag Handle */}
+            <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto my-2 shrink-0" />
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50 shrink-0">
               <div>
@@ -1577,7 +1581,7 @@ export default function PublicCafeClient({
 
             {/* Checkout Action */}
             {cartLines.length > 0 && (
-              <div className="p-4 sm:p-5 border-t border-stone-200 bg-stone-50 shrink-0">
+              <div className="p-4 sm:p-5 border-t border-stone-200 bg-stone-50 shrink-0 pb-safe">
                 <div className="flex items-center justify-between mb-3 text-sm font-black text-stone-900">
                   <span>Grand Total:</span>
                   <span className="text-lg font-mono text-stone-900">{paise(totalPaise)}</span>
@@ -1587,7 +1591,7 @@ export default function PublicCafeClient({
                   type="button"
                   disabled={orderSubmitting}
                   onClick={handlePlaceOrder}
-                  className="w-full py-3.5 rounded-2xl bg-stone-900 hover:bg-black disabled:opacity-50 text-white font-black text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+                  className="w-full py-3.5 rounded-2xl bg-stone-900 hover:bg-black disabled:opacity-50 text-white font-black text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider min-h-[48px]"
                 >
                   {orderSubmitting ? (
                     <span>Sending to Kitchen…</span>
@@ -1611,9 +1615,11 @@ export default function PublicCafeClient({
           onClick={() => setIsTableModalOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-stone-200 animate-slide-in-bottom"
+            className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 pb-safe shadow-2xl border border-stone-200 animate-slide-in-bottom max-h-[90dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* iOS Drag Handle */}
+            <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-black text-stone-900">Select Your Table</h3>
@@ -1678,9 +1684,11 @@ export default function PublicCafeClient({
           onClick={() => setIsServiceModalOpen(false)}
         >
           <div
-            className="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-stone-200 animate-slide-in-bottom"
+            className="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 pb-safe shadow-2xl border border-stone-200 animate-slide-in-bottom max-h-[90dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* iOS Drag Handle */}
+            <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-black text-stone-900 flex items-center gap-2">

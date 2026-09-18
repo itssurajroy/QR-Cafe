@@ -256,7 +256,7 @@ export default function OrderStatusPage({
   const progressPercent = Math.min(100, Math.round(((currentIdx + 1) / STEPS.length) * 100));
 
   return (
-    <main className="min-h-screen bg-[#FAF9F6] text-slate-900 p-4 sm:p-6 flex flex-col items-center justify-start overflow-y-auto font-[family-name:var(--font-plus-jakarta)] antialiased selection:bg-[#5738F5] selection:text-white">
+    <main className="min-h-dvh bg-[#FAF9F6] text-slate-900 p-4 sm:p-6 pt-safe pb-safe flex flex-col items-center justify-start overflow-y-auto font-[family-name:var(--font-plus-jakarta)] antialiased selection:bg-[#5738F5] selection:text-white">
       {/* Dynamic Island Style Card */}
       <div className="max-w-md w-full bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xl space-y-6 my-auto relative overflow-hidden">
         {/* Top Header with Table Badge & Payment Pill */}
@@ -520,7 +520,7 @@ export default function OrderStatusPage({
           }}
         >
           <div
-            className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white border-2 border-indigo-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl relative text-center animate-in zoom-in-95 duration-300"
+            className="w-full max-w-sm max-h-[90dvh] overflow-y-auto bg-white border-2 border-indigo-200 rounded-3xl p-5 sm:p-6 pb-safe space-y-4 shadow-2xl relative text-center animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Close Cross */}

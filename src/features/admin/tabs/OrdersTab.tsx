@@ -238,111 +238,172 @@ export function OrdersTab({ orders, onUpdateStatus, onUpdatePayment, flash }: Or
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-[#E7E4F0] bg-slate-50/70 text-[#6F7185] uppercase tracking-wider font-extrabold text-[10px]">
-                  <th className="py-3 px-4">Order ID</th>
-                  <th className="py-3 px-4">Time</th>
-                  <th className="py-3 px-4">Table</th>
-                  <th className="py-3 px-4">Guest</th>
-                  <th className="py-3 px-4">Dishes</th>
-                  <th className="py-3 px-4">Total</th>
-                  <th className="py-3 px-4">Payment</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E7E4F0]">
-                {filteredOrders.map((o) => {
-                  const itemsList = o.order_items || o.items || [];
-                  const tbl = o.table?.label || o.table_label || "Counter";
-                  const isSelected = selectedOrder?.id === o.id;
+          <div>
+            {/* Desktop Table View (md:block) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-[#E7E4F0] bg-slate-50/70 text-[#6F7185] uppercase tracking-wider font-extrabold text-[10px]">
+                    <th className="py-3 px-4">Order ID</th>
+                    <th className="py-3 px-4">Time</th>
+                    <th className="py-3 px-4">Table</th>
+                    <th className="py-3 px-4">Guest</th>
+                    <th className="py-3 px-4">Dishes</th>
+                    <th className="py-3 px-4">Total</th>
+                    <th className="py-3 px-4">Payment</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E7E4F0]">
+                  {filteredOrders.map((o) => {
+                    const itemsList = o.order_items || o.items || [];
+                    const tbl = o.table?.label || o.table_label || "Counter";
+                    const isSelected = selectedOrder?.id === o.id;
 
-                  return (
-                    <tr
-                      key={o.id}
-                      onClick={() => setSelectedOrder(o)}
-                      className={`hover:bg-[#EEEAFE]/30 transition-colors cursor-pointer ${
-                        isSelected ? "bg-[#EEEAFE]/40" : ""
-                      }`}
-                    >
-                      {/* Order Number */}
-                      <td className="py-3.5 px-4 font-mono font-black text-sm text-[#17142B]">
-                        #{o.order_number}
-                      </td>
+                    return (
+                      <tr
+                        key={o.id}
+                        onClick={() => setSelectedOrder(o)}
+                        className={`hover:bg-[#EEEAFE]/30 transition-colors cursor-pointer ${
+                          isSelected ? "bg-[#EEEAFE]/40" : ""
+                        }`}
+                      >
+                        {/* Order Number */}
+                        <td className="py-3.5 px-4 font-mono font-black text-sm text-[#17142B]">
+                          #{o.order_number}
+                        </td>
 
-                      {/* Time */}
-                      <td className="py-3.5 px-4 font-mono text-[#6F7185]">
+                        {/* Time */}
+                        <td className="py-3.5 px-4 font-mono text-[#6F7185]">
+                          {new Date(o.created_at).toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+
+                        {/* Table */}
+                        <td className="py-3.5 px-4">
+                          <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-[#17142B] border border-slate-200">
+                            {tbl}
+                          </span>
+                        </td>
+
+                        {/* Guest Name */}
+                        <td className="py-3.5 px-4 font-semibold text-[#17142B]">
+                          {o.customer_name || "Dine-in Guest"}
+                        </td>
+
+                        {/* Items Preview */}
+                        <td className="py-3.5 px-4 text-[#6F7185] max-w-xs truncate">
+                          {itemsList.map((it) => `${it.quantity}× ${it.item_name}`).join(", ") || "—"}
+                        </td>
+
+                        {/* Total */}
+                        <td className="py-3.5 px-4 font-mono font-black text-[#17142B]">
+                          {paise(o.total_paise)}
+                        </td>
+
+                        {/* Payment */}
+                        <td className="py-3.5 px-4">
+                          <StatusBadge status={o.payment_status} type="payment" size="sm" />
+                        </td>
+
+                        {/* Order Status */}
+                        <td className="py-3.5 px-4">
+                          <StatusBadge status={o.status} type="order" size="sm" pulse={o.status === "pending"} />
+                        </td>
+
+                        {/* Detail CTA */}
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrder(o);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#5738F5] hover:text-white font-bold text-[11px] transition-colors"
+                          >
+                            View →
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card List View (md:hidden) */}
+            <div className="md:hidden divide-y divide-[#E7E4F0]">
+              {filteredOrders.map((o) => {
+                const itemsList = o.order_items || o.items || [];
+                const tbl = o.table?.label || o.table_label || "Counter";
+
+                return (
+                  <div
+                    key={o.id}
+                    onClick={() => setSelectedOrder(o)}
+                    className="p-4 space-y-2.5 hover:bg-[#EEEAFE]/20 active:bg-[#EEEAFE]/40 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-sm text-[#17142B]">
+                          #{o.order_number}
+                        </span>
+                        <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-slate-100 text-[#17142B] border border-slate-200">
+                          {tbl}
+                        </span>
+                      </div>
+                      <span className="font-mono font-black text-sm text-[#17142B]">
+                        {paise(o.total_paise)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-[#6F7185]">
+                      <span className="font-semibold text-[#17142B]">
+                        {o.customer_name || "Dine-in Guest"}
+                      </span>
+                      <span className="font-mono text-[11px]">
                         {new Date(o.created_at).toLocaleTimeString("en-IN", {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
-                      </td>
+                      </span>
+                    </div>
 
-                      {/* Table */}
-                      <td className="py-3.5 px-4">
-                        <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-[#17142B] border border-slate-200">
-                          {tbl}
-                        </span>
-                      </td>
+                    <div className="text-xs text-[#6F7185] line-clamp-2">
+                      {itemsList.map((it) => `${it.quantity}× ${it.item_name}`).join(", ") || "—"}
+                    </div>
 
-                      {/* Guest Name */}
-                      <td className="py-3.5 px-4 font-semibold text-[#17142B]">
-                        {o.customer_name || "Dine-in Guest"}
-                      </td>
-
-                      {/* Items Preview */}
-                      <td className="py-3.5 px-4 text-[#6F7185] max-w-xs truncate">
-                        {itemsList.map((it) => `${it.quantity}× ${it.item_name}`).join(", ") || "—"}
-                      </td>
-
-                      {/* Total */}
-                      <td className="py-3.5 px-4 font-mono font-black text-[#17142B]">
-                        {paise(o.total_paise)}
-                      </td>
-
-                      {/* Payment */}
-                      <td className="py-3.5 px-4">
-                        <StatusBadge status={o.payment_status} type="payment" size="sm" />
-                      </td>
-
-                      {/* Order Status */}
-                      <td className="py-3.5 px-4">
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center gap-2">
                         <StatusBadge status={o.status} type="order" size="sm" pulse={o.status === "pending"} />
-                      </td>
-
-                      {/* Detail CTA */}
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedOrder(o);
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#5738F5] hover:text-white font-bold text-[11px] transition-colors"
-                        >
-                          View →
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <StatusBadge status={o.payment_status} type="payment" size="sm" />
+                      </div>
+                      <span className="text-[#5738F5] text-xs font-bold flex items-center gap-1">
+                        View Details →
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
 
-      {/* SLIDE-OVER ORDER DETAIL DRAWER */}
+      {/* SLIDE-OVER / BOTTOM SHEET ORDER DETAIL DRAWER */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end">
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
             onClick={() => setSelectedOrder(null)}
           />
 
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 animate-slide-in-right overflow-y-auto">
+          <div className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-none max-h-[90dvh] sm:max-h-full sm:h-full shadow-2xl flex flex-col z-10 animate-slide-in-bottom sm:animate-slide-in-right overflow-y-auto pb-safe">
+            {/* iOS Drag Handle */}
+            <div className="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-2.5 shrink-0" />
             {/* Drawer Header */}
             <div className="p-6 border-b border-[#E7E4F0] flex items-start justify-between bg-slate-50/50">
               <div>

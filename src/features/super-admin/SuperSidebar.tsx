@@ -163,10 +163,8 @@ function GlobeIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-export function SuperSidebar() {
-  const { tab, setTab, totalCafes, staff } = useSuperAdmin();
-
-  const groups: NavGroup[] = [
+function getSuperNavGroups(totalCafes?: number, staffCount?: number): NavGroup[] {
+  return [
     {
       title: "Overview",
       items: [
@@ -186,7 +184,7 @@ export function SuperSidebar() {
       title: "Operations",
       items: [
         { id: "orders", label: "Live Orders", icon: ShoppingBagIcon },
-        { id: "staff", label: "Staff Directory", icon: UsersIcon, count: staff?.length || 0 },
+        { id: "staff", label: "Staff Directory", icon: UsersIcon, count: staffCount || 0 },
         { id: "users", label: "User Accounts", icon: UsersIcon },
         { id: "support", label: "Support", icon: LifebuoyIcon },
       ],
@@ -224,9 +222,14 @@ export function SuperSidebar() {
       ],
     },
   ];
+}
+
+export function SuperSidebar() {
+  const { tab, setTab, totalCafes, staff } = useSuperAdmin();
+  const groups = getSuperNavGroups(totalCafes, staff?.length);
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between flex-shrink-0 h-full select-none">
+    <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 h-full select-none">
       <div className="p-5 border-b border-slate-100 flex items-center justify-between">
         <Link href="/super" className="flex items-center gap-3 group">
           <div>
@@ -300,5 +303,100 @@ export function SuperSidebar() {
         </Link>
       </div>
     </aside>
+  );
+}
+
+export function SuperMobileDrawer() {
+  const { tab, setTab, totalCafes, staff, mobileMenuOpen, setMobileMenuOpen } = useSuperAdmin();
+
+  if (!mobileMenuOpen) return null;
+
+  const groups = getSuperNavGroups(totalCafes, staff?.length);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-stretch lg:hidden animate-fade-in">
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+        onClick={() => setMobileMenuOpen(false)}
+      />
+      <div className="relative w-full sm:w-80 max-w-full bg-white rounded-t-3xl sm:rounded-none max-h-[90dvh] sm:max-h-full sm:h-full flex flex-col z-10 shadow-2xl p-4 sm:p-5 pb-safe animate-slide-in-bottom sm:animate-none">
+        <div className="sm:hidden w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-3 shrink-0" />
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-2">
+            <QrSliceLogo size="sm" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Super Console
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold hover:bg-slate-200 transition-colors"
+            aria-label="Close navigation"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-1 py-3 space-y-4">
+          {groups.map((group) => (
+            <div key={group.title} className="space-y-1">
+              <div className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                {group.title}
+              </div>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = tab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setTab(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer min-h-[44px] ${
+                      isActive
+                        ? "bg-[#5738F5] text-white shadow-sm font-bold"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                    {item.count !== undefined && item.count > 0 && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold shrink-0 ${
+                          isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-between shrink-0">
+          <Link
+            href="/"
+            target="_blank"
+            className="text-xs font-bold text-[#5738F5] hover:underline py-2"
+          >
+            Public Site ↗
+          </Link>
+          <Link
+            href="/login"
+            className="text-xs font-semibold text-slate-500 hover:text-slate-900 py-2 px-3 rounded-xl hover:bg-slate-100"
+          >
+            Sign Out
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -106,9 +106,9 @@ export default function KdsClient({
   };
 
   return (
-    <main className="h-screen flex flex-col bg-slate-900 text-slate-100 font-sans antialiased overflow-hidden selection:bg-indigo-600 selection:text-white">
+    <main className="h-dvh flex flex-col bg-slate-900 text-slate-100 font-sans antialiased overflow-hidden selection:bg-indigo-600 selection:text-white">
       {/* KDS Header */}
-      <header className="bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4 py-3 shrink-0 shadow-md">
+      <header className="bg-slate-950 border-b border-slate-800 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 pt-[max(0.6rem,env(safe-area-inset-top))] shrink-0 shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-gradient-to-r from-amber-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-base shadow-md">
             🍳

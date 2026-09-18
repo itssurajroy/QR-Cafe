@@ -202,7 +202,7 @@ export function PosCatalogGrid({
 
       {/* MOBILE FLOATING CART ACTION BAR */}
       {cartLength > 0 && (
-        <div className="md:hidden fixed bottom-16 left-3 right-3 z-40 bg-[#007AFF] text-white rounded-2xl p-3 shadow-xl flex items-center justify-between font-bold animate-in slide-in-from-bottom duration-200">
+        <div className="md:hidden fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom))] left-3 right-3 z-30 bg-[#007AFF] text-white rounded-2xl p-3 shadow-xl flex items-center justify-between font-bold animate-in slide-in-from-bottom duration-200">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wider text-white/80">{totalItemCount} Items Selected</div>
             <div className="text-sm font-mono font-bold">{paise(finalTotalPaise)}</div>
