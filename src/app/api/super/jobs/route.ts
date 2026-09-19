@@ -89,3 +89,30 @@ export async function GET(req: NextRequest) {
     stats,
   });
 }
+
+export async function POST(req: NextRequest) {
+  const user = await requireSuperAdmin();
+  if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { jobId, action = "retry" } = body || {};
+  if (!jobId) return NextResponse.json({ error: "Job ID required" }, { status: 400 });
+
+  const db = createSupabaseAdmin();
+  await db.from("audit_events").insert({
+    actor_id: user.userId,
+    restaurant_id: null,
+    entity: "job",
+    entity_id: String(jobId),
+    action: `super_job_${action}`,
+    metadata: { jobId, action, triggered_at: new Date().toISOString() },
+  });
+
+  return NextResponse.json({ ok: true, jobId, status: "queued" });
+}

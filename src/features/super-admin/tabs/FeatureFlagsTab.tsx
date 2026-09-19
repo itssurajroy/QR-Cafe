@@ -1,7 +1,7 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
 
 type FeatureFlag = {
@@ -29,7 +29,14 @@ export function FeatureFlagsTab() {
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newKey, setNewKey] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+  const [newRolloutPct, setNewRolloutPct] = useState(100);
+  const [newEnabled, setNewEnabled] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const fetchFlags = useCallback(() => {
     setLoading(true);
     fetch("/api/super/flags")
       .then((r) => (r.ok ? r.json() : null))
@@ -54,38 +61,109 @@ export function FeatureFlagsTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  const toggleFlag = (flagId: string) => {
-    setFlags((prev) =>
-      prev.map((f) => {
-        if (f.id === flagId) {
-          const nextState = !f.enabled;
-          flash("ok", `Feature flag "${f.name}" ${nextState ? "enabled" : "disabled"} (Audited)`);
-          return {
-            ...f,
-            enabled: nextState,
-            percentage: nextState ? (f.percentage === 0 ? 100 : f.percentage) : 0,
-            lastModified: "Just now",
-          };
-        }
-        return f;
-      })
-    );
+  useEffect(() => {
+    fetchFlags();
+  }, [fetchFlags]);
+
+  const toggleFlag = async (flagId: string) => {
+    const flag = flags.find((f) => f.id === flagId);
+    if (!flag) return;
+    const nextState = !flag.enabled;
+    const nextPct = nextState ? (flag.percentage === 0 ? 100 : flag.percentage) : 0;
+    try {
+      const res = await fetch("/api/super/flags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: flag.key,
+          enabled: nextState,
+          rollout_pct: nextPct,
+          description: flag.description,
+        }),
+      });
+      if (res.ok) {
+        flash("ok", `Feature flag "${flag.name}" ${nextState ? "enabled" : "disabled"} (Audited)`);
+        setFlags((prev) =>
+          prev.map((f) =>
+            f.id === flagId
+              ? { ...f, enabled: nextState, percentage: nextPct, lastModified: "Just now" }
+              : f
+          )
+        );
+      } else {
+        const err = await res.json().catch(() => ({}));
+        flash("err", err.error || "Failed to update feature flag");
+      }
+    } catch {
+      flash("err", "Network error updating feature flag");
+    }
   };
 
-  const updatePercentage = (flagId: string, pct: number) => {
+  const updatePercentage = async (flagId: string, pct: number) => {
+    const flag = flags.find((f) => f.id === flagId);
+    if (!flag) return;
+    const nextEnabled = pct > 0;
     setFlags((prev) =>
-      prev.map((f) => {
-        if (f.id === flagId) {
-          return {
-            ...f,
-            percentage: pct,
-            enabled: pct > 0,
-            lastModified: "Just now",
-          };
-        }
-        return f;
-      })
+      prev.map((f) =>
+        f.id === flagId ? { ...f, percentage: pct, enabled: nextEnabled, lastModified: "Just now" } : f
+      )
     );
+    try {
+      const res = await fetch("/api/super/flags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: flag.key,
+          enabled: nextEnabled,
+          rollout_pct: pct,
+          description: flag.description,
+        }),
+      });
+      if (res.ok) {
+        flash("ok", `Feature flag "${flag.name}" traffic set to ${pct}%`);
+      } else {
+        flash("err", "Failed to update percentage");
+      }
+    } catch {
+      flash("err", "Network error updating percentage");
+    }
+  };
+
+  const handleCreateFlag = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanKey = newKey.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
+    if (cleanKey.length < 2) {
+      flash("err", "Key must be at least 2 characters (alphanumeric and dashes)");
+      return;
+    }
+    setIsCreating(true);
+    try {
+      const res = await fetch("/api/super/flags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: cleanKey,
+          enabled: newEnabled,
+          rollout_pct: newRolloutPct,
+          description: newDesc.trim() || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        flash("ok", `Feature flag "${cleanKey}" created successfully`);
+        setShowCreateModal(false);
+        setNewKey("");
+        setNewDesc("");
+        setNewRolloutPct(100);
+        fetchFlags();
+      } else {
+        flash("err", data.error || "Failed to create feature flag");
+      }
+    } catch {
+      flash("err", "Network error creating feature flag");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -99,6 +177,13 @@ export function FeatureFlagsTab() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#492ee0] text-white font-bold text-xs transition-all shadow-sm shadow-[#5738F5]/25 cursor-pointer flex items-center gap-1.5"
+          >
+            <span>＋ Add Feature Flag</span>
+          </button>
           <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
             Active Experiments: <strong className="text-slate-900 font-mono">{flags.filter((f) => f.enabled).length} Live</strong>
           </span>
@@ -188,6 +273,99 @@ export function FeatureFlagsTab() {
           ))
         )}
       </div>
+
+      {/* Create Flag Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <form
+            onSubmit={handleCreateFlag}
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150"
+          >
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Add New Feature Flag</h3>
+                <p className="text-xs text-slate-500">Configure progressive rollout or dark launch</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Flag Key</label>
+                <input
+                  type="text"
+                  value={newKey}
+                  onChange={(e) => setNewKey(e.target.value)}
+                  placeholder="e.g. upi-autopay-v2"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono focus:outline-none focus:border-[#5738F5]"
+                  required
+                />
+                <span className="text-[10px] text-slate-400">Lower-case alphanumeric with hyphens</span>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  placeholder="Describe the feature or experiment purpose…"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-[#5738F5] resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <div>
+                  <div className="text-xs font-bold text-slate-800">Initial Traffic Allocation</div>
+                  <div className="text-[11px] font-mono text-slate-500">{newRolloutPct}%</div>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={newRolloutPct}
+                  onChange={(e) => setNewRolloutPct(Number(e.target.value))}
+                  className="w-36 accent-[#5738F5] cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <span className="text-xs font-bold text-slate-800">Enabled Immediately</span>
+                <input
+                  type="checkbox"
+                  checked={newEnabled}
+                  onChange={(e) => setNewEnabled(e.target.checked)}
+                  className="w-4 h-4 accent-[#5738F5] cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isCreating}
+                className="px-4 py-2 rounded-xl bg-[#5738F5] text-white text-xs font-bold hover:bg-[#492ee0] shadow-sm shadow-[#5738F5]/25 cursor-pointer disabled:opacity-50"
+              >
+                {isCreating ? "Creating…" : "Save Flag"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

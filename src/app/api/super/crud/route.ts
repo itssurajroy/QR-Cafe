@@ -310,6 +310,54 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  if (action === "create_super_admin") {
+    const { email, name, role } = data;
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return NextResponse.json({ error: "Valid email address required" }, { status: 422 });
+    }
+    const cleanEmail = email.toLowerCase().trim();
+    const displayName = String(name || cleanEmail.split("@")[0]).trim();
+    const cleanRole = String(role || "Platform Admin").trim();
+
+    let userId: string;
+    const { data: authCreated, error: createErr } = await admin.auth.admin.createUser({
+      email: cleanEmail,
+      email_confirm: true,
+      user_metadata: { display_name: displayName, role: cleanRole },
+    });
+
+    if (createErr) {
+      const { data: usersList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const matched = usersList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+      if (!matched) {
+        return NextResponse.json({ error: createErr.message }, { status: 500 });
+      }
+      userId = matched.id;
+    } else {
+      userId = authCreated.user.id;
+    }
+
+    const { error: profErr } = await admin.from("cafe_profiles").upsert({
+      id: userId,
+      restaurant_id: null,
+      role: "super_admin",
+      display_name: displayName,
+      active: true,
+    });
+
+    if (profErr) {
+      return NextResponse.json({ error: profErr.message }, { status: 500 });
+    }
+
+    await audit(admin, auth.userId, null, "admin_user", userId, "super_create_admin", {
+      email: cleanEmail,
+      display_name: displayName,
+      role: cleanRole,
+    });
+
+    return NextResponse.json({ ok: true, id: userId, email: cleanEmail });
+  }
+
   // --- MENU CATEGORIES ---
   if (action === "get_menu") {
     const { cafeId } = data;

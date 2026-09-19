@@ -7,6 +7,16 @@ import SuperClient from "@/components/SuperClient";
 
 export const dynamic = "force-dynamic";
 
+function normalizeSuperTab(t: string | null | undefined): string {
+  if (!t) return "dashboard";
+  if (t === "analytics" || t === "funnel") return "dashboard";
+  if (t === "tenants" || t === "cafes") return "restaurants";
+  if (t === "health") return "system-health";
+  if (t === "users") return "admins";
+  if (t === "config" || t === "broadcast" || t === "announcements" || t === "api-keys" || t === "platform" || t === "content") return "settings";
+  return t;
+}
+
 export default async function SuperPage({
   searchParams,
 }: {
@@ -18,8 +28,7 @@ export default async function SuperPage({
   }
 
   const { page = "1", q = "", plan = "", status = "", tab: rawTab = "dashboard" } = await searchParams;
-  // Legacy alias: the old "health" tab id was consolidated into "system-health".
-  const tab = rawTab === "health" ? "system-health" : rawTab;
+  const tab = normalizeSuperTab(rawTab);
   const currentPage = Math.max(1, parseInt(page, 10));
   const pageSize = 15;
 

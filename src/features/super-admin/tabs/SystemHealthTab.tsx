@@ -82,9 +82,9 @@ export function SystemHealthTab() {
     if (health.errorAudits > 0)
       a.push({ severity: "amber", text: `${health.errorAudits} error audits in 24h`, tab: "audit" });
     if ((kpis?.trialsEnding7d ?? 0) > 0)
-      a.push({ severity: "amber", text: `${kpis.trialsEnding7d} trial${kpis.trialsEnding7d > 1 ? "s" : ""} expiring within 7 days`, tab: "cafes" });
+      a.push({ severity: "amber", text: `${kpis.trialsEnding7d} trial${kpis.trialsEnding7d > 1 ? "s" : ""} expiring within 7 days`, tab: "restaurants" });
     if ((kpis?.suspended ?? 0) > 0)
-      a.push({ severity: "amber", text: `${kpis.suspended} suspended tenant${kpis.suspended > 1 ? "s" : ""} need${kpis.suspended > 1 ? "" : "s"} review`, tab: "cafes" });
+      a.push({ severity: "amber", text: `${kpis.suspended} suspended tenant${kpis.suspended > 1 ? "s" : ""} need${kpis.suspended > 1 ? "" : "s"} review`, tab: "restaurants" });
     return a;
   }, [health, kpis]);
 

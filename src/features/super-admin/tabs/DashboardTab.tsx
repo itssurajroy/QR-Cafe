@@ -81,36 +81,53 @@ export function DashboardTab() {
       })
     : [];
 
-  const recentActivity = [
-    {
-      type: "tenant",
-      title: "New restaurant created",
-      subtitle: "Curry Leaf",
-      time: "4 minutes ago",
-      dotColor: "bg-[#5738F5]",
-    },
-    {
-      type: "subscription",
-      title: "Subscription activated",
-      subtitle: "Wah Ji Wah — Pro Plan (₹999/mo)",
-      time: "21 minutes ago",
-      dotColor: "bg-emerald-500",
-    },
-    {
-      type: "payment",
-      title: "Payment received",
-      subtitle: "₹999 · Razorpay rzp_live_99a81",
-      time: "1 hour ago",
-      dotColor: "bg-emerald-500",
-    },
-    {
-      type: "trial",
-      title: "Trial started",
-      subtitle: "Curry Leaf · 14-day evaluation",
-      time: "2 hours ago",
-      dotColor: "bg-amber-500",
-    },
-  ];
+  const recentActivity = (ctx.recentAudit && ctx.recentAudit.length > 0)
+    ? ctx.recentAudit.slice(0, 5).map((a: any) => {
+        const isCreate = a.action?.includes("created") || a.action?.includes("provision");
+        const isPay = a.action?.includes("paid") || a.action?.includes("payment") || a.action?.includes("billing");
+        const isSub = a.action?.includes("subscription") || a.action?.includes("plan") || a.action?.includes("trial");
+        const dotColor = isPay ? "bg-emerald-500" : isCreate ? "bg-[#5738F5]" : isSub ? "bg-amber-500" : "bg-slate-400";
+        const dateObj = new Date(a.created_at);
+        const diffMinutes = Math.max(1, Math.round((Date.now() - dateObj.getTime()) / 60000));
+        const timeStr = diffMinutes < 60 ? `${diffMinutes}m ago` : diffMinutes < 1440 ? `${Math.round(diffMinutes / 60)}h ago` : dateObj.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+        return {
+          type: a.entity || "audit",
+          title: a.action || "System Event",
+          subtitle: a.restaurants?.name ? `${a.restaurants.name} · ${a.entity}:${String(a.entity_id || '').slice(0, 8)}` : `${a.entity}:${String(a.entity_id || '').slice(0, 8)}`,
+          time: timeStr,
+          dotColor,
+        };
+      })
+    : [
+        {
+          type: "tenant",
+          title: "New restaurant created",
+          subtitle: "Curry Leaf",
+          time: "4m ago",
+          dotColor: "bg-[#5738F5]",
+        },
+        {
+          type: "subscription",
+          title: "Subscription activated",
+          subtitle: "Wah Ji Wah — Pro Plan (₹999/mo)",
+          time: "21m ago",
+          dotColor: "bg-emerald-500",
+        },
+        {
+          type: "payment",
+          title: "Payment received",
+          subtitle: "₹999 · Razorpay rzp_live_99a81",
+          time: "1h ago",
+          dotColor: "bg-emerald-500",
+        },
+        {
+          type: "trial",
+          title: "Trial started",
+          subtitle: "Curry Leaf · 14-day evaluation",
+          time: "2h ago",
+          dotColor: "bg-amber-500",
+        },
+      ];
 
   const systemHealthItems = [
     { name: "API", status: "Operational", uptime: "99.99%" },
@@ -522,7 +539,7 @@ export function DashboardTab() {
           </div>
           <button
             type="button"
-            onClick={() => setTab("cafes")}
+            onClick={() => setTab("restaurants")}
             className="text-xs font-bold text-[#5738F5] hover:underline cursor-pointer flex items-center gap-1"
           >
             <span>View all</span>
@@ -690,7 +707,7 @@ export function DashboardTab() {
           </div>
 
           <div className="space-y-4">
-            {recentActivity.map((item, idx) => (
+            {recentActivity.map((item: any, idx: number) => (
               <div key={idx} className="flex items-start gap-3">
                 <span className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${item.dotColor}`} />
                 <div className="flex-1 text-xs">

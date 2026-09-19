@@ -70,7 +70,6 @@ export default async function TenantDetailPage({
     <ImpersonationBanner
       tenantName={tenant.name}
       tenantSlug={tenant.slug}
-      onExit={() => window.location.href = "/super/tenants"}
     >
       <TenantDetail
         tenant={tenant}

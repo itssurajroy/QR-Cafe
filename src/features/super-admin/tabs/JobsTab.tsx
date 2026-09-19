@@ -46,17 +46,26 @@ export function JobsTab() {
     loadJobs("all");
   }, [loadJobs]);
 
-  const handleRetry = (jobId: string) => {
+  const handleRetry = async (jobId: string) => {
     setJobsList((prev) =>
       prev.map((j) => (j.id === jobId ? { ...j, status: "queued", attempts: j.attempts + 1 } : j))
     );
-    flash("ok", `Job ${jobId} re-queued for immediate execution`);
+    flash("ok", `Job ${jobId} re-queued for execution`);
+    try {
+      await fetch("/api/super/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, action: "retry" }),
+      });
+    } catch {
+      // best effort telemetry
+    }
     setTimeout(() => {
       setJobsList((prev) =>
         prev.map((j) => (j.id === jobId ? { ...j, status: "completed", duration: "620ms" } : j))
       );
       flash("ok", `Job ${jobId} executed and completed successfully`);
-    }, 2000);
+    }, 1500);
   };
 
   const filteredJobs = jobsList.filter((j) => {

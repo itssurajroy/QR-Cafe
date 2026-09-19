@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSuperAdmin } from "../SuperAdminContext";
 import { RolesTab } from "./RolesTab";
 
@@ -16,12 +17,17 @@ type AdminUser = {
 };
 
 export function AdminsTab() {
+  const router = useRouter();
   const { tab, authUsers, flash } = useSuperAdmin();
   const [activeSubTab, setActiveSubTab] = useState<"admins" | "roles">(tab === "roles" ? "roles" : "admins");
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [inviteRole, setInviteRole] = useState<AdminUser["role"]>("Platform Admin");
+  const [isInviting, setIsInviting] = useState(false);
+  const [selectedAdminForManage, setSelectedAdminForManage] = useState<AdminUser | null>(null);
+  const [recoveryLink, setRecoveryLink] = useState<string | null>(null);
+  const [isManagingAction, setIsManagingAction] = useState(false);
 
   const admins: AdminUser[] = React.useMemo(() => {
     if (!authUsers || authUsers.length === 0) {
@@ -50,22 +56,83 @@ export function AdminsTab() {
     }));
   }, [authUsers]);
 
-  const handleInvite = (e: React.FormEvent) => {
+  const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail) return;
-    const newAdmin: AdminUser = {
-      id: `adm-${Date.now().toString().slice(-4)}`,
-      name: inviteName || inviteEmail.split("@")[0],
-      email: inviteEmail,
-      role: inviteRole,
-      lastActive: "Never",
-      twoFactorEnabled: false,
-      status: "Invited",
-    };
-    flash("ok", `Invitation sent to ${inviteEmail} with role ${inviteRole}`);
-    setShowInviteModal(false);
-    setInviteEmail("");
-    setInviteName("");
+    setIsInviting(true);
+    try {
+      const res = await fetch("/api/super/crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_super_admin",
+          email: inviteEmail.trim(),
+          name: inviteName.trim(),
+          role: inviteRole,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        flash("ok", `Super Admin invited successfully: ${inviteEmail}`);
+        setShowInviteModal(false);
+        setInviteEmail("");
+        setInviteName("");
+        router.refresh();
+      } else {
+        flash("err", data.error || "Failed to invite Super Admin");
+      }
+    } catch {
+      flash("err", "Network error inviting Super Admin");
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    setIsManagingAction(true);
+    setRecoveryLink(null);
+    try {
+      const res = await fetch("/api/super/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ op: "reset_password", user_id: userId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.link) {
+        setRecoveryLink(data.link);
+        flash("ok", "Password recovery link generated");
+      } else {
+        flash("err", data.error || "Failed to generate recovery link");
+      }
+    } catch {
+      flash("err", "Network error generating recovery link");
+    } finally {
+      setIsManagingAction(false);
+    }
+  };
+
+  const handleToggleActive = async (userId: string, currentStatus: string) => {
+    setIsManagingAction(true);
+    const nextOp = currentStatus === "Active" ? "disable" : "enable";
+    try {
+      const res = await fetch("/api/super/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ op: nextOp, user_id: userId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        flash("ok", `Admin user account ${nextOp === "enable" ? "enabled" : "disabled"}`);
+        setSelectedAdminForManage(null);
+        router.refresh();
+      } else {
+        flash("err", data.error || "Action failed");
+      }
+    } catch {
+      flash("err", "Network error updating user");
+    } finally {
+      setIsManagingAction(false);
+    }
   };
 
   return (
@@ -174,7 +241,10 @@ export function AdminsTab() {
                   <td className="py-3.5 px-4 text-right">
                     <button
                       type="button"
-                      onClick={() => flash("ok", `Sent 2FA reset & session refresh for ${admin.email}`)}
+                      onClick={() => {
+                        setSelectedAdminForManage(admin);
+                        setRecoveryLink(null);
+                      }}
                       className="px-3 py-1 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition-colors cursor-pointer shadow-2xs"
                     >
                       Manage
@@ -186,6 +256,99 @@ export function AdminsTab() {
           </table>
         </div>
       </div>
+
+      {/* Admin Manage Modal */}
+      {selectedAdminForManage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Manage Administrator</h3>
+                <p className="text-xs text-slate-500 font-mono mt-0.5">{selectedAdminForManage.email}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedAdminForManage(null);
+                  setRecoveryLink(null);
+                }}
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Name:</span>
+                <span className="font-bold text-slate-900">{selectedAdminForManage.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Role:</span>
+                <span className="font-bold text-[#5738F5]">{selectedAdminForManage.role}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Status:</span>
+                <span className="font-bold text-slate-900">{selectedAdminForManage.status}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">User ID:</span>
+                <span className="font-mono text-[10px] text-slate-400">{selectedAdminForManage.id}</span>
+              </div>
+            </div>
+
+            {recoveryLink && (
+              <div className="p-3 bg-violet-50 border border-violet-200 rounded-xl space-y-2">
+                <span className="text-[11px] font-bold text-violet-900 block">Password Recovery URL Generated:</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={recoveryLink}
+                    className="flex-1 bg-white border border-violet-200 text-xs px-2.5 py-1.5 rounded-lg font-mono text-slate-700 select-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(recoveryLink);
+                      flash("ok", "Recovery link copied to clipboard!");
+                    }}
+                    className="px-3 py-1.5 bg-[#5738F5] text-white font-bold text-xs rounded-lg cursor-pointer"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                disabled={isManagingAction}
+                onClick={() => handleResetPassword(selectedAdminForManage.id)}
+                className="w-full py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                <span>🔑 Generate Password Recovery Link</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isManagingAction}
+                onClick={() => handleToggleActive(selectedAdminForManage.id, selectedAdminForManage.status)}
+                className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 ${
+                  selectedAdminForManage.status === "Active"
+                    ? "bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100"
+                    : "bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                }`}
+              >
+                <span>
+                  {selectedAdminForManage.status === "Active" ? "⛔ Disable Administrator Account" : "✓ Enable Administrator Account"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Invite Modal */}
       {showInviteModal && (
@@ -259,9 +422,10 @@ export function AdminsTab() {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-[#5738F5] text-white text-xs font-bold hover:bg-[#492ee0] shadow-sm shadow-[#5738F5]/25 cursor-pointer"
+                disabled={isInviting}
+                className="px-4 py-2 rounded-xl bg-[#5738F5] text-white text-xs font-bold hover:bg-[#492ee0] shadow-sm shadow-[#5738F5]/25 cursor-pointer disabled:opacity-50"
               >
-                Send Invite
+                {isInviting ? "Inviting…" : "Send Invite"}
               </button>
             </div>
           </form>

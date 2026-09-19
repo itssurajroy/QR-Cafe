@@ -10,9 +10,11 @@ const SuperAdminContext = createContext<SuperAdminContextType | null>(null);
 
 function normalizeTab(t: string | null | undefined): string {
   if (!t) return "dashboard";
+  if (t === "analytics" || t === "funnel") return "dashboard";
+  if (t === "tenants" || t === "cafes") return "restaurants";
   if (t === "health") return "system-health";
-  if (t === "tenants" || t === "restaurants") return "cafes";
-  if (t === "notifications") return "broadcast";
+  if (t === "users") return "admins";
+  if (t === "config" || t === "broadcast" || t === "announcements" || t === "api-keys" || t === "platform" || t === "content") return "settings";
   return t;
 }
 
