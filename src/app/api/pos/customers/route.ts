@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     const adminDb = createSupabaseAdmin();
     let dbQuery = adminDb
-      .from("customers")
+      .from("restaurant_customers")
       .select("*")
       .eq("restaurant_id", auth.restaurantId)
       .order("created_at", { ascending: false });
@@ -54,14 +54,14 @@ export async function POST(req: NextRequest) {
 
     const adminDb = createSupabaseAdmin();
     const { data: customer, error } = await adminDb
-      .from("customers")
+      .from("restaurant_customers")
       .upsert(
         {
           restaurant_id: auth.restaurantId,
           name,
           phone,
           email: email || null,
-          last_visit: new Date().toISOString(),
+          last_visit_at: new Date().toISOString(),
         },
         { onConflict: "restaurant_id,phone" }
       )
