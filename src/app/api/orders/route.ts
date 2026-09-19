@@ -137,6 +137,46 @@ export async function POST(req: NextRequest) {
   }
   const byId = new Map(menuItems.map((m) => [m.id, m]));
 
+  // Fetch verified modifier groups from platform_config for this restaurant
+  const { data: modConfig } = await db
+    .from("platform_config")
+    .select("value")
+    .eq("restaurant_id", table.restaurant_id)
+    .eq("key", "modifier_groups")
+    .maybeSingle();
+
+  const verifiedModifierPriceMap = new Map<string, number>();
+  const rawGroups = modConfig?.value || [
+    {
+      options: [
+        { name: "Regular", price_adjustment_paise: 0 },
+        { name: "Large", price_adjustment_paise: 6000 },
+        { name: "Jumbo / Family Pack", price_adjustment_paise: 12000 },
+        { name: "Mild", price_adjustment_paise: 0 },
+        { name: "Medium", price_adjustment_paise: 0 },
+        { name: "Spicy / Desi Hot", price_adjustment_paise: 0 },
+        { name: "Extra Mozzarella Cheese", price_adjustment_paise: 4000 },
+        { name: "Extra Makhani Gravy", price_adjustment_paise: 5000 },
+        { name: "Garlic Mint Mayo Dip", price_adjustment_paise: 2500 },
+      ],
+    },
+  ];
+
+  if (Array.isArray(rawGroups)) {
+    for (const group of rawGroups) {
+      if (Array.isArray(group.options)) {
+        for (const opt of group.options) {
+          if (opt && typeof opt.name === "string") {
+            verifiedModifierPriceMap.set(
+              opt.name.trim().toLowerCase(),
+              Number(opt.price_adjustment_paise) || 0,
+            );
+          }
+        }
+      }
+    }
+  }
+
   const unavailable: string[] = [];
   let subtotal = 0;
   const orderItems: {
@@ -159,10 +199,20 @@ export async function POST(req: NextRequest) {
       unavailable.push(mi.name);
       continue;
     }
-    const modTotal = ci.modifiers.reduce(
-      (s, m) => s + (Math.max(0, m.price_delta_paise) || 0),
-      0,
-    );
+
+    // Verify and re-price each modifier from server catalog
+    const sanitizedModifiers = (ci.modifiers || []).map((m) => {
+      const optKey = m.option_name.trim().toLowerCase();
+      const catalogPrice = verifiedModifierPriceMap.get(optKey);
+      // If catalog has an official price adjustment, enforce it; otherwise clamp untrusted delta to 0
+      const verifiedDelta = catalogPrice !== undefined ? catalogPrice : 0;
+      return {
+        option_name: m.option_name,
+        price_delta_paise: verifiedDelta,
+      };
+    });
+
+    const modTotal = sanitizedModifiers.reduce((s, m) => s + m.price_delta_paise, 0);
     const unit = mi.price_paise + modTotal;
     const line = unit * ci.quantity;
     subtotal += line;
@@ -173,7 +223,7 @@ export async function POST(req: NextRequest) {
       quantity: ci.quantity,
       line_total_paise: line,
       notes: ci.notes || "",
-      modifiers: ci.modifiers,
+      modifiers: sanitizedModifiers,
     });
   }
 
@@ -297,26 +347,16 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Auto-deduct ingredients from inventory (non-blocking)
-  deductInventoryIngredients(db, table.restaurant_id, orderItems).catch(
-    (err) => console.error("Inventory deduction failed:", err)
-  );
-
-  // Loyalty processing (non-blocking)
-  let loyaltyData = { pointsEarned: 0, newTotalPoints: 0 };
-  if (input.customer_phone) {
-    try {
-      loyaltyData = await processCustomerLoyalty(
-        db,
-        table.restaurant_id,
-        input.customer_phone,
-        input.customer_name || "",
-        subtotal
-      );
-    } catch (err) {
-      console.error("Loyalty processing failed:", err);
-    }
+  // Auto-deduct ingredients from inventory if payment is already guaranteed online.
+  // Unpaid counter orders are held as pending and deducted upon staff confirmation in POS/KDS.
+  if (input.payment_method === "online") {
+    deductInventoryIngredients(db, table.restaurant_id, orderItems).catch(
+      (err) => console.error("Inventory deduction failed:", err)
+    );
   }
+
+  // Loyalty preview only: actual points are credited upon verified payment settlement
+  const potentialPoints = input.customer_phone ? Math.floor(subtotal / 10000) : 0;
 
   return NextResponse.json({
     order_id: orderId,
@@ -324,7 +364,7 @@ export async function POST(req: NextRequest) {
     order_number: orderNumber,
     checksum: payloadHash.slice(0, 12),
     unavailable,
-    loyalty: loyaltyData,
+    loyalty: { pointsEarned: potentialPoints, status: "pending_payment" },
   });
 }
 

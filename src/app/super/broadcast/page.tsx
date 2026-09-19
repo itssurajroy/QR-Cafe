@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperBroadcastRedirect() {
-  redirect("/super?tab=broadcast");
+  redirect("/super?tab=settings");
 }

@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperApiKeysRedirect() {
-  redirect("/super?tab=api-keys");
+  redirect("/super?tab=settings");
 }

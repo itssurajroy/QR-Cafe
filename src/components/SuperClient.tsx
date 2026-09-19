@@ -37,38 +37,49 @@ function TabRenderer() {
   const { tab } = useSuperAdmin();
 
   switch (tab) {
-    case 'dashboard': return <DashboardTab />;
+    case 'dashboard':
+    case 'analytics':
+    case 'funnel':
+      return <DashboardTab />;
+    case 'restaurants':
     case 'cafes':
     case 'tenants':
-    case 'restaurants':
       return <TenantsTab />;
-    case 'outlets': return <OutletsTab />;
-    case 'config': return <ConfigTab />;
-    case 'audit': return <AuditTab />;
-    case 'staff': return <StaffTab />;
-    case 'subscriptions': return <SubscriptionsTab />;
-    case 'broadcast':
-    case 'notifications':
-      return <BroadcastTab />;
-    case 'content': return <ContentTab />;
-    case 'users': return <UsersTab />;
-    case 'billing': return <BillingTab />;
-    case 'orders': return <OrdersTab />;
-    case 'analytics': return <AnalyticsTab />;
-    case 'funnel': return <FunnelTab />;
-    case 'settings': return <SettingsTab />;
-    case 'announcements': return <AnnouncementsTab />;
-    case 'support': return <SupportTab />;
+    case 'subscriptions':
+      return <SubscriptionsTab />;
+    case 'billing':
+      return <BillingTab />;
+    case 'orders':
+      return <OrdersTab />;
+    case 'support':
+      return <SupportTab />;
     case 'system-health':
     case 'health':
+    case 'jobs':
       return <SystemHealthTab />;
-    case 'integrations': return <IntegrationsTab />;
-    case 'jobs': return <JobsTab />;
-    case 'feature-flags': return <FeatureFlagsTab />;
-    case 'admins': return <AdminsTab />;
-    case 'roles': return <RolesTab />;
-    case 'api-keys': return <ApiKeysTab />;
-    default: return <DashboardTab />;
+    case 'integrations':
+      return <IntegrationsTab />;
+    case 'admins':
+    case 'roles':
+    case 'users':
+      return <AdminsTab />;
+    case 'audit':
+      return <AuditTab />;
+    case 'settings':
+    case 'config':
+    case 'feature-flags':
+    case 'broadcast':
+    case 'notifications':
+    case 'announcements':
+    case 'api-keys':
+    case 'content':
+      return <SettingsTab />;
+    case 'staff':
+      return <TenantsTab />;
+    case 'outlets':
+      return <OutletsTab />;
+    default:
+      return <DashboardTab />;
   }
 }
 

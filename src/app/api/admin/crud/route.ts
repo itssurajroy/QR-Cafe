@@ -62,13 +62,29 @@ export async function POST(req: NextRequest) {
     if (!isOwner) {
       return NextResponse.json({ error: "Forbidden: Owner role required" }, { status: 403 });
     }
-    const { logoUrl, tagline, accentColor, googleReviewUrl } = data;
+    const { logoUrl, tagline, googleReviewUrl, accentColor } = data;
+    let cleanReviewUrl: string | null | undefined = undefined;
+    if (googleReviewUrl !== undefined) {
+      if (googleReviewUrl === null || String(googleReviewUrl).trim() === "") {
+        cleanReviewUrl = null;
+      } else {
+        const trimmed = String(googleReviewUrl).trim();
+        if (!trimmed.startsWith("https://") && !trimmed.startsWith("http://")) {
+          return NextResponse.json(
+            { error: "Google review URL must begin with https://" },
+            { status: 422 },
+          );
+        }
+        cleanReviewUrl = trimmed;
+      }
+    }
+
     const { error } = await admin
       .from("restaurants")
       .update({
         logo_url: logoUrl !== undefined ? (logoUrl || null) : undefined,
         tagline: tagline !== undefined ? (String(tagline || "").trim() || null) : undefined,
-        google_review_url: googleReviewUrl !== undefined ? (String(googleReviewUrl || "").trim() || null) : undefined,
+        google_review_url: cleanReviewUrl,
         accent_color: accentColor || "#f59e0b",
       })
       .eq("id", user.restaurantId);

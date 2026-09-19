@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
 
   // Developer / Sandbox Instant Activation
   if (simulate) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Simulation mode is strictly disabled in production" },
+        { status: 403 },
+      );
+    }
     const mockSubId = `sub_sim_${Date.now()}`;
     await db
       .from("restaurants")

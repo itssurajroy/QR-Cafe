@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
+import { deductInventoryIngredients } from "@/lib/inventory";
 
 const TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "rejected", "cancelled"],
@@ -51,10 +52,12 @@ export async function PATCH(
 
   const { status, payment_status, delay_minutes, delay_reason } = parsed.data;
 
-  // Staff may only advance kitchen status and set delays, never touch payments.
-  if (user.role === "staff" && payment_status) {
+  // Only managers, owners, and super_admins can modify payment status. Counter staff (staff, waiter, kitchen) cannot.
+  const canManagePayments =
+    user.role === "owner" || user.role === "manager" || user.role === "super_admin";
+  if (payment_status && !canManagePayments) {
     return NextResponse.json(
-      { error: "Staff cannot change payment status" },
+      { error: "Forbidden: Only managers and owners can modify payment status" },
       { status: 403 },
     );
   }
@@ -152,8 +155,17 @@ export async function PATCH(
     },
   });
 
-  if (updates.status) {
-    // TODO: Send status notification to customer via SMS or email
+  if (updates.status === "confirmed" || updates.status === "preparing") {
+    // Deduct inventory when order is officially accepted by staff
+    const { data: items } = await db
+      .from("order_items")
+      .select("menu_item_id, quantity")
+      .eq("order_id", id);
+    if (items && items.length > 0) {
+      deductInventoryIngredients(db, order.restaurant_id, items).catch((err) =>
+        console.error("Delayed inventory deduction failed:", err)
+      );
+    }
   }
 
   if (typeof delay_minutes === "number" && delay_minutes > 0) {

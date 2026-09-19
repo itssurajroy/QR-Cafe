@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperAnnouncementsRedirect() {
-  redirect("/super?tab=announcements");
+  redirect("/super?tab=settings");
 }

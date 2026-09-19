@@ -13,9 +13,10 @@ import {
 
 const pinLoginSchema = z.object({
   // Exactly one restaurant identifier is required: slug (cafe code) or id.
-  restaurant_slug: z.string().min(2).max(50).optional(),
+  restaurant_slug: z.string().trim().min(1).optional(),
   restaurant_id: z.string().uuid().optional(),
-  pin: z.string().regex(/^\d{4}$/, "PIN must be exactly 4 digits"),
+  staff_id: z.string().uuid().optional(),
+  pin: z.string().regex(/^\d{4}$/, "PIN must be 4 digits"),
 });
 
 const MAX_PIN_ATTEMPTS = 5;
@@ -41,14 +42,13 @@ export async function POST(req: NextRequest) {
       { status: 422 },
     );
   }
-  const { restaurant_slug, restaurant_id, pin } = parsed.data;
+  const { restaurant_slug, restaurant_id, staff_id, pin } = parsed.data;
 
-  // Rate limit: 10 PIN attempts per IP per minute (brute-force protection
-  // on top of per-profile lockout below).
-  const rl = rateLimit(`pin:${ip}`, 10, 60);
+  // Rate limit: 5 PIN attempts per IP per minute
+  const rl = rateLimit(`pin:${ip}`, 5, 60);
   if (!rl.ok) {
     return NextResponse.json(
-      { error: "Too many attempts. Please wait a moment.", retryAfter: rl.retryAfter },
+      { error: "Too many attempts from this terminal. Please wait a moment.", retryAfter: rl.retryAfter },
       { status: 429 },
     );
   }
@@ -69,19 +69,25 @@ export async function POST(req: NextRequest) {
     restaurantId = restaurant.id;
   }
 
-  // 2. Candidate PIN-enabled staff in this restaurant
-  const { data: candidates, error: cErr } = await admin
+  // 2. Candidate PIN-enabled staff in this restaurant (scoped to staff_id if selected)
+  let query = admin
     .from("cafe_profiles")
     .select("id, role, display_name, active, restaurant_id, pin_hash, pin_failed_attempts, pin_locked_until")
     .eq("restaurant_id", restaurantId as string)
     .eq("active", true)
     .not("pin_hash", "is", null);
 
+  if (staff_id) {
+    query = query.eq("id", staff_id);
+  }
+
+  const { data: candidates, error: cErr } = await query;
+
   if (cErr || !candidates || candidates.length === 0) {
     return NextResponse.json({ error: "Invalid café code or PIN" }, { status: 401 });
   }
 
-  // 3. Constant-work comparison across candidates (don't leak which PIN exists)
+  // 3. Constant-work comparison across candidates
   let matched: (typeof candidates)[number] | null = null;
   for (const c of candidates) {
     if (!c.pin_hash) continue;
@@ -96,20 +102,28 @@ export async function POST(req: NextRequest) {
   }
 
   if (!matched) {
-    // Increment failure counters (drives per-profile lockout).
-    const now = Date.now();
-    for (const c of candidates) {
-      const attempts = (c.pin_failed_attempts || 0) + 1;
-      const updates: Record<string, unknown> = {
-        pin_failed_attempts: attempts,
-        pin_locked_until:
-          attempts >= MAX_PIN_ATTEMPTS
-            ? new Date(now + PIN_LOCK_MS).toISOString()
-            : null,
-      };
-      await admin.from("cafe_profiles").update(updates).eq("id", c.id);
+    // If a specific staff member was targeted, lock out ONLY that profile
+    if (staff_id && candidates[0]) {
+      const target = candidates[0];
+      const attempts = (target.pin_failed_attempts || 0) + 1;
+      const now = Date.now();
+      await admin
+        .from("cafe_profiles")
+        .update({
+          pin_failed_attempts: attempts,
+          pin_locked_until: attempts >= MAX_PIN_ATTEMPTS ? new Date(now + PIN_LOCK_MS).toISOString() : null,
+        })
+        .eq("id", target.id);
     }
-    return NextResponse.json({ error: "Invalid café code or PIN" }, { status: 401 });
+    return NextResponse.json({ error: "Invalid PIN or account locked" }, { status: 401 });
+  }
+
+  // Reset failed attempts on successful login
+  if ((matched.pin_failed_attempts || 0) > 0 || matched.pin_locked_until) {
+    await admin
+      .from("cafe_profiles")
+      .update({ pin_failed_attempts: 0, pin_locked_until: null })
+      .eq("id", matched.id);
   }
 
   // 4. PIN sessions are counter-staff only (kitchen/waiter/staff).

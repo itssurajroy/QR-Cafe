@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
+import { JobsTab } from "./JobsTab";
 
 type Health = { failedWebhooks: number; errorAudits: number; failedPayments: number; checked_at: string };
 
@@ -44,7 +45,8 @@ function Indicator({ label, value, degraded, description }: { label: string; val
 }
 
 export function SystemHealthTab() {
-  const { kpis, setTab } = useSuperAdmin();
+  const { tab, kpis, setTab } = useSuperAdmin();
+  const [activeSubTab, setActiveSubTab] = useState<"monitoring" | "jobs">(tab === "jobs" ? "jobs" : "monitoring");
   const [health, setHealth] = useState<Health>({ failedWebhooks: 0, errorAudits: 0, failedPayments: 0, checked_at: "" });
   const [subsystems, setSubsystems] = useState<Subsystem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,14 +90,44 @@ export function SystemHealthTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">System Infrastructure Health</h2>
-            <span className="px-2 py-0.5 rounded-md bg-violet-50 text-[#5738F5] text-[10px] font-black uppercase tracking-wider border border-violet-100">
-              Live Monitoring
-            </span>
-          </div>
+      {/* Segmented Sub-Navigation */}
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80 w-fit">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("monitoring")}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSubTab === "monitoring"
+              ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          Telemetry & Subsystems
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("jobs")}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSubTab === "jobs"
+              ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          Background Jobs Queue
+        </button>
+      </div>
+
+      {activeSubTab === "jobs" ? (
+        <JobsTab />
+      ) : (
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-black text-slate-900 tracking-tight">System Infrastructure Health</h2>
+                <span className="px-2 py-0.5 rounded-md bg-violet-50 text-[#5738F5] text-[10px] font-black uppercase tracking-wider border border-violet-100">
+                  Live Monitoring
+                </span>
+              </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
             {loading
               ? "Checking telemetry signals & endpoints…"
@@ -184,6 +216,8 @@ export function SystemHealthTab() {
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -163,7 +163,16 @@ function GlobeIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-function getSuperNavGroups(totalCafes?: number, staffCount?: number): NavGroup[] {
+function isItemActive(itemId: string, currentTab: string): boolean {
+  if (itemId === "restaurants") return currentTab === "restaurants" || currentTab === "cafes" || currentTab === "tenants" || currentTab === "outlets";
+  if (itemId === "dashboard") return currentTab === "dashboard" || currentTab === "analytics" || currentTab === "funnel";
+  if (itemId === "system-health") return currentTab === "system-health" || currentTab === "health" || currentTab === "jobs";
+  if (itemId === "admins") return currentTab === "admins" || currentTab === "roles" || currentTab === "users";
+  if (itemId === "settings") return currentTab === "settings" || currentTab === "config" || currentTab === "feature-flags" || currentTab === "broadcast" || currentTab === "announcements" || currentTab === "api-keys" || currentTab === "content";
+  return currentTab === itemId;
+}
+
+function getSuperNavGroups(totalCafes?: number): NavGroup[] {
   return [
     {
       title: "Overview",
@@ -172,61 +181,36 @@ function getSuperNavGroups(totalCafes?: number, staffCount?: number): NavGroup[]
       ],
     },
     {
-      title: "Business",
+      title: "Platform Operations",
       items: [
-        { id: "cafes", label: "Restaurants", icon: BuildingIcon, count: totalCafes },
-        { id: "outlets", label: "Outlets", icon: StoreIcon },
+        { id: "restaurants", label: "Restaurants", icon: BuildingIcon, count: totalCafes },
         { id: "subscriptions", label: "Subscriptions", icon: CreditCardIcon },
-        { id: "billing", label: "Billing & Invoices", icon: CreditCardIcon },
-      ],
-    },
-    {
-      title: "Operations",
-      items: [
+        { id: "billing", label: "Billing", icon: CreditCardIcon },
         { id: "orders", label: "Live Orders", icon: ShoppingBagIcon },
-        { id: "staff", label: "Staff Directory", icon: UsersIcon, count: staffCount || 0 },
-        { id: "users", label: "User Accounts", icon: UsersIcon },
         { id: "support", label: "Support", icon: LifebuoyIcon },
       ],
     },
     {
-      title: "Analytics",
-      items: [
-        { id: "analytics", label: "Platform Analytics", icon: ChartBarIcon },
-        { id: "funnel", label: "Funnel Analytics", icon: FunnelIcon },
-      ],
-    },
-    {
-      title: "Platform",
+      title: "Infrastructure",
       items: [
         { id: "system-health", label: "System Health", icon: PulseIcon },
         { id: "integrations", label: "Integrations", icon: PuzzlePieceIcon },
-        { id: "jobs", label: "Background Jobs", icon: CommandLineIcon },
-        { id: "broadcast", label: "Notifications", icon: MegaphoneIcon },
-        { id: "announcements", label: "Announcements", icon: MegaphoneIcon },
       ],
     },
     {
-      title: "Configuration",
+      title: "Governance & Control",
       items: [
-        { id: "config", label: "Platform Config", icon: CogIcon },
-        { id: "feature-flags", label: "Feature Flags", icon: FlagIcon },
-      ],
-    },
-    {
-      title: "Security",
-      items: [
-        { id: "admins", label: "Admin Users", icon: ShieldCheckIcon },
-        { id: "roles", label: "Roles & Permissions", icon: LockClosedIcon },
+        { id: "admins", label: "Admins & Roles", icon: ShieldCheckIcon },
         { id: "audit", label: "Audit Logs", icon: ClipboardListIcon },
+        { id: "settings", label: "Settings", icon: CogIcon },
       ],
     },
   ];
 }
 
 export function SuperSidebar() {
-  const { tab, setTab, totalCafes, staff } = useSuperAdmin();
-  const groups = getSuperNavGroups(totalCafes, staff?.length);
+  const { tab, setTab, totalCafes } = useSuperAdmin();
+  const groups = getSuperNavGroups(totalCafes);
 
   return (
     <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 h-full select-none">
@@ -252,7 +236,7 @@ export function SuperSidebar() {
             </div>
             {group.items.map((item) => {
               const Icon = item.icon;
-              const isActive = tab === item.id;
+              const isActive = isItemActive(item.id, tab);
               return (
                 <button
                   key={item.id}
@@ -307,11 +291,11 @@ export function SuperSidebar() {
 }
 
 export function SuperMobileDrawer() {
-  const { tab, setTab, totalCafes, staff, mobileMenuOpen, setMobileMenuOpen } = useSuperAdmin();
+  const { tab, setTab, totalCafes, mobileMenuOpen, setMobileMenuOpen } = useSuperAdmin();
 
   if (!mobileMenuOpen) return null;
 
-  const groups = getSuperNavGroups(totalCafes, staff?.length);
+  const groups = getSuperNavGroups(totalCafes);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-stretch lg:hidden animate-fade-in">
@@ -346,7 +330,7 @@ export function SuperMobileDrawer() {
               </div>
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = tab === item.id;
+                const isActive = isItemActive(item.id, tab);
                 return (
                   <button
                     key={item.id}

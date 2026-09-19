@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperUsersRedirect() {
-  redirect("/super?tab=users");
+  redirect("/super?tab=admins");
 }

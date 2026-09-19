@@ -1,5 +1,6 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
 /**
@@ -69,12 +70,12 @@ export default async function OrderAgainPage({
           This reorder link is invalid or the order no longer exists. Please
           scan the QR code at your table to start a fresh order.
         </p>
-        <a
+        <Link
           href="/"
           className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-black text-xs inline-flex items-center gap-2 min-h-[44px]"
         >
           Return to Home
-        </a>
+        </Link>
       </div>
     </main>
   );

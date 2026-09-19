@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".agents/**",
+    ".kilo/**",
     "*.cjs",
     "seed.js",
     "test_fetch.js",

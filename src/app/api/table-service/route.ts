@@ -1,8 +1,14 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "127.0.0.1";
+
   let body: any;
   try {
     body = await req.json();
@@ -13,6 +19,15 @@ export async function POST(req: NextRequest) {
   const { qr_token, request_type = "waiter", notes = "" } = body;
   if (!qr_token) {
     return NextResponse.json({ error: "qr_token required" }, { status: 400 });
+  }
+
+  // Rate limit: max 3 requests per 60s window per table/IP to prevent spam
+  const rl = rateLimit(`table-service:${qr_token}:${ip}`, 3, 60);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many service requests. Please wait a moment.", retryAfter: rl.retryAfter },
+      { status: 429 }
+    );
   }
 
   const admin = createSupabaseAdmin();

@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
-  if (!token || typeof token !== "string" || token.length < 3 || token.length > 64) {
+  if (!token || typeof token !== "string" || token.length < 16) {
     return NextResponse.json({ error: "Invalid status token format" }, { status: 400 });
   }
   const db = createSupabaseAdmin();
@@ -19,29 +19,9 @@ export async function GET(
   let order: any = null;
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
 
+  // Strictly require high-entropy status_token or UUID order ID
+  // Raw order numbers (e.g. #101) are never permitted without tenant scoping
   if (isUuid) {
-    // 1. Try by Order ID (UUID)
-    const { data: byId } = await db
-      .from("orders")
-      .select(baseCols)
-      .eq("id", token)
-      .maybeSingle();
-
-    if (byId) {
-      order = byId;
-    } else {
-      // 2. Try by status_token (UUID)
-      const { data: byStatusToken } = await db
-        .from("orders")
-        .select(baseCols)
-        .eq("status_token", token)
-        .maybeSingle();
-      if (byStatusToken) order = byStatusToken;
-    }
-  }
-
-  // 3. Fallback: Try by status_token or order_number
-  if (!order) {
     const { data: byStatusToken } = await db
       .from("orders")
       .select(baseCols)
@@ -51,15 +31,20 @@ export async function GET(
     if (byStatusToken) {
       order = byStatusToken;
     } else {
-      const { data: byNumber } = await db
+      const { data: byId } = await db
         .from("orders")
         .select(baseCols)
-        .eq("order_number", token)
-        .order("created_at", { ascending: false })
-        .limit(1)
+        .eq("id", token)
         .maybeSingle();
-      if (byNumber) order = byNumber;
+      if (byId) order = byId;
     }
+  } else {
+    const { data: byStatusToken } = await db
+      .from("orders")
+      .select(baseCols)
+      .eq("status_token", token)
+      .maybeSingle();
+    if (byStatusToken) order = byStatusToken;
   }
 
   if (!order) {
@@ -125,7 +110,6 @@ export async function GET(
     delay_reason: delayReason,
     total_paise: order.total_paise,
     table: tableLabel,
-    qr_token: qrToken,
     restaurant_name: restaurantName,
     google_review_url: googleReviewUrl,
     upi_qr_url: upiQrUrl,

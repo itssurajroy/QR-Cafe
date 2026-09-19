@@ -105,6 +105,26 @@ export async function POST(req: NextRequest) {
   const userId = newUser.user.id;
 
   // 2. Insert into cafe_profiles (with optional quick sign-in PIN)
+  if (pin) {
+    const { data: existingStaff } = await admin
+      .from("cafe_profiles")
+      .select("id, pin_hash")
+      .eq("restaurant_id", restaurantId)
+      .eq("active", true)
+      .not("pin_hash", "is", null);
+
+    const { verifyPinHash } = await import("@/lib/pin-auth");
+    for (const s of existingStaff || []) {
+      if (s.pin_hash && (await verifyPinHash(pin, restaurantId, s.id, s.pin_hash))) {
+        await admin.auth.admin.deleteUser(userId);
+        return NextResponse.json(
+          { error: "This PIN is already in use by another staff member. Please choose a unique 4-digit PIN." },
+          { status: 409 },
+        );
+      }
+    }
+  }
+
   const { error: profileErr } = await admin.from("cafe_profiles").insert({
     id: userId,
     restaurant_id: restaurantId,
@@ -166,7 +186,17 @@ export async function PATCH(req: NextRequest) {
   const admin = createSupabaseAdmin();
   const updates: Record<string, any> = {};
   if (active !== undefined) updates.active = Boolean(active);
-  if (role !== undefined) updates.role = role;
+  if (role !== undefined) {
+    const normRole = String(role).toLowerCase();
+    const ALLOWED_STAFF_ROLES = ["admin", "manager", "staff", "waiter", "kitchen"];
+    if (normRole === "super_admin" || !ALLOWED_STAFF_ROLES.includes(normRole)) {
+      return NextResponse.json(
+        { error: "Invalid role. Cannot assign super_admin." },
+        { status: 422 },
+      );
+    }
+    updates.role = normRole === "admin" ? "manager" : normRole;
+  }
   if (display_name !== undefined) updates.display_name = String(display_name).trim();
   if (pin !== undefined) {
     if (pin === "" || pin === null) {
@@ -175,6 +205,24 @@ export async function PATCH(req: NextRequest) {
       updates.pin_failed_attempts = 0;
       updates.pin_locked_until = null;
     } else {
+      const { data: existingStaff } = await admin
+        .from("cafe_profiles")
+        .select("id, pin_hash")
+        .eq("restaurant_id", user.restaurantId)
+        .eq("active", true)
+        .neq("id", id)
+        .not("pin_hash", "is", null);
+
+      const { verifyPinHash } = await import("@/lib/pin-auth");
+      for (const s of existingStaff || []) {
+        if (s.pin_hash && (await verifyPinHash(String(pin), user.restaurantId, s.id, s.pin_hash))) {
+          return NextResponse.json(
+            { error: "This PIN is already in use by another staff member. Please choose a unique 4-digit PIN." },
+            { status: 409 },
+          );
+        }
+      }
+
       updates.pin_hash = await hashPin(String(pin), user.restaurantId, String(id));
       updates.pin_updated_at = new Date().toISOString();
       updates.pin_failed_attempts = 0;
@@ -218,6 +266,22 @@ export async function DELETE(req: NextRequest) {
   }
 
   const admin = createSupabaseAdmin();
+
+  // Verify target profile exists and is scoped to caller's restaurant before any deletion
+  const { data: targetProfile } = await admin
+    .from("cafe_profiles")
+    .select("id, role")
+    .eq("id", id)
+    .eq("restaurant_id", user.restaurantId)
+    .maybeSingle();
+
+  if (!targetProfile) {
+    return NextResponse.json({ error: "Staff member not found in your restaurant" }, { status: 404 });
+  }
+
+  if (targetProfile.role === "owner" && user.role !== "super_admin") {
+    return NextResponse.json({ error: "Cannot delete another restaurant owner" }, { status: 403 });
+  }
 
   const { error: profileErr } = await admin
     .from("cafe_profiles")

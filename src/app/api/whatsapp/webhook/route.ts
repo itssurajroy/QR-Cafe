@@ -47,30 +47,68 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing signature" }, { status: 401 });
   }
 
-  // Find all accounts with webhook_secret configured
-  const { data: accounts, error: accountsError } = await db
-    .from("whatsapp_accounts")
-    .select("tenant_id, webhook_secret")
-    .not("webhook_secret", "is", null);
+  let matchedAccount = null;
 
-  if (accountsError || !accounts || accounts.length === 0) {
-    console.error("[WhatsApp Webhook] No webhook secrets configured");
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 403 });
+  // 1. Try O(1) direct lookup by phone_number_id if present in Meta payload
+  try {
+    const preview = JSON.parse(body);
+    const phoneNumberId = preview?.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
+    if (phoneNumberId) {
+      const { data: directAccount } = await db
+        .from("whatsapp_accounts")
+        .select("tenant_id, webhook_secret")
+        .eq("phone_number_id", phoneNumberId)
+        .maybeSingle();
+
+      if (directAccount?.webhook_secret) {
+        const expectedSignature =
+          "sha256=" +
+          crypto
+            .createHmac("sha256", directAccount.webhook_secret)
+            .update(body)
+            .digest("hex");
+
+        if (
+          signature.length === expectedSignature.length &&
+          crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+        ) {
+          matchedAccount = directAccount;
+        }
+      }
+    }
+  } catch {
+    /* ignore json preview parse failure */
   }
 
-  // Find matching webhook secret using timing-safe comparison
-  let matchedAccount = null;
-  for (const account of accounts) {
-    if (!account.webhook_secret) continue;
-    
-    const expectedSignature = "sha256=" + crypto
-      .createHmac("sha256", account.webhook_secret)
-      .update(body)
-      .digest("hex");
-    
-    if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
-      matchedAccount = account;
-      break;
+  // 2. Fallback: match against configured accounts pool
+  if (!matchedAccount) {
+    const { data: accounts, error: accountsError } = await db
+      .from("whatsapp_accounts")
+      .select("tenant_id, webhook_secret")
+      .not("webhook_secret", "is", null);
+
+    if (accountsError || !accounts || accounts.length === 0) {
+      console.error("[WhatsApp Webhook] No webhook secrets configured");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 403 });
+    }
+
+    for (const account of accounts) {
+      if (!account.webhook_secret) continue;
+
+      const expectedSignature =
+        "sha256=" +
+        crypto
+          .createHmac("sha256", account.webhook_secret)
+          .update(body)
+          .digest("hex");
+
+      if (
+        signature.length === expectedSignature.length &&
+        crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+      ) {
+        matchedAccount = account;
+        break;
+      }
     }
   }
 

@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperContentRedirect() {
-  redirect("/super?tab=content");
+  redirect("/super?tab=settings");
 }

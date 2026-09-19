@@ -168,6 +168,15 @@ export function CrmTab({ flash }: CrmTabProps) {
   const [firstOrderBonus, setFirstOrderBonus] = useState(100);
   const [loyaltySaved, setLoyaltySaved] = useState(false);
 
+  // Loyalty tiers from API
+  const [tiers, setTiers] = useState<any[]>([]);
+  const [newTierName, setNewTierName] = useState("");
+  const [newTierMinPoints, setNewTierMinPoints] = useState(0);
+  const [newTierMaxPoints, setNewTierMaxPoints] = useState("");
+  const [newTierColor, setNewTierColor] = useState("#CD7F32");
+  const [newTierDisplayName, setNewTierDisplayName] = useState("");
+  const [newTierBenefits, setNewTierBenefits] = useState("");
+
   // Rewards catalog state
   const [rewards, setRewards] = useState<RewardItem[]>([]);
   const [newRewardModal, setNewRewardModal] = useState(false);
@@ -259,13 +268,13 @@ export function CrmTab({ flash }: CrmTabProps) {
     }
   };
 
-  // 5. Fetch Automations
-  const fetchAutomations = async () => {
+  // 5. Fetch Loyalty Tiers
+  const fetchLoyalty = async () => {
     try {
-      const res = await fetch("/api/admin/crm/automations");
+      const res = await fetch("/api/admin/crm/loyalty");
       const data = await res.json();
-      if (res.ok && data.automations) {
-        setAutomations(data.automations);
+      if (res.ok && data.tiers) {
+        setTiers(data.tiers);
       }
     } catch {
       // ignore
@@ -275,7 +284,7 @@ export function CrmTab({ flash }: CrmTabProps) {
   useEffect(() => {
     if (activeTab === "campaigns") fetchCampaigns();
     if (activeTab === "rewards" || activeTab === "loyalty") fetchRewards();
-    if (activeTab === "automations") fetchAutomations();
+    if (activeTab === "loyalty") fetchLoyalty();
   }, [activeTab]);
 
   // Point Adjustment Handler (writes to ledger)
@@ -793,6 +802,216 @@ export function CrmTab({ flash }: CrmTabProps) {
                   Configure Earning Rules & Tiers
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 4: LOYALTY & TIERS ──────────────────────────────────────── */}
+      {activeTab === "loyalty" && (
+        <div className="space-y-8">
+          <div className="bg-white p-6 rounded-3xl border border-[#E7E4F0] shadow-xs">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black text-[#17142B] tracking-tight">
+                Loyalty & Tiers
+              </h2>
+              <div className="flex items-center gap-2">
+                <StarIcon className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-black text-[#5738F5]">Manage tier thresholds & benefits</span>
+              </div>
+            </div>
+
+            {/* Tiers Catalog */}
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-[#F8F7FC] border-b border-[#E7E4F0]">
+                  <tr>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Tier</th>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Min Points</th>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Max Points</th>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Color</th>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Display Name</th>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Benefits</th>
+                    <th className="p-3 text-xs font-bold text-[#6F7185] uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E7E4F0]/60">
+                  {tiers.map((t) => (
+                    <tr key={t.id} className="hover:bg-[#F8F7FC]/50 transition-colors">
+                      <td className="p-3 text-xs font-bold text-[#17142B]">{t.display_name || t.name}</td>
+                      <td className="p-3 text-xs font-mono font-medium text-[#17142B]">{t.min_points}</td>
+                      <td className="p-3 text-xs font-mono font-medium text-[#17142B]">{t.max_points || "∞"}</td>
+                      <td className="p-3 text-xs">
+                        <span
+                          className="inline-block w-3 h-3 rounded-full"
+                          style={{ backgroundColor: t.color }}
+                        />
+                      </td>
+                      <td className="p-3 text-xs font-medium text-[#17142B]">{t.display_name || t.name}</td>
+                      <td className="p-3 text-xs font-mono text-[#6F7185]">{JSON.stringify(t.benefits || {}).substring(0, 50)}...</td>
+                      <td className="p-3 text-xs">
+                        <button
+                          className="text-[10px] font-bold text-[#5738F5] hover:underline cursor-pointer"
+                        >
+                          Manage
+                        </button>
+                        <button
+                          className="text-[10px] font-bold text-red-600 hover:underline cursor-pointer ml-2"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {tiers.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-4 text-center">
+                        <span className="text-[10px] text-[#6F7185]">No tiers configured. Create your first tier above.</span>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Add New Tier Form */}
+            <div className="mt-8 bg-white p-6 rounded-3xl border border-[#E7E4F0] shadow-xs">
+              <h3 className="text-base font-black text-[#17142B] tracking-tight mb-4">
+                Create New Tier
+              </h3>
+              <form
+                onSubmit={async (e: React.FormEvent) => {
+                  e.preventDefault();
+                  try {
+                    const res = await fetch("/api/admin/crm/loyalty", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        action: "create",
+                        name: newTierName,
+                        minPoints: Number(newTierMinPoints),
+                        maxPoints: newTierMaxPoints ? Number(newTierMaxPoints) : null,
+                        color: newTierColor,
+                        displayName: newTierDisplayName,
+                        benefits: JSON.parse(newTierBenefits || "{}"),
+                      }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error);
+                    setTiers((prev) => [...prev, data.tier]);
+                    setNewTierName("");
+                    setNewTierMinPoints(0);
+                    setNewTierMaxPoints("");
+                    setNewTierColor("#CD7F32");
+                    setNewTierDisplayName("");
+                    setNewTierBenefits("");
+                    flash("ok", "New tier created successfully");
+                  } catch (err: any) {
+                    flash("err", err.message || "Failed to create tier");
+                  }
+                }}
+              >
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="text-xs font-bold text-[#6F7185] uppercase tracking-wider block mb-1">
+                      Tier Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newTierName}
+                      onChange={(e) => setNewTierName(e.target.value)}
+                      placeholder="e.g. Bronze"
+                      className="w-full px-3 py-2 text-xs bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl focus:border-[#5738F5] text-[#17142B] font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#6F7185] uppercase tracking-wider block mb-1">
+                      Min Points
+                    </label>
+                    <input
+                      type="number"
+                      value={newTierMinPoints}
+                      onChange={(e) => setNewTierMinPoints(Number(e.target.value) || 0)}
+                      min="0"
+                      className="w-full px-3 py-2 text-xs bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl focus:border-[#5738F5] text-[#17142B] font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#6F7185] uppercase tracking-wider block mb-1">
+                      Max Points
+                    </label>
+                    <input
+                      type="number"
+                      value={newTierMaxPoints || ""}
+                      onChange={(e) => setNewTierMaxPoints(e.target.value || "")}
+                      min="0"
+                      className="w-full px-3 py-2 text-xs bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl focus:border-[#5738F5] text-[#17142B] font-medium"
+                      placeholder="Leave empty for unlimited"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#6F7185] uppercase tracking-wider block mb-1">
+                      Color
+                    </label>
+                    <input
+                      type="color"
+                      value={newTierColor}
+                      onChange={(e) => setNewTierColor(e.target.value)}
+                      className="w-16 h-7 rounded-border accent-color: #5738F5"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="text-xs font-bold text-[#6F7185] uppercase tracking-wider block mb-1">
+                      Display Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newTierDisplayName}
+                      onChange={(e) => setNewTierDisplayName(e.target.value)}
+                      placeholder="e.g. Bronze Member"
+                      className="w-full px-3 py-2 text-xs bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl focus:border-[#5738F5] text-[#17142B] font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#6F7185] uppercase tracking-wider block mb-1">
+                      Benefits JSON
+                    </label>
+                    <textarea
+                      value={newTierBenefits}
+                      onChange={(e) => setNewTierBenefits(e.target.value)}
+                      rows={2}
+                      placeholder='{"free_appetizer": true, "birthday_bonus": 250}'
+                      className="w-full px-3 py-2 text-xs bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl focus:border-[#5738F5] text-[#17142B] font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 bg-[#5738F5] hover:bg-[#4628D8] text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                  >
+                    Create Tier
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewTierName("");
+                      setNewTierMinPoints(0);
+                      setNewTierMaxPoints("");
+                      setNewTierColor("#CD7F32");
+                      setNewTierDisplayName("");
+                      setNewTierBenefits("");
+                    }}
+                    className="flex-1 py-2 bg-white hover:bg-[#F1EFF7] text-[#17142B] text-xs font-bold rounded-xl transition cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

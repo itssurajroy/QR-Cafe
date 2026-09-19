@@ -39,6 +39,8 @@ describe("Middleware Config & Public Routes", () => {
     expect(isPublicPath("/admin")).toBe(false);
     expect(isPublicPath("/pos")).toBe(false);
     expect(isPublicPath("/api/admin/crud")).toBe(false);
+    expect(isPublicPath("/api/kds")).toBe(false);
+    expect(isPublicPath("/api/kds/tickets")).toBe(false);
     expect(isPublicPath("/super")).toBe(false);
     expect(isPublicPath("/api/super/tenants")).toBe(false);
   });

@@ -759,7 +759,7 @@ export default function PublicCafeClient({
             </p>
 
             <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-              {restaurant.google_review_url && (
+              {restaurant.google_review_url && (restaurant.google_review_url.startsWith("https://") || restaurant.google_review_url.startsWith("http://")) && (
                 <a
                   href={restaurant.google_review_url}
                   target="_blank"
@@ -1803,7 +1803,7 @@ export default function PublicCafeClient({
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-            {restaurant.google_review_url && (
+            {restaurant.google_review_url && (restaurant.google_review_url.startsWith("https://") || restaurant.google_review_url.startsWith("http://")) && (
               <a
                 href={restaurant.google_review_url}
                 target="_blank"

@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperTenantsRedirect() {
-  redirect("/super?tab=tenants");
+  redirect("/super?tab=restaurants");
 }

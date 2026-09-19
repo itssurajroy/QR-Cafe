@@ -46,8 +46,9 @@ export default function KdsClient({
   useEffect(() => {
     fetchLiveOrders();
 
+    const channelName = `kds-live-orders-${restaurant?.id}`;
     const channel = supabase
-      .channel("kds-live-orders")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -56,9 +57,27 @@ export default function KdsClient({
           table: "orders",
           filter: `restaurant_id=eq.${restaurant?.id}`,
         },
-        () => {
-          fetchLiveOrders();
-          playAudioTone("newOrder");
+        async (payload: any) => {
+          // Fetch only the newly inserted order with items rather than reloading the full 24h table
+          try {
+            const { data: newOrder } = await supabase
+              .from("orders")
+              .select("*, items:order_items(*)")
+              .eq("id", payload.new.id)
+              .single();
+
+            if (newOrder) {
+              setLiveOrders((prev) => {
+                if (prev.some((o) => o.id === newOrder.id)) return prev;
+                return [...prev, newOrder];
+              });
+              playAudioTone("newOrder");
+            } else {
+              fetchLiveOrders();
+            }
+          } catch {
+            fetchLiveOrders();
+          }
         }
       )
       .on(
@@ -69,16 +88,20 @@ export default function KdsClient({
           table: "orders",
           filter: `restaurant_id=eq.${restaurant?.id}`,
         },
-        () => {
-          fetchLiveOrders();
+        (payload: any) => {
+          // Incremental state update: update the matching order in place
+          setLiveOrders((prev) =>
+            prev.map((o) => (o.id === payload.new.id ? { ...o, ...payload.new } : o))
+          );
         }
       )
       .subscribe();
 
-    const poll = setInterval(fetchLiveOrders, 4000);
+    // Adaptive 30-second background heartbeat (only as a fallback in case WebSockets drop)
+    const heartbeat = setInterval(fetchLiveOrders, 30000);
 
     return () => {
-      clearInterval(poll);
+      clearInterval(heartbeat);
       supabase.removeChannel(channel);
     };
   }, [restaurant?.id, supabase, fetchLiveOrders, playAudioTone]);

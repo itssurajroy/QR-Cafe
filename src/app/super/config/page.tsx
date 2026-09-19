@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperConfigRedirect() {
-  redirect("/super?tab=config");
+  redirect("/super?tab=settings");
 }

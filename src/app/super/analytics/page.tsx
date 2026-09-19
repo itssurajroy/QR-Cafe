@@ -2,5 +2,5 @@
 import { redirect } from "next/navigation";
 
 export default function SuperAnalyticsRedirect() {
-  redirect("/super?tab=analytics");
+  redirect("/super?tab=dashboard");
 }

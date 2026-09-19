@@ -80,17 +80,15 @@ export async function checkAuthAndProfile(request: NextRequest, response: NextRe
     },
   });
 
-  // 0. PIN quick sign-in session (shared counter terminals). Checked first
-  // so kitchen/waiter staff work without a Supabase email session.
-  const pinSession = await checkPinSession(request);
-  if (pinSession) {
-    return { user: pinSession.user, profile: pinSession.profile, response };
-  }
-
   // 1. Get user session (validates JWT, refreshes if needed)
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
+    // 2. PIN quick sign-in session fallback (shared counter terminals)
+    const pinSession = await checkPinSession(request);
+    if (pinSession) {
+      return { user: pinSession.user, profile: pinSession.profile, response };
+    }
     return { user: null, profile: null, response };
   }
 

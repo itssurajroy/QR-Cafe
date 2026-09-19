@@ -9,10 +9,19 @@ import { checkSubscriptionAccess } from "./src/lib/middleware/subscription";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Strip spoofable incoming custom context headers before creating the response
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete("x-tenant-id");
+  requestHeaders.delete("x-tenant-slug");
+  requestHeaders.delete("x-tenant-status");
+  requestHeaders.delete("x-user-id");
+  requestHeaders.delete("x-user-role");
+  requestHeaders.delete("x-restaurant-id");
+
   // 1. Set baseline secure headers
   let response = NextResponse.next({
     request: {
-      headers: request.headers,
+      headers: requestHeaders,
     },
   });
 
@@ -26,14 +35,6 @@ export async function middleware(request: NextRequest) {
     "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; " +
       "img-src 'self' https://*.supabase.co https://images.unsplash.com data: blob:;"
   );
-
-  // Strip spoofable incoming custom context headers
-  request.headers.delete("x-tenant-id");
-  request.headers.delete("x-tenant-slug");
-  request.headers.delete("x-tenant-status");
-  request.headers.delete("x-user-id");
-  request.headers.delete("x-user-role");
-  request.headers.delete("x-restaurant-id");
 
   // 2. Maintenance Mode Check
   if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true") {
@@ -49,9 +50,9 @@ export async function middleware(request: NextRequest) {
   // 3. Resolve Tenant (fast edge cache)
   const tenant = await resolveTenant(request);
   if (tenant) {
-    response.headers.set("x-tenant-id", tenant.id);
-    response.headers.set("x-tenant-slug", tenant.slug);
-    response.headers.set("x-tenant-status", getTenantState(tenant));
+    requestHeaders.set("x-tenant-id", tenant.id);
+    requestHeaders.set("x-tenant-slug", tenant.slug);
+    requestHeaders.set("x-tenant-status", getTenantState(tenant));
   } else if (!isPublicPath(pathname) && !pathname.startsWith("/super") && !isApiRoute(pathname)) {
     // If tenant isn't found for a route that requires one (like /c/[slug] or /pos), we could 404
     // But it's safer to let the app handle it unless it's a subdomain 404.
@@ -60,7 +61,6 @@ export async function middleware(request: NextRequest) {
 
   // 4. Fast path for public routes
   if (isPublicPath(pathname)) {
-    // We don't block public routes, but we still return the tenant headers if matched
     return response;
   }
 
@@ -79,11 +79,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Attach auth context headers securely
-  response.headers.set("x-user-id", user.id);
-  response.headers.set("x-user-role", profile.role);
+  // Attach auth context headers downstream only (never leak to browser response headers)
+  requestHeaders.set("x-user-id", user.id);
+  requestHeaders.set("x-user-role", profile.role);
   if (profile.restaurant_id) {
-    response.headers.set("x-restaurant-id", profile.restaurant_id);
+    requestHeaders.set("x-restaurant-id", profile.restaurant_id);
   }
 
   // 6. Role & Isolation Guard

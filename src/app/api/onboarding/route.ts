@@ -225,6 +225,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 1.5 Prevent account hijacking: check if email already exists
+  const emailLower = input.ownerEmail.toLowerCase().trim();
+  const { data: existingUsersData } = await admin.auth.admin.listUsers();
+  if (existingUsersData?.users?.some((u) => u.email === emailLower)) {
+    return NextResponse.json(
+      { error: "An account with this email already exists. Please log in to create or register new cafés." },
+      { status: 409 },
+    );
+  }
+
   // 2. Create the Restaurant Tenant (single plan + 14-day full-access trial)
   const { data: restaurant, error: restErr } = await admin
     .from("restaurants")
@@ -257,32 +267,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 3. Create or Link Owner Account
-  const { data: existingUser } = await admin.auth.admin.listUsers();
-  let user = existingUser?.users?.find((u) => u.email === input.ownerEmail.toLowerCase().trim());
-
-  if (!user) {
-    const { data: newUser, error: userErr } = await admin.auth.admin.createUser({
-      email: input.ownerEmail.toLowerCase().trim(),
-      password: input.ownerPassword,
-      email_confirm: true,
-    });
-    if (userErr || !newUser?.user) {
-      // rollback restaurant
-      await admin.from("restaurants").delete().eq("id", restaurant.id);
-      return NextResponse.json(
-        { error: userErr?.message || "Failed to create owner account" },
-        { status: 500 },
-      );
-    }
-    user = newUser.user;
-  } else {
-    // update password if user exists
-    await admin.auth.admin.updateUserById(user.id, {
-      password: input.ownerPassword,
-      email_confirm: true,
-    });
+  // 3. Create Owner Account
+  const { data: newUser, error: userErr } = await admin.auth.admin.createUser({
+    email: emailLower,
+    password: input.ownerPassword,
+    email_confirm: true,
+  });
+  if (userErr || !newUser?.user) {
+    // rollback restaurant
+    await admin.from("restaurants").delete().eq("id", restaurant.id);
+    return NextResponse.json(
+      { error: userErr?.message || "Failed to create owner account" },
+      { status: 500 },
+    );
   }
+  const user = newUser.user;
 
   // 4. Create cafe_profiles record
   const { error: profErr } = await admin.from("cafe_profiles").upsert({

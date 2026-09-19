@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
+import { RolesTab } from "./RolesTab";
 
 type AdminUser = {
   id: string;
@@ -16,6 +17,7 @@ type AdminUser = {
 
 export function AdminsTab() {
   const { tab, authUsers, flash } = useSuperAdmin();
+  const [activeSubTab, setActiveSubTab] = useState<"admins" | "roles">(tab === "roles" ? "roles" : "admins");
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
@@ -68,22 +70,52 @@ export function AdminsTab() {
 
   return (
     <div className="space-y-6 select-none">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Super Admin Users</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage authenticated platform console administrators, RBAC role assignments, and 2FA credentials.
-          </p>
-        </div>
+      {/* Segmented Sub-Navigation */}
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80 w-fit">
         <button
           type="button"
-          onClick={() => setShowInviteModal(true)}
-          className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#492ee0] text-white font-bold text-xs transition-all shadow-sm shadow-[#5738F5]/25 cursor-pointer flex items-center gap-1.5"
+          onClick={() => setActiveSubTab("admins")}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSubTab === "admins"
+              ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
         >
-          <span>＋ Invite Super Admin</span>
+          Super Admin Accounts
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("roles")}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeSubTab === "roles"
+              ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          Roles & Permissions Matrix
         </button>
       </div>
+
+      {activeSubTab === "roles" ? (
+        <RolesTab />
+      ) : (
+        <>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Super Admin Users</h1>
+              <p className="text-sm text-slate-500 mt-1">
+                Manage authenticated platform console administrators, RBAC role assignments, and 2FA credentials.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowInviteModal(true)}
+              className="px-4 py-2 rounded-xl bg-[#5738F5] hover:bg-[#492ee0] text-white font-bold text-xs transition-all shadow-sm shadow-[#5738F5]/25 cursor-pointer flex items-center gap-1.5"
+            >
+              <span>＋ Invite Super Admin</span>
+            </button>
+          </div>
 
       {/* Admins Table */}
       <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
@@ -234,6 +266,8 @@ export function AdminsTab() {
             </div>
           </form>
         </div>
+      )}
+        </>
       )}
     </div>
   );

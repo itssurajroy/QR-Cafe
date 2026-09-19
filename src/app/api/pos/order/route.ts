@@ -107,8 +107,34 @@ const {
   // 1 Point = 1 Rupee = 100 Paise
   const maxRedeem = Math.floor((subtotal * 0.25) / 100); // 25% cap
   const pointsToUse = redeem_points > 0 ? Math.min(redeem_points, maxRedeem) : 0;
-  const pointsDiscountPaise = pointsToUse * 100;
 
+  // Pre-validate loyalty balance to prevent unauthorized discounts
+  if (pointsToUse > 0) {
+    if (!customer_phone) {
+      return NextResponse.json(
+        { error: "Customer phone number is required to redeem loyalty points" },
+        { status: 400 },
+      );
+    }
+
+    const { data: cust } = await admin
+      .from("restaurant_customers")
+      .select("id, loyalty_points")
+      .eq("restaurant_id", user.restaurantId)
+      .eq("phone", customer_phone)
+      .maybeSingle();
+
+    if (!cust || (cust.loyalty_points || 0) < pointsToUse) {
+      return NextResponse.json(
+        {
+          error: `Insufficient loyalty points (available: ${cust?.loyalty_points || 0}, requested: ${pointsToUse})`,
+        },
+        { status: 400 },
+      );
+    }
+  }
+
+  const pointsDiscountPaise = pointsToUse * 100;
   const finalDiscountPaise = discount_paise + pointsDiscountPaise;
   const totalPaise = Math.max(0, subtotal - finalDiscountPaise);
 
@@ -165,7 +191,7 @@ const {
     return NextResponse.json({ error: oErr?.message || "Order creation failed" }, { status: 500 });
   }
 
-  // Redeem points if applicable
+  // Deduct validated loyalty points
   if (pointsToUse > 0 && customer_phone) {
     try {
       await redeemCustomerPoints(admin, user.restaurantId, customer_phone, pointsToUse, order.id);

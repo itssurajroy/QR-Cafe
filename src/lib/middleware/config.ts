@@ -7,10 +7,13 @@ export const MIDDLEWARE_CONFIG = {
     "/pricing",
     "/about",
     "/contact",
+    "/careers",
     "/faq",
     "/legal/privacy",
     "/legal/terms",
     "/legal/refund",
+    "/legal/shipping-delivery",
+    "/legal/grievance",
     "/legal/cookies",
     "/login",
     "/onboarding",
@@ -34,11 +37,12 @@ export const MIDDLEWARE_CONFIG = {
     "/api/onboarding",
     "/api/feedback",
     "/api/contact",
+    "/api/leads/whatsapp",
   ],
   // Routes for super admin only
   superPaths: ["/super", "/api/super"],
   // Routes for cafe owners/staff
-  adminPaths: ["/admin", "/api/admin", "/pos", "/api/pos", "/api/analytics"],
+  adminPaths: ["/admin", "/api/admin", "/pos", "/api/pos", "/api/kds", "/api/analytics"],
   // Guest storefront routes (tenant resolved, but no cafe staff auth needed)
   guestPaths: [
     "/c/",
@@ -48,7 +52,6 @@ export const MIDDLEWARE_CONFIG = {
     "/api/orders",
     "/api/order-status",
     "/api/table-service",
-    "/api/kds",
     "/api/bookings",
     "/api/public/",
     "/api/whatsapp/log-event",

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
+import { processCustomerLoyalty } from "@/lib/crm";
 
 // orders.payment_method is constrained to ('counter','online'): the channel
 // category. POS methods cash/upi/card map to it; the exact method is kept in
@@ -72,6 +73,16 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "orderId required" }, { status: 400 });
   }
 
+  // Only manager, owner, or super_admin can modify payment status
+  const canManagePayments =
+    user.role === "owner" || user.role === "manager" || user.role === "super_admin";
+  if (payment_status && !canManagePayments) {
+    return NextResponse.json(
+      { error: "Forbidden: Manager or Owner role required to settle payments" },
+      { status: 403 },
+    );
+  }
+
   // Use admin client: session is validated by getSessionUser() and scoped by restaurant_id.
   const db = createSupabaseAdmin();
   const updates: Record<string, any> = {
@@ -101,6 +112,17 @@ export async function PATCH(req: NextRequest) {
       amount_paise: updated.total_paise,
       status: "success",
     });
+
+    // Credit loyalty points securely on verified payment settlement
+    if (updated.customer_phone) {
+      processCustomerLoyalty(
+        adminDb,
+        user.restaurantId,
+        updated.customer_phone,
+        updated.customer_name || "",
+        updated.total_paise,
+      ).catch((err) => console.error("Loyalty processing failed:", err));
+    }
   }
 
   return NextResponse.json({ ok: true, order: updated });

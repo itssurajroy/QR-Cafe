@@ -17,12 +17,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/faq", changeFrequency: "monthly", priority: 0.8 },
     { path: "/about", changeFrequency: "monthly", priority: 0.7 },
     { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/careers", changeFrequency: "monthly", priority: 0.6 },
     { path: "/onboarding", changeFrequency: "monthly", priority: 0.8 },
     { path: "/marketing/brochure", changeFrequency: "yearly", priority: 0.3 },
     { path: "/marketing/flyer", changeFrequency: "yearly", priority: 0.3 },
     { path: "/legal/terms", changeFrequency: "yearly", priority: 0.3 },
     { path: "/legal/privacy", changeFrequency: "yearly", priority: 0.3 },
     { path: "/legal/refund", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/legal/shipping-delivery", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/legal/grievance", changeFrequency: "yearly", priority: 0.3 },
     { path: "/legal/cookies", changeFrequency: "yearly", priority: 0.3 },
   ];
 

@@ -8,26 +8,6 @@ import { fadeIn, VIEWPORT_ONCE } from "@/lib/animations";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
 
-const FOOTER_LINKS = {
-  Product: [
-    { label: "Features", href: "/#features" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Book a Demo", href: "/contact" },
-    { label: "Kitchen Display", href: "/pos" },
-  ],
-  Company: [
-    { label: "About", href: "/about" },
-    { label: "FAQ", href: "/faq" },
-    { label: "Contact", href: "/contact" },
-  ],
-  Legal: [
-    { label: "Terms of Service", href: "/legal/terms" },
-    { label: "Privacy Policy", href: "/legal/privacy" },
-    { label: "Refund Policy", href: "/legal/refund" },
-    { label: "Cookie Policy", href: "/legal/cookies" },
-  ],
-};
-
 export function Footer() {
   const prefersReducedMotion = useReducedMotion();
   const noMotion = prefersReducedMotion;
@@ -43,52 +23,143 @@ export function Footer() {
       viewport={VIEWPORT_ONCE}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-16">
+        {/* Main 4-Column Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Brand Column */}
-          <div className="col-span-2 sm:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 mb-4 group">
+          <div className="space-y-4">
+            <Link href="/" className="inline-flex items-center gap-2.5 group">
               <QrSliceLogo size="md" variant="full" className="group-hover:scale-105 transition-transform" />
             </Link>
-            <p className="text-sm text-slate-500 font-medium leading-relaxed max-w-[240px] mb-4">
-              QR ordering, without the chaos. Calm, real-time operating system for hospitality teams.
+            <p className="text-sm font-semibold text-slate-700">
+              Restaurant management, simplified.
             </p>
+            <div className="space-y-1.5 text-xs text-slate-500 font-medium">
+              <p className="flex items-center gap-1.5 flex-wrap">
+                <span>QR Ordering</span>
+                <span>•</span>
+                <span>Digital Menu</span>
+                <span>•</span>
+                <span>KDS</span>
+                <span>•</span>
+                <span>Tables</span>
+              </p>
+              <p className="flex items-center gap-1.5 flex-wrap">
+                <span>Inventory</span>
+                <span>•</span>
+                <span>Loyalty</span>
+                <span>•</span>
+                <span>Analytics</span>
+              </p>
+            </div>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200/80 rounded-full text-xs font-semibold text-emerald-800">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               All Systems Operational
             </div>
           </div>
 
-          {/* Link Columns */}
-          {Object.entries(FOOTER_LINKS).map(([category, links]) => (
-            <div key={category}>
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 font-[family-name:var(--font-plus-jakarta)]">
-                {category}
-              </h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Company Column */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 font-[family-name:var(--font-plus-jakarta)]">
+              Company
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/about" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/careers" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Careers
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal Column */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 font-[family-name:var(--font-plus-jakarta)]">
+              Legal
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/legal/terms" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/privacy" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/refund" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Refund &amp; Cancellation
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/shipping-delivery" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Shipping &amp; Delivery Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/grievance" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Grievance Redressal
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support Column */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 font-[family-name:var(--font-plus-jakarta)]">
+              Support
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <a
+                  href="mailto:support@qrslice.com"
+                  className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors"
+                >
+                  support@qrslice.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/918595101297"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors"
+                >
+                  WhatsApp
+                </a>
+              </li>
+              <li>
+                <Link href="/faq" className="text-sm font-semibold text-slate-500 hover:text-[#5738F5] transition-colors">
+                  Help Center
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
+
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm font-medium text-slate-400">
-            © {new Date().getFullYear()} QRslice. All rights reserved.
+            © 2026 QrSlice. All rights reserved.
           </p>
-          <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
+          <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
             <span>Built in India</span>
             <span>•</span>
-            <Link href="/contact" className="hover:text-[#5738F5] transition-colors">Book a Demo</Link>
+            <Link href="/contact" className="hover:text-[#5738F5] transition-colors">
+              Book a Demo
+            </Link>
           </div>
         </div>
       </div>

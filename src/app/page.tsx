@@ -12,6 +12,7 @@ import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
+import { FloatingWhatsAppCTA } from "@/components/landing/FloatingWhatsAppCTA";
 
 import { createFAQSchema, createSoftwareApplicationSchema } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -198,6 +199,9 @@ export default async function LandingPage() {
 
       {/* 13. Footer */}
       <Footer />
+
+      {/* 14. Floating WhatsApp CTA Widget */}
+      <FloatingWhatsAppCTA />
     </div>
   );
 }
