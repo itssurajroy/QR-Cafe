@@ -4,13 +4,15 @@ import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
 import { deductInventoryIngredients } from "@/lib/inventory";
+import { processCustomerLoyalty, reverseCustomerLoyalty } from "@/lib/crm";
 
 const TRANSITIONS: Record<string, string[]> = {
-  pending: ["confirmed", "rejected", "cancelled"],
+  pending: ["confirmed", "preparing", "rejected", "cancelled"],
   confirmed: ["preparing", "cancelled"],
   preparing: ["ready", "cancelled"],
-  ready: ["served", "cancelled"],
-  served: [],
+  ready: ["served", "completed", "cancelled"],
+  served: ["completed"],
+  completed: [],
   rejected: [],
   cancelled: [],
 };
@@ -68,7 +70,7 @@ export async function PATCH(
   // Load current order; RLS ensures it belongs to the caller's restaurant.
   const { data: order, error } = await db
     .from("orders")
-    .select("id, status, payment_status, restaurant_id")
+    .select("id, status, payment_status, restaurant_id, customer_phone, customer_name, total_paise, order_number")
     .eq("id", id)
     .eq("restaurant_id", user.restaurantId)
     .maybeSingle();
@@ -168,8 +170,30 @@ export async function PATCH(
     }
   }
 
-  if (typeof delay_minutes === "number" && delay_minutes > 0) {
-    // TODO: Send delay notification to customer via SMS or email
+  if (updates.payment_status === "paid" && order.payment_status !== "paid" && order.customer_phone) {
+    processCustomerLoyalty(
+      db,
+      order.restaurant_id,
+      order.customer_phone,
+      order.customer_name || "",
+      order.total_paise || 0,
+      order.id,
+      String(order.order_number || ""),
+    ).catch((err) => console.error("[Loyalty] Processing error on order payment:", err));
+  } else if (updates.payment_status === "refunded" && order.payment_status === "paid") {
+    reverseCustomerLoyalty(
+      db,
+      order.restaurant_id,
+      order.id,
+      "Order Payment Refunded",
+    ).catch((err) => console.error("[Loyalty] Reversal error on refund:", err));
+  } else if (updates.status === "cancelled" && order.payment_status === "paid") {
+    reverseCustomerLoyalty(
+      db,
+      order.restaurant_id,
+      order.id,
+      "Paid Order Cancelled",
+    ).catch((err) => console.error("[Loyalty] Reversal error on cancellation:", err));
   }
 
   return NextResponse.json({ ok: true, updates });

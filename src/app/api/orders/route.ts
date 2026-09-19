@@ -7,6 +7,7 @@ import { computeOrderChecksum, generateAuditBlockHash } from "@/lib/crypto";
 import { deductInventoryIngredients } from "@/lib/inventory";
 import { overlaps, istDayStart } from "@/lib/booking";
 import { processCustomerLoyalty } from "@/lib/crm";
+import { calculateAuthoritativePricing, type PricingItemInput } from "@/lib/pricing";
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
   // Resolve QR token -> table + restaurant (server-side only)
   const { data: table, error: tErr } = await db
     .from("restaurant_tables")
-    .select("id, restaurant_id, active, label, restaurants(plan, trial_ends_at)")
+    .select("id, restaurant_id, active, label, restaurants(plan, trial_ends_at, tax_rate)")
     .eq("qr_token", input.qr_token)
     .maybeSingle();
   if (tErr || !table || !table.active) {
@@ -178,16 +179,7 @@ export async function POST(req: NextRequest) {
   }
 
   const unavailable: string[] = [];
-  let subtotal = 0;
-  const orderItems: {
-    menu_item_id: string;
-    item_name: string;
-    unit_price_paise: number;
-    quantity: number;
-    line_total_paise: number;
-    notes: string;
-    modifiers: { option_name: string; price_delta_paise: number }[];
-  }[] = [];
+  const pricingInputItems: PricingItemInput[] = [];
 
   for (const ci of input.items) {
     const mi = byId.get(ci.menu_item_id);
@@ -212,27 +204,31 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    const modTotal = sanitizedModifiers.reduce((s, m) => s + m.price_delta_paise, 0);
-    const unit = mi.price_paise + modTotal;
-    const line = unit * ci.quantity;
-    subtotal += line;
-    orderItems.push({
+    pricingInputItems.push({
       menu_item_id: mi.id,
       item_name: mi.name,
-      unit_price_paise: unit,
-      quantity: ci.quantity,
-      line_total_paise: line,
-      notes: ci.notes || "",
+      base_price_paise: mi.price_paise,
       modifiers: sanitizedModifiers,
+      quantity: ci.quantity,
+      notes: ci.notes || "",
     });
   }
 
-  if (orderItems.length === 0) {
+  if (pricingInputItems.length === 0) {
     return NextResponse.json(
       { error: "No available items in cart", unavailable },
       { status: 409 },
     );
   }
+
+  const taxRate = Number((table as any).restaurants?.tax_rate) || 0;
+  const pricingResult = calculateAuthoritativePricing({
+    items: pricingInputItems,
+    tax_rate_percent: taxRate,
+  });
+
+  const orderItems = pricingResult.items;
+  const subtotal = pricingResult.subtotal_paise;
 
   // Generate order number (retry on unique conflict)
   let orderNumber = "";
@@ -248,8 +244,11 @@ export async function POST(req: NextRequest) {
         restaurant_id: table.restaurant_id,
         table_id: table.id,
         order_number: orderNumber,
-        subtotal_paise: subtotal,
-        total_paise: subtotal,
+        subtotal_paise: pricingResult.subtotal_paise,
+        tax_paise: pricingResult.tax_paise,
+        discount_paise: pricingResult.discount_paise,
+        total_paise: pricingResult.total_paise,
+        pricing_snapshot: pricingResult.snapshot,
         payment_method: input.payment_method,
         customer_name: input.customer_name ?? "",
         customer_phone: input.customer_phone ?? "",

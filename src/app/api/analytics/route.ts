@@ -151,6 +151,11 @@ export async function GET(req: NextRequest) {
   const { data: recentOrders } = await recentQuery;
 
   return NextResponse.json({
+    // Legacy shape expected by AdminClient live ticker
+    today: {
+      revenue: todayRevenue,
+      orders: todayOrders.length,
+    },
     metrics: {
       totalOrders: orderList.length,
       paidOrders: paidOrders.length,

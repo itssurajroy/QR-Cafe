@@ -3,7 +3,15 @@
 
 import React, { useState, useEffect } from 'react';
 
-export function StaffTab({ restaurantId, userRole }: { restaurantId: string; userRole?: string }) {
+export function StaffTab({
+  restaurantId,
+  userRole,
+  flash,
+}: {
+  restaurantId: string;
+  userRole?: string;
+  flash?: (kind: "ok" | "err", msg: string) => void;
+}) {
   const isOwner = userRole === "owner" || userRole === "super_admin";
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +19,9 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
   
   // Modal state
   const [showModal, setShowModal] = useState(false);
+  const [pinModalUser, setPinModalUser] = useState<any | null>(null);
+  const [pinModalValue, setPinModalValue] = useState('');
+  const [savingPin, setSavingPin] = useState(false);
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -65,32 +76,42 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
     }
   };
 
-  const handleSetPin = async (user: any) => {
-    const input = window.prompt(
-      `Set 4-digit quick sign-in PIN for ${user.display_name || user.email || 'staff member'} (kitchen/waiter use this on shared terminals):`,
-      ''
-    );
-    if (input === null) return;
-    if (!/^\d{4}$/.test(input.trim())) {
-      alert("PIN must be exactly 4 digits.");
+  const handleSetPin = (user: any) => {
+    setPinModalUser(user);
+    setPinModalValue('');
+  };
+
+  const handleSavePinModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pinModalUser) return;
+    if (!/^\d{4}$/.test(pinModalValue.trim())) {
+      if (flash) flash("err", "PIN must be exactly 4 digits");
+      else setErrorMsg("PIN must be exactly 4 digits");
       return;
     }
+    setSavingPin(true);
     try {
       const res = await fetch('/api/admin/staff', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: user.id, pin: input.trim() }),
+        body: JSON.stringify({ id: pinModalUser.id, pin: pinModalValue.trim() }),
       });
       if (res.ok) {
         setStaff((prev) =>
-          prev.map((s) => (s.id === user.id ? { ...s, has_pin: true } : s))
+          prev.map((s) => (s.id === pinModalUser.id ? { ...s, has_pin: true } : s))
         );
+        if (flash) flash("ok", `PIN set for ${pinModalUser.display_name || pinModalUser.email}`);
+        setPinModalUser(null);
       } else {
         const d = await res.json();
-        alert(d.error || "Failed to set PIN");
+        if (flash) flash("err", d.error || "Failed to set PIN");
+        else setErrorMsg(d.error || "Failed to set PIN");
       }
     } catch (e) {
       console.error("Failed to set PIN", e);
+      if (flash) flash("err", "Failed to set PIN");
+    } finally {
+      setSavingPin(false);
     }
   };
 
@@ -106,12 +127,15 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
         setStaff((prev) =>
           prev.map((s) => (s.id === user.id ? { ...s, has_pin: false } : s))
         );
+        if (flash) flash("ok", `PIN cleared for ${user.display_name || user.email}`);
       } else {
         const d = await res.json();
-        alert(d.error || "Failed to clear PIN");
+        if (flash) flash("err", d.error || "Failed to clear PIN");
+        else setErrorMsg(d.error || "Failed to clear PIN");
       }
     } catch (e) {
       console.error("Failed to clear PIN", e);
+      if (flash) flash("err", "Failed to clear PIN");
     }
   };
 
@@ -123,12 +147,15 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
       });
       if (res.ok) {
         setStaff((prev) => prev.filter((s) => s.id !== id));
+        if (flash) flash("ok", "Team member removed successfully");
       } else {
         const d = await res.json();
-        alert(d.error || "Failed to remove staff member");
+        if (flash) flash("err", d.error || "Failed to remove staff member");
+        else setErrorMsg(d.error || "Failed to remove staff member");
       }
     } catch (e) {
       console.error("Failed to delete staff member", e);
+      if (flash) flash("err", "Failed to remove staff member");
     }
   };
 
@@ -452,6 +479,70 @@ export function StaffTab({ restaurantId, userRole }: { restaurantId: string; use
                   className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl shadow-sm transition-colors cursor-pointer"
                 >
                   {isSubmitting ? 'Creating...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Set PIN Modal */}
+      {pinModalUser && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          onClick={() => setPinModalUser(null)}
+        >
+          <div
+            className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="text-base font-black text-slate-900">Set Quick Sign-in PIN</h3>
+              <button
+                type="button"
+                onClick={() => setPinModalUser(null)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Set 4-digit numeric PIN for <strong className="text-slate-900">{pinModalUser.display_name || pinModalUser.email}</strong> to quickly sign in on kitchen KDS or waiter handhelds.
+            </p>
+
+            <form onSubmit={handleSavePinModal} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  4-Digit Numeric PIN
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  required
+                  autoFocus
+                  value={pinModalValue}
+                  onChange={(e) => setPinModalValue(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center text-xl font-mono tracking-widest text-slate-900 focus:outline-none focus:border-indigo-500"
+                  placeholder="••••"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPinModalUser(null)}
+                  className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingPin || pinModalValue.length !== 4}
+                  className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs shadow-sm cursor-pointer"
+                >
+                  {savingPin ? "Saving..." : "Save PIN ✓"}
                 </button>
               </div>
             </form>

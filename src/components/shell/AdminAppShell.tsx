@@ -24,6 +24,8 @@ import {
   PlugIcon,
   CalendarIcon,
   MessageCircleIcon,
+  LifebuoyIcon,
+  ManualIcon,
 } from "@/components/Icons";
 
 import { canAccessTab, getRoleBadge } from "@/lib/role-permissions";
@@ -129,6 +131,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "account", label: "Owner Profile & Security", icon: ShieldCheckIcon },
       { id: "billing", label: "Subscription & Billing", icon: CreditCardIcon },
+      { id: "support", label: "Priority Support", icon: LifebuoyIcon },
+      { id: "help", label: "Operating Manual", icon: ManualIcon },
     ],
   },
 ];

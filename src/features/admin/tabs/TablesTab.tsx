@@ -1103,14 +1103,18 @@ export function TablesTab({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
+                    disabled={!currentOrder}
                     onClick={() => {
                       if (currentOrder) {
                         window.open(`/receipt/${currentOrder.status_token || currentOrder.id}`, "_blank");
-                      } else {
-                        window.print();
                       }
                     }}
-                    className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center cursor-pointer transition-all"
+                    title={currentOrder ? "Print Bill" : "No active bill for this table"}
+                    className={`py-2 px-3 rounded-xl font-bold text-xs text-center transition-all ${
+                      currentOrder
+                        ? "bg-slate-100 hover:bg-slate-200 text-slate-800 cursor-pointer"
+                        : "bg-slate-50 text-slate-400 cursor-not-allowed border border-slate-100"
+                    }`}
                   >
                     Print Bill 🧾
                   </button>

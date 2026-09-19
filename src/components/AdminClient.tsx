@@ -932,7 +932,7 @@ export default function AdminClient({
 
         {/* TAB: STAFF MANAGEMENT */}
         {tab === "staff" && (
-          <StaffTab restaurantId={restaurantId} userRole={userRole} />
+          <StaffTab restaurantId={restaurantId} userRole={userRole} flash={flash} />
         )}
 
         {/* TAB: CRM & LOYALTY */}

@@ -62,10 +62,10 @@ const STATUS_TABS = [
 ];
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  pending: ["confirmed", "cancelled"],
+  pending: ["confirmed", "preparing", "cancelled"],
   confirmed: ["preparing", "cancelled"],
   preparing: ["ready", "cancelled"],
-  ready: ["served", "cancelled"],
+  ready: ["served", "completed", "cancelled"],
   served: ["completed"],
   completed: [],
   cancelled: [],
@@ -446,14 +446,24 @@ export function OrdersTab({ orders, onUpdateStatus, onUpdatePayment, flash }: Or
               {/* Status Action Buttons */}
               <div className="flex flex-wrap gap-2 pt-1">
                 {selectedOrder.status === "pending" && (
-                  <button
-                    type="button"
-                    disabled={updatingId === selectedOrder.id}
-                    onClick={() => handleTransition(selectedOrder.id, "confirmed")}
-                    className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs shadow-md shadow-[#5738F5]/20 cursor-pointer"
-                  >
-                    Accept Order ✓
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      disabled={updatingId === selectedOrder.id}
+                      onClick={() => handleTransition(selectedOrder.id, "confirmed")}
+                      className="flex-1 py-2.5 rounded-xl bg-[#5738F5] hover:bg-[#4328D9] text-white font-bold text-xs shadow-md shadow-[#5738F5]/20 cursor-pointer"
+                    >
+                      Accept Order ✓
+                    </button>
+                    <button
+                      type="button"
+                      disabled={updatingId === selectedOrder.id}
+                      onClick={() => handleTransition(selectedOrder.id, "preparing")}
+                      className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md cursor-pointer"
+                    >
+                      Start Cooking 🔥
+                    </button>
+                  </>
                 )}
                 {selectedOrder.status === "confirmed" && (
                   <button

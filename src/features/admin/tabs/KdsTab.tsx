@@ -194,12 +194,23 @@ export function KdsTab({
                   </div>
 
                   {/* Items List */}
-                  <div className="space-y-1.5 border-t border-b border-slate-200/60 py-3 max-h-48 overflow-y-auto">
-                    {itemsList.map((it, idx) => (
-                      <div key={idx} className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-800">
-                          {it.item_name} <span className="text-indigo-600 font-mono">×{it.quantity}</span>
-                        </span>
+                  <div className="space-y-2 border-t border-b border-slate-200/60 py-3 max-h-48 overflow-y-auto">
+                    {itemsList.map((it: any, idx) => (
+                      <div key={idx} className="text-xs space-y-0.5">
+                        <div className="flex justify-between font-bold text-slate-800">
+                          <span>{it.item_name}</span>
+                          <span className="text-indigo-600 font-mono">×{it.quantity}</span>
+                        </div>
+                        {Array.isArray(it.modifiers) && it.modifiers.length > 0 && (
+                          <div className="text-[11px] text-amber-700 font-medium pl-2 border-l-2 border-amber-300">
+                            + {it.modifiers.join(", ")}
+                          </div>
+                        )}
+                        {it.notes && (
+                          <div className="text-[11px] text-slate-500 italic pl-2 border-l-2 border-slate-300">
+                            Note: {it.notes}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

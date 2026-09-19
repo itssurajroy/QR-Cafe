@@ -35,34 +35,28 @@ export class InvoiceService {
       throw new Error("Restaurant not found");
     }
 
-    // Tax convention (exclusive model — ONE consistent assumption):
-    // stored `subtotal_paise` is the NET (pre-tax) base. Discount applies to
-    // the base first, then tax is computed on the discounted base:
-    //   taxable = subtotal - discount; tax = round(taxable * rate / 100);
-    //   cgst = floor(tax / 2); sgst = tax - cgst; total = taxable + tax.
-    const discountPaise = order.discount_paise ?? order.discount ?? 0;
-
-    const subtotalPaise = order.subtotal_paise || orderItems.reduce((sum, item) => sum + item.line_total_paise, 0);
-    const taxableBasePaise = Math.max(0, subtotalPaise - discountPaise);
+    // Tax convention & Immutable snapshot precedence:
+    // If order has an immutable pricing_snapshot, use it as the single source of truth.
+    // Otherwise fallback to stored order fields and recompute reconciliations.
+    const snapshot = order.pricing_snapshot;
+    const discountPaise = snapshot?.discount_paise ?? (order.discount_paise ?? order.discount ?? 0);
+    const subtotalPaise = snapshot?.subtotal_paise ?? (order.subtotal_paise || orderItems.reduce((sum, item) => sum + item.line_total_paise, 0));
+    const taxableBasePaise = snapshot?.net_subtotal_paise ?? Math.max(0, subtotalPaise - discountPaise);
 
     const taxRate =
-      order.tax_rate ?? restaurant.tax_rate ?? (order.tax_paise && taxableBasePaise
+      snapshot?.tax_rate_percent ??
+      order.tax_rate ??
+      restaurant.tax_rate ??
+      (order.tax_paise && taxableBasePaise
         ? Math.round((order.tax_paise * 100) / taxableBasePaise)
         : 5);
 
-    const totalTaxPaise = Math.round((taxableBasePaise * taxRate) / 100);
+    const totalTaxPaise = snapshot?.tax_paise ?? Math.round((taxableBasePaise * taxRate) / 100);
     const cgstPaise = Math.floor(totalTaxPaise / 2);
     const sgstPaise = totalTaxPaise - cgstPaise;
     const taxableValuePaise = taxableBasePaise;
 
-    // Reconcile: the printed Subtotal/Discount/Taxable/CGST/SGST lines must
-    // sum to Grand Total. Prefer the stored order.total_paise when it agrees
-    // with the recomputed total within 1 paise (rounding tolerance);
-    // otherwise prefer the recomputed total so the breakdown reconciles.
-    const recomputedTotalPaise = taxableValuePaise + totalTaxPaise;
-    const storedTotalPaise = order.total_paise ?? recomputedTotalPaise;
-    const grandTotalPaise =
-      Math.abs(storedTotalPaise - recomputedTotalPaise) > 1 ? recomputedTotalPaise : storedTotalPaise;
+    const grandTotalPaise = snapshot?.total_paise ?? order.total_paise ?? (taxableValuePaise + totalTaxPaise);
 
     const invoiceData: InvoiceData = {
       restaurant: {
@@ -87,13 +81,21 @@ export class InvoiceService {
         customer_name: order.customer_name,
         customer_phone: order.customer_phone,
       },
-      items: orderItems.map((item) => ({
-        item_name: item.item_name,
-        quantity: item.quantity,
-        unit_price_paise: item.unit_price_paise,
-        line_total_paise: item.line_total_paise,
-        notes: item.notes,
-      })),
+      items: (snapshot?.items && snapshot.items.length > 0)
+        ? snapshot.items.map((item: any) => ({
+            item_name: item.item_name,
+            quantity: item.quantity,
+            unit_price_paise: item.unit_price_paise,
+            line_total_paise: item.line_total_paise,
+            notes: item.notes,
+          }))
+        : orderItems.map((item) => ({
+            item_name: item.item_name,
+            quantity: item.quantity,
+            unit_price_paise: item.unit_price_paise,
+            line_total_paise: item.line_total_paise,
+            notes: item.notes,
+          })),
       tax: {
         taxable_value_paise: taxableValuePaise,
         tax_rate: taxRate,

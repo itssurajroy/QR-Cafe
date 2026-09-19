@@ -136,16 +136,17 @@ export function DashboardTab({
       }
     });
 
-    const total = upiPaise + cashPaise + cardPaise || liveRevenue || 1;
+    const total = upiPaise + cashPaise + cardPaise;
     return {
       upiPaise,
       cashPaise,
       cardPaise,
-      upiPct: Math.round((upiPaise / total) * 100) || 68,
-      cashPct: Math.round((cashPaise / total) * 100) || 24,
-      cardPct: Math.round((cardPaise / total) * 100) || 8,
+      total,
+      upiPct: total > 0 ? Math.round((upiPaise / total) * 100) : 0,
+      cashPct: total > 0 ? Math.round((cashPaise / total) * 100) : 0,
+      cardPct: total > 0 ? Math.round((cardPaise / total) * 100) : 0,
     };
-  }, [recentOrders, liveRevenue]);
+  }, [recentOrders]);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -194,11 +195,17 @@ export function DashboardTab({
             </span>
           </div>
           <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
-            {paise(liveRevenue)}
+            {liveOrders === 0 ? paise(0) : paise(liveRevenue)}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
-            <span>{deltas.revenue >= 0 ? "↑" : "↓"} {Math.abs(deltas.revenue).toFixed(1)}%</span>
-            <span className="text-slate-400 font-normal">vs yesterday</span>
+            {liveOrders === 0 ? (
+              <span className="text-slate-400 font-normal">No orders yet today</span>
+            ) : (
+              <>
+                <span>{deltas.revenue >= 0 ? "↑" : "↓"} {Math.abs(deltas.revenue).toFixed(1)}%</span>
+                <span className="text-slate-400 font-normal">vs yesterday</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -216,8 +223,14 @@ export function DashboardTab({
             {liveOrders}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
-            <span>{deltas.orders >= 0 ? "↑" : "↓"} {Math.abs(deltas.orders).toFixed(1)}%</span>
-            <span className="text-slate-400 font-normal">pace</span>
+            {liveOrders === 0 ? (
+              <span className="text-slate-400 font-normal">Awaiting first ticket</span>
+            ) : (
+              <>
+                <span>{deltas.orders >= 0 ? "↑" : "↓"} {Math.abs(deltas.orders).toFixed(1)}%</span>
+                <span className="text-slate-400 font-normal">pace</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -232,11 +245,17 @@ export function DashboardTab({
             </span>
           </div>
           <div className="text-2xl lg:text-3xl font-black text-[#17142B] font-mono tracking-tight">
-            {paise(avgOrderValue)}
+            {liveOrders === 0 ? "—" : paise(avgOrderValue)}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
-            <span>{deltas.avg >= 0 ? "↑" : "↓"} {Math.abs(deltas.avg).toFixed(1)}%</span>
-            <span className="text-slate-400 font-normal">per guest ticket</span>
+            {liveOrders === 0 ? (
+              <span className="text-slate-400 font-normal">Calculated after first ticket</span>
+            ) : (
+              <>
+                <span>{deltas.avg >= 0 ? "↑" : "↓"} {Math.abs(deltas.avg).toFixed(1)}%</span>
+                <span className="text-slate-400 font-normal">per guest ticket</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -501,37 +520,44 @@ export function DashboardTab({
             <div className="text-xs font-black uppercase tracking-wider text-[#17142B] border-b border-slate-100 pb-2">
               Payment Settlement
             </div>
-            <div className="space-y-3 text-xs">
-              <div>
-                <div className="flex items-center justify-between font-bold mb-1">
-                  <span className="text-slate-600">UPI / QR Payment</span>
-                  <span className="font-mono font-black text-[#17142B]">{paymentSummary.upiPct}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5738F5]" style={{ width: `${paymentSummary.upiPct}%` }} />
-                </div>
+            {paymentSummary.total === 0 ? (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
+                <span className="text-xs font-bold text-slate-600 block">No payments settled yet today</span>
+                <span className="text-[11px] text-slate-400 block">UPI, cash, and card breakdown will appear here once guests settle tickets.</span>
               </div>
+            ) : (
+              <div className="space-y-3 text-xs">
+                <div>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-slate-600">UPI / QR Payment</span>
+                    <span className="font-mono font-black text-[#17142B]">{paymentSummary.upiPct}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#5738F5]" style={{ width: `${paymentSummary.upiPct}%` }} />
+                  </div>
+                </div>
 
-              <div>
-                <div className="flex items-center justify-between font-bold mb-1">
-                  <span className="text-slate-600">Cash at Counter</span>
-                  <span className="font-mono font-black text-[#17142B]">{paymentSummary.cashPct}%</span>
+                <div>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-slate-600">Cash at Counter</span>
+                    <span className="font-mono font-black text-[#17142B]">{paymentSummary.cashPct}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500" style={{ width: `${paymentSummary.cashPct}%` }} />
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500" style={{ width: `${paymentSummary.cashPct}%` }} />
-                </div>
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between font-bold mb-1">
-                  <span className="text-slate-600">Card POS</span>
-                  <span className="font-mono font-black text-[#17142B]">{paymentSummary.cardPct}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500" style={{ width: `${paymentSummary.cardPct}%` }} />
+                <div>
+                  <div className="flex items-center justify-between font-bold mb-1">
+                    <span className="text-slate-600">Card POS</span>
+                    <span className="font-mono font-black text-[#17142B]">{paymentSummary.cardPct}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500" style={{ width: `${paymentSummary.cardPct}%` }} />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
