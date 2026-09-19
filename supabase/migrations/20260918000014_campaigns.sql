@@ -61,5 +61,5 @@ CREATE INDEX IF NOT EXISTS idx_notification_campaigns_status ON notification_cam
 CREATE INDEX IF NOT EXISTS idx_notification_campaigns_segment ON notification_campaigns(audience_segment);
 
 COMMENT ON TABLE notification_campaigns IS 'Push/WhatsApp campaign records with audience tracking';
-COMMENT ON COLUMN notification_campaigns.campaign_type type of campaign;
-COMMENT ON COLUMN notification_campaigns.status current status of the campaign;
+COMMENT ON COLUMN notification_campaigns.campaign_type IS 'type of campaign';
+COMMENT ON COLUMN notification_campaigns.status IS 'current status of the campaign';

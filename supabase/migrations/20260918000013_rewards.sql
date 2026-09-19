@@ -35,5 +35,5 @@ CREATE INDEX IF NOT EXISTS idx_loyalty_rewards_is_active ON loyalty_rewards(is_a
 CREATE INDEX IF NOT EXISTS idx_loyalty_rewards_points_required ON loyalty_rewards(points_required);
 
 COMMENT ON TABLE loyalty_rewards IS 'Catalog of redeemable loyalty rewards per restaurant';
-COMMENT ON COLUMN loyalty_rewards.restaurant_id links to restaurants table for tenancy;
-COMMENT ON COLUMN loyalty_rewards.reward_type type of reward (fixed_discount/percent_discount/free_item);
+COMMENT ON COLUMN loyalty_rewards.restaurant_id IS 'links to restaurants table for tenancy';
+COMMENT ON COLUMN loyalty_rewards.reward_type IS 'type of reward (fixed_discount/percent_discount/free_item)';

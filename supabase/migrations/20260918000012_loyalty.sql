@@ -57,5 +57,5 @@ ALTER TABLE restaurant_customers ADD COLUMN IF NOT EXISTS tier_id UUID REFERENCE
 CREATE INDEX IF NOT EXISTS idx_restaurant_customers_tier_id ON restaurant_customers(tier_id);
 
 COMMENT ON TABLE loyalty_tiers IS 'Structured loyalty tier definitions with point thresholds and per-tier benefits';
-COMMENT ON COLUMN loyalty_tiers.restaurant_id links to restaurants table for tenancy;
-COMMENT ON COLUMN loyalty_tiers.benefits JSONB stores per-tier benefits configuration;
+COMMENT ON COLUMN loyalty_tiers.restaurant_id IS 'links to restaurants table for tenancy';
+COMMENT ON COLUMN loyalty_tiers.benefits IS 'stores per-tier benefits configuration';

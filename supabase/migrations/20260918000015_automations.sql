@@ -35,5 +35,5 @@ CREATE INDEX IF NOT EXISTS idx_crm_automations_trigger_active ON crm_automations
 CREATE INDEX IF NOT EXISTS idx_crm_automations_is_active ON crm_automations(is_active);
 
 COMMENT ON TABLE crm_automations IS 'CRM automation rules triggered by customer events (win-back, birthday, first order, etc.)';
-COMMENT ON COLUMN crm_automations.trigger_type is the event that fires the automation;
-COMMENT ON COLUMN crm_automations.is_active whether the automation is currently enabled;
+COMMENT ON COLUMN crm_automations.trigger_type IS 'the event that fires the automation';
+COMMENT ON COLUMN crm_automations.is_active IS 'whether the automation is currently enabled';
