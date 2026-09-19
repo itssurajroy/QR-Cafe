@@ -33,19 +33,19 @@ CREATE INDEX IF NOT EXISTS idx_loyalty_tiers_min_points ON loyalty_tiers(min_poi
 -- Default tiers: Bronze (0-1k), Silver (1k-5k), Gold (5k-15k), Platinum (15k+)
 DO $$
 DECLARE
-  restaurant_id uuid;
+  r_id uuid;
 BEGIN
-  FOR restaurant_id IN SELECT id FROM restaurants
+  FOR r_id IN SELECT id FROM restaurants
   LOOP
     -- Delete existing tiers for this restaurant
-    DELETE FROM loyalty_tiers WHERE restaurant_id = restaurant_id;
+    DELETE FROM loyalty_tiers WHERE restaurant_id = r_id;
 
     -- Insert default tier structure
     INSERT INTO loyalty_tiers (restaurant_id, name, min_points, max_points, color, display_name, benefits) VALUES
-      (restaurant_id, 'Bronze', 0, 1000, '#CD7F32', 'Bronze Member', '{"welcome_discount": 5, "birthday_bonus": 100}'::jsonb),
-      (restaurant_id, 'Silver', 1001, 5000, '#C0C0C0', 'Silver Member', '{"free_appetizer": true, "welcome_discount": 10, "birthday_bonus": 250}'::jsonb),
-      (restaurant_id, 'Gold', 5001, 15000, '#FFD700', 'Gold Member', '{"priority_seating": true, "free_appetizer": true, "welcome_discount": 15, "birthday_bonus": 500}'::jsonb),
-      (restaurant_id, 'Platinum', 15001, NULL, '#FF1493', 'Platinum Member', '{"priority_seating": true, "free_appetizer": true, "welcome_discount": 20, "birthday_bonus": 1000, "anniversary_gift": true}'::jsonb);
+      (r_id, 'Bronze', 0, 1000, '#CD7F32', 'Bronze Member', '{"welcome_discount": 5, "birthday_bonus": 100}'::jsonb),
+      (r_id, 'Silver', 1001, 5000, '#C0C0C0', 'Silver Member', '{"free_appetizer": true, "welcome_discount": 10, "birthday_bonus": 250}'::jsonb),
+      (r_id, 'Gold', 5001, 15000, '#FFD700', 'Gold Member', '{"priority_seating": true, "free_appetizer": true, "welcome_discount": 15, "birthday_bonus": 500}'::jsonb),
+      (r_id, 'Platinum', 15001, NULL, '#FF1493', 'Platinum Member', '{"priority_seating": true, "free_appetizer": true, "welcome_discount": 20, "birthday_bonus": 1000, "anniversary_gift": true}'::jsonb);
   END LOOP;
 END $$;
 

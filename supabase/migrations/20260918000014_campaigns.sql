@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS notification_campaigns (
   opened_count INTEGER NOT NULL DEFAULT 0,
   clicked_count INTEGER NOT NULL DEFAULT 0,
   orders_count INTEGER NOT NULL DEFAULT 0,
-  revenue_paise NOT NULL DEFAULT 0,
+  revenue_paise BIGINT NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'draft', -- draft, sent, completed
   subscriber_count INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
