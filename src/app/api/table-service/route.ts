@@ -41,8 +41,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Table not found" }, { status: 404 });
   }
 
-  // Create an audit/service notification event
-  const { error: aErr } = await admin.from("audit_events").insert({
+  // Insert into new service_requests table
+  const { data: requestRecord, error: sErr } = await admin
+    .from("service_requests")
+    .insert({
+      restaurant_id: table.restaurant_id,
+      table_id: table.id,
+      request_type,
+      notes,
+    })
+    .select("id, status, created_at")
+    .single();
+
+  if (sErr || !requestRecord) {
+    return NextResponse.json({ error: sErr?.message || "Failed to create request" }, { status: 500 });
+  }
+
+  // Create an audit notification event (append-only ledger)
+  await admin.from("audit_events").insert({
     restaurant_id: table.restaurant_id,
     entity: "table_service",
     entity_id: table.id,
@@ -51,13 +67,25 @@ export async function POST(req: NextRequest) {
       table_label: table.label,
       request_type,
       notes,
+      request_id: requestRecord.id,
       created_at: new Date().toISOString(),
     },
   });
 
-  if (aErr) {
-    return NextResponse.json({ error: aErr.message }, { status: 500 });
-  }
+  // Broadcast to staff via Supabase Realtime
+  await admin.channel(`table-service-alerts:${table.restaurant_id}`).send({
+    type: "broadcast",
+    event: "new_request",
+    payload: {
+      id: requestRecord.id,
+      table_id: table.id,
+      table_label: table.label,
+      request_type,
+      notes,
+      status: requestRecord.status,
+      created_at: requestRecord.created_at,
+    },
+  });
 
   return NextResponse.json({
     ok: true,

@@ -80,19 +80,10 @@ begin
       return NEW;
     end if;
 
-    -- 3. Resolve recipient phone: order phone first (empty string = missing),
-    -- then restaurant_customers via NEW.customer_id where that column exists.
+    -- 3. Resolve recipient phone: order phone (customer_phone on orders table).
     customer_phone := nullif(btrim(coalesce(NEW.customer_phone, '')), '');
     if customer_phone is null then
-      begin
-        select c.phone into customer_phone
-          from restaurant_customers c
-          where c.id = NEW.customer_id;
-      exception when others then
-        -- orders links customers by phone; no customer_id column: skip fallback.
-        customer_phone := null;
-      end;
-      customer_phone := nullif(btrim(coalesce(customer_phone, '')), '');
+      customer_phone := null;
     end if;
     if customer_phone is null then
       return NEW;

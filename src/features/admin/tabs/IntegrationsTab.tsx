@@ -39,8 +39,10 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
   const [activeModal, setActiveModal] = useState<IntegrationItem | null>(null);
   const [modalInput1, setModalInput1] = useState("");
   const [modalInput2, setModalInput2] = useState("");
+  const [modalInput3, setModalInput3] = useState("");
   const [testingConnection, setTestingConnection] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
 
   // Fetch integrations from API
   const fetchIntegrations = useCallback(async () => {
@@ -70,18 +72,23 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
   const openConfigModal = (item: IntegrationItem) => {
     setActiveModal(item);
     setTestResult(null);
+    setTestError(null);
     if (item.id === "whatsapp") {
-      setModalInput1("+91 85951 01297");
-      setModalInput2("waba_live_prod_99214");
+      setModalInput1("123456789012345");
+      setModalInput2("EAAGm...");
+      setModalInput3("123456789012345");
     } else if (item.id === "razorpay") {
-      setModalInput1("rzp_live_key_9941");
-      setModalInput2("••••••••••••••••");
+      setModalInput1("rzp_live_...");
+      setModalInput2("secret_...");
+      setModalInput3("");
     } else if (item.id === "thermal_printer") {
       setModalInput1("192.168.1.120");
       setModalInput2("80mm Standard ESC/POS");
+      setModalInput3("");
     } else {
       setModalInput1("");
       setModalInput2("");
+      setModalInput3("");
     }
   };
 
@@ -89,11 +96,28 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
     if (!activeModal) return;
     setTestingConnection(true);
     setTestResult(null);
-    setTimeout(() => {
+    setTestError(null);
+
+    try {
+      const res = await fetch("/api/admin/integrations/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          integrationId: activeModal.id,
+          config: { input1: modalInput1, input2: modalInput2, input3: modalInput3 },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to validate connection");
+      
+      setTestResult(data.message || "Connection test passed!");
+      flash("ok", `Connection verified for ${activeModal.name}!`);
+    } catch (err: any) {
+      setTestError(err.message);
+      flash("err", err.message);
+    } finally {
       setTestingConnection(false);
-      setTestResult("Handshake successful! Response latency: 42ms. Health status: OK.");
-      flash("ok", `Connection test passed for ${activeModal?.name}! ✓`);
-    }, 1200);
+    }
   };
 
   const handleSaveIntegration = async () => {
@@ -106,7 +130,7 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
         body: JSON.stringify({
           integrationId: activeModal.id,
           status: "connected",
-          config: { input1: modalInput1, input2: modalInput2 },
+          config: { input1: modalInput1, input2: modalInput2, input3: modalInput3 },
         }),
       });
       
@@ -301,14 +325,14 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
                       {activeModal.id === "thermal_printer"
                         ? "Printer IP Address or Port"
                         : activeModal.id === "whatsapp"
-                        ? "Official WhatsApp Business Phone ID"
-                        : "Primary API Key / ID"}
+                        ? "Phone Number ID"
+                        : "Key ID"}
                     </label>
                     <input
                       type="text"
                       value={modalInput1}
                       onChange={(e) => setModalInput1(e.target.value)}
-                      placeholder="e.g. 192.168.1.100 or key_live_..."
+                      placeholder={activeModal.id === "whatsapp" ? "e.g. 123456789012345" : "e.g. 192.168.1.100 or key_live_..."}
                       className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
                     />
                   </div>
@@ -317,20 +341,43 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
                     <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
                       {activeModal.id === "thermal_printer"
                         ? "Paper Width & Protocol"
-                        : "Secret Token / Webhook Signature"}
+                        : activeModal.id === "whatsapp"
+                        ? "System User Access Token"
+                        : "Key Secret"}
                     </label>
                     <input
-                      type="text"
+                      type="password"
                       value={modalInput2}
                       onChange={(e) => setModalInput2(e.target.value)}
-                      placeholder="e.g. 80mm Standard or secret_token_..."
+                      placeholder={activeModal.id === "whatsapp" ? "EAAGm..." : "e.g. 80mm Standard or secret_..."}
                       className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
                     />
                   </div>
 
+                  {activeModal.id === "whatsapp" && (
+                    <div>
+                      <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
+                        Business Account ID
+                      </label>
+                      <input
+                        type="text"
+                        value={modalInput3}
+                        onChange={(e) => setModalInput3(e.target.value)}
+                        placeholder="e.g. 123456789012345"
+                        className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
+                      />
+                    </div>
+                  )}
+
                   {testResult && (
                     <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] leading-relaxed">
                       ✓ {testResult}
+                    </div>
+                  )}
+                  
+                  {testError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-[11px] leading-relaxed">
+                      ⚠ {testError}
                     </div>
                   )}
                 </div>

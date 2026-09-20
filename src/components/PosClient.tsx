@@ -577,7 +577,14 @@ export default function PosClient({
             order_type: orderType,
             customer_name: "Walk-in Guest",
             customer_phone: customerPhone,
-            items: cart.map((c) => ({ id: c.item.id, quantity: c.quantity, notes: c.notes || "" })),
+            items: cart.map((c) => ({
+              id: c.item.id,
+              quantity: c.quantity,
+              notes: c.notes || "",
+              ...(c.item.id.startsWith("custom-")
+                ? { name: c.item.name, price_paise: c.item.price_paise }
+                : {}),
+            })),
             discount_paise: discountPaise || 0,
             redeem_points: redeemPoints || 0,
             payment_method: paymentMethod || "cash",
@@ -605,9 +612,9 @@ export default function PosClient({
           payment_status: status,
           table_label: selectedTable?.label || "Counter",
           itemsSnapshot: [...cart],
-          finalTotalPaise,
-          subtotalPaise,
-          discountPaise,
+          finalTotalPaise: Number(billData.total_paise) || finalTotalPaise,
+          subtotalPaise: Number(billData.subtotal_paise) || subtotalPaise,
+          discountPaise: Number(billData.discount_paise) || discountPaise,
           paymentMethod,
         };
         setLastBill(savedBill);
@@ -647,10 +654,10 @@ export default function PosClient({
                 price: c.item.price_paise,
                 total: c.item.price_paise * c.quantity,
               })),
-              subtotal: subtotalPaise,
-              discount: discountPaise,
-              tax: 0,
-              total: finalTotalPaise,
+              subtotal: savedBill.subtotalPaise ?? 0,
+              discount: savedBill.discountPaise ?? 0,
+              tax: Number(billData.tax_paise) || 0,
+              total: savedBill.finalTotalPaise ?? 0,
               paymentMethod: paymentMethod || "cash",
               timestamp: new Date(),
             });

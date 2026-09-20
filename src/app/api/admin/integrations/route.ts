@@ -124,7 +124,6 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { integrationId, status, config } = body;
     
-    // Map integration IDs to platform_config keys
     const keyMap: Record<string, string> = {
       whatsapp: "whatsapp_enabled",
       razorpay: "razorpay_key",
@@ -141,6 +140,31 @@ export async function PATCH(req: NextRequest) {
     if (!key) return NextResponse.json({ error: "Invalid integration" }, { status: 400 });
     
     const value = status === "connected" ? true : false;
+    
+    if (integrationId === "whatsapp" && config && value) {
+      await db.from("whatsapp_accounts").upsert({
+        tenant_id: restaurantId,
+        phone_number_id: config.input1,
+        access_token: config.input2,
+        business_account_id: config.input3,
+        status: "connected",
+        updated_at: new Date().toISOString()
+      }, { onConflict: "tenant_id" });
+    } else if (integrationId === "whatsapp" && !value) {
+      await db.from("whatsapp_accounts").update({ status: "disconnected" }).eq("tenant_id", restaurantId);
+    }
+    
+    if (integrationId === "razorpay" && config && value) {
+      await db.from("razorpay_accounts").upsert({
+        tenant_id: restaurantId,
+        key_id: config.input1,
+        key_secret: config.input2,
+        status: "connected",
+        updated_at: new Date().toISOString()
+      }, { onConflict: "tenant_id" });
+    } else if (integrationId === "razorpay" && !value) {
+      await db.from("razorpay_accounts").update({ status: "disconnected" }).eq("tenant_id", restaurantId);
+    }
     
     await db
       .from("platform_config")

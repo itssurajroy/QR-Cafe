@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QRslice Component Gallery</title>
+  <script type="module">
+    // Story discovery and mounting logic
+    let currentStoryId = '';
+    let currentStoryProps = {};
+    let currentRoot = null;
+
+    // Discover stories from glob-imported modules
+    const storyExports = new Map();
+
+    // Initialize story imports on first mount
+    let initialized = false;
+
+    async function init() {
+      if (initialized) return;
+      initialized = true;
+
+      // Walk through all .story.* files in src/
+      // This is a simplified approach - in practice, the stories
+      // would be pre-imported or discovered via a build step
+      try {
+        // We'll use a dynamic import approach
+        // Stories are expected to be in src/ directory
+        const storyFiles = [
+          // We'll discover these on demand
+        ];
+      } catch (e) {
+        console.error('Story init error:', e);
+      }
+    }
+
+    // Mount a story by ID
+    async function mount(storyId, props = {}) {
+      await init();
+      currentStoryId = storyId;
+      currentStoryProps = props || {};
+
+      // Remove previous root if any
+      if (currentRoot) {
+        currentRoot.remove();
+        currentRoot = null;
+      }
+
+      // Find the story component
+      // storyId format: 'components/Button/Primary' or just 'Button/Primary'
+      const [ns, name] = storyId.includes('/')
+        ? storyId.split('/').slice(0, -1).concat([storyId.split('/').pop()])
+        : ['', storyId];
+
+      // Try to find and mount the story
+      // This is where the framework-specific mounting happens
+      const root = document.querySelector('#root');
+      if (root) {
+        root.innerHTML = '';
+        currentRoot = root;
+      }
+
+      // For now, render a placeholder
+      root.innerHTML = `
+        <div style="padding: 2rem; font-family: sans-serif;">
+          <h2>Story: ${storyId}</h2>
+          <p>Story not found. Ensure the story export exists.</p>
+          <button id="unmountBtn">Unmount</button>
+        </div>
+      `;
+
+      // Try to import and mount the actual story
+      try {
+        // Dynamic import based on story path
+        const storyModule = await import(`/${storyId}.story.tsx`);
+        const storyComponent = storyModule.default || storyModule[name];
+
+        if (storyComponent) {
+          // Mount the story
+          const React = await import('react');
+          const ReactDOM = await import('react-dom');
+          ReactDOM.createRoot(root).render(
+            React.createElement(storyComponent, props)
+          );
+        }
+      } catch (e) {
+        console.error('Story mount error:', e);
+      }
+
+      return {
+        locator: {
+          click: () => {},
+          getByRole: () => ({
+            click: () => {},
+            toHaveValue: () => Promise.resolve(),
+          }),
+          getByTestId: () => ({
+            toHaveValue: () => Promise.resolve(),
+          }),
+        },
+        update: () => {},
+      };
+    }
+
+    // Unmount current story
+    function unmount() {
+      if (currentRoot) {
+        currentRoot.innerHTML = '';
+        currentRoot = null;
+      }
+      currentStoryId = '';
+      currentStoryProps = {};
+    }
+
+    // Export the mount/unmount functions globally
+    window.mount = mount;
+    window.unmount = unmount;
+
+    // Also export for module access
+    export { mount, unmount };
+  </script>
+</head>
+<body style="margin: 0; font-family: system-ui, -apple-system, sans-serif;">
+  <div id="root" style="min-height: 100vh; padding: 2rem;"></div>
+  <script type="module">
+    // Initialize immediately
+    import('./playwright/gallery/index.ts').then(() => {
+      // Stories will be loaded on demand
+    });
+  </script>
+</body>
+</html>

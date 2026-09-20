@@ -12,6 +12,61 @@ function normalizePaymentMethod(pm: string): "counter" | "online" {
   return "counter";
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const CUSTOM_ITEM_PREFIX = "custom-";
+const OPEN_ITEM_NAME = "Open Item";
+
+// Custom (open) items have no menu_items row; order_items.menu_item_id FKs to
+// menu_items(id), so they are persisted under a per-restaurant Open Item SKU.
+async function getOrCreateOpenItemSku(
+  admin: ReturnType<typeof createSupabaseAdmin>,
+  restaurantId: string,
+): Promise<string | null> {
+  const { data: existing } = await admin
+    .from("menu_items")
+    .select("id")
+    .eq("restaurant_id", restaurantId)
+    .eq("name", OPEN_ITEM_NAME)
+    .limit(1)
+    .maybeSingle();
+  if (existing) return existing.id;
+
+  const { data: cat } = await admin
+    .from("menu_categories")
+    .select("id")
+    .eq("restaurant_id", restaurantId)
+    .order("sort_order", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  let categoryId = cat?.id || null;
+  if (!categoryId) {
+    const { data: newCat, error: catErr } = await admin
+      .from("menu_categories")
+      .insert({ restaurant_id: restaurantId, name: "Custom", sort_order: 999 })
+      .select("id")
+      .single();
+    if (catErr || !newCat) return null;
+    categoryId = newCat.id;
+  }
+
+  const { data: created, error: createErr } = await admin
+    .from("menu_items")
+    .insert({
+      restaurant_id: restaurantId,
+      category_id: categoryId,
+      name: OPEN_ITEM_NAME,
+      description: "System SKU for POS custom/open items",
+      price_paise: 0,
+      is_veg: true,
+      available: true,
+    })
+    .select("id")
+    .single();
+  if (createErr || !created) return null;
+  return created.id;
+}
+
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();
   if (!user || !user.restaurantId) {
@@ -96,15 +151,28 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Validate items
-  const itemIds = items.map((i: any) => i.id || i.menu_item_id);
-  const { data: dbItems, error: iErr } = await admin
-    .from("menu_items")
-    .select("id, name, price_paise, hsn")
-    .in("id", itemIds)
-    .eq("restaurant_id", user.restaurantId);
+  // Validate items — only real menu-item UUIDs go into the .in() query
+  // (custom- prefixed ids would trip PostgREST's uuid parse and 500).
+  const itemIds = items
+    .map((i: any) => i.id || i.menu_item_id)
+    .filter((id: unknown) => typeof id === "string" && UUID_RE.test(id));
+  const hasCustomItems = items.some((i: any) => {
+    const id = i.id || i.menu_item_id;
+    return typeof id === "string" && id.startsWith(CUSTOM_ITEM_PREFIX);
+  });
+  const openItemId = hasCustomItems
+    ? await getOrCreateOpenItemSku(admin, user.restaurantId)
+    : null;
 
-  if (iErr || !dbItems) {
+  const dbItems = itemIds.length
+    ? (await admin
+        .from("menu_items")
+        .select("id, name, price_paise, hsn")
+        .in("id", itemIds)
+        .eq("restaurant_id", user.restaurantId)).data
+    : [];
+
+  if (dbItems === null) {
     return NextResponse.json({ error: "Failed to validate items" }, { status: 500 });
   }
 
@@ -114,6 +182,24 @@ export async function POST(req: NextRequest) {
   const pricingItems: PricingItemInput[] = [];
   for (const it of items) {
     const itemId = it.id || it.menu_item_id;
+
+    if (typeof itemId === "string" && itemId.startsWith(CUSTOM_ITEM_PREFIX)) {
+      // Open item: validate name + price server-side, persist under the Open Item SKU.
+      if (!openItemId) continue;
+      const customName = String(it.name || "").trim().slice(0, 80);
+      const customPricePaise = Math.round(Number(it.price_paise ?? it.price) || 0);
+      if (!customName || customPricePaise < 1 || customPricePaise > 10_000_000) continue;
+      pricingItems.push({
+        menu_item_id: openItemId,
+        item_name: customName,
+        base_price_paise: customPricePaise,
+        quantity: Number(it.quantity) || 1,
+        notes: it.notes || "",
+        hsn: null,
+      });
+      continue;
+    }
+
     const matched = dbMap.get(itemId);
     if (!matched) continue;
 

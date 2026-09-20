@@ -1544,7 +1544,7 @@ export function CrmTab({ flash }: CrmTabProps) {
                         </td>
                         <td className="py-3.5 px-4 capitalize">
                           <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F1EFF7] text-[#17142B]">
-                            {camp.audience_segment.replace("_", " ")}
+                            {camp.audience_segment?.replace("_", " ") ?? ""}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-center font-mono font-bold text-[#17142B]">
@@ -1775,7 +1775,7 @@ export function CrmTab({ flash }: CrmTabProps) {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800">
-                      {r.reward_type.replace("_", " ")}
+                      {r.reward_type?.replace("_", " ") ?? ""}
                     </span>
                     <button
                       onClick={() => handleToggleReward(r.id, r.is_active)}
@@ -1939,7 +1939,7 @@ export function CrmTab({ flash }: CrmTabProps) {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-[#5738F5]/10 text-[#5738F5]">
-                      {rule.trigger_type.replace("_", " ")}
+                      {rule.trigger_type?.replace("_", " ") ?? ""}
                     </span>
                     <button
                       onClick={() => handleToggleAutomation(rule.id, rule.is_active)}
@@ -2180,7 +2180,7 @@ export function CrmTab({ flash }: CrmTabProps) {
                           >
                             <div className="space-y-0.5">
                               <span className="font-bold text-[#17142B] block">
-                                {tx.reason || tx.transaction_type.replace("_", " ")}
+                                {tx.reason || tx.transaction_type?.replace("_", " ") || ""}
                               </span>
                               <span className="text-[10px] text-[#6F7185] font-mono">
                                 {formatDate(tx.created_at)} • Bal: {tx.balance_after} pts
