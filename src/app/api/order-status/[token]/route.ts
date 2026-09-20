@@ -14,7 +14,7 @@ export async function GET(
 
   // Core base columns present in all database environments
   const baseCols =
-    "id, order_number, status, payment_status, created_at, total_paise, table_id, restaurant_id, order_items(id, item_name, quantity, line_total_paise, notes, order_item_modifiers(id, option_name, price_delta_paise))";
+    "id, order_number, status, payment_status, payment_method, created_at, total_paise, table_id, restaurant_id, order_items(id, item_name, quantity, line_total_paise, notes, order_item_modifiers(id, option_name, price_delta_paise))";
 
   let order: any = null;
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
@@ -103,9 +103,11 @@ export async function GET(
   }
 
   return NextResponse.json({
+    id: order.id,
     order_number: order.order_number,
     status: order.status,
     payment_status: order.payment_status,
+    payment_method: order.payment_method,
     delay_minutes: delayMinutes,
     delay_reason: delayReason,
     total_paise: order.total_paise,

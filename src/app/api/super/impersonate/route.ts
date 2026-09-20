@@ -82,15 +82,32 @@ export async function DELETE(req: NextRequest) {
   }
 
   const db = createSupabaseAdmin();
+
+  // Find the owner of this cafe to revoke their sessions
+  const { data: profiles } = await db
+    .from("cafe_profiles")
+    .select("id")
+    .eq("restaurant_id", body.cafeId)
+    .eq("role", "owner")
+    .limit(1);
+
+  if (profiles && profiles.length > 0) {
+    const ownerId = profiles[0].id;
+    // Revoke all sessions for the owner (including impersonation magic links)
+    await db.auth.admin.signOut(ownerId, "global").catch((err) => {
+      console.error("Failed to revoke impersonation sessions:", err);
+    });
+  }
+
   await logAudit(db, {
     actor_id: superAdmin.userId,
     restaurant_id: body.cafeId,
     entity: "tenant",
     entity_id: body.cafeId,
     action: "impersonation.ended",
-    metadata: { ended_at: new Date().toISOString() },
+    metadata: { ended_at: new Date().toISOString(), sessions_revoked: true },
   });
 
-  return NextResponse.json({ ok: true, ended: body.cafeId });
+  return NextResponse.json({ ok: true, ended: body.cafeId, sessions_revoked: true });
 }
 

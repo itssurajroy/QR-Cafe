@@ -1,9 +1,20 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircleIcon, SparklesIcon } from "@/components/Icons";
+import Script from "next/script";
+import { CheckCircleIcon, SparklesIcon, CreditCardIcon } from "@/components/Icons";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: any) => {
+      open: () => void;
+      on: (event: string, handler: (response: any) => void) => void;
+      close: () => void;
+    };
+  }
+}
 
 type BillingClientProps = {
   restaurant: any;
@@ -16,8 +27,9 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<{ message: string; hint?: string } | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [rzpLoaded, setRzpLoaded] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (
@@ -26,9 +38,17 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
         params.get("razorpay_payment_link_status") === "paid"
       ) {
         setPaymentSuccess(true);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
-  });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.Razorpay) {
+      setRzpLoaded(true);
+    }
+  }, []);
 
   const plan = restaurant?.plan || "trial";
   const trialEnds = restaurant?.trial_ends_at ? new Date(restaurant.trial_ends_at) : null;
@@ -54,35 +74,143 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
     setError(null);
 
     try {
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cycle: billingCycle, simulate }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        if (data.short_url) {
-          window.location.href = data.short_url;
-        } else if (data.simulated) {
+      if (simulate) {
+        // Sandbox simulation mode (dev only)
+        const res = await fetch("/api/billing/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cycle: billingCycle, simulate: true }),
+        });
+        const data = await res.json();
+        if (res.ok && data.simulated) {
           window.location.reload();
         } else {
-          window.location.reload();
+          setError({ message: data.error || "Sandbox activation failed" });
         }
-      } else {
-        setError({
-          message: data.error || "Failed to initiate Razorpay checkout.",
-          hint: data.hint || "Please verify your Razorpay API credentials.",
-        });
+        return;
       }
+
+      // Standard Web Checkout flow
+      if (!rzpLoaded) {
+        setError({
+          message: "Payment gateway is still loading. Please wait a moment and try again.",
+          hint: "If this persists, check your internet connection.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 1. Create Razorpay order via our backend
+      const orderRes = await fetch("/api/billing/subscription/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cycle: billingCycle }),
+      });
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok || !orderData.order_id) {
+        setError({
+          message: orderData.error || "Failed to create payment order.",
+          hint: orderData.hint || "Please verify your Razorpay API credentials.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 2. Open Razorpay modal
+      const keyId = orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!keyId) {
+        setError({
+          message: "Payment gateway configuration incomplete.",
+          hint: "NEXT_PUBLIC_RAZORPAY_KEY_ID is missing.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const RazorpayConstructor = window.Razorpay;
+      if (!RazorpayConstructor) {
+        setError({
+          message: "Payment gateway failed to load. Please refresh and try again.",
+        });
+        setLoading(false);
+        return;
+      }
+      const rzp = new RazorpayConstructor({
+        key: keyId,
+        amount: orderData.amount,
+        currency: orderData.currency || "INR",
+        order_id: orderData.order_id,
+        name: "QRslice",
+        description: `${billingCycle === "yearly" ? "Annual" : "Monthly"} Subscription - ${restaurant?.name || "Your Restaurant"}`,
+        prefill: {
+          name: restaurant?.name || "",
+          contact: restaurant?.phone || "",
+        },
+        theme: {
+          color: "#007AFF",
+        },
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+          },
+        },
+        handler: async (response: any) => {
+          // 3. Verify payment on our backend
+          setLoading(true);
+          try {
+            const verifyRes = await fetch("/api/billing/subscription/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyRes.ok) {
+              setPaymentSuccess(true);
+              // Refresh page to show updated subscription state
+              setTimeout(() => window.location.reload(), 1500);
+            } else {
+              setError({
+                message: verifyData.error || "Payment verification failed.",
+                hint: "Your payment may have been processed but verification failed. Contact support if amount was deducted.",
+              });
+            }
+          } catch {
+            setError({
+              message: "Network error during payment verification.",
+              hint: "Please check your connection. If payment was deducted, it will be reconciled automatically.",
+            });
+          } finally {
+            setLoading(false);
+          }
+        },
+      });
+
+      rzp.on("payment.failed", (response: any) => {
+        setError({
+          message: response.error?.description || "Payment failed. Please try again.",
+          hint: "No amount has been charged. You can safely retry.",
+        });
+        setLoading(false);
+      });
+
+      rzp.open();
     } catch {
       setError({
         message: "Network error connecting to payment gateway.",
         hint: "Please check your internet connection and try again.",
       });
     } finally {
-      setLoading(false);
-      setSimulating(false);
+      if (!simulate) {
+        // Loading state will be cleared by modal dismiss or payment handler
+      } else {
+        setSimulating(false);
+      }
     }
   }
 
@@ -109,6 +237,13 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-slate-900 flex flex-col font-sans selection:bg-[#007AFF] selection:text-white">
+      {/* Razorpay Checkout Script */}
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+        onLoad={() => setRzpLoaded(true)}
+      />
+
       {/* Apple-style Frosted Header */}
       <header className="sticky top-0 z-50 border-b border-black/[0.06] bg-white/80 backdrop-blur-xl px-6 py-4 shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -180,7 +315,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#007AFF]">
-QRslice Complete
+                  QRslice Complete
                 </span>
                 <span
                   className={`px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
@@ -225,10 +360,13 @@ QRslice Complete
                   className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold text-xs transition-all shadow-md shadow-[#007AFF]/20 active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <span>Connecting to Razorpay…</span>
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Opening Razorpay…</span>
+                    </>
                   ) : (
                     <>
-                      <SparklesIcon className="w-4 h-4" />
+                      <CreditCardIcon className="w-4 h-4" />
                       <span>Subscribe Now (₹{currentPrice.toLocaleString("en-IN")}) →</span>
                     </>
                   )}
@@ -321,4 +459,3 @@ QRslice Complete
     </div>
   );
 }
-

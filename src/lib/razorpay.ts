@@ -110,8 +110,38 @@ export const razorpay = {
     });
   },
 
-  cancelSubscription: (subId: string) =>
+cancelSubscription: (subId: string) =>
     rp("POST", `/subscriptions/${subId}/cancel`, { cancel_at_cycle_end: 0 }),
+
+  // Standard Checkout: create a one-time order for subscription payment
+  // Amount must be >= 100 paise (₹1)
+  createOrder: (amountPaise: number, currency: string = "INR", receipt?: string, notes?: Record<string, string>) => {
+    const amount = Math.round(Number(amountPaise) || 0);
+    if (amount < 100) {
+      return { error: "Minimum amount for Razorpay checkout is 100 paise (₹1).", status: 400 };
+    }
+    return rp("POST", "/orders", {
+      amount,
+      currency,
+      receipt: receipt || undefined,
+      notes: notes || undefined,
+    });
+  },
+
+  // Standard Checkout: verify HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
+  verifyPaymentSignature: (razorpayOrderId: string, razorpayPaymentId: string, razorpaySignature: string) => {
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      throw new Error("RAZORPAY_KEY_SECRET is missing.");
+    }
+    const expected = crypto
+      .createHmac("sha256", secret.trim())
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+      .digest("hex");
+    const a = Buffer.from(expected, "hex");
+    const b = Buffer.from(String(razorpaySignature || ""), "hex");
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  },
 
   verifyWebhook: (rawBody: string, signature: string) => {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;

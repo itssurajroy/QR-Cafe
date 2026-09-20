@@ -19,6 +19,7 @@ import {
   ArrowRightIcon,
   MessageCircleIcon,
 } from "@/components/Icons";
+import RazorpayPaymentButton from "@/components/RazorpayPaymentButton";
 
 const STEPS = [
   {
@@ -312,8 +313,8 @@ export default function OrderStatusPage({
           </div>
         )}
 
-        {/* Customer Payment Required Alert Banner (When Food Served & Unpaid) */}
-        {data.status === "served" && data.payment_status === "unpaid" && (
+        {/* Customer Payment Required Alert Banner (Online Payment & Unpaid) */}
+        {data.payment_method === "online" && data.payment_status === "unpaid" && (
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-slate-900 shadow-sm space-y-2 text-center">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center mx-auto shadow-md">
               <CreditCardIcon className="w-5 h-5" />
@@ -323,9 +324,20 @@ export default function OrderStatusPage({
                 Bill Payment Due: {paise(data.total_paise)}
               </h3>
               <p className="text-xs text-amber-800/90 mt-0.5">
-                Your order is served! Please settle your bill at the counter or scan the café UPI QR.
+                {data.status === "served"
+                  ? "Your order is served! Please settle your bill at the counter or pay online below."
+                  : "Complete your payment to confirm the order."}
               </p>
             </div>
+            <RazorpayPaymentButton
+              orderId={data.id}
+              orderNumber={data.order_number}
+              amountPaise={data.total_paise}
+              restaurantName={data.restaurant_name || "QRslice"}
+              onSuccess={() => {
+                window.location.reload();
+              }}
+            />
           </div>
         )}
 
