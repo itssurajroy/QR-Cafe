@@ -19,6 +19,7 @@ import {
   ArrowRightIcon,
   MessageCircleIcon,
 } from "@/components/Icons";
+import { paise } from "@/lib/utils";
 
 const STEPS = [
   {
@@ -52,10 +53,6 @@ const STEPS = [
     renderIcon: (cls: string) => <SparklesIcon className={cls} />,
   },
 ] as const;
-
-function paise(n: number) {
-  return `₹${(n / 100).toLocaleString("en-IN")}`;
-}
 
 export default function OrderStatusPage({
   params,
@@ -464,7 +461,19 @@ export default function OrderStatusPage({
                 </div>
               ))}
             </div>
-            <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-xs font-black">
+            {data.total_paise > (data.subtotal_paise || data.total_paise) && (
+              <div className="border-t border-slate-200 pt-2 mt-2 space-y-1 text-[11px] text-slate-500 font-medium px-1">
+                <div className="flex justify-between items-center">
+                  <span>CGST (2.5%)</span>
+                  <span className="font-mono">{paise(Math.round((data.total_paise - data.subtotal_paise) / 2))}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>SGST (2.5%)</span>
+                  <span className="font-mono">{paise(Math.round((data.total_paise - data.subtotal_paise) / 2))}</span>
+                </div>
+              </div>
+            )}
+            <div className="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center text-xs font-black">
               <span className="text-slate-700">Total Bill</span>
               <span className="text-slate-900 font-mono text-sm font-black">{paise(data.total_paise)}</span>
             </div>

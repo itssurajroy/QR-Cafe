@@ -4,10 +4,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
-
-function paise(n: number) {
-  return `₹${(n / 100).toLocaleString("en-IN")}`;
-}
+import { paise } from "@/lib/utils";
 
 export default function ReceiptPage({
   params,
@@ -292,6 +289,18 @@ export default function ReceiptPage({
 
         {/* ─── TOTAL & PAYMENT ─── */}
         <div className="p-6 border-b border-slate-200 bg-slate-50/50 space-y-2.5">
+          {data.total_paise > (data.subtotal_paise || data.total_paise) && (
+            <div className="pb-3 border-b border-slate-200/60 mb-3 space-y-1 text-xs text-slate-500 font-medium">
+              <div className="flex justify-between items-center">
+                <span>CGST (2.5%)</span>
+                <span className="font-mono">{paise(Math.round((data.total_paise - data.subtotal_paise) / 2))}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>SGST (2.5%)</span>
+                <span className="font-mono">{paise(Math.round((data.total_paise - data.subtotal_paise) / 2))}</span>
+              </div>
+            </div>
+          )}
           <div className="flex justify-between items-center text-base font-black">
             <span className="font-sans text-slate-900">Total Paid</span>
             <span className="font-mono text-lg text-[#007AFF]">{paise(data.total_paise)}</span>

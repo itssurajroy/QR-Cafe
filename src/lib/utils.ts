@@ -10,7 +10,7 @@
 /** Format paise (integer) as ₹ string with Indian locale */
 export function paise(n: number): string {
   return `₹${(Math.max(0, n) / 100).toLocaleString("en-IN", {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
 }
@@ -21,7 +21,7 @@ export const formatPaise = paise;
 /** Format a rupees number as ₹ string */
 export function formatRupees(rupees: number): string {
   return `₹${Math.max(0, rupees).toLocaleString("en-IN", {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
 }
