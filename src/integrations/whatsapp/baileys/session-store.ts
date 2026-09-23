@@ -7,8 +7,40 @@ try {
   }
 } catch {}
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import type { AuthenticationState } from "@whiskeysockets/baileys";
+import { BufferJSON, type AuthenticationState } from "@whiskeysockets/baileys";
 import crypto from "crypto";
+
+type KeyBag = Record<string, Record<string, unknown>>;
+
+function extractKeyBag(keys: AuthenticationState["keys"]): KeyBag {
+  const bag = (keys as unknown as { __bag?: KeyBag }).__bag;
+  return bag ?? {};
+}
+
+function bagToKeyStore(bag: KeyBag): AuthenticationState["keys"] {
+  const store: AuthenticationState["keys"] & { __bag: KeyBag } = {
+    __bag: bag,
+    get: async (type, ids) => {
+      const cat = bag[type as string] ?? {};
+      const out: Record<string, unknown> = {};
+      for (const id of ids) out[id] = cat[id] ?? null;
+      return out as never;
+    },
+    set: async (data) => {
+      for (const [type, cat] of Object.entries(data)) {
+        bag[type] = bag[type] || {};
+        for (const [id, val] of Object.entries(cat ?? {})) {
+          if (val === null) delete bag[type][id];
+          else bag[type][id] = val;
+        }
+      }
+    },
+    clear: async () => {
+      for (const k of Object.keys(bag)) delete bag[k];
+    },
+  };
+  return store;
+}
 
 const CURRENT_KEY_ID = "v1";
 const SUPPORTED_KEY_IDS = ["v1"] as const;
@@ -74,8 +106,14 @@ export class BaileysSessionStore {
 
     try {
       const decrypted = decrypt(data.session_data as Buffer, data.encryption_key_id);
-      const parsed = JSON.parse(decrypted) as AuthenticationState;
-      return parsed;
+      const parsed = JSON.parse(decrypted, BufferJSON.reviver) as {
+        creds: AuthenticationState["creds"];
+        bag?: KeyBag;
+      };
+      return {
+        creds: parsed.creds,
+        keys: bagToKeyStore(parsed.bag ?? {}),
+      };
     } catch (error) {
       console.error(`[WhatsApp:${tenantId}] Failed to decrypt session data (keyId: ${data.encryption_key_id}):`, error);
       throw new Error(`Session decryption failed for tenant ${tenantId}: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -86,7 +124,8 @@ export class BaileysSessionStore {
     validateTenantId(tenantId);
 
     const keyId = CURRENT_KEY_ID;
-    const serialized = JSON.stringify(state);
+    const plain = { creds: state.creds, bag: extractKeyBag(state.keys) };
+    const serialized = JSON.stringify(plain, BufferJSON.replacer);
     const encrypted = encrypt(serialized, keyId);
 
     const { error } = await this.supabase.from("whatsapp_sessions").upsert({
@@ -99,6 +138,16 @@ export class BaileysSessionStore {
     if (error) {
       throw new Error(`Failed to save auth state: ${error.message}`);
     }
+  }
+
+  async hasSession(tenantId: string): Promise<boolean> {
+    validateTenantId(tenantId);
+    const { data } = await this.supabase
+      .from("whatsapp_sessions")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    return Boolean(data);
   }
 
   async clearAuthState(tenantId: string): Promise<void> {
