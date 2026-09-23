@@ -102,15 +102,24 @@ interface ConnectionData {
   autoReconnect: boolean;
 }
 
+interface OpenWaiter {
+  resolve: () => void;
+  reject: (error: Error) => void;
+  timer: NodeJS.Timeout;
+}
+
 export class BaileysConnectionManager {
   private connections = new Map<string, ConnectionData>();
   private sessionStore = new BaileysSessionStore();
   private qrCodes = new Map<string, string>();
+  private openWaiters = new Map<string, OpenWaiter>();
 
   async connect(tenantId: string, opts: { autoReconnect?: boolean } = {}): Promise<void> {
     validateTenantId(tenantId);
 
-    if (this.connections.has(tenantId)) {
+    const existing = this.connections.get(tenantId);
+    if (existing) {
+      existing.autoReconnect = opts.autoReconnect !== false;
       return;
     }
 
@@ -157,31 +166,37 @@ export class BaileysConnectionManager {
     const conn = this.connections.get(tenantId);
     if (!conn) throw new Error(`No connection for ${tenantId}`);
     if (conn.socket.user) return;
+
+    const previous = this.openWaiters.get(tenantId);
+    if (previous) {
+      this.openWaiters.delete(tenantId);
+      clearTimeout(previous.timer);
+      previous.reject(new Error(`Superseded waitForOpen for ${tenantId}`));
+    }
+
     await new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
-        conn.socket.ev.off("connection.update", handler);
+        this.openWaiters.delete(tenantId);
         reject(new Error(`Timeout waiting for WhatsApp open: ${tenantId}`));
       }, timeoutMs);
-      const handler = (update: Partial<ConnectionState>) => {
-        if (update.connection === "open") {
-          clearTimeout(timer);
-          conn.socket.ev.off("connection.update", handler);
-          resolve();
-        }
-        if (update.connection === "close") {
-          const code = (update.lastDisconnect?.error as { output?: { statusCode?: number } })?.output?.statusCode;
-          if (code === 401 || code === 403) {
-            clearTimeout(timer);
-            conn.socket.ev.off("connection.update", handler);
-            reject(new Error(`WhatsApp session invalid (${code}) for ${tenantId}`));
-          }
-        }
-      };
-      conn.socket.ev.on("connection.update", handler);
+      this.openWaiters.set(tenantId, { resolve, reject, timer });
     });
   }
 
+  private settleOpenWaiter(tenantId: string, outcome: "resolve" | "reject", error?: Error): void {
+    const waiter = this.openWaiters.get(tenantId);
+    if (!waiter) return;
+    this.openWaiters.delete(tenantId);
+    clearTimeout(waiter.timer);
+    if (outcome === "resolve") {
+      waiter.resolve();
+    } else {
+      waiter.reject(error ?? new Error(`waitForOpen aborted for ${tenantId}`));
+    }
+  }
+
   async release(tenantId: string): Promise<void> {
+    this.settleOpenWaiter(tenantId, "reject", new Error(`Connection released while waiting for open: ${tenantId}`));
     const conn = this.connections.get(tenantId);
     if (!conn) return;
     if (conn.reconnectTimeout) clearTimeout(conn.reconnectTimeout);
@@ -204,6 +219,7 @@ export class BaileysConnectionManager {
   async disconnect(tenantId: string): Promise<void> {
     validateTenantId(tenantId);
 
+    this.settleOpenWaiter(tenantId, "reject", new Error(`Disconnected while waiting for open: ${tenantId}`));
     const connectionData = this.connections.get(tenantId);
     if (connectionData) {
       if (connectionData.reconnectTimeout) {
@@ -261,6 +277,7 @@ export class BaileysConnectionManager {
 
     if (update.connection === "open") {
       this.qrCodes.delete(tenantId);
+      this.settleOpenWaiter(tenantId, "resolve");
     }
 
     if (update.connection === "close") {
@@ -269,6 +286,14 @@ export class BaileysConnectionManager {
       const code = error?.output?.statusCode;
       const isAuthFailure = code === 401 || code === 403;
       const shouldReconnect = connectionData?.autoReconnect !== false && !isAuthFailure;
+
+      if (isAuthFailure) {
+        this.settleOpenWaiter(
+          tenantId,
+          "reject",
+          new Error(`WhatsApp session invalid (${code}) for ${tenantId}`)
+        );
+      }
 
       this.connections.delete(tenantId);
       this.qrCodes.delete(tenantId);

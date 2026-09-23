@@ -203,6 +203,50 @@ describe("BaileysConnectionManager", () => {
 
     expect(mockBaileys.makeWASocket).toHaveBeenCalledTimes(1);
   });
+
+  it("waitForOpen rejects promptly when released", async () => {
+    await manager.connect("test-tenant");
+    const promise = manager.waitForOpen("test-tenant", 60_000);
+    const assertion = expect(promise).rejects.toThrow(/released/i);
+    await manager.release("test-tenant");
+    await assertion;
+  });
+
+  it("waitForOpen rejects promptly when disconnected", async () => {
+    await manager.connect("test-tenant");
+    const promise = manager.waitForOpen("test-tenant", 60_000);
+    const assertion = expect(promise).rejects.toThrow(/disconnect/i);
+    await manager.disconnect("test-tenant");
+    await assertion;
+  });
+
+  it("connect applies autoReconnect:false on existing connection", async () => {
+    vi.useFakeTimers();
+    await manager.connect("test-tenant");
+    expect(mockBaileys.makeWASocket).toHaveBeenCalledTimes(1);
+
+    await manager.connect("test-tenant", { autoReconnect: false });
+    expect(mockBaileys.makeWASocket).toHaveBeenCalledTimes(1);
+
+    const socket = lastSocket();
+    socket.emit("connection.update", { connection: "close" });
+    await vi.advanceTimersByTimeAsync(5000);
+
+    expect(mockBaileys.makeWASocket).toHaveBeenCalledTimes(1);
+  });
+
+  it("waitForOpen resolves via manager when socket reopens after reconnect", async () => {
+    vi.useFakeTimers();
+    await manager.connect("test-tenant");
+    const promise = manager.waitForOpen("test-tenant", 60_000);
+
+    lastSocket().emit("connection.update", { connection: "close" });
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(mockBaileys.makeWASocket).toHaveBeenCalledTimes(2);
+
+    lastSocket().emit("connection.update", { connection: "open" });
+    await expect(promise).resolves.toBeUndefined();
+  });
 });
 
 describe("BaileysSessionStore", () => {
