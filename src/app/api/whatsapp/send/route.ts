@@ -4,34 +4,14 @@ import { z } from "zod";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth";
 import { buildWhatsAppReceiptVars } from "@/lib/whatsapp-templates";
-import { baileysClient } from "@/integrations/whatsapp/baileys/client";
-import type { WhatsAppTemplate, TemplateComponent, TemplateParameter } from "@/integrations/whatsapp/whatsapp.types";
+import { toWhatsAppJid } from "@/lib/whatsapp-bill-text";
 
 const sendSchema = z.object({
-  order_id: z.string().uuid(),
-  phone: z.string().min(10).max(20),
-  template_name: z.string().default("bill_receipt"),
-  template_language: z.string().default("en"),
+  order_id: z.string().uuid().optional(),
+  phone: z.string().min(1).max(20),
+  message_type: z.enum(["bill_receipt", "test"]).default("bill_receipt"),
   variables: z.record(z.string(), z.unknown()).optional(),
 });
-
-function buildTemplateFromVars(templateName: string, templateLanguage: string, vars: Record<string, unknown>): WhatsAppTemplate {
-  const components: TemplateComponent[] = [
-    {
-      type: "body",
-      parameters: Object.entries(vars).map(([_, value]) => ({
-        type: "text",
-        text: String(value),
-      })) as TemplateParameter[],
-    },
-  ];
-
-  return {
-    name: templateName,
-    language: templateLanguage,
-    components,
-  };
-}
 
 export async function POST(req: NextRequest) {
   const auth = await getSessionUser();
@@ -53,7 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 422 });
     }
 
-    const { order_id, phone, template_name, template_language, variables } = parsed.data;
+    const { order_id, phone, message_type, variables } = parsed.data;
 
     const [settingsResult, accountsResult] = await Promise.all([
       db.from("whatsapp_settings").select("*").eq("tenant_id", restaurantId).maybeSingle(),
@@ -71,65 +51,100 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "WhatsApp is not enabled for this restaurant" }, { status: 400 });
     }
 
-    const { data: order, error: orderError } = await db
-      .from("orders")
-      .select("*")
-      .eq("id", order_id)
-      .eq("restaurant_id", restaurantId)
-      .maybeSingle();
-
-    if (orderError || !order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    const jid = toWhatsAppJid(phone);
+    if (!jid) {
+      return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
 
-    const { data: restaurant } = await db
-      .from("restaurants")
-      .select("name, gstin")
-      .eq("id", restaurantId)
-      .maybeSingle();
-
-    const receiptUrl = `https://www.qrslice.com/receipt/${order.status_token}`;
-    const defaultVars = buildWhatsAppReceiptVars({
-      restaurantName: restaurant?.name || "Your Café",
-      restaurantGstin: restaurant?.gstin,
-      orderNumber: order.order_number,
-      tableLabel: order.table_label,
-      totalPaise: order.total_paise,
-      paymentMethod: order.payment_method,
-      paymentStatus: order.payment_status,
-      receiptUrl,
-    });
-
-    const finalVars = { ...defaultVars, ...(parsed.data.variables || {}) };
-
-    const template = buildTemplateFromVars(template_name, template_language, finalVars);
-
-    const { data: existingMsg, error: existingError } = await db
-      .from("whatsapp_messages")
-      .select("id, status")
-      .eq("tenant_id", restaurantId)
-      .eq("order_id", order_id)
-      .eq("message_type", "bill_receipt")
-      .maybeSingle();
-
-    if (existingError) {
-      console.error("[WhatsApp Send] Failed to check existing message:", existingError);
-      return NextResponse.json({ error: "Failed to check existing message" }, { status: 500 });
+    const { BaileysSessionStore } = await import("@/integrations/whatsapp/baileys/session-store");
+    const linked = await new BaileysSessionStore().hasSession(restaurantId);
+    if (!linked) {
+      return NextResponse.json(
+        { error: "WhatsApp not linked. Link WhatsApp number in Settings first." },
+        { status: 400 },
+      );
     }
 
-    if (existingMsg) {
-      return NextResponse.json({ messageId: existingMsg.id, status: existingMsg.status, idempotent: true });
+    let order: {
+      id: string;
+      order_number: string;
+      table_label?: string | null;
+      total_paise: number;
+      payment_method?: string | null;
+      payment_status?: string | null;
+      status_token?: string | null;
+    } | null = null;
+
+    if (order_id) {
+      const { data: fetchedOrder, error: orderError } = await db
+        .from("orders")
+        .select("*")
+        .eq("id", order_id)
+        .eq("restaurant_id", restaurantId)
+        .maybeSingle();
+
+      if (orderError || !fetchedOrder) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
+      order = fetchedOrder;
+    }
+
+    const messageType = order ? message_type : "test";
+    const templateName = messageType;
+    const templateLanguage = "en";
+
+    let finalVars: Record<string, unknown> = { ...(variables || {}) };
+
+    if (order) {
+      const { data: restaurant } = await db
+        .from("restaurants")
+        .select("name, gstin")
+        .eq("id", restaurantId)
+        .maybeSingle();
+
+      const receiptUrl = `https://www.qrslice.com/receipt/${order.status_token}`;
+      const defaultVars = buildWhatsAppReceiptVars({
+        restaurantName: restaurant?.name || "Your Café",
+        restaurantGstin: restaurant?.gstin,
+        orderNumber: order.order_number,
+        tableLabel: order.table_label,
+        totalPaise: order.total_paise,
+        paymentMethod: order.payment_method,
+        paymentStatus: order.payment_status,
+        receiptUrl,
+      });
+
+      finalVars = { ...defaultVars, ...finalVars };
+    }
+
+    if (order_id) {
+      const { data: existingMsg, error: existingError } = await db
+        .from("whatsapp_messages")
+        .select("id, status")
+        .eq("tenant_id", restaurantId)
+        .eq("order_id", order_id)
+        .eq("message_type", messageType)
+        .maybeSingle();
+
+      if (existingError) {
+        console.error("[WhatsApp Send] Failed to check existing message:", existingError);
+        return NextResponse.json({ error: "Failed to check existing message" }, { status: 500 });
+      }
+
+      if (existingMsg) {
+        return NextResponse.json({ messageId: existingMsg.id, status: existingMsg.status, idempotent: true });
+      }
     }
 
     const { data: outboundMsg, error: logError } = await db
       .from("whatsapp_messages")
       .insert({
         tenant_id: restaurantId,
-        order_id: order_id,
-        message_type: "bill_receipt",
+        order_id: order_id ?? null,
+        message_type: messageType,
         recipient_phone: phone,
-        template_name,
-        template_language,
+        template_name: templateName,
+        template_language: templateLanguage,
         template_variables: finalVars,
         status: "pending",
       })
@@ -145,7 +160,7 @@ export async function POST(req: NextRequest) {
       tenant_id: restaurantId,
       message_id: outboundMsg.id,
       event_type: "created",
-      payload: { trigger: "manual_send", template_name, template_language },
+      payload: { trigger: "manual_send", message_type: messageType },
     });
 
     return NextResponse.json({ messageId: outboundMsg.id, status: "pending" });
