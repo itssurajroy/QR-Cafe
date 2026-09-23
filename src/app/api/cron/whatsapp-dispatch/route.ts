@@ -176,18 +176,29 @@ export async function GET(req: NextRequest) {
           error_message: null,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", row.id);
+        .eq("id", row.id)
+        .throwOnError();
 
-      await db.from("whatsapp_message_events").insert({
+      const { error: eventError } = await db.from("whatsapp_message_events").insert({
         tenant_id: row.tenant_id,
         message_id: row.id,
         event_type: "sent",
         payload: { providerMessageId: providerId },
       });
-      await db
+      if (eventError) {
+        console.error(
+          `whatsapp-dispatch: sent event insert failed for ${row.id}: ${eventError.message}`,
+        );
+      }
+      const { error: seenError } = await db
         .from("whatsapp_accounts")
         .update({ last_seen_at: new Date().toISOString() })
         .eq("tenant_id", row.tenant_id);
+      if (seenError) {
+        console.error(
+          `whatsapp-dispatch: last_seen_at update failed for ${row.id}: ${seenError.message}`,
+        );
+      }
       sent++;
     } catch (err) {
       const message = err instanceof Error ? err.message : "send failed";
@@ -208,7 +219,8 @@ export async function GET(req: NextRequest) {
               error_message: null,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", row.id);
+            .eq("id", row.id)
+            .throwOnError();
         } catch {
           /* leave status untouched — invariant is never re-send */
         }

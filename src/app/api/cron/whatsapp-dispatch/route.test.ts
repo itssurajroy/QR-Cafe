@@ -11,6 +11,7 @@ type QueryState = {
   columns?: unknown;
   values?: Record<string, unknown>;
   filters: Array<[string, unknown]>;
+  throwOnError?: boolean;
 };
 
 const db = vi.hoisted(() => {
@@ -50,12 +51,21 @@ const db = vi.hoisted(() => {
       state.filters.push([col, val]);
       return self;
     };
+    self.throwOnError = () => {
+      state.throwOnError = true;
+      return self;
+    };
     self.order = () => self;
     self.limit = () => self;
-    self.maybeSingle = () => Promise.resolve(responder(state));
-    self.single = () => Promise.resolve(responder(state));
+    function settle(): R {
+      const r = responder(state);
+      if (state.throwOnError && r.error) throw new Error(r.error.message);
+      return r;
+    }
+    self.maybeSingle = () => Promise.resolve(settle());
+    self.single = () => Promise.resolve(settle());
     self.then = (onFulfilled: unknown, onRejected: unknown) =>
-      Promise.resolve(responder(state)).then(
+      Promise.resolve(settle()).then(
         onFulfilled as (v: R) => unknown,
         onRejected as (e: unknown) => unknown,
       );
@@ -421,8 +431,92 @@ describe("GET /api/cron/whatsapp-dispatch", () => {
     expect(messageUpdates().some((c) => c.values?.status === "failed")).toBe(false);
   });
 
+  it("routes primary sent-write {error} failure into sendSucceeded path — not requeued, best-effort resend attempted", async () => {
+    let sentAttempts = 0;
+    db.setResponder((state) => {
+      if (
+        state.table === "whatsapp_messages" &&
+        state.op === "update" &&
+        state.values?.status === "sent"
+      ) {
+        sentAttempts++;
+        if (sentAttempts === 1) {
+          return { data: null, error: { message: "postgrest unavailable" } };
+        }
+        return { data: null, error: null };
+      }
+      return baseResponder([dueBillRow])(state);
+    });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const res = await GET(cronReq("Bearer test-cron-secret"));
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+      expect(sendMessageMock).toHaveBeenCalledTimes(1);
+      expect(sentAttempts).toBe(2);
+      expect(
+        messageUpdates().find(
+          (c) =>
+            c.values?.status === "pending" &&
+            c.filters.some(([col, val]) => col === "id" && val === "msg-1"),
+        ),
+      ).toBeUndefined();
+      expect(messageUpdates().some((c) => "retry_count" in (c.values ?? {}))).toBe(false);
+      expect(messageUpdates().some((c) => c.values?.status === "failed")).toBe(false);
+      const bestEffort = messageUpdates().filter((c) => c.values?.status === "sent");
+      expect(bestEffort).toHaveLength(2);
+      expect(bestEffort[1].values).toMatchObject({ provider_message_id: "wamid.TEST" });
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("post-send bookkeeping failed for msg-1"),
+      );
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it("surfaces double sent-write failure as sent-counted, never requeued (residual two-failure case)", async () => {
+    let sentAttempts = 0;
+    db.setResponder((state) => {
+      if (
+        state.table === "whatsapp_messages" &&
+        state.op === "update" &&
+        state.values?.status === "sent"
+      ) {
+        sentAttempts++;
+        return { data: null, error: { message: "db down" } };
+      }
+      return baseResponder([dueBillRow])(state);
+    });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const res = await GET(cronReq("Bearer test-cron-secret"));
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+      expect(sentAttempts).toBe(2);
+      expect(messageUpdates().some((c) => "retry_count" in (c.values ?? {}))).toBe(false);
+      expect(
+        messageUpdates().some(
+          (c) =>
+            (c.values?.status === "pending" || c.values?.status === "failed") &&
+            c.filters.some(([col]) => col === "id"),
+        ),
+      ).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("post-send bookkeeping failed for msg-1"),
+      );
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
   it("reclaims stale sending rows back to pending before the due fetch", async () => {
     const before = Date.now();
+    let reclaimed = false;
+    const staleRow = { ...dueBillRow, id: "msg-stale" };
     db.setResponder((state) => {
       if (
         state.table === "whatsapp_messages" &&
@@ -430,15 +524,17 @@ describe("GET /api/cron/whatsapp-dispatch", () => {
         state.values?.status === "pending" &&
         state.filters.some(([col, val]) => col === "status" && val === "sending")
       ) {
+        reclaimed = true;
         return { data: null, error: null };
       }
-      return baseResponder([dueBillRow])(state);
+      return baseResponder(reclaimed ? [staleRow] : [])(state);
     });
 
     const res = await GET(cronReq("Bearer test-cron-secret"));
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+    expect(reclaimed).toBe(true);
 
     const reclaim = messageUpdates().find(
       (c) =>
@@ -455,6 +551,13 @@ describe("GET /api/cron/whatsapp-dispatch", () => {
     expect(before - 6 * 60_000).toBeLessThanOrEqual(cutoff);
     expect(cutoff).toBeLessThanOrEqual(Date.now() - 4 * 60_000);
 
+    const claim = messageUpdates().find((c) => c.values?.status === "sending");
+    expect(claim?.filters).toEqual(
+      expect.arrayContaining([
+        ["id", "msg-stale"],
+        ["status", "pending"],
+      ]),
+    );
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
   });
 
