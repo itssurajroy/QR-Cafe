@@ -1,6 +1,12 @@
-// Copyright (c) 2026 QRslice. All rights reserved.
-// Subscription Plans - Dynamic plans managed by Super Admin
-// Replaces hardcoded Razorpay Plan IDs with flexible plan management
+-- Copyright (c) 2026 QRslice. All rights reserved.
+-- Subscription Plans - Dynamic plans managed by Super Admin
+-- Replaces hardcoded Razorpay Plan IDs with flexible plan management.
+--
+-- After applying, run in the Supabase dashboard SQL editor:
+--   NOTIFY pgrst, 'reload schema';
+--
+-- Depends on: update_updated_at_column() from 20260918000001_whatsapp_cloud_api.sql
+-- and qrcafe_auth_role() RLS helper (must exist in the target database).
 
 -- Subscription Plans table
 create table if not exists public.subscription_plans (
@@ -24,16 +30,16 @@ create index if not exists idx_subscription_plans_billing_cycle on public.subscr
 -- RLS
 alter table public.subscription_plans enable row level security;
 
--- Super Admin full access
+-- Super Admin full access (uses mandated RLS helper per AGENTS.md)
+drop policy if exists "Super Admin full access subscription_plans" on public.subscription_plans;
 create policy "Super Admin full access subscription_plans"
   on public.subscription_plans
   for all
-  using (auth.role() = 'service_role' or exists (
-    select 1 from public.cafe_profiles cp
-    where cp.id = auth.uid() and cp.role = 'super_admin' and cp.active = true
-  ));
+  using (auth.role() = 'service_role' or qrcafe_auth_role() = 'super_admin')
+  with check (auth.role() = 'service_role' or qrcafe_auth_role() = 'super_admin');
 
 -- Owner/Staff read active plans (for billing page)
+drop policy if exists "Authenticated read active subscription_plans" on public.subscription_plans;
 create policy "Authenticated read active subscription_plans"
   on public.subscription_plans
   for select
@@ -59,6 +65,46 @@ values
    true, 2)
 on conflict (slug) do nothing;
 
--- Grant permissions
-grant select on public.subscription_plans to anon, authenticated;
+-- Grant permissions (authenticated users read via RLS; anon gets nothing)
+grant select on public.subscription_plans to authenticated;
 grant all on public.subscription_plans to service_role;
+
+-- Plan linkage on restaurants: used by super-admin plan delete guard
+alter table public.restaurants
+  add column if not exists subscription_plan_id uuid
+  references public.subscription_plans(id) on delete set null;
+
+-- Billing events: provider webhook feed for the Super Admin dashboard.
+-- The webhook writes here as best-effort; audit_events remains the durable record.
+create table if not exists public.billing_events (
+  id uuid primary key default gen_random_uuid(),
+  restaurant_id uuid references public.restaurants(id) on delete set null,
+  provider text not null default 'razorpay',
+  event_type text not null,
+  status text not null default 'processed',
+  amount_paise integer,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  processed_at timestamptz
+);
+
+create index if not exists idx_billing_events_created_at on public.billing_events(created_at desc);
+create index if not exists idx_billing_events_restaurant_id on public.billing_events(restaurant_id);
+create index if not exists idx_billing_events_status on public.billing_events(status);
+
+alter table public.billing_events enable row level security;
+
+drop policy if exists "Super Admin read billing_events" on public.billing_events;
+create policy "Super Admin read billing_events"
+  on public.billing_events
+  for select
+  using (auth.role() = 'service_role' or qrcafe_auth_role() = 'super_admin');
+
+drop policy if exists "Service role full access billing_events" on public.billing_events;
+create policy "Service role full access billing_events"
+  on public.billing_events
+  for all
+  using (auth.role() = 'service_role');
+
+grant select on public.billing_events to authenticated;
+grant all on public.billing_events to service_role;

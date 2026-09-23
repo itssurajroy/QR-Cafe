@@ -75,6 +75,7 @@ export type Database = {
           event_type: string
           id: string
           payload: Json
+          processed_at: string | null
           provider: string
           restaurant_id: string | null
           status: string
@@ -85,6 +86,7 @@ export type Database = {
           event_type: string
           id?: string
           payload?: Json
+          processed_at?: string | null
           provider?: string
           restaurant_id?: string | null
           status?: string
@@ -95,6 +97,7 @@ export type Database = {
           event_type?: string
           id?: string
           payload?: Json
+          processed_at?: string | null
           provider?: string
           restaurant_id?: string | null
           status?: string
@@ -1533,6 +1536,7 @@ export type Database = {
           razorpay_subscription_id: string | null
           slug: string
           subscription_ends_at: string | null
+          subscription_plan_id: string | null
           subscription_status: string
           suspended_at: string | null
           suspended_reason: string | null
@@ -1574,6 +1578,7 @@ export type Database = {
           razorpay_subscription_id?: string | null
           slug: string
           subscription_ends_at?: string | null
+          subscription_plan_id?: string | null
           subscription_status?: string
           suspended_at?: string | null
           suspended_reason?: string | null
@@ -1615,6 +1620,7 @@ export type Database = {
           razorpay_subscription_id?: string | null
           slug?: string
           subscription_ends_at?: string | null
+          subscription_plan_id?: string | null
           subscription_status?: string
           suspended_at?: string | null
           suspended_reason?: string | null

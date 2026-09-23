@@ -11,6 +11,11 @@ export default async function BillingPage() {
   if (!user || user.role === "super_admin" || !user.restaurantId) {
     redirect("/login");
   }
+  // Billing management is owner-only, matching /api/billing/* gates.
+  // (Staff/manager tabs are already blocked by canAccessTab.)
+  if (user.role !== "owner") {
+    redirect("/admin");
+  }
 
   const db = createSupabaseAdmin();
   const { data: restaurant } = await db

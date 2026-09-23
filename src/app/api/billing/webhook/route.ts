@@ -2,6 +2,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { razorpay } from "@/lib/razorpay";
+import {
+  cycleDurationDays,
+  extractNotes,
+  isSubscriptionPaymentNotes,
+  resolveBillingCycle,
+  resolveRazorpayOrderId,
+} from "@/lib/billing-webhook";
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
@@ -15,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!signature || !razorpay.verifyWebhook(rawBody, signature)) {
-    console.error("Invalid webhook signature", { signature: signature.substring(0, 10) + "..." });
+    console.error("Invalid webhook signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -43,33 +50,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, received: true, idempotent: true });
   }
 
-  // Extract restaurant_id from various event payloads
+  // Extract restaurant_id / order id from various event payloads
   let restaurantId: string | null = null;
   let isSubscriptionEvent = false;
   let isOrderEvent = false;
 
-  const notes =
-    payload?.subscription?.entity?.notes ||
-    payload?.payment_link?.entity?.notes ||
-    payload?.payment?.entity?.notes ||
-    payload?.order?.entity?.notes;
+  const notes = extractNotes(payload);
+  const razorpayOrderId = resolveRazorpayOrderId(payload, notes);
 
-  restaurantId = notes?.restaurant_id;
+  restaurantId = typeof notes?.restaurant_id === "string" ? notes.restaurant_id : null;
+
+  // Payment/order entities often carry no notes on payment.* events.
+  // Fall back to the billing_payments row created by create-order.
+  let lookupCycle: string | null = null;
+  if (razorpayOrderId) {
+    const { data: bp } = await db
+      .from("billing_payments")
+      .select("restaurant_id, billing_cycle")
+      .eq("razorpay_order_id", razorpayOrderId)
+      .maybeSingle();
+    if (bp) {
+      restaurantId = restaurantId || bp.restaurant_id;
+      lookupCycle = bp.billing_cycle;
+    }
+  }
 
   // Determine event type
   if (eventType.startsWith("subscription.")) {
     isSubscriptionEvent = true;
-    // For subscription events, restaurant_id might be in subscription.entity.notes
-    restaurantId = restaurantId || payload?.subscription?.entity?.notes?.restaurant_id;
+    restaurantId = restaurantId || payload?.subscription?.entity?.notes?.restaurant_id || null;
   } else if (eventType.startsWith("order.")) {
     isOrderEvent = true;
-    // For order events, restaurant_id might be in order.entity.notes
-    restaurantId = restaurantId || payload?.order?.entity?.notes?.restaurant_id;
+    restaurantId = restaurantId || payload?.order?.entity?.notes?.restaurant_id || null;
   } else if (eventType.startsWith("payment.")) {
-    // For payment events, restaurant_id might be in payment.entity.notes
-    restaurantId = restaurantId || payload?.payment?.entity?.notes?.restaurant_id;
+    restaurantId = restaurantId || payload?.payment?.entity?.notes?.restaurant_id || null;
   } else if (eventType.startsWith("payment_link.")) {
-    restaurantId = restaurantId || payload?.payment_link?.entity?.notes?.restaurant_id;
+    restaurantId = restaurantId || payload?.payment_link?.entity?.notes?.restaurant_id || null;
   }
 
   if (!restaurantId) {
@@ -97,37 +113,57 @@ export async function POST(req: NextRequest) {
       eventType === "order.paid" ||
       eventType === "payment.captured"
     ) {
-      // Determine billing cycle from notes or default to monthly
-      const cycle = notes?.cycle || "monthly";
-      const durationDays = cycle === "yearly" ? 365 : 30;
+      // Billing cycle: create-order writes billing_cycle, legacy checkout
+      // writes cycle; fall back to the billing_payments row, then monthly.
+      const cycle = resolveBillingCycle(notes, lookupCycle);
+      const durationDays = cycleDurationDays(cycle);
 
-      await db
+      const restaurantPatch: Record<string, unknown> = {
+        plan: "active",
+        billing_status: "active",
+        subscription_ends_at: new Date(
+          Date.now() + durationDays * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+      };
+      if (typeof notes?.plan_id === "string") {
+        restaurantPatch.subscription_plan_id = notes.plan_id;
+      }
+
+      let { error: updErr } = await db
         .from("restaurants")
-        .update({
-          plan: "active",
-          billing_status: "active",
-          subscription_ends_at: new Date(
-            Date.now() + durationDays * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-        })
+        .update(restaurantPatch)
         .eq("id", restaurantId);
 
-      // Update billing_payments record if exists
-      const paymentId = payload?.payment?.entity?.id || payload?.order?.entity?.id;
-      if (paymentId) {
+      // subscription_plan_id column may not be migrated yet — retry without it.
+      if (updErr && String(updErr.message).includes("subscription_plan_id")) {
+        delete restaurantPatch.subscription_plan_id;
+        const retry = await db.from("restaurants").update(restaurantPatch).eq("id", restaurantId);
+        updErr = retry.error;
+      }
+      if (updErr) throw updErr;
+
+      // Update billing_payments record for Standard Checkout orders
+      if (razorpayOrderId) {
+        const paymentPatch: Record<string, unknown> = {
+          status: "paid",
+          verified_at: new Date().toISOString(),
+        };
+        const paymentId = payload?.payment?.entity?.id;
+        if (paymentId) paymentPatch.razorpay_payment_id = paymentId;
+
         await db
           .from("billing_payments")
-          .update({
-            status: "paid",
-            razorpay_payment_id: paymentId,
-            verified_at: new Date().toISOString(),
-          })
-          .eq("razorpay_order_id", notes?.razorpay_order_id || payload?.order?.entity?.id);
+          .update(paymentPatch)
+          .eq("razorpay_order_id", razorpayOrderId);
       }
     } else if (eventType === "payment.failed") {
-      // Determine if this is a subscription payment or order payment
-      if (isSubscriptionEvent || notes?.razorpay_order_id) {
-        // 5-Day Dunning Grace Period for subscription payments
+      // 5-Day Dunning Grace Period for subscription payments only.
+      // Order payments are identified by the absence of subscription notes
+      // (plan_id / billing_cycle / cycle) and a billing_payments miss.
+      const isSubscriptionPayment =
+        isSubscriptionEvent || isSubscriptionPaymentNotes(notes) || Boolean(lookupCycle);
+
+      if (isSubscriptionPayment) {
         const graceDays = 5;
         await db
           .from("restaurants")
@@ -139,15 +175,15 @@ export async function POST(req: NextRequest) {
           })
           .eq("id", restaurantId);
 
-        // Update billing_payments if exists
-        if (notes?.razorpay_order_id) {
+        // Update billing_payments if this failure maps to a checkout order
+        if (razorpayOrderId) {
           await db
             .from("billing_payments")
             .update({
               status: "failed",
-              razorpay_payment_id: payload?.payment?.entity?.id,
+              razorpay_payment_id: payload?.payment?.entity?.id || null,
             })
-            .eq("razorpay_order_id", notes.razorpay_order_id);
+            .eq("razorpay_order_id", razorpayOrderId);
         }
       } else {
         // For order payments, just log - order payment failure handled elsewhere
@@ -195,17 +231,27 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Insert into billing_events for Super Admin dashboard
-    const amountPaise = payload?.payment?.entity?.amount || payload?.order?.entity?.amount || payload?.subscription?.entity?.amount || payload?.payment_link?.entity?.amount;
-    await db.from("billing_events").insert({
-      restaurant_id: restaurantId,
-      provider: "razorpay",
-      event_type: eventType,
-      status: "processed",
-      amount_paise: amountPaise || null,
-      payload: event,
-      processed_at: new Date().toISOString(),
-    });
+    // Best-effort: feed the Super Admin dashboard. Never 500 after the
+    // side effects above — a failure here must not trigger Razorpay retries
+    // that the audit dedup would then swallow.
+    try {
+      const amountPaise =
+        payload?.payment?.entity?.amount ||
+        payload?.order?.entity?.amount ||
+        payload?.subscription?.entity?.amount ||
+        payload?.payment_link?.entity?.amount;
+      await db.from("billing_events").insert({
+        restaurant_id: restaurantId,
+        provider: "razorpay",
+        event_type: eventType,
+        status: "processed",
+        amount_paise: amountPaise || null,
+        payload: event,
+        processed_at: new Date().toISOString(),
+      });
+    } catch (beErr) {
+      console.error("Non-fatal: failed to insert billing_events", { beErr, eventType, eventId: event.id });
+    }
 
     return NextResponse.json({ ok: true, received: true });
   } catch (error) {

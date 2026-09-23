@@ -4,6 +4,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
 import { SubscriptionPlan } from "../types";
+import { DEFAULT_MONTHLY_PAISE, DEFAULT_MONTHLY_PLAN_SLUG } from "@/lib/plan-pricing";
 
 type BillingRow = {
   id: string;
@@ -205,7 +206,7 @@ export function BillingTab() {
                       </span>
                     </td>
                     <td className="p-4 font-mono font-bold text-slate-900">
-                      {paiseToRupees(typeof r.mrr_cents === "number" ? r.mrr_cents : s === "active" ? (subscriptionPlans?.find((p: SubscriptionPlan) => p.slug === "complete_monthly")?.price_paise ?? 99900) : 0)}
+                      {paiseToRupees(typeof r.mrr_cents === "number" ? r.mrr_cents : s === "active" ? (subscriptionPlans?.find((p: SubscriptionPlan) => p.slug === DEFAULT_MONTHLY_PLAN_SLUG)?.price_paise ?? DEFAULT_MONTHLY_PAISE) : 0)}
                     </td>
                     <td className="p-4 text-right space-x-2">
                       <button

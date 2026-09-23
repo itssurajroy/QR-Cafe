@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { razorpay } from "@/lib/razorpay";
+import { DEFAULT_MONTHLY_PAISE, DEFAULT_YEARLY_PAISE } from "@/lib/plan-pricing";
 
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const amountPaise = cycle === "yearly" ? 999900 : 99900;
+  const amountPaise = cycle === "yearly" ? DEFAULT_YEARLY_PAISE : DEFAULT_MONTHLY_PAISE;
   const planTitle = cycle === "yearly" ? "QrSlice Complete (1 Year)" : "QrSlice Complete (1 Month)";
 
   // Developer / Sandbox Instant Activation

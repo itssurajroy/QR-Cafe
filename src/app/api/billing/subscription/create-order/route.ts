@@ -85,13 +85,6 @@ export async function POST(req: NextRequest) {
   }
 
   const amountPaise = plan.price_paise;
-  if (amountPaise < 100) {
-    return NextResponse.json(
-      { error: "Invalid plan price" },
-      { status: 400 },
-    );
-  }
-
   const receipt = `sub_${rest.slug}_${plan.slug}_${Date.now()}`;
 
   const order = await razorpay.createOrder(

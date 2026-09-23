@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { calcMrr, calcArr } from "@/lib/platform-mrr";
+import { DEFAULT_MONTHLY_PAISE } from "@/lib/plan-pricing";
 import SuperClient from "@/components/SuperClient";
 
 export const dynamic = "force-dynamic";
@@ -74,9 +75,9 @@ export default async function SuperPage({
     db.from("subscription_plans").select("id, name, slug, price_paise, billing_cycle, features, sort_order").eq("active", true).order("sort_order", { ascending: true }),
   ]);
 
-  // Monthly price (paise) from subscription_plans table; fallback 99900 (₹999).
+  // Monthly price (paise) from subscription_plans table; fallback from plan-pricing.
   // Uses the active monthly plan price.
-  let monthlyPaise = 99900;
+  let monthlyPaise = DEFAULT_MONTHLY_PAISE;
   try {
     const { data: monthlyPlan } = await db
       .from("subscription_plans")
@@ -90,7 +91,7 @@ export default async function SuperPage({
       monthlyPaise = monthlyPlan.price_paise;
     }
   } catch {
-    monthlyPaise = 99900;
+    monthlyPaise = DEFAULT_MONTHLY_PAISE;
   }
 
   // Aggregate Metrics

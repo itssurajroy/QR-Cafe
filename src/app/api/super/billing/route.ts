@@ -6,6 +6,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { logAudit } from "@/lib/audit";
 import { checkPlatformRateLimit } from "@/lib/rate-limit-platform";
 import { escapeOrFilter } from "@/lib/platform-filter";
+import { DEFAULT_MONTHLY_PAISE } from "@/lib/plan-pricing";
 
 // Single-purpose duplication of the subscription state machine in
 // src/lib/subscription-machine.test.ts — intentional per Task 8 brief.
@@ -21,7 +22,7 @@ function canTransition(from: string, to: string) {
   return (ALLOWED[from] ?? []).includes(to);
 }
 
-const ACTIVE_MRR_PAISE = 99900;
+const ACTIVE_MRR_PAISE = DEFAULT_MONTHLY_PAISE;
 
 export async function GET(req: NextRequest) {
   const user = await requireSuperAdmin();
