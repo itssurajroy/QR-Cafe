@@ -32,8 +32,10 @@ export async function POST(req: NextRequest) {
   }
   const input = parsed.data;
 
-  // Generate server-side UUID if client didn't supply one or environment lacks crypto.randomUUID
-  const idempotencyKey = input.idempotency_key || crypto.randomUUID();
+  // A18: prefer body key; fall back to Idempotency-Key header from offline queue.
+  const headerIdempotencyKey = req.headers.get("idempotency-key")?.trim() || undefined;
+  const idempotencyKey =
+    input.idempotency_key || headerIdempotencyKey || crypto.randomUUID();
 
   // Rate limit: per token and per IP
   const limit = Number(process.env.ORDER_RATE_LIMIT || 10);

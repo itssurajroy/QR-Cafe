@@ -33,6 +33,8 @@ interface VisualFloorGridProps {
   orders: any[];
   reservations?: FloorReservation[];
   billRequestedTableIds?: Set<string> | string[];
+  /** B2: order ids with a settle in flight — disables Settle Bill. */
+  unsettledIds?: ReadonlySet<string>;
   onSelectTable: (table: Table) => void;
   onOpenRegister: (table: Table) => void;
   onSettleOrder?: (orderId: string, table: Table) => void;
@@ -51,6 +53,7 @@ export function VisualFloorGrid({
   orders,
   reservations = [],
   billRequestedTableIds = new Set(),
+  unsettledIds,
   onSelectTable,
   onOpenRegister,
   onSettleOrder,
@@ -700,16 +703,17 @@ export function VisualFloorGrid({
             <div className="pt-5 border-t border-slate-200 space-y-2.5 mt-6">
               {inspectedTable.status.totalPaise > 0 && onSettleOrder && (
                 <button
+                  disabled={(unsettledIds?.size ?? 0) > 0 && inspectedTable.status.activeOrders.some((o) => unsettledIds?.has(o.id))}
                   onClick={() => {
                     const unpaidOrder = inspectedTable.status.activeOrders.find(
                       (o) => o.payment_status === "unpaid",
                     );
-                    if (unpaidOrder) {
+                    if (unpaidOrder && !unsettledIds?.has(unpaidOrder.id)) {
                       onSettleOrder(unpaidOrder.id, inspectedTable.table);
                       setInspectedTable(null);
                     }
                   }}
-                  className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm rounded-2xl shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm rounded-2xl shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>Settle Bill ({paise(inspectedTable.status.totalPaise)})</span>

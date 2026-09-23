@@ -19,8 +19,9 @@ import {
 } from "@/components/Icons";
 import { paise, getItemImage, getCategoryEmoji } from "@/lib/utils";
 import { api } from "@/lib/api";
-import { BookingWidget } from "@/features/booking/BookingWidget";
 import { QrSliceLogo } from "@/components/brand/QrSliceLogo";
+import { InstallPwaButton } from "@/components/pwa/InstallPwaButton";
+import { BookingWidget } from "@/features/booking/BookingWidget";
 import { Tenant, TierLimits } from "@/lib/tenant";
 import type { Category, MenuItem as Item } from "@/types";
 
@@ -621,6 +622,8 @@ export default function PublicCafeClient({
 
             {/* Right: Quick Actions */}
             <div className="flex items-center gap-2 shrink-0">
+              <InstallPwaButton className="hidden sm:flex px-2 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 transition-colors" />
+              
               {/* Search Toggle */}
               <button
                 type="button"

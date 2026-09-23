@@ -38,6 +38,37 @@ const RETRY_DELAY_MS = 5000;
 
 let dbInstance: IDBPDatabase<OfflineDBSchema> | null = null;
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * A18: stable Idempotency-Key for offline/online order retries.
+ * Reuses payload.idempotency_key when already a UUID; otherwise injects one
+ * so processQueue retries hit orders.idempotency_key_idx instead of duplicating.
+ */
+export function ensureIdempotencyKey(payload: unknown): {
+  payload: unknown;
+  idempotencyKey: string;
+} {
+  if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+    const obj = payload as Record<string, unknown>;
+    const existing = typeof obj.idempotency_key === "string" ? obj.idempotency_key : "";
+    if (existing && UUID_RE.test(existing)) {
+      return { payload, idempotencyKey: existing };
+    }
+    const key =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `00000000-0000-4000-8000-${Date.now().toString(16).padStart(12, "0")}`;
+    return { payload: { ...obj, idempotency_key: key }, idempotencyKey: key };
+  }
+  const fallback =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `00000000-0000-4000-8000-${Date.now().toString(16).padStart(12, "0")}`;
+  return { payload, idempotencyKey: fallback };
+}
+
 async function getDB(): Promise<IDBPDatabase<OfflineDBSchema>> {
   if (dbInstance) return dbInstance;
 
@@ -63,14 +94,16 @@ export async function queueOrder(
 ): Promise<string> {
   const db = await getDB();
   const id = `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const { payload: stablePayload, idempotencyKey } = ensureIdempotencyKey(payload);
 
   const order: OfflineOrder = {
     id,
-    payload,
+    payload: stablePayload,
     endpoint,
     method: options.method || "POST",
     headers: {
       "Content-Type": "application/json",
+      "Idempotency-Key": idempotencyKey,
       ...options.headers,
     },
     createdAt: Date.now(),
@@ -250,13 +283,17 @@ export async function submitOrderOnlineFirst(
   options: { endpoint?: string; onOffline?: (id: string) => void } = {}
 ): Promise<{ success: boolean; online: boolean; orderId?: string }> {
   const endpoint = options.endpoint || "/api/pos/order";
+  const { payload: stablePayload, idempotencyKey } = ensureIdempotencyKey(payload);
 
   if (navigator.onLine) {
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
+        body: JSON.stringify(stablePayload),
       });
 
       if (response.ok) {
@@ -268,8 +305,10 @@ export async function submitOrderOnlineFirst(
     }
   }
 
-  // Queue offline
-  const id = await queueOrder(endpoint, payload);
+  // Queue offline (same idempotency key as the online attempt)
+  const id = await queueOrder(endpoint, stablePayload, {
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
   // queueOrder already fires registerOrderSync; this covers callers that
   // reach here via other paths. Fire-and-forget, never throws.
   void registerOrderSync();

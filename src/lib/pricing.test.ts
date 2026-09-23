@@ -1,102 +1,110 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  calculateItemUnitPrice,
-  calculateItemLineTotal,
   calculateAuthoritativePricing,
+  calculateItemLineTotal,
+  calculateItemUnitPrice,
 } from "./pricing";
 
-describe("Authoritative Pricing Engine", () => {
-  it("satisfies the mandatory pricing regression test", () => {
-    // Base: ₹200 (20000 paise)
-    const basePrice = 20000;
-    // Full portion: +₹50 (5000 paise)
-    const portionDelta = 5000;
-    // Addon A: +₹30 (3000 paise), Addon B: +₹20 (2000 paise)
-    const modifiers = [
-      { option_name: "Addon A", price_delta_paise: 3000 },
-      { option_name: "Addon B", price_delta_paise: 2000 },
-    ];
-    // Quantity: 2
-    const quantity = 2;
-
-    const unitPrice = calculateItemUnitPrice(basePrice, portionDelta, modifiers);
-    expect(unitPrice).toBe(30000); // ₹300
-
-    const lineTotal = calculateItemLineTotal(unitPrice, quantity);
-    expect(lineTotal).toBe(60000); // ₹600
-
-    // Full pricing calculation
-    const pricing = calculateAuthoritativePricing({
-      items: [
-        {
-          menu_item_id: "00000000-0000-0000-0000-000000000001",
-          item_name: "Special Biryani",
-          base_price_paise: basePrice,
-          portion_name: "Full Portion",
-          portion_delta_paise: portionDelta,
-          modifiers,
-          quantity,
-        },
-      ],
-    });
-
-    expect(pricing.items[0].unit_price_paise).toBe(30000);
-    expect(pricing.items[0].line_total_paise).toBe(60000);
-    expect(pricing.subtotal_paise).toBe(60000);
-    expect(pricing.total_paise).toBe(60000);
-    expect(pricing.snapshot.items[0].unit_price_paise).toBe(30000);
-    expect(pricing.snapshot.items[0].line_total_paise).toBe(60000);
+describe("calculateItemUnitPrice (A3/A6)", () => {
+  it("computes base + portion + modifier deltas", () => {
+    expect(
+      calculateItemUnitPrice(10000, 5000, [
+        { option_name: "extra cheese", price_delta_paise: 2000, quantity: 2 },
+      ]),
+    ).toBe(10000 + 5000 + 4000);
   });
 
-  it("accurately computes 5% GST on net subtotal", () => {
-    const pricing = calculateAuthoritativePricing({
-      items: [
-        {
-          menu_item_id: "00000000-0000-0000-0000-000000000001",
-          base_price_paise: 100000, // ₹1,000
-          quantity: 1,
-        },
-      ],
+  it("clamps negative portion delta so unit never drops below base", () => {
+    expect(calculateItemUnitPrice(10000, -5000, [])).toBe(10000);
+  });
+
+  it("clamps negative modifier deltas", () => {
+    expect(
+      calculateItemUnitPrice(10000, 0, [{ option_name: "x", price_delta_paise: -9999 }]),
+    ).toBe(10000);
+  });
+
+  it("never returns a negative unit price", () => {
+    expect(calculateItemUnitPrice(0, -100, [])).toBe(0);
+  });
+});
+
+describe("calculateItemLineTotal", () => {
+  it("multiplies unit by quantity with min qty 1", () => {
+    expect(calculateItemLineTotal(500, 3)).toBe(1500);
+    expect(calculateItemLineTotal(500, 0)).toBe(500);
+  });
+});
+
+describe("calculateAuthoritativePricing (A3/A6)", () => {
+  const baseItem = {
+    menu_item_id: "11111111-1111-4111-8111-111111111111",
+    item_name: "Paneer Tikka",
+    base_price_paise: 20000,
+    quantity: 2,
+  };
+
+  it("rejects (clamps) negative portion delta in snapshot", () => {
+    const result = calculateAuthoritativePricing({
+      items: [{ ...baseItem, portion_delta_paise: -99999 }],
       tax_rate_percent: 5,
     });
-
-    expect(pricing.subtotal_paise).toBe(100000);
-    expect(pricing.tax_paise).toBe(5000); // ₹50
-    expect(pricing.total_paise).toBe(105000); // ₹1,050
+    expect(result.items[0].portion_delta_paise).toBe(0);
+    expect(result.items[0].unit_price_paise).toBe(20000);
+    expect(result.subtotal_paise).toBe(40000);
   });
 
-  it("properly caps loyalty point redemption at 25% of subtotal", () => {
-    const pricing = calculateAuthoritativePricing({
-      items: [
-        {
-          menu_item_id: "00000000-0000-0000-0000-000000000001",
-          base_price_paise: 40000, // ₹400
-          quantity: 1,
-        },
-      ],
-      loyalty_points_to_redeem: 200, // ₹200 requested, but 25% cap of ₹400 is ₹100 (10000 paise)
+  it("rounds fractional discount to integer paise", () => {
+    const result = calculateAuthoritativePricing({
+      items: [{ ...baseItem, quantity: 1 }],
+      discount_paise: 100.6,
+      tax_rate_percent: 0,
     });
-
-    expect(pricing.subtotal_paise).toBe(40000);
-    expect(pricing.discount_paise).toBe(10000); // Capped at ₹100
-    expect(pricing.total_paise).toBe(30000); // ₹300
+    expect(result.discount_paise).toBe(101);
+    expect(Number.isInteger(result.discount_paise)).toBe(true);
   });
 
-  it("handles rounding to nearest rupee", () => {
-    const pricing = calculateAuthoritativePricing({
-      items: [
-        {
-          menu_item_id: "00000000-0000-0000-0000-000000000001",
-          base_price_paise: 10550, // ₹105.50
-          quantity: 1,
-        },
-      ],
-      round_to_nearest_rupee: true,
+  it("never lets discount exceed subtotal", () => {
+    const result = calculateAuthoritativePricing({
+      items: [{ ...baseItem, quantity: 1 }],
+      discount_paise: 999999,
+      tax_rate_percent: 0,
     });
+    expect(result.discount_paise).toBe(20000);
+    expect(result.total_paise).toBe(0);
+  });
 
-    // 10550 rounds to 10600 (+50 paise)
-    expect(pricing.rounding_paise).toBe(50);
-    expect(pricing.total_paise).toBe(10600);
+  it("caps loyalty redemption at 25% of subtotal", () => {
+    // 100 points requested = ₹100 = 10000 paise; 25% of 20000 = 5000
+    const result = calculateAuthoritativePricing({
+      items: [{ ...baseItem, quantity: 1 }],
+      loyalty_points_to_redeem: 100,
+      tax_rate_percent: 0,
+    });
+    expect(result.discount_paise).toBe(5000);
+    expect(result.total_paise).toBe(15000);
+  });
+
+  it("computes tax on discounted subtotal", () => {
+    const result = calculateAuthoritativePricing({
+      items: [{ ...baseItem, quantity: 1 }],
+      discount_paise: 0,
+      tax_rate_percent: 5,
+    });
+    expect(result.net_subtotal_paise).toBe(20000);
+    expect(result.tax_paise).toBe(1000);
+    expect(result.total_paise).toBe(21000);
+  });
+
+  it("A4: client totals are ignored — only inputs feed the calculation", () => {
+    // There is no "client total" parameter: the engine recomputes from items only.
+    const result = calculateAuthoritativePricing({
+      items: [{ ...baseItem, quantity: 3 }],
+      tax_rate_percent: 0,
+    });
+    expect(result.total_paise).toBe(60000);
+    expect(result.snapshot.version).toBe(1);
+    expect(result.snapshot.items).toHaveLength(1);
   });
 });

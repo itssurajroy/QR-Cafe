@@ -7,7 +7,6 @@ import {
   PIN_SESSION_COOKIE,
   PIN_SESSION_TTL_MS,
   signPinSession,
-  validatePinFormat,
   verifyPinHash,
 } from "@/lib/pin-auth";
 
@@ -87,6 +86,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid café code or PIN" }, { status: 401 });
   }
 
+  // Targeted staff already locked → 423 (do not burn further attempts).
+  if (staff_id && candidates[0]) {
+    const target = candidates[0];
+    if (
+      target.pin_locked_until &&
+      new Date(target.pin_locked_until).getTime() > Date.now()
+    ) {
+      return NextResponse.json(
+        { error: "Account locked. Try again later.", status: "locked" },
+        { status: 423 },
+      );
+    }
+  }
+
   // 3. Constant-work comparison across candidates
   let matched: (typeof candidates)[number] | null = null;
   for (const c of candidates) {
@@ -107,23 +120,28 @@ export async function POST(req: NextRequest) {
       const target = candidates[0];
       const attempts = (target.pin_failed_attempts || 0) + 1;
       const now = Date.now();
+      const lockedUntil =
+        attempts >= MAX_PIN_ATTEMPTS ? new Date(now + PIN_LOCK_MS).toISOString() : null;
       await admin
         .from("cafe_profiles")
         .update({
           pin_failed_attempts: attempts,
-          pin_locked_until: attempts >= MAX_PIN_ATTEMPTS ? new Date(now + PIN_LOCK_MS).toISOString() : null,
+          pin_locked_until: lockedUntil,
         })
         .eq("id", target.id);
+
+      if (lockedUntil) {
+        return NextResponse.json(
+          {
+            error: "Account locked after too many failed attempts",
+            status: "locked",
+            retryAfter: Math.ceil(PIN_LOCK_MS / 1000),
+          },
+          { status: 423 },
+        );
+      }
     }
     return NextResponse.json({ error: "Invalid PIN or account locked" }, { status: 401 });
-  }
-
-  // Reset failed attempts on successful login
-  if ((matched.pin_failed_attempts || 0) > 0 || matched.pin_locked_until) {
-    await admin
-      .from("cafe_profiles")
-      .update({ pin_failed_attempts: 0, pin_locked_until: null })
-      .eq("id", matched.id);
   }
 
   // 4. PIN sessions are counter-staff only (kitchen/waiter/staff).
@@ -143,15 +161,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 5. Reset failure counters, issue signed session cookie.
+  // Reset failure counters on successful login, then issue signed session cookie.
   await admin
     .from("cafe_profiles")
     .update({ pin_failed_attempts: 0, pin_locked_until: null })
     .eq("id", matched.id);
-
-  if (!validatePinFormat(pin)) {
-    return NextResponse.json({ error: "Invalid café code or PIN" }, { status: 401 });
-  }
 
   const token = await signPinSession({ sub: matched.id, rid: matched.restaurant_id, role });
 

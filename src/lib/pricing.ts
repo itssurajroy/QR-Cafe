@@ -60,6 +60,10 @@ export interface PricingCalculationOptions {
 /**
  * Calculates item unit price authoritative server-side:
  * Unit = base + portion_delta + sum(modifier_delta * modifier_quantity)
+ *
+ * A3/A6 hardening: portion_delta and modifier deltas are clamped to >= 0 so a
+ * negative client-supplied delta can never reduce the unit price below base.
+ * (The order route also rejects negative/excessive portion deltas outright.)
  */
 export function calculateItemUnitPrice(
   basePricePaise: number,
@@ -70,7 +74,8 @@ export function calculateItemUnitPrice(
     const qty = m.quantity !== undefined && m.quantity > 0 ? m.quantity : 1;
     return acc + Math.max(0, m.price_delta_paise) * qty;
   }, 0);
-  return Math.max(0, basePricePaise + portionDeltaPaise + modTotal);
+  const safePortionDelta = Math.max(0, portionDeltaPaise || 0);
+  return Math.max(0, basePricePaise + safePortionDelta + modTotal);
 }
 
 /**
@@ -114,7 +119,8 @@ export function calculateAuthoritativePricing(
 
   for (const it of items) {
     const qty = Math.max(1, it.quantity || 1);
-    const portionDelta = it.portion_delta_paise || 0;
+    // A3: clamp negative portion deltas so they never reduce the unit price.
+    const portionDelta = Math.max(0, it.portion_delta_paise || 0);
     const sanitizedMods = (it.modifiers || []).map((m) => ({
       option_name: m.option_name,
       price_delta_paise: Math.max(0, m.price_delta_paise || 0),
@@ -149,9 +155,11 @@ export function calculateAuthoritativePricing(
   const requestedLoyaltyPaise = Math.max(0, loyalty_points_to_redeem) * 100;
   const effectiveLoyaltyPaise = Math.min(requestedLoyaltyPaise, maxLoyaltyPaise);
 
+  // A6: round client discount to integer paise before clamping to subtotal.
+  const safeDiscountPaise = Math.round(Math.max(0, discount_paise));
   const totalDiscountPaise = Math.min(
     subtotal,
-    Math.max(0, discount_paise) + effectiveLoyaltyPaise,
+    safeDiscountPaise + effectiveLoyaltyPaise,
   );
   const netSubtotalPaise = Math.max(0, subtotal - totalDiscountPaise);
 

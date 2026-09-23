@@ -27,6 +27,7 @@ import {
   LifebuoyIcon,
   ManualIcon,
 } from "@/components/Icons";
+import { InstallPwaButton } from "@/components/pwa/InstallPwaButton";
 
 import { canAccessTab, getRoleBadge } from "@/lib/role-permissions";
 
@@ -358,6 +359,11 @@ export function AdminAppShell({
 
           {/* Sidebar Footer */}
           <div className="p-3 border-t border-[#E7E4F0] space-y-2">
+            <InstallPwaButton
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-all ${
+                collapsed ? "justify-center px-0" : ""
+              }`}
+            />
             <Link
               href={`/c/${restaurantSlug}`}
               target="_blank"
@@ -470,7 +476,17 @@ export function AdminAppShell({
               </div>
 
               {/* Sheet Footer */}
-              <div className="pt-3 border-t border-[#E7E4F0] flex items-center justify-between shrink-0">
+              <div className="pt-3 border-t border-[#E7E4F0] flex flex-col gap-2 shrink-0">
+                <div className="flex items-center justify-between">
+                  <InstallPwaButton className="text-xs font-bold text-emerald-600 hover:text-emerald-700 py-2 px-3 rounded-xl hover:bg-emerald-50" />
+                  <Link
+                    href={`/c/${restaurantSlug}`}
+                    target="_blank"
+                    className="text-xs font-bold text-[#5738F5] hover:underline py-2 px-3"
+                  >
+                    Guest Menu ↗
+                  </Link>
+                </div>
                 <button
                   type="button"
                   onClick={handleLogout}

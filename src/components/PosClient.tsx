@@ -74,6 +74,7 @@ interface PosOrder {
   status: string;
   payment_status: string;
   payment_method?: string;
+  priority?: boolean;
   split_cash_paise?: number;
   split_upi_paise?: number;
   total_paise: number;
@@ -110,6 +111,9 @@ export default function PosClient({
 }) {
   // Kitchen role is KDS-only: locked to the kitchen view (no billing/floor).
   const isKitchenLocked = userRole === "kitchen";
+  // PAY / settle is owner, manager, or super_admin only (mirrors server POS_SETTLE_ROLES).
+  const canSettlePay =
+    userRole === "owner" || userRole === "manager" || userRole === "super_admin";
   const printer = usePrinter();
   const [reservationList, setReservationList] = useState(reservations);
   useEffect(() => {
@@ -191,6 +195,8 @@ export default function PosClient({
 
   // Customer & Loyalty State
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerGstin, setCustomerGstin] = useState("");
+  const [rushPriority, setRushPriority] = useState(false);
   const [customerPoints, setCustomerPoints] = useState<number | null>(null);
   const [redeemPoints, setRedeemPoints] = useState<number>(0);
   const [isCheckingPoints, setIsCheckingPoints] = useState(false);
@@ -213,6 +219,8 @@ export default function PosClient({
 
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "upi" | "card" | "mixed">("cash");
   const [isSettling, setIsSettling] = useState(false);
+  // B2: orders with a settle PATCH in flight — ignore re-clicks / disable PAY.
+  const [settlingOrderIds, setSettlingOrderIds] = useState<ReadonlySet<string>>(new Set());
   const [amountReceived, setAmountReceived] = useState<string>("");
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
@@ -563,6 +571,10 @@ export default function PosClient({
 
   const handleSettle = useCallback(
     async (status: "paid" | "unpaid") => {
+      if (status === "paid" && !canSettlePay) {
+        flash("err", "Only managers and owners can settle payments");
+        return;
+      }
       if (cart.length === 0 || isSettling) return;
       setIsSettling(true);
       try {
@@ -591,6 +603,9 @@ export default function PosClient({
             payment_status: status,
             split_cash_paise: splitCashPaise,
             split_upi_paise: splitUpiPaise,
+            customer_gstin: customerGstin || undefined,
+            priority: rushPriority,
+            idempotency_key: crypto.randomUUID(),
           }),
         });
         const json = await res.json();
@@ -690,20 +705,41 @@ export default function PosClient({
       flash,
       speakVoice,
       clearCart,
+      canSettlePay,
     ]
   );
 
   const handleUnlockPin = useCallback(
-    (pinToTest?: string) => {
+    async (pinToTest?: string) => {
       const pin = pinToTest !== undefined ? pinToTest : enteredPin;
-      // Default unlock PIN is 1234 or any 4 digits
-      if (pin === "1234" || pin.length === 4) {
-        setIsPosLocked(false);
+      if (!/^\d{4}$/.test(pin)) {
+        setPinError("Enter a 4-digit PIN");
+        setTimeout(() => setPinError(""), 2500);
+        return;
+      }
+      try {
+        const res = await fetch("/api/pos/unlock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pin }),
+        });
+        const data: { error?: string; needsPassword?: boolean } = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setIsPosLocked(false);
+          setEnteredPin("");
+          setPinError("");
+          flash("ok", `Station Unlocked — Welcome back, ${userName}`);
+        } else if (data.needsPassword) {
+          setPinError(data.error || "No staff PIN set. Switch user to unlock.");
+          setTimeout(() => setPinError(""), 4000);
+        } else {
+          setPinError(data.error || "Invalid PIN");
+          setEnteredPin("");
+          setTimeout(() => setPinError(""), 2500);
+        }
+      } catch {
+        setPinError("Unlock failed — check connection");
         setEnteredPin("");
-        setPinError("");
-        flash("ok", `Station Unlocked — Welcome back, ${userName}`);
-      } else {
-        setPinError("Invalid PIN (Default: 1234)");
         setTimeout(() => setPinError(""), 2500);
       }
     },
@@ -762,7 +798,9 @@ export default function PosClient({
         }
       } else if (e.key === "F7") {
         e.preventDefault();
-        if (cart.length > 0 && !isSettling) {
+        if (!canSettlePay) {
+          flash("err", "Only managers and owners can settle payments (F7)");
+        } else if (cart.length > 0 && !isSettling) {
           handleSettle("paid");
         } else if (cart.length === 0) {
           flash("err", "Cart is empty — add dishes before settling bill (F7)");
@@ -792,6 +830,7 @@ export default function PosClient({
     clearCart,
     flash,
     handleUnlockPin,
+    canSettlePay,
   ]);
 
   const tableOrderCounts = useMemo(() => {
@@ -812,20 +851,32 @@ export default function PosClient({
     const prevStatus = liveOrders.find((o) => o.id === id)?.status;
     setLiveOrders((list) => list.map((o) => (o.id === id ? { ...o, status } : o)));
     try {
-      const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-      if (error) throw error;
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Failed to update order status");
       speakVoice(`Order ${orderNumber} is ${status}`);
     } catch (err: unknown) {
       // Revert to the previous column on failure.
       if (prevStatus !== undefined) {
         setLiveOrders((list) => list.map((o) => (o.id === id ? { ...o, status: prevStatus } : o)));
       }
-      toast.error("Network Error: Ticket not updated");
+      toast.error(err instanceof Error ? err.message : "Network Error: Ticket not updated");
       flash("err", err instanceof Error ? err.message : "Failed to update order status");
     }
   };
 
   const handleSettleExistingOrder = async (orderId: string, table: Table, method: string = "cash") => {
+    // B2: ignore re-clicks while this order's settle is in flight.
+    if (!canSettlePay) {
+      flash("err", "Only managers and owners can settle payments");
+      return;
+    }
+    if (settlingOrderIds.has(orderId)) return;
+    setSettlingOrderIds((prev) => new Set(prev).add(orderId));
     try {
       const res = await fetch("/api/pos/active-orders", {
         method: "PATCH",
@@ -839,14 +890,24 @@ export default function PosClient({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Settlement failed");
-      toast.success(`Table #${table.label} settled and paid!`);
-      flash("ok", `Table #${table.label} bill settled ✓`);
-      speakVoice(`Table ${table.label} payment received`);
+      if (data.alreadySettled) {
+        toast.info?.("Bill was already settled");
+      } else {
+        toast.success(`Table #${table.label} settled and paid!`);
+        flash("ok", `Table #${table.label} bill settled ✓`);
+        speakVoice(`Table ${table.label} payment received`);
+      }
       fetchLiveOrders();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to settle table";
       toast.error(message);
       flash("err", message);
+    } finally {
+      setSettlingOrderIds((prev) => {
+        const next = new Set(prev);
+        next.delete(orderId);
+        return next;
+      });
     }
   };
 
@@ -912,15 +973,25 @@ export default function PosClient({
     activeOrders: any[]
   ) => {
     try {
-      for (const ord of activeOrders) {
-        const { error } = await supabase
-          .from("orders")
-          .update({
-            table_id: destinationTable.id,
-            table_label: destinationTable.label,
-          })
-          .eq("id", ord.id);
-        if (error) throw error;
+      const orderIds = activeOrders
+        .map((ord) => String(ord.id || ""))
+        .filter((id) => id.length > 0);
+      if (orderIds.length === 0) {
+        toast.error("No orders to transfer");
+        return;
+      }
+      const res = await fetch("/api/pos/transfer-table", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order_ids: orderIds,
+          destination_table_id: destinationTable.id,
+          destination_table_label: destinationTable.label,
+        }),
+      });
+      const data: { error?: string; transferred?: number } = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to transfer table orders");
       }
       toast.success(
         `Table #${sourceTable.label} orders transferred to Table #${destinationTable.label}!`
@@ -1224,6 +1295,7 @@ export default function PosClient({
           setAmountReceived={setAmountReceived}
           isSettling={isSettling}
           handleSettle={handleSettle}
+          canSettlePay={canSettlePay}
 
           msg={msg}
           totalItemCount={totalItemCount}
@@ -1232,6 +1304,10 @@ export default function PosClient({
           finalTotalPaise={finalTotalPaise}
           customerPhone={customerPhone}
           setCustomerPhone={setCustomerPhone}
+          customerGstin={customerGstin}
+          setCustomerGstin={setCustomerGstin}
+          rushPriority={rushPriority}
+          setRushPriority={setRushPriority}
           customerPoints={customerPoints}
           redeemPoints={redeemPoints}
           setRedeemPoints={setRedeemPoints}
@@ -1268,6 +1344,7 @@ export default function PosClient({
           tables={tables}
           orders={liveOrders}
           reservations={reservationList}
+          unsettledIds={settlingOrderIds}
           onSelectTable={(tbl) => {
             setSelectedTable(tbl);
           }}
@@ -1275,9 +1352,13 @@ export default function PosClient({
             setSelectedTable(tbl);
             setViewMode("catalog");
           }}
-          onSettleOrder={(orderId, tbl) => {
-            handleSettleExistingOrder(orderId, tbl, "cash");
-          }}
+          onSettleOrder={
+            canSettlePay
+              ? (orderId, tbl) => {
+                  handleSettleExistingOrder(orderId, tbl, "cash");
+                }
+              : undefined
+          }
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onActionReservation={handleActionReservation}
           onTransferTable={handleTransferTable}
@@ -1618,10 +1699,35 @@ export default function PosClient({
 
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     const email = prompt("Enter guest email address to send invoice:");
-                    if (email && email.includes("@")) {
+                    if (!email || !email.includes("@")) {
+                      if (email) flash("err", "Invalid email address");
+                      return;
+                    }
+                    if (!lastBill.id) {
+                      flash("err", "No order id — cannot email invoice");
+                      return;
+                    }
+                    try {
+                      const res = await fetch("/api/invoice-email", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          order_id: lastBill.id,
+                          email: email.trim(),
+                        }),
+                      });
+                      const data = await res.json().catch(() => ({}));
+                      if (!res.ok) {
+                        throw new Error(data.error || `Request failed (${res.status})`);
+                      }
                       flash("ok", `Invoice emailed to ${email} ✓`);
+                    } catch (err) {
+                      flash(
+                        "err",
+                        err instanceof Error ? err.message : "Failed to email invoice",
+                      );
                     }
                   }}
                   className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
@@ -1958,7 +2064,7 @@ export default function PosClient({
             </div>
 
             <div className="pt-2 border-t border-black/[0.06] flex items-center justify-between text-xs">
-              <span className="text-[10px] text-slate-400 font-mono">Default PIN: 1234</span>
+              <span className="text-[10px] text-slate-400 font-mono">Staff PIN required</span>
               <Link
                 href="/login"
                 className="text-xs font-semibold text-[#007AFF] hover:underline"

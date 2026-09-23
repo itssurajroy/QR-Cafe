@@ -113,12 +113,15 @@ export default function KdsClient({
     tableLabel: string
   ) => {
     try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status })
-        .eq("id", id);
-
-      if (error) throw error;
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update order status");
+      }
 
       playAudioTone("statusChange");
       flash("ok", `Order #${orderNumber} (${tableLabel}) updated to ${status.toUpperCase()}`);

@@ -1,6 +1,22 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { SupabaseClient } from "@supabase/supabase-js";
 
+type EarnResult = {
+  pointsEarned: number;
+  newTotalPoints: number;
+  customerId?: string;
+  already?: boolean;
+};
+
+function rpcJson(data: unknown): Record<string, unknown> {
+  if (data && typeof data === "object") return data as Record<string, unknown>;
+  return {};
+}
+
+/**
+ * Atomic loyalty earn (A12). Delegates to p_earn_loyalty RPC so concurrent
+ * settles cannot lose balance/spend/visit updates.
+ */
 export async function processCustomerLoyalty(
   db: SupabaseClient,
   restaurantId: string,
@@ -9,68 +25,30 @@ export async function processCustomerLoyalty(
   totalPaise: number,
   orderId?: string,
   orderNumber?: string,
-) {
+): Promise<EarnResult> {
   if (!customerPhone) return { pointsEarned: 0, newTotalPoints: 0 };
 
-  // 1 point per ₹100 spent (10,000 paise)
-  const pointsEarned = Math.floor(totalPaise / 10000);
+  const { data, error } = await db.rpc("p_earn_loyalty", {
+    p_restaurant_id: restaurantId,
+    p_phone: customerPhone,
+    p_name: customerName || "",
+    p_total_paise: totalPaise,
+    p_order_id: orderId || null,
+    p_order_number: orderNumber || null,
+  });
 
-  const { data: cust } = await db
-    .from("restaurant_customers")
-    .select("id, name, total_spent_paise, loyalty_points, visit_count")
-    .eq("restaurant_id", restaurantId)
-    .eq("phone", customerPhone)
-    .maybeSingle();
-
-  let customerId = cust?.id;
-  let newTotalPoints = pointsEarned;
-
-  if (cust) {
-    newTotalPoints += (cust.loyalty_points || 0);
-    await db
-      .from("restaurant_customers")
-      .update({
-        name: customerName || cust.name,
-        total_spent_paise: (cust.total_spent_paise || 0) + totalPaise,
-        loyalty_points: newTotalPoints,
-        visit_count: (cust.visit_count || 0) + 1,
-        last_visit_at: new Date().toISOString(),
-      })
-      .eq("id", cust.id);
-  } else {
-    const { data: inserted } = await db
-      .from("restaurant_customers")
-      .insert({
-        restaurant_id: restaurantId,
-        phone: customerPhone,
-        name: customerName || "",
-        loyalty_points: newTotalPoints,
-        total_spent_paise: totalPaise,
-        visit_count: 1,
-      })
-      .select("id")
-      .single();
-    customerId = inserted?.id;
+  if (error) {
+    console.error("[CRM] p_earn_loyalty failed:", error.message);
+    throw new Error("Failed to process loyalty: " + error.message);
   }
 
-  // Record in immutable loyalty transaction ledger
-  if (customerId && pointsEarned > 0) {
-    try {
-      await db.from("loyalty_transactions").insert({
-        restaurant_id: restaurantId,
-        customer_id: customerId,
-        order_id: orderId || null,
-        points: pointsEarned,
-        balance_after: newTotalPoints,
-        type: "earn",
-        notes: orderNumber ? `Earned on order #${orderNumber}` : "Points earned from dine-in payment",
-      });
-    } catch (txErr) {
-      console.error("[CRM] Failed to record loyalty earn transaction:", txErr);
-    }
-  }
-
-  return { pointsEarned, newTotalPoints };
+  const payload = rpcJson(data);
+  return {
+    pointsEarned: Number(payload.pointsEarned ?? 0),
+    newTotalPoints: Number(payload.newTotalPoints ?? 0),
+    customerId: typeof payload.customerId === "string" ? payload.customerId : undefined,
+    already: payload.already === true,
+  };
 }
 
 export async function getCustomerBalance(
@@ -92,114 +70,84 @@ export async function getCustomerBalance(
   };
 }
 
+/**
+ * Atomic loyalty redeem (A12). Row-locked debit inside p_redeem_loyalty.
+ */
 export async function redeemCustomerPoints(
   db: SupabaseClient,
   restaurantId: string,
   customerPhone: string,
   pointsToRedeem: number,
   orderId?: string,
-) {
+): Promise<boolean> {
   if (!customerPhone || pointsToRedeem <= 0) return false;
 
-  const { data: cust } = await db
-    .from("restaurant_customers")
-    .select("id, loyalty_points")
-    .eq("restaurant_id", restaurantId)
-    .eq("phone", customerPhone)
-    .maybeSingle();
-
-  if (!cust || (cust.loyalty_points || 0) < pointsToRedeem) {
-    throw new Error("Insufficient loyalty points");
-  }
-
-  const newPoints = (cust.loyalty_points || 0) - pointsToRedeem;
-
-  const { error } = await db
-    .from("restaurant_customers")
-    .update({ loyalty_points: newPoints })
-    .eq("id", cust.id);
-
-  if (error) throw new Error("Failed to redeem points: " + error.message);
-
-  // Record in immutable loyalty transaction ledger
-  try {
-    await db.from("loyalty_transactions").insert({
-      restaurant_id: restaurantId,
-      customer_id: cust.id,
-      order_id: orderId || null,
-      points: -pointsToRedeem,
-      balance_after: newPoints,
-      type: "redeem",
-      notes: orderId ? `Redeemed on order ${orderId}` : "Points redeemed against bill",
-    });
-  } catch (txErr) {
-    console.error("[CRM] Failed to record loyalty redeem transaction:", txErr);
-  }
-
-  await db.from("audit_events").insert({
-    restaurant_id: restaurantId,
-    entity: "customer_points",
-    entity_id: cust.id,
-    action: "points_redeemed",
-    metadata: {
-      adjustment: -pointsToRedeem,
-      previous_balance: cust.loyalty_points,
-      new_balance: newPoints,
-      order_id: orderId,
-      reason: "Redeemed on order",
-    },
+  const { error } = await db.rpc("p_redeem_loyalty", {
+    p_restaurant_id: restaurantId,
+    p_phone: customerPhone,
+    p_points: pointsToRedeem,
+    p_order_id: orderId || null,
   });
+
+  if (error) {
+    const msg = error.message || "";
+    if (msg.includes("Insufficient")) throw new Error("Insufficient loyalty points");
+    throw new Error("Failed to redeem points: " + msg);
+  }
 
   return true;
 }
 
 /**
- * Reverses loyalty points for refunded or cancelled orders
+ * Atomic reverse for refunded/cancelled orders (A12).
+ * Compensation sign: reverse ledger entry is always -abs(earn.points);
+ * redeem restores with +abs(redeem.points). Idempotent per order.
  */
 export async function reverseCustomerLoyalty(
   db: SupabaseClient,
   restaurantId: string,
   orderId: string,
   reason: string = "Order refund",
-) {
+): Promise<void> {
   if (!orderId) return;
 
-  // Find earn transaction for this order
-  const { data: earnTxs } = await db
-    .from("loyalty_transactions")
-    .select("id, customer_id, points")
-    .eq("restaurant_id", restaurantId)
-    .eq("order_id", orderId)
-    .eq("type", "earn");
+  const { error } = await db.rpc("p_reverse_loyalty", {
+    p_restaurant_id: restaurantId,
+    p_order_id: orderId,
+    p_reason: reason,
+  });
 
-  if (!earnTxs || earnTxs.length === 0) return;
-
-  for (const tx of earnTxs) {
-    if (tx.points <= 0) continue;
-
-    const { data: cust } = await db
-      .from("restaurant_customers")
-      .select("id, loyalty_points")
-      .eq("id", tx.customer_id)
-      .maybeSingle();
-
-    if (!cust) continue;
-
-    const newBalance = Math.max(0, (cust.loyalty_points || 0) - tx.points);
-
-    await db
-      .from("restaurant_customers")
-      .update({ loyalty_points: newBalance })
-      .eq("id", cust.id);
-
-    await db.from("loyalty_transactions").insert({
-      restaurant_id: restaurantId,
-      customer_id: cust.id,
-      order_id: orderId,
-      points: -tx.points,
-      balance_after: newBalance,
-      type: "reverse",
-      notes: `Reversal: ${reason} (Order ${orderId})`,
-    });
+  if (error) {
+    console.error("[CRM] p_reverse_loyalty failed:", error.message);
+    throw new Error("Failed to reverse loyalty: " + error.message);
   }
+}
+
+/**
+ * Atomic visit counter (B3). Does not award points or spend.
+ */
+export async function countCustomerVisit(
+  db: SupabaseClient,
+  restaurantId: string,
+  customerPhone: string,
+  customerName: string = "",
+): Promise<{ customerId?: string; visitCount: number } | null> {
+  if (!customerPhone) return null;
+
+  const { data, error } = await db.rpc("p_count_visit", {
+    p_restaurant_id: restaurantId,
+    p_phone: customerPhone,
+    p_name: customerName || "",
+  });
+
+  if (error) {
+    console.error("[CRM] p_count_visit failed:", error.message);
+    throw new Error("Failed to count visit: " + error.message);
+  }
+
+  const payload = rpcJson(data);
+  return {
+    customerId: typeof payload.customerId === "string" ? payload.customerId : undefined,
+    visitCount: Number(payload.visitCount ?? 0),
+  };
 }

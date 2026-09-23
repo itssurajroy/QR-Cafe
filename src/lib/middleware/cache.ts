@@ -35,4 +35,5 @@ class EdgeCache<T> {
 // Global cache instances that persist across some requests in the same isolate
 export const tenantCache = new EdgeCache<any>(30000); // 30 seconds for tenant metadata
 export const profileCache = new EdgeCache<any>(15000); // 15 seconds for auth roles
+export const consentCache = new EdgeCache<any>(15000); // 15 seconds for consent state
 

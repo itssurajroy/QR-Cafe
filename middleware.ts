@@ -5,6 +5,7 @@ import { resolveTenant } from "./src/lib/middleware/tenant";
 import { checkAuthAndProfile } from "./src/lib/middleware/auth";
 import { checkRoleAccess } from "./src/lib/middleware/roles";
 import { checkSubscriptionAccess } from "./src/lib/middleware/subscription";
+import { checkConsentAccess } from "./src/lib/middleware/consent";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -84,6 +85,19 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-user-role", profile.role);
   if (profile.restaurant_id) {
     requestHeaders.set("x-restaurant-id", profile.restaurant_id);
+  }
+
+  // 5.5 DPDP Consent Guard
+  const consentCheck = await checkConsentAccess(request, user);
+  if (!consentCheck.allowed) {
+    if (isApiRoute(pathname)) {
+      return NextResponse.json({ error: consentCheck.error }, { status: 403 });
+    }
+    // Allow users to reach the consent page to re-opt-in, or logout.
+    if (!pathname.startsWith("/privacy") && !pathname.startsWith("/login") && !pathname.startsWith("/logout")) {
+      const redirectUrl = new URL("/privacy/consent-required", request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   // 6. Role & Isolation Guard

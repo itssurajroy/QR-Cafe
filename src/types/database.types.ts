@@ -2371,6 +2371,42 @@ export type Database = {
     Functions: {
       qrcafe_auth_restaurant_id: { Args: never; Returns: string }
       qrcafe_auth_role: { Args: never; Returns: string }
+      p_count_visit: {
+        Args: {
+          p_restaurant_id: string
+          p_phone: string
+          p_name?: string
+        }
+        Returns: Json
+      }
+      p_earn_loyalty: {
+        Args: {
+          p_restaurant_id: string
+          p_phone: string
+          p_name?: string
+          p_total_paise?: number
+          p_order_id?: string | null
+          p_order_number?: string | null
+        }
+        Returns: Json
+      }
+      p_redeem_loyalty: {
+        Args: {
+          p_restaurant_id: string
+          p_phone: string
+          p_points: number
+          p_order_id?: string | null
+        }
+        Returns: Json
+      }
+      p_reverse_loyalty: {
+        Args: {
+          p_restaurant_id: string
+          p_order_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
