@@ -3,6 +3,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useSuperAdmin } from "../SuperAdminContext";
+import { SubscriptionPlan } from "../types";
 
 type BillingRow = {
   id: string;
@@ -30,7 +31,7 @@ function paiseToRupees(paise: number | null | undefined) {
 }
 
 export function BillingTab() {
-  const { tab } = useSuperAdmin();
+  const { tab, subscriptionPlans } = useSuperAdmin();
   const [rows, setRows] = useState<BillingRow[]>([]);
   const [events, setEvents] = useState<BillingEvent[]>([]);
   const [mrrPaise, setMrrPaise] = useState(0);
@@ -204,7 +205,7 @@ export function BillingTab() {
                       </span>
                     </td>
                     <td className="p-4 font-mono font-bold text-slate-900">
-                      {paiseToRupees(typeof r.mrr_cents === "number" ? r.mrr_cents : s === "active" ? 99900 : 0)}
+                      {paiseToRupees(typeof r.mrr_cents === "number" ? r.mrr_cents : s === "active" ? (subscriptionPlans?.find((p: SubscriptionPlan) => p.slug === "complete_monthly")?.price_paise ?? 99900) : 0)}
                     </td>
                     <td className="p-4 text-right space-x-2">
                       <button

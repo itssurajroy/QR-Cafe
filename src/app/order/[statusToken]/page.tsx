@@ -19,7 +19,6 @@ import {
   ArrowRightIcon,
   MessageCircleIcon,
 } from "@/components/Icons";
-import RazorpayPaymentButton from "@/components/RazorpayPaymentButton";
 
 const STEPS = [
   {
@@ -325,19 +324,10 @@ export default function OrderStatusPage({
               </h3>
               <p className="text-xs text-amber-800/90 mt-0.5">
                 {data.status === "served"
-                  ? "Your order is served! Please settle your bill at the counter or pay online below."
-                  : "Complete your payment to confirm the order."}
+                  ? "Your order is served! Please settle your bill at the counter."
+                  : "Complete your payment at the counter to confirm the order."}
               </p>
             </div>
-            <RazorpayPaymentButton
-              orderId={data.id}
-              orderNumber={data.order_number}
-              amountPaise={data.total_paise}
-              restaurantName={data.restaurant_name || "QRslice"}
-              onSuccess={() => {
-                window.location.reload();
-              }}
-            />
           </div>
         )}
 

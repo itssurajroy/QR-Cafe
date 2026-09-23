@@ -61,6 +61,7 @@ export default async function SuperPage({
     { data: platformConfigRows },
     { data: recentAudit },
     { data: authUsersData },
+    { data: subscriptionPlans },
   ] = await Promise.all([
     query.range(fromIdx, toIdx),
     db.from("restaurants").select("id, name, slug, plan, tier, trial_ends_at, subscription_ends_at, billing_status, created_at"),
@@ -70,16 +71,23 @@ export default async function SuperPage({
     db.from("platform_config").select("*"),
     db.from("audit_events").select("*, restaurants(name, slug)").order("created_at", { ascending: false }).limit(50),
     db.auth.admin.listUsers(),
+    db.from("subscription_plans").select("id, name, slug, price_paise, billing_cycle, features, sort_order").eq("active", true).order("sort_order", { ascending: true }),
   ]);
 
-  // Monthly price (paise) from platform_settings.pricing -> monthly_inr; fallback 99900 (₹999).
-  // Task-1 tables may not exist yet, so degrade gracefully and never crash.
+  // Monthly price (paise) from subscription_plans table; fallback 99900 (₹999).
+  // Uses the active monthly plan price.
   let monthlyPaise = 99900;
   try {
-    const { data: pricingRow } = await db.from("platform_settings").select("value").eq("key", "pricing").maybeSingle();
-    const monthlyInr = (pricingRow?.value as any)?.monthly_inr;
-    if (typeof monthlyInr === "number" && monthlyInr > 0) {
-      monthlyPaise = Math.round(monthlyInr * 100);
+    const { data: monthlyPlan } = await db
+      .from("subscription_plans")
+      .select("price_paise")
+      .eq("active", true)
+      .eq("billing_cycle", "monthly")
+      .order("sort_order", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (monthlyPlan?.price_paise) {
+      monthlyPaise = monthlyPlan.price_paise;
     }
   } catch {
     monthlyPaise = 99900;
@@ -258,6 +266,7 @@ export default async function SuperPage({
       config={configMap}
       recentAudit={recentAudit || []}
       initialTab={tab}
+      subscriptionPlans={subscriptionPlans || []}
     />
   );
 }

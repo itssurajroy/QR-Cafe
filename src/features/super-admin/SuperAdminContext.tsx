@@ -2,9 +2,9 @@
 "use client";
 import React, { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SuperClientProps, Cafe } from "./types";
+import { SuperClientProps, Cafe, SubscriptionPlan } from "./types";
 
-export type SuperAdminContextType = any; // We'll type this as 'any' for the refactor speed, but all state is here.
+export type SuperAdminContextType = any;
 
 const SuperAdminContext = createContext<SuperAdminContextType | null>(null);
 
@@ -21,8 +21,8 @@ function normalizeTab(t: string | null | undefined): string {
 export function SuperAdminProvider({ children, initialData }: { children: React.ReactNode, initialData: SuperClientProps }) {
   const router = useRouter();
   
-  const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit, initialTab, authUsers } = initialData as any;
-
+  const { cafes, totalCafes, page, pageSize, q: initialQ, planFilter: initialPlanFilter, staff, kpis, charts, config: initialConfig, recentAudit, initialTab, authUsers, subscriptionPlans } = initialData as any;
+  
   const [tab, setTabState] = useState<string>(normalizeTab(initialTab));
 
   React.useEffect(() => {
@@ -76,7 +76,7 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
   const [drawerData, setDrawerData] = useState<any>(null);
   const [loadingDrawer, setLoadingDrawer] = useState(false);
   const [drawerTab, setDrawerTab] = useState<"overview" | "menu" | "tables" | "orders" | "billing" | "audit" | "danger">("overview");
-
+  
   // New Café Modal
   const [showNewCafeModal, setShowNewCafeModal] = useState(false);
   const [newCafeName, setNewCafeName] = useState("");
@@ -210,6 +210,8 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
       if (res.ok) {
         flash("ok", "Refund note recorded in audit log");
         openDrawer(drawerCafeId);
+      } else {
+        flash("err", "Failed to record refund note");
       }
     } catch {
       flash("err", "Error recording refund note");
@@ -404,7 +406,9 @@ export function SuperAdminProvider({ children, initialData }: { children: React.
 
   const value = {
     cafes, totalCafes, page, pageSize, initialQ, initialPlanFilter, staff, kpis, charts, initialConfig, recentAudit, authUsers,
-    tab, setTab, mobileMenuOpen, setMobileMenuOpen, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab,     showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, newCafeOwnerName, setNewCafeOwnerName, newCafeOwnerEmail, setNewCafeOwnerEmail, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
+    subscriptionPlans,
+    tab, setTab, mobileMenuOpen, setMobileMenuOpen, broadcastInput, setBroadcastInput, isBroadcasting, setIsBroadcasting, searchQuery, setSearchQuery, selectedPlan, setSelectedPlan, drawerCafeId, setDrawerCafeId, drawerData, setDrawerData, loadingDrawer, setLoadingDrawer, drawerTab, setDrawerTab,
+    showNewCafeModal, setShowNewCafeModal, newCafeName, setNewCafeName, newCafeSlug, setNewCafeSlug, newCafeTier, setNewCafeTier, newCafePlan, setNewCafePlan, newCafeTagline, setNewCafeTagline, newCafePhone, setNewCafePhone, newCafeAddress, setNewCafeAddress, newCafeOwnerName, setNewCafeOwnerName, newCafeOwnerEmail, setNewCafeOwnerEmail, creatingCafe, setCreatingCafe, platformConfig, setPlatformConfig, savingConfigKey, setSavingConfigKey, auditRows, setAuditRows, auditLoading, setAuditLoading, auditActionFilter, setAuditActionFilter, toast, setToast,
     handleExtendTrial, handleMarkPaid, handleSetPlan, handleAddRefundNote, handleExportCSV, handleSaveBroadcast, handleFastExtendTrial, handleFastToggleStatus, handleDeleteCafe, handleSaveConfig, handleCreateCafeSubmit, loadFilteredAudit, openDrawer, applyFilter, totalPages, flash
   };
 

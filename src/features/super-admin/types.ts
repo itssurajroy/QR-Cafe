@@ -22,6 +22,17 @@ export interface SuperClientProps {
   recentAudit?: any[];
   initialTab?: string;
   authUsers?: Array<{ id: string; email: string; last_sign_in_at: string | null; role: string; app_metadata?: any; user_metadata?: any }>;
+  subscriptionPlans?: SubscriptionPlan[];
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  slug: string;
+  price_paise: number;
+  billing_cycle: "monthly" | "yearly";
+  features: string[];
+  sort_order: number;
 }
 
 export interface Cafe {

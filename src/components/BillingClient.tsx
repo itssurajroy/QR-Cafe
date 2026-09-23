@@ -28,6 +28,18 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
   const [error, setError] = useState<{ message: string; hint?: string } | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [rzpLoaded, setRzpLoaded] = useState(false);
+  const [plans, setPlans] = useState<Array<{ id: string; slug: string; billing_cycle: string }>>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/billing/plans")
+      .then((res) => res.json())
+      .then((data) => {
+        setPlans(data.plans || []);
+        setPlansLoading(false);
+      })
+      .catch(() => setPlansLoading(false));
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -69,6 +81,10 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
     if (simulate) {
       setSimulating(true);
     } else {
+      if (plansLoading) {
+        setError({ message: "Plans are still loading. Please wait a moment." });
+        return;
+      }
       setLoading(true);
     }
     setError(null);
@@ -101,10 +117,22 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
       }
 
       // 1. Create Razorpay order via our backend
+      const selectedPlan = plans.find((p) => p.billing_cycle === billingCycle);
+      const planId = selectedPlan?.id;
+      if (!planId) {
+        setError({
+          message: "Plan not found for selected billing cycle.",
+          hint: "Please try again or contact support.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 1. Create Razorpay order via our backend
       const orderRes = await fetch("/api/billing/subscription/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cycle: billingCycle }),
+        body: JSON.stringify({ plan_id: planId }),
       });
       const orderData = await orderRes.json();
 
@@ -356,13 +384,18 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                 <button
                   type="button"
                   onClick={() => handleSubscribe(false)}
-                  disabled={loading || simulating}
+                  disabled={loading || simulating || plansLoading}
                   className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold text-xs transition-all shadow-md shadow-[#007AFF]/20 active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
                       <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>Opening Razorpay…</span>
+                    </>
+                  ) : plansLoading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Loading plans…</span>
                     </>
                   ) : (
                     <>

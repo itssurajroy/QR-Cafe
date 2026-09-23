@@ -9,7 +9,6 @@ try {
 import makeWASocket, { WASocket, ConnectionState, AuthenticationState, SignalDataTypeMap, BaileysEventMap } from "@whiskeysockets/baileys";
 import { initAuthCreds } from "@whiskeysockets/baileys/lib/Utils/auth-utils";
 import { BaileysSessionStore } from "./session-store";
-import { Boom } from "@hapi/boom";
 import type { WhatsAppStatus } from "@/integrations/whatsapp/whatsapp.types";
 import type { ILogger } from "@whiskeysockets/baileys/lib/Utils/logger";
 
@@ -209,8 +208,8 @@ export class BaileysConnectionManager {
 
     if (update.connection === "close") {
       const connectionData = this.connections.get(tenantId);
-      const shouldReconnect = !update.lastDisconnect?.error ||
-        (update.lastDisconnect.error as Boom).output?.statusCode !== 403;
+      const error = update.lastDisconnect?.error as { output?: { statusCode?: number } } | undefined;
+      const shouldReconnect = !error || error.output?.statusCode !== 403;
 
       this.connections.delete(tenantId);
       this.qrCodes.delete(tenantId);

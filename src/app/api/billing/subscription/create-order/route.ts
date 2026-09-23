@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { razorpay } from "@/lib/razorpay";
+import { z } from "zod";
+
+const createOrderSchema = z.object({
+  plan_id: z.string().uuid("Invalid plan ID"),
+});
 
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();
@@ -17,15 +22,38 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let cycle: "monthly" | "yearly" = "monthly";
+  let body: unknown;
   try {
-    const body = await req.json();
-    if (body?.cycle === "yearly") cycle = "yearly";
+    body = await req.json();
   } catch {
-    // Body optional, default to monthly
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
+  const parsed = createOrderSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 422 },
+    );
+  }
+
+  const { plan_id } = parsed.data;
   const db = createSupabaseAdmin();
+
+  const { data: plan, error: planErr } = await db
+    .from("subscription_plans")
+    .select("id, name, slug, price_paise, billing_cycle, features")
+    .eq("id", plan_id)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (planErr || !plan) {
+    return NextResponse.json(
+      { error: "Plan not found or inactive" },
+      { status: 404 },
+    );
+  }
+
   const { data: rest, error: rErr } = await db
     .from("restaurants")
     .select("id, name, slug, plan, razorpay_customer_id")
@@ -36,40 +64,46 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Restaurant not found" }, { status: 404 });
   }
 
-  // Idempotency: Check for existing pending payment for this restaurant/cycle
+  // Idempotency: Check for existing pending payment for this restaurant/plan
   const { data: existingPayment } = await db
     .from("billing_payments")
     .select("id, razorpay_order_id, status")
     .eq("restaurant_id", user.restaurantId)
-    .eq("billing_cycle", cycle)
+    .eq("metadata->>plan_id", plan.id)
     .eq("status", "pending")
     .maybeSingle();
 
   if (existingPayment?.razorpay_order_id) {
-    // Return existing order for idempotency
     return NextResponse.json({
       ok: true,
       order_id: existingPayment.razorpay_order_id,
-      amount: cycle === "yearly" ? 999900 : 99900,
+      amount: plan.price_paise,
       currency: "INR",
-      key_id: process.env.RAZORPAY_KEY_ID || "",
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
       idempotent: true,
     });
   }
 
-  const amountPaise = cycle === "yearly" ? 999900 : 99900;
-  const planTitle = cycle === "yearly" ? "QrSlice Complete (1 Year)" : "QrSlice Complete (1 Month)";
+  const amountPaise = plan.price_paise;
+  if (amountPaise < 100) {
+    return NextResponse.json(
+      { error: "Invalid plan price" },
+      { status: 400 },
+    );
+  }
 
-  // Create Razorpay order
+  const receipt = `sub_${rest.slug}_${plan.slug}_${Date.now()}`;
+
   const order = await razorpay.createOrder(
     amountPaise,
     "INR",
-    `sub_${rest.slug}_${cycle}_${Date.now()}`,
+    receipt,
     {
       restaurant_id: rest.id,
       slug: rest.slug,
-      plan_name: planTitle,
-      billing_cycle: cycle,
+      plan_id: plan.id,
+      plan_name: plan.name,
+      billing_cycle: plan.billing_cycle,
     },
   );
 
@@ -84,16 +118,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Store pending payment record for idempotency and verification
   await db.from("billing_payments").insert({
     restaurant_id: rest.id,
     razorpay_order_id: order.id,
     amount_paise: amountPaise,
     currency: "INR",
-    billing_cycle: cycle,
+    billing_cycle: plan.billing_cycle,
     status: "pending",
     metadata: {
-      plan_name: planTitle,
+      plan_id: plan.id,
+      plan_name: plan.name,
       restaurant_name: rest.name,
     },
   });
@@ -103,6 +137,6 @@ export async function POST(req: NextRequest) {
     order_id: order.id,
     amount: order.amount,
     currency: order.currency || "INR",
-    key_id: process.env.RAZORPAY_KEY_ID || "",
+    key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
   });
 }

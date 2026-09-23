@@ -9,6 +9,8 @@ export interface ButtonProps {
   onClick?: () => void;
   /** Optional custom className */
   className?: string;
+  /** Optional native title attribute */
+  title?: string;
 }
 
 /**
@@ -19,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   onClick,
   className,
+  title,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,6 +35,7 @@ export const Button: React.FC<ButtonProps> = ({
       onClick={handleClick}
       aria-disabled={disabled}
       type="button"
+      title={title}
     >
       {children}
     </button>
