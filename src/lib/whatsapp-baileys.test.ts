@@ -111,6 +111,21 @@ describe("BaileysSessionStore BufferJSON round-trip", () => {
     await expect(store.getAuthState("missing")).resolves.toBeNull();
   });
 
+  it("returns null when session data is corrupt (cannot decrypt)", async () => {
+    mockFrom.mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          single: async () => ({
+            data: { session_data: Buffer.alloc(48), encryption_key_id: "v1" },
+            error: null,
+          }),
+        }),
+      }),
+    });
+    const store = new BaileysSessionStore();
+    await expect(store.getAuthState("corrupt-tenant")).resolves.toBeNull();
+  });
+
   it("hasSession is false without a row and true with one", async () => {
     const store = new BaileysSessionStore();
     mockFrom.mockReturnValue({
@@ -126,5 +141,15 @@ describe("BaileysSessionStore BufferJSON round-trip", () => {
       }),
     });
     await expect(store.hasSession("t1")).resolves.toBe(true);
+  });
+
+  it("hasSession throws on Supabase error", async () => {
+    const store = new BaileysSessionStore();
+    mockFrom.mockReturnValue({
+      select: () => ({
+        eq: () => ({ maybeSingle: async () => ({ data: null, error: { message: "connection lost" } }) }),
+      }),
+    });
+    await expect(store.hasSession("t1")).rejects.toThrow("Failed to check session");
   });
 });

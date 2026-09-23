@@ -116,7 +116,7 @@ export class BaileysSessionStore {
       };
     } catch (error) {
       console.error(`[WhatsApp:${tenantId}] Failed to decrypt session data (keyId: ${data.encryption_key_id}):`, error);
-      throw new Error(`Session decryption failed for tenant ${tenantId}: ${error instanceof Error ? error.message : "Unknown error"}`);
+      return null;
     }
   }
 
@@ -142,11 +142,14 @@ export class BaileysSessionStore {
 
   async hasSession(tenantId: string): Promise<boolean> {
     validateTenantId(tenantId);
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from("whatsapp_sessions")
       .select("id")
       .eq("tenant_id", tenantId)
       .maybeSingle();
+    if (error) {
+      throw new Error(`Failed to check session for tenant ${tenantId}: ${error.message}`);
+    }
     return Boolean(data);
   }
 
