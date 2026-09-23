@@ -99,6 +99,7 @@ interface ConnectionData {
   socket: WASocket;
   eventHandlers: Array<{ event: keyof BaileysEventMap; handler: (...args: unknown[]) => void }>;
   reconnectTimeout: NodeJS.Timeout | null;
+  autoReconnect: boolean;
 }
 
 export class BaileysConnectionManager {
@@ -106,13 +107,14 @@ export class BaileysConnectionManager {
   private sessionStore = new BaileysSessionStore();
   private qrCodes = new Map<string, string>();
 
-  async connect(tenantId: string): Promise<void> {
+  async connect(tenantId: string, opts: { autoReconnect?: boolean } = {}): Promise<void> {
     validateTenantId(tenantId);
 
     if (this.connections.has(tenantId)) {
       return;
     }
 
+    const autoReconnect = opts.autoReconnect !== false;
     const storedAuthState = await this.sessionStore.getAuthState(tenantId);
     const authState = storedAuthState || createDefaultAuthState();
 
@@ -125,7 +127,7 @@ export class BaileysConnectionManager {
     const eventHandlers: ConnectionData["eventHandlers"] = [];
 
     const connectionUpdateHandler = (update: Partial<ConnectionState>) => {
-      this.handleConnectionUpdate(tenantId, update);
+      void this.handleConnectionUpdate(tenantId, update);
     };
     socket.ev.on("connection.update", connectionUpdateHandler);
     eventHandlers.push({ event: "connection.update", handler: connectionUpdateHandler as (...args: unknown[]) => void });
@@ -146,7 +148,57 @@ export class BaileysConnectionManager {
       socket,
       eventHandlers,
       reconnectTimeout: null,
+      autoReconnect,
     });
+  }
+
+  async waitForOpen(tenantId: string, timeoutMs = 20_000): Promise<void> {
+    validateTenantId(tenantId);
+    const conn = this.connections.get(tenantId);
+    if (!conn) throw new Error(`No connection for ${tenantId}`);
+    if (conn.socket.user) return;
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        conn.socket.ev.off("connection.update", handler);
+        reject(new Error(`Timeout waiting for WhatsApp open: ${tenantId}`));
+      }, timeoutMs);
+      const handler = (update: Partial<ConnectionState>) => {
+        if (update.connection === "open") {
+          clearTimeout(timer);
+          conn.socket.ev.off("connection.update", handler);
+          resolve();
+        }
+        if (update.connection === "close") {
+          const code = (update.lastDisconnect?.error as { output?: { statusCode?: number } })?.output?.statusCode;
+          if (code === 401 || code === 403) {
+            clearTimeout(timer);
+            conn.socket.ev.off("connection.update", handler);
+            reject(new Error(`WhatsApp session invalid (${code}) for ${tenantId}`));
+          }
+        }
+      };
+      conn.socket.ev.on("connection.update", handler);
+    });
+  }
+
+  async release(tenantId: string): Promise<void> {
+    const conn = this.connections.get(tenantId);
+    if (!conn) return;
+    if (conn.reconnectTimeout) clearTimeout(conn.reconnectTimeout);
+    for (const { event, handler } of conn.eventHandlers) conn.socket.ev.off(event, handler);
+    conn.eventHandlers.length = 0;
+    try {
+      conn.socket.end?.(undefined);
+    } catch {
+      /* ignore */
+    }
+    try {
+      (conn.socket as { ws?: { close?: () => void } }).ws?.close?.();
+    } catch {
+      /* ignore */
+    }
+    this.connections.delete(tenantId);
+    this.qrCodes.delete(tenantId);
   }
 
   async disconnect(tenantId: string): Promise<void> {
@@ -164,10 +216,15 @@ export class BaileysConnectionManager {
       }
       connectionData.eventHandlers.length = 0;
 
-      await connectionData.socket.logout();
+      try {
+        await connectionData.socket.logout();
+      } catch {
+        /* already dead */
+      }
       this.connections.delete(tenantId);
       this.qrCodes.delete(tenantId);
     }
+    await this.sessionStore.clearAuthState(tenantId);
   }
 
   async getStatus(tenantId: string): Promise<WhatsAppStatus> {
@@ -197,7 +254,7 @@ export class BaileysConnectionManager {
     return this.connections.get(tenantId)?.socket;
   }
 
-  private handleConnectionUpdate(tenantId: string, update: Partial<ConnectionState>): void {
+  private async handleConnectionUpdate(tenantId: string, update: Partial<ConnectionState>): Promise<void> {
     if (update.qr) {
       this.qrCodes.set(tenantId, update.qr);
     }
@@ -209,10 +266,20 @@ export class BaileysConnectionManager {
     if (update.connection === "close") {
       const connectionData = this.connections.get(tenantId);
       const error = update.lastDisconnect?.error as { output?: { statusCode?: number } } | undefined;
-      const shouldReconnect = !error || error.output?.statusCode !== 403;
+      const code = error?.output?.statusCode;
+      const isAuthFailure = code === 401 || code === 403;
+      const shouldReconnect = connectionData?.autoReconnect !== false && !isAuthFailure;
 
       this.connections.delete(tenantId);
       this.qrCodes.delete(tenantId);
+
+      if (isAuthFailure) {
+        try {
+          await this.sessionStore.clearAuthState(tenantId);
+        } catch (err) {
+          console.error(`[WhatsApp:${tenantId}] Failed to clear auth state on ${code}:`, err);
+        }
+      }
 
       if (shouldReconnect) {
         const timeout = setTimeout(() => this.connect(tenantId), 5000);
