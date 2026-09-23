@@ -43,9 +43,15 @@ interface PosCartDrawerProps {
 
   handleSettle: (status: "paid" | "unpaid") => void;
   isSettling: boolean;
+  /** PAY gate — only owner/manager/super_admin. Hides PAY for other roles. */
+  canSettlePay?: boolean;
 
   customerPhone?: string;
   setCustomerPhone?: (v: string) => void;
+  customerGstin?: string;
+  setCustomerGstin?: (v: string) => void;
+  rushPriority?: boolean;
+  setRushPriority?: (v: boolean) => void;
   customerPoints?: number | null;
   redeemPoints?: number;
   setRedeemPoints?: (v: number) => void;
@@ -92,8 +98,13 @@ export function PosCartDrawer({
   setAmountReceived,
   handleSettle,
   isSettling,
+  canSettlePay = false,
   customerPhone,
   setCustomerPhone,
+  customerGstin = "",
+  setCustomerGstin,
+  rushPriority = false,
+  setRushPriority,
   customerPoints,
   redeemPoints = 0,
   setRedeemPoints,
@@ -104,8 +115,7 @@ export function PosCartDrawer({
   onOpenWaModal,
 }: PosCartDrawerProps) {
   const [splitGuests, setSplitGuests] = useState<number>(1);
-  const [gstin, setGstin] = useState<string>("");
-  const [isRushKOT, setIsRushKOT] = useState<boolean>(false);
+  const isRushKOT = rushPriority;
 
   const pointsDiscount = (redeemPoints || 0) * 100;
 
@@ -341,8 +351,8 @@ export function PosCartDrawer({
           <input
             type="text"
             placeholder="e.g. 27AAAAA0000A1Z5"
-            value={gstin}
-            onChange={(e) => setGstin(e.target.value)}
+            value={customerGstin}
+            onChange={(e) => setCustomerGstin?.(e.target.value)}
             className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-xs text-slate-900 font-mono uppercase focus:outline-none focus:border-indigo-500 font-bold"
           />
         </div>
@@ -351,7 +361,7 @@ export function PosCartDrawer({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setIsRushKOT(!isRushKOT)}
+            onClick={() => setRushPriority?.(!isRushKOT)}
             className={`flex-1 py-2 px-3 rounded-xl border text-xs font-black transition-all cursor-pointer min-h-[40px] flex items-center justify-center gap-1.5 active:scale-95 ${
               isRushKOT
                 ? "bg-red-600 text-white border-red-500 shadow-md animate-pulse"
@@ -675,7 +685,7 @@ export function PosCartDrawer({
             type="button"
             onClick={() => handleSettle("unpaid")}
             disabled={isSettling || cart.length === 0}
-            className="flex-1 py-3 px-2 rounded-2xl bg-[#FF9500] hover:bg-[#FF9500]/90 text-white font-black text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[48px] transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
+            className={`${canSettlePay ? "flex-1" : "w-full"} py-3 px-2 rounded-2xl bg-[#FF9500] hover:bg-[#FF9500]/90 text-white font-black text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[48px] transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5`}
           >
             <div className="flex items-center gap-1.5">
               <span>👨‍🍳 SEND KOT</span>
@@ -683,18 +693,20 @@ export function PosCartDrawer({
             </div>
             <span className="text-[10px] text-white/85 font-normal">Kitchen Ticket Only</span>
           </button>
-          <button
-            type="button"
-            onClick={() => handleSettle("paid")}
-            disabled={isSettling || cart.length === 0}
-            className="flex-1 py-3 px-2 rounded-2xl bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-black text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[48px] transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
-          >
-            <div className="flex items-center gap-1.5">
-              <span>💳 {isSettling ? "Settling..." : `PAY ${paise(finalTotalPaise)}`}</span>
-              <span className="text-[9px] px-1 py-0.2 bg-white/25 rounded font-mono font-semibold">F7</span>
-            </div>
-            <span className="text-[10px] text-white/85 font-normal">Settle & Receipt</span>
-          </button>
+          {canSettlePay && (
+            <button
+              type="button"
+              onClick={() => handleSettle("paid")}
+              disabled={isSettling || cart.length === 0}
+              className="flex-1 py-3 px-2 rounded-2xl bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-black text-xs cursor-pointer shadow-sm disabled:opacity-40 min-h-[48px] transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
+            >
+              <div className="flex items-center gap-1.5">
+                <span>💳 {isSettling ? "Settling..." : `PAY ${paise(finalTotalPaise)}`}</span>
+                <span className="text-[9px] px-1 py-0.2 bg-white/25 rounded font-mono font-semibold">F7</span>
+              </div>
+              <span className="text-[10px] text-white/85 font-normal">Settle & Receipt</span>
+            </button>
+          )}
         </div>
       </div>
     </aside>

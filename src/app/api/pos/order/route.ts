@@ -5,6 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 import { deductInventoryIngredients } from "@/lib/inventory";
 import { processCustomerLoyalty, redeemCustomerPoints } from "@/lib/crm";
 import { calculateAuthoritativePricing, type PricingItemInput } from "@/lib/pricing";
+import { isValidGstin, normalizeGstin, validateSplitTender } from "@/lib/validation";
+import { POS_SETTLE_ROLES } from "@/lib/pos-guard";
 
 function normalizePaymentMethod(pm: string): "counter" | "online" {
   const p = String(pm || "").toLowerCase();
@@ -12,9 +14,22 @@ function normalizePaymentMethod(pm: string): "counter" | "online" {
   return "counter";
 }
 
+function isUniqueViolation(err: unknown): boolean {
+  return Boolean(
+    err &&
+      typeof err === "object" &&
+      "code" in err &&
+      String((err as { code: unknown }).code) === "23505",
+  );
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CUSTOM_ITEM_PREFIX = "custom-";
 const OPEN_ITEM_NAME = "Open Item";
+// A3: portion delta max ₹10,000 (1,000,000 paise)
+const MAX_PORTION_DELTA_PAISE = 1_000_000;
+// A7: bounded retries when order_number collides under the unique index
+const ORDER_NUMBER_MAX_ATTEMPTS = 5;
 
 // Custom (open) items have no menu_items row; order_items.menu_item_id FKs to
 // menu_items(id), so they are persisted under a per-restaurant Open Item SKU.
@@ -93,11 +108,42 @@ export async function POST(req: NextRequest) {
     split_cash_paise = 0,
     split_upi_paise = 0,
     notes = "",
-    idempotency_key,
+    idempotency_key: bodyIdempotencyKey,
+    customer_gstin,
+    priority = false,
   } = body;
+
+  // A18: offline queue sends Idempotency-Key header; body wins when present.
+  const headerIdempotencyKey = req.headers.get("idempotency-key")?.trim() || undefined;
+  const idempotency_key = bodyIdempotencyKey || headerIdempotencyKey;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: "Cart cannot be empty" }, { status: 400 });
+  }
+
+  const paymentStatus =
+    payment_status === "unpaid" ? "unpaid" : payment_status === "refunded" ? "refunded" : "paid";
+
+  // PAY gate: marking a new order paid requires settle roles (owner/manager/super_admin).
+  // Unpaid KOTs remain available to all POS order roles.
+  if (paymentStatus === "paid" && !(POS_SETTLE_ROLES as readonly string[]).includes(user.role)) {
+    return NextResponse.json(
+      { error: "Forbidden: only managers and owners can settle payments" },
+      { status: 403 },
+    );
+  }
+
+  // A15: optional B2B buyer GSTIN — reject malformed values early.
+  let buyerGstin: string | null = null;
+  if (customer_gstin != null && String(customer_gstin).trim() !== "") {
+    const normalized = normalizeGstin(String(customer_gstin));
+    if (!isValidGstin(normalized)) {
+      return NextResponse.json(
+        { error: "Invalid customer GSTIN (expected 15-char Indian GSTIN)" },
+        { status: 400 },
+      );
+    }
+    buyerGstin = normalized;
   }
 
   const admin = createSupabaseAdmin();
@@ -208,7 +254,15 @@ export async function POST(req: NextRequest) {
       const optName = typeof m === "string" ? m : m.option_name || m.name || "";
       const optKey = optName.trim().toLowerCase();
       const catalogPrice = verifiedModifierPriceMap.get(optKey);
+      // B6: when a modifier catalog exists, unknown modifiers are rejected
+      // (map empty → catalog not configured → allow free-text / legacy path).
+      if (verifiedModifierPriceMap.size > 0 && catalogPrice === undefined) {
+        return { __unknown: true, option_name: optName };
+      }
       const verifiedDelta = catalogPrice !== undefined ? catalogPrice : (Number(m.price_delta_paise) || 0);
+      if (Number(m.price_delta_paise) < 0 || verifiedDelta < 0) {
+        return { __negative: true, option_name: optName };
+      }
       return {
         option_name: optName,
         price_delta_paise: verifiedDelta,
@@ -216,13 +270,42 @@ export async function POST(req: NextRequest) {
       };
     });
 
+    const unknownMod = sanitizedModifiers.find(
+      (m: any) => m.__unknown || m.__negative,
+    ) as { __unknown?: boolean; __negative?: boolean; option_name?: string } | undefined;
+    if (unknownMod) {
+      return NextResponse.json(
+        {
+          error: unknownMod.__negative
+            ? `Modifier "${unknownMod.option_name || ""}" has an invalid price delta`
+            : `Unknown modifier "${unknownMod.option_name || ""}"`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // A3: reject negative / excessive portion deltas at the route (pricing also clamps).
+    const portionDeltaRaw = Number(it.portion_delta_paise);
+    if (Number.isFinite(portionDeltaRaw) && portionDeltaRaw < 0) {
+      return NextResponse.json(
+        { error: `Invalid portion delta for item (must be >= 0)` },
+        { status: 400 },
+      );
+    }
+    if (Number.isFinite(portionDeltaRaw) && portionDeltaRaw > MAX_PORTION_DELTA_PAISE) {
+      return NextResponse.json(
+        { error: `Portion delta exceeds maximum (₹10,000)` },
+        { status: 400 },
+      );
+    }
+
     pricingItems.push({
       menu_item_id: matched.id,
       item_name: matched.name,
       base_price_paise: matched.price_paise,
       portion_name: it.portion_name || undefined,
-      portion_delta_paise: Number(it.portion_delta_paise) || 0,
-      modifiers: sanitizedModifiers,
+      portion_delta_paise: Number.isFinite(portionDeltaRaw) ? portionDeltaRaw : 0,
+      modifiers: sanitizedModifiers as PricingItemInput["modifiers"],
       quantity: Number(it.quantity) || 1,
       notes: it.notes || "",
       hsn: matched.hsn || null,
@@ -269,8 +352,24 @@ export async function POST(req: NextRequest) {
     tax_rate_percent: taxRate,
   });
 
-  const orderNumber = `POS-${Math.floor(Math.random() * 9000) + 1000}`;
-  const validUuid = idempotency_key || crypto.randomUUID();
+  // A5: split tender must exactly equal the order total when paid via mixed/split.
+  const wantsSplit =
+    String(payment_method).toLowerCase() === "mixed" ||
+    Number(split_cash_paise) > 0 ||
+    Number(split_upi_paise) > 0;
+  if (paymentStatus === "paid" && wantsSplit) {
+    const cash = Math.round(Number(split_cash_paise) || 0);
+    const upi = Math.round(Number(split_upi_paise) || 0);
+    const check = validateSplitTender(pricingResult.total_paise, cash, upi);
+    if (!check.ok) {
+      return NextResponse.json({ error: check.error }, { status: 400 });
+    }
+  }
+
+  const validUuid =
+    (typeof idempotency_key === "string" && UUID_RE.test(idempotency_key)
+      ? idempotency_key
+      : null) || crypto.randomUUID();
 
   let resolvedTableId = table_id || null;
   if (!resolvedTableId) {
@@ -293,36 +392,54 @@ export async function POST(req: NextRequest) {
   const validOrderType =
     order_type === "takeaway" || order_type === "delivery" ? order_type : "dine_in";
 
-  // Persist Order with authoritative pricing snapshot
-  const { data: order, error: oErr } = await admin
-    .from("orders")
-    .insert({
-      restaurant_id: user.restaurantId,
-      table_id: resolvedTableId,
-      order_number: orderNumber,
-      subtotal_paise: pricingResult.subtotal_paise,
-      tax_paise: pricingResult.tax_paise,
-      discount_paise: pricingResult.discount_paise,
-      total_paise: pricingResult.total_paise,
-      pricing_snapshot: pricingResult.snapshot,
-      payment_method: normalizePaymentMethod(payment_method),
-      payment_status,
-      status: payment_status === "paid" ? "preparing" : "pending",
-      order_type: validOrderType,
-      customer_name:
-        customer_name ||
-        (validOrderType === "takeaway"
-          ? "Takeaway Guest"
-          : validOrderType === "delivery"
-            ? "Delivery Guest"
-            : "Walk-in Guest"),
-      customer_phone: customer_phone || "",
-      idempotency_key: validUuid,
-      status_token: validUuid,
-      notes: notes || "",
-    })
-    .select()
-    .single();
+  const baseOrderPayload: Record<string, unknown> = {
+    restaurant_id: user.restaurantId,
+    table_id: resolvedTableId,
+    subtotal_paise: pricingResult.subtotal_paise,
+    tax_paise: pricingResult.tax_paise,
+    discount_paise: pricingResult.discount_paise,
+    total_paise: pricingResult.total_paise,
+    pricing_snapshot: pricingResult.snapshot,
+    payment_method: normalizePaymentMethod(payment_method),
+    payment_status: paymentStatus,
+    status: paymentStatus === "paid" ? "preparing" : "pending",
+    order_type: validOrderType,
+    customer_name:
+      customer_name ||
+      (validOrderType === "takeaway"
+        ? "Takeaway Guest"
+        : validOrderType === "delivery"
+          ? "Delivery Guest"
+          : "Walk-in Guest"),
+    customer_phone: customer_phone || "",
+    customer_gstin: buyerGstin,
+    priority: Boolean(priority),
+    idempotency_key: validUuid,
+    status_token: validUuid,
+    notes: notes || "",
+  };
+
+  // A7: insert with bounded retry on (restaurant_id, order_number) unique violations.
+  let order: Record<string, unknown> | null = null;
+  let oErr: { message?: string } | null = null;
+  for (let attempt = 0; attempt < ORDER_NUMBER_MAX_ATTEMPTS; attempt++) {
+    const orderNumber = `POS-${Math.floor(Math.random() * 900000) + 100000}-${attempt + 1}`;
+    const result = await admin
+      .from("orders")
+      .insert({ ...baseOrderPayload, order_number: orderNumber })
+      .select()
+      .single();
+    if (!result.error && result.data) {
+      order = result.data;
+      oErr = null;
+      break;
+    }
+    if (!isUniqueViolation(result.error)) {
+      oErr = result.error;
+      break;
+    }
+    // 23505 → regenerate order_number and retry
+  }
 
   if (oErr || !order) {
     return NextResponse.json(
@@ -331,10 +448,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const orderNumber = String(order.order_number || "");
+  const orderId = String(order.id);
+  const restaurantId = user.restaurantId!;
+
   // Deduct validated loyalty points and record transaction
   if (pointsToUse > 0 && customer_phone) {
     try {
-      await redeemCustomerPoints(admin, user.restaurantId, customer_phone, pointsToUse, order.id);
+      await redeemCustomerPoints(admin, restaurantId, customer_phone, pointsToUse, orderId);
     } catch (err) {
       console.error("[POS] Failed to redeem loyalty points:", err);
     }
@@ -387,11 +508,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Record payments
-  if (payment_status === "paid") {
-    if (payment_method === "mixed") {
-      const cashAmount = split_cash_paise > 0 ? split_cash_paise : Math.floor(pricingResult.total_paise / 2);
-      const upiAmount = split_upi_paise > 0 ? split_upi_paise : pricingResult.total_paise - cashAmount;
+  // Record payments — only when paid (B5: unpaid mixed/orders insert no rows).
+  if (paymentStatus === "paid") {
+    if (String(payment_method).toLowerCase() === "mixed") {
+      // A5 already validated cash+upi === total; no 50/50 fallback.
+      const cashAmount = Math.round(Number(split_cash_paise) || 0);
+      const upiAmount = Math.round(Number(split_upi_paise) || 0);
 
       await admin.from("payments").insert([
         {
@@ -408,9 +530,10 @@ export async function POST(req: NextRequest) {
         },
       ]);
     } else {
+      const method = String(payment_method).toLowerCase();
       await admin.from("payments").insert({
         order_id: order.id,
-        provider: payment_method === "upi" ? "upi_qr" : payment_method === "card" ? "card_pos" : "cash",
+        provider: method === "upi" || method === "online" ? "upi_qr" : method === "card" ? "card_pos" : "cash",
         amount_paise: pricingResult.total_paise,
         status: "success",
       });
@@ -442,15 +565,15 @@ export async function POST(req: NextRequest) {
 
   // Loyalty processing on payment completion
   let loyaltyData = { pointsEarned: 0, newTotalPoints: 0 };
-  if (payment_status === "paid" && customer_phone) {
+  if (paymentStatus === "paid" && customer_phone) {
     try {
       loyaltyData = await processCustomerLoyalty(
         admin,
-        user.restaurantId,
+        restaurantId,
         customer_phone,
         customer_name || "",
         pricingResult.total_paise,
-        order.id,
+        orderId,
         orderNumber,
       );
     } catch (err) {

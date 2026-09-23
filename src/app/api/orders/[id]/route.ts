@@ -3,25 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { patchOrderSchema } from "@/lib/validation";
+import {
+  authorizeStatusChange,
+  canTransition,
+  canTransitionPayment,
+} from "@/lib/order-transitions";
+import { POS_ORDER_ROLES, POS_SETTLE_ROLES } from "@/lib/pos-guard";
 import { deductInventoryIngredients } from "@/lib/inventory";
 import { processCustomerLoyalty, reverseCustomerLoyalty } from "@/lib/crm";
-
-const TRANSITIONS: Record<string, string[]> = {
-  pending: ["confirmed", "preparing", "rejected", "cancelled"],
-  confirmed: ["preparing", "cancelled"],
-  preparing: ["ready", "cancelled"],
-  ready: ["served", "completed", "cancelled"],
-  served: ["completed"],
-  completed: [],
-  rejected: [],
-  cancelled: [],
-};
-
-const PAYMENT_TRANSITIONS: Record<string, string[]> = {
-  unpaid: ["paid", "refunded"],
-  paid: ["refunded", "unpaid"],
-  refunded: ["unpaid"],
-};
 
 export async function PATCH(
   req: NextRequest,
@@ -52,14 +41,38 @@ export async function PATCH(
     );
   }
 
-  const { status, payment_status, delay_minutes, delay_reason } = parsed.data;
+  const { status, payment_status, delay_minutes, delay_reason, priority } =
+    parsed.data;
 
-  // Only managers, owners, and super_admins can modify payment status. Counter staff (staff, waiter, kitchen) cannot.
-  const canManagePayments =
-    user.role === "owner" || user.role === "manager" || user.role === "super_admin";
+  // Role gates (B4): payment moves need settle roles; kitchen-facing status
+  // needs order roles; cancel/reject reserved for manager+.
+  const canManagePayments = (POS_SETTLE_ROLES as readonly string[]).includes(
+    user.role,
+  );
   if (payment_status && !canManagePayments) {
     return NextResponse.json(
       { error: "Forbidden: Only managers and owners can modify payment status" },
+      { status: 403 },
+    );
+  }
+
+  if (status) {
+    const gate = authorizeStatusChange(user.role, status);
+    if (!gate.ok) {
+      return NextResponse.json({ error: gate.error }, { status: 403 });
+    }
+    if (!(POS_ORDER_ROLES as readonly string[]).includes(user.role)) {
+      return NextResponse.json(
+        { error: "Forbidden: order status change not allowed" },
+        { status: 403 },
+      );
+    }
+  }
+
+  // Rush priority is kitchen-facing (same gate as status).
+  if (typeof priority === "boolean" && !(POS_ORDER_ROLES as readonly string[]).includes(user.role)) {
+    return NextResponse.json(
+      { error: "Forbidden: order status change not allowed" },
       { status: 403 },
     );
   }
@@ -97,7 +110,7 @@ export async function PATCH(
   const updates: Record<string, unknown> = {};
 
   if (status && status !== order.status) {
-    if (!TRANSITIONS[order.status]?.includes(status)) {
+    if (!canTransition(order.status, status)) {
       return NextResponse.json(
         { error: `Invalid status transition from ${order.status} to ${status}` },
         { status: 422 },
@@ -107,7 +120,7 @@ export async function PATCH(
   }
 
   if (payment_status && payment_status !== order.payment_status) {
-    if (!PAYMENT_TRANSITIONS[order.payment_status]?.includes(payment_status)) {
+    if (!canTransitionPayment(order.payment_status, payment_status)) {
       return NextResponse.json(
         { error: `Invalid payment status transition from ${order.payment_status} to ${payment_status}` },
         { status: 422 },
@@ -122,6 +135,10 @@ export async function PATCH(
     if (delay_reason) {
       updates.delay_reason = delay_reason;
     }
+  }
+
+  if (typeof priority === "boolean") {
+    updates.priority = priority;
   }
 
   if (Object.keys(updates).length === 0) {

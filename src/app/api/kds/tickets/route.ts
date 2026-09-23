@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const { data: orders, error } = await db
     .from("orders")
     .select(
-      "id, order_number, status, payment_status, created_at, table_id, customer_name, customer_phone, restaurant_tables(label), order_items(id, item_name, quantity, notes, order_item_modifiers(option_name))",
+      "id, order_number, status, payment_status, priority, created_at, table_id, customer_name, customer_phone, restaurant_tables(label), order_items(id, item_name, quantity, notes, order_item_modifiers(option_name))",
     )
     .eq("restaurant_id", restaurantId)
     .in("status", ["pending", "confirmed", "preparing", "ready"])
@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
     order_number: o.order_number,
     status: o.status,
     payment_status: o.payment_status,
+    priority: Boolean(o.priority),
     created_at: o.created_at,
     table_label: o.restaurant_tables?.label ?? "Counter",
     customer_name: o.customer_name,

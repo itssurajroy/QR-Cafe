@@ -149,7 +149,10 @@ export function KitchenView({
     if (fresh.length === 0) return;
     setLastTicketAt(Date.now());
     const rush = fresh.filter(
-      (o) => (o as { priority?: boolean }).priority || priorityMap[o.id],
+      (o) =>
+        priorityMap[o.id] !== undefined
+          ? priorityMap[o.id]
+          : Boolean((o as { priority?: boolean }).priority),
     );
     if (!soundMuted) {
       if (rush.length > 0) {
@@ -167,13 +170,40 @@ export function KitchenView({
   }, [liveOrders, playAudioTone, playRushAlert, soundMuted, priorityMap]);
 
   const togglePriority = (orderId: string) => {
-    setPriorityMap((prev) => {
-      const nextVal = !prev[orderId];
-      if (nextVal) {
-        announceVoice("High priority rush order flagged");
+    const current =
+      priorityMap[orderId] !== undefined
+        ? priorityMap[orderId]
+        : Boolean(
+            (liveOrders.find((o) => o.id === orderId) as { priority?: boolean } | undefined)
+              ?.priority,
+          );
+    const nextVal = !current;
+
+    // Optimistic local update so the fire badge feels instant.
+    setPriorityMap((prev) => ({ ...prev, [orderId]: nextVal }));
+    if (nextVal) {
+      announceVoice("High priority rush order flagged");
+    }
+
+    // Persist to orders.priority (Phase 9) — kitchen roles only server-side.
+    void (async () => {
+      try {
+        const res = await fetch("/api/order-priority", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order_id: orderId, priority: nextVal }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Priority update failed (${res.status})`);
+        }
+        fetchLiveOrders();
+      } catch (err) {
+        // Revert optimistic flip on failure.
+        setPriorityMap((prev) => ({ ...prev, [orderId]: current }));
+        console.error("Failed to persist priority:", err);
       }
-      return { ...prev, [orderId]: nextVal };
-    });
+    })();
   };
 
   const handleServe = (id: string, status: string, orderNumber: string, tableLabel: string) => {
@@ -193,7 +223,10 @@ export function KitchenView({
   const filteredOrders = useMemo(() => {
     return liveOrders.map((o) => ({
       ...o,
-      priority: priorityMap[o.id] || false,
+      priority:
+        priorityMap[o.id] !== undefined
+          ? priorityMap[o.id]
+          : Boolean((o as { priority?: boolean }).priority),
     })).filter((order) => {
       // 1. Order Type Filter
       if (selectedOrderType !== "all") {

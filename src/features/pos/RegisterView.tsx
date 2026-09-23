@@ -58,9 +58,15 @@ interface RegisterViewProps {
 
   handleSettle: (status: "paid" | "unpaid") => void;
   isSettling: boolean;
+  /** PAY gate — only owner/manager/super_admin (server enforces too). */
+  canSettlePay?: boolean;
 
   customerPhone?: string;
   setCustomerPhone?: (v: string) => void;
+  customerGstin?: string;
+  setCustomerGstin?: (v: string) => void;
+  rushPriority?: boolean;
+  setRushPriority?: (v: boolean) => void;
   customerPoints?: number | null;
   redeemPoints?: number;
   setRedeemPoints?: (v: number) => void;
@@ -333,8 +339,13 @@ export function RegisterView(props: RegisterViewProps) {
         setAmountReceived={props.setAmountReceived}
         isSettling={props.isSettling}
         handleSettle={props.handleSettle}
+        canSettlePay={props.canSettlePay}
         customerPhone={props.customerPhone}
         setCustomerPhone={props.setCustomerPhone}
+        customerGstin={props.customerGstin}
+        setCustomerGstin={props.setCustomerGstin}
+        rushPriority={props.rushPriority}
+        setRushPriority={props.setRushPriority}
         customerPoints={props.customerPoints}
         redeemPoints={props.redeemPoints}
         setRedeemPoints={props.setRedeemPoints}
