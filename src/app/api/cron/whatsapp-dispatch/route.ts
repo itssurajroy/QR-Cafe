@@ -6,6 +6,8 @@ import { BaileysSessionStore } from "@/integrations/whatsapp/baileys/session-sto
 import { buildBillReceiptText, toWhatsAppJid } from "@/lib/whatsapp-bill-text";
 
 const MAX_ATTEMPTS = 3;
+/** A `sending` row older than this is presumed orphaned (crash between claim and terminal update). */
+const SENDING_STALE_MS = 5 * 60_000;
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,22 @@ export async function GET(req: NextRequest) {
 
   const db = createSupabaseAdmin();
   const now = new Date().toISOString();
+
+  // Reclaim rows orphaned in `sending` by a crashed run. Claim sets `updated_at`,
+  // so a row still `sending` with an old `updated_at` was never terminally updated.
+  const staleBefore = new Date(Date.now() - SENDING_STALE_MS).toISOString();
+  const { error: reclaimError } = await db
+    .from("whatsapp_messages")
+    .update({
+      status: "pending",
+      error_message: "reclaimed stale sending",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("status", "sending")
+    .lt("updated_at", staleBefore);
+  if (reclaimError) {
+    console.error("whatsapp-dispatch: stale sending reclaim failed:", reclaimError.message);
+  }
 
   const { data: due, error } = await db
     .from("whatsapp_messages")
@@ -63,6 +81,8 @@ export async function GET(req: NextRequest) {
     if (!claimedRow) continue;
     claimed++;
 
+    let sendSucceeded = false;
+    let providerId: string | null = null;
     try {
       const { data: settings } = await db
         .from("whatsapp_settings")
@@ -143,7 +163,8 @@ export async function GET(req: NextRequest) {
       const socket = manager.getSocket(row.tenant_id);
       if (!socket) throw new Error("Socket unavailable");
       const result = await socket.sendMessage(jid, { text });
-      const providerId = result?.key?.id ?? null;
+      providerId = result?.key?.id ?? null;
+      sendSucceeded = true;
       await manager.release(row.tenant_id);
 
       await db
@@ -170,6 +191,34 @@ export async function GET(req: NextRequest) {
       sent++;
     } catch (err) {
       const message = err instanceof Error ? err.message : "send failed";
+      await manager.release(row.tenant_id).catch(() => {});
+
+      if (sendSucceeded) {
+        // The message already left the device — never requeue (that would
+        // duplicate-send). Best-effort mark `sent`; if this write is the one
+        // failing, leave the row as-is (`sending`) rather than retry-send it.
+        // Counted as `sent`: the message did leave, regardless of bookkeeping.
+        try {
+          await db
+            .from("whatsapp_messages")
+            .update({
+              status: "sent",
+              provider_message_id: providerId,
+              sent_at: new Date().toISOString(),
+              error_message: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", row.id);
+        } catch {
+          /* leave status untouched — invariant is never re-send */
+        }
+        console.error(
+          `whatsapp-dispatch: post-send bookkeeping failed for ${row.id}: ${message}`,
+        );
+        sent++;
+        continue;
+      }
+
       const retry = (row.retry_count ?? 0) + 1;
       const giveUp = retry >= (row.max_retries ?? MAX_ATTEMPTS);
       const backoffMs = Math.min(2 ** retry * 30_000, 15 * 60_000);
@@ -184,7 +233,6 @@ export async function GET(req: NextRequest) {
       }
       await db.from("whatsapp_messages").update(patch).eq("id", row.id);
       failed++;
-      await manager.release(row.tenant_id).catch(() => {});
     }
   }
 

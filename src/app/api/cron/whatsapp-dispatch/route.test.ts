@@ -46,6 +46,10 @@ const db = vi.hoisted(() => {
       state.filters.push([col, val]);
       return self;
     };
+    self.lt = (col: string, val: unknown) => {
+      state.filters.push([col, val]);
+      return self;
+    };
     self.order = () => self;
     self.limit = () => self;
     self.maybeSingle = () => Promise.resolve(responder(state));
@@ -351,7 +355,9 @@ describe("GET /api/cron/whatsapp-dispatch", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ claimed: 1, sent: 0, deferred: 0, failed: 1 });
 
-    const retryUpdate = messageUpdates().find((c) => c.values?.status === "pending");
+    const retryUpdate = messageUpdates().find(
+      (c) => c.values?.status === "pending" && "retry_count" in (c.values ?? {}),
+    );
     expect(retryUpdate?.values?.retry_count).toBe(1);
     expect(retryUpdate?.values?.error_message).toMatch(/socket down/);
     const scheduledAt = retryUpdate?.values?.scheduled_at as string;
@@ -377,6 +383,79 @@ describe("GET /api/cron/whatsapp-dispatch", () => {
     const failUpdate = messageUpdates().find((c) => c.values?.status === "failed");
     expect(failUpdate?.values?.retry_count).toBe(3);
     expect(failUpdate?.values).not.toHaveProperty("scheduled_at");
+  });
+
+  it("does not requeue when bookkeeping fails after sendMessage succeeded", async () => {
+    db.setResponder((state) => {
+      if (
+        state.table === "whatsapp_messages" &&
+        state.op === "update" &&
+        state.values?.status === "sent"
+      ) {
+        throw new Error("db write failed");
+      }
+      return baseResponder([dueBillRow])(state);
+    });
+
+    const res = await GET(cronReq("Bearer test-cron-secret"));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+
+    const requeue = messageUpdates().find(
+      (c) =>
+        c.values?.status === "pending" &&
+        c.filters.some(([col, val]) => col === "id" && val === "msg-1"),
+    );
+    expect(requeue).toBeUndefined();
+    expect(messageUpdates().some((c) => "retry_count" in (c.values ?? {}))).toBe(false);
+    expect(
+      messageUpdates().some(
+        (c) =>
+          "scheduled_at" in (c.values ?? {}) &&
+          c.filters.some(([col, val]) => col === "id" && val === "msg-1"),
+      ),
+    ).toBe(false);
+    expect(messageUpdates().some((c) => c.values?.status === "failed")).toBe(false);
+  });
+
+  it("reclaims stale sending rows back to pending before the due fetch", async () => {
+    const before = Date.now();
+    db.setResponder((state) => {
+      if (
+        state.table === "whatsapp_messages" &&
+        state.op === "update" &&
+        state.values?.status === "pending" &&
+        state.filters.some(([col, val]) => col === "status" && val === "sending")
+      ) {
+        return { data: null, error: null };
+      }
+      return baseResponder([dueBillRow])(state);
+    });
+
+    const res = await GET(cronReq("Bearer test-cron-secret"));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+
+    const reclaim = messageUpdates().find(
+      (c) =>
+        c.values?.status === "pending" &&
+        c.filters.some(([col, val]) => col === "status" && val === "sending"),
+    );
+    expect(reclaim).toBeDefined();
+    expect(reclaim!.filters).toEqual(
+      expect.arrayContaining([["status", "sending"]]),
+    );
+    const lt = reclaim!.filters.find(([col]) => col === "updated_at");
+    expect(lt).toBeDefined();
+    const cutoff = new Date(lt![1] as string).getTime();
+    expect(before - 6 * 60_000).toBeLessThanOrEqual(cutoff);
+    expect(cutoff).toBeLessThanOrEqual(Date.now() - 4 * 60_000);
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
   });
 
   it("sends template_variables.text for non-bill rows", async () => {
