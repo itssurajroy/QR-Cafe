@@ -12,20 +12,35 @@ export async function GET(req: NextRequest) {
   const db = createSupabaseAdmin();
   const restaurantId = auth.restaurantId;
 
+  const keysToFetch = [
+    "api_key", "webhook_url", "webhook_secret",
+    "gstin", "fssai", "restaurantEmail", "currency", "timezone", "invoicePrefix",
+    "tagline", "accentColor", "googleReviewUrl",
+    "businessHours",
+    "cgstRate", "sgstRate", "igstRate", "serviceChargeRate", "isInclusivePricing", "roundToNearestRupee",
+    "enableCash", "enableCard", "enableUpi",
+    "qrType", "afterScanAction", "allowCustomerOrdering", "requireTableSelection", "showQrBranding",
+    "printers",
+    "soundAlerts", "emailAlerts", "orderReadySms",
+    "waEnabled", "waTemplate", "waIncludeReviewCta", "waIncludeGstin", "waThankYou", "autoSendWaBill", "includePdfInvoice", "includeOrderAgainBtn"
+  ];
+
   const { data: config } = await db
     .from("platform_config")
     .select("key, value")
     .eq("restaurant_id", restaurantId)
-    .in("key", ["api_key", "webhook_url", "webhook_secret"]);
+    .in("key", keysToFetch);
 
   const configMap = new Map((config ?? []).map((c: any) => [c.key, c.value]));
 
-  return NextResponse.json({
-    ok: true,
-    api_key: configMap.get("api_key") || `qrslice_live_pk_${Math.random().toString(36).substring(2, 15)}`,
-    webhook_url: configMap.get("webhook_url") || "",
-    webhook_secret: configMap.get("webhook_secret") || `whsec_${Math.random().toString(36).substring(2, 15)}`,
-  });
+  const responseObj: any = { ok: true };
+  for (const key of keysToFetch) {
+    if (configMap.has(key)) {
+      responseObj[key] = configMap.get(key);
+    }
+  }
+
+  return NextResponse.json(responseObj);
 }
 
 export async function PATCH(req: NextRequest) {
@@ -43,18 +58,19 @@ export async function PATCH(req: NextRequest) {
 
     // Map of allowed settings
     const allowedKeys = [
-      "api_key",
-      "webhook_url",
-      "webhook_secret",
-      "whatsapp_enabled",
-      "razorpay_key",
-      "printer_configured",
-      "email_configured",
-      "sms_configured",
-      "tally_configured",
-      "delivery_configured",
-      "ga4_configured",
-      "google_reviews_configured",
+      "api_key", "webhook_url", "webhook_secret",
+      "whatsapp_enabled", "razorpay_key", "printer_configured",
+      "email_configured", "sms_configured", "tally_configured",
+      "delivery_configured", "ga4_configured", "google_reviews_configured",
+      "gstin", "fssai", "restaurantEmail", "currency", "timezone", "invoicePrefix",
+      "tagline", "accentColor", "googleReviewUrl",
+      "businessHours",
+      "cgstRate", "sgstRate", "igstRate", "serviceChargeRate", "isInclusivePricing", "roundToNearestRupee",
+      "enableCash", "enableCard", "enableUpi",
+      "qrType", "afterScanAction", "allowCustomerOrdering", "requireTableSelection", "showQrBranding",
+      "printers",
+      "soundAlerts", "emailAlerts", "orderReadySms",
+      "waEnabled", "waTemplate", "waIncludeReviewCta", "waIncludeGstin", "waThankYou", "autoSendWaBill", "includePdfInvoice", "includeOrderAgainBtn"
     ];
 
     for (const key of allowedKeys) {
