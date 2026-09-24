@@ -1,37 +1,38 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { BaileysSessionStore } from "@/integrations/whatsapp/baileys/session-store";
+import { BaileysConnectionManager } from "@/integrations/whatsapp/baileys/connection-manager";
 
 export async function POST(req: NextRequest) {
   const auth = await getSessionUser();
-  if (!auth || auth.role === "super_admin" || !auth.restaurantId) {
+  if (!auth || !auth.restaurantId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (auth.role !== "owner" && auth.role !== "super_admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const { integrationId, config } = await req.json();
 
     if (integrationId === "whatsapp") {
-      const { input1: phoneNumberId, input2: accessToken } = config;
-      if (!phoneNumberId || !accessToken) {
-        return NextResponse.json({ error: "Missing Phone Number ID or Access Token" }, { status: 400 });
+      const tenantId = auth.restaurantId;
+      const linked = await new BaileysSessionStore().hasSession(tenantId);
+      if (!linked) {
+        return NextResponse.json({ ok: false, linked: false, message: "WhatsApp not linked. Scan QR to connect." });
       }
-
-      const res = await fetch(`https://graph.facebook.com/v17.0/${phoneNumberId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const status = await new BaileysConnectionManager().getStatus(tenantId);
+      if (!status.connected) {
+        return NextResponse.json({ ok: false, linked: true, connected: false, message: "WhatsApp linked but not connected. Retrying..." });
+      }
+      return NextResponse.json({
+        ok: true,
+        linked: true,
+        connected: true,
+        phoneNumber: status.phoneNumber,
+        message: `WhatsApp connected${status.phoneNumber ? ` as ${status.phoneNumber}` : ""}.`,
       });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        return NextResponse.json(
-          { error: errorData.error?.message || "Invalid WhatsApp credentials" },
-          { status: 400 }
-        );
-      }
-
-      return NextResponse.json({ ok: true, message: "Handshake successful! WhatsApp API is reachable." });
     }
 
     if (integrationId === "razorpay") {

@@ -123,10 +123,12 @@ export function SettingsTab(props: SettingsTabProps) {
   const [includePdfInvoice, setIncludePdfInvoice] = useState(true);
   const [includeOrderAgainBtn, setIncludeOrderAgainBtn] = useState(true);
 
-  // WhatsApp Cloud API Credentials
-  const [waPhoneNumberId, setWaPhoneNumberId] = useState("");
-  const [waAccessToken, setWaAccessToken] = useState("");
-  const [waBusinessAccountId, setWaBusinessAccountId] = useState("");
+  // WhatsApp Baileys link state
+  const [waLinked, setWaLinked] = useState(false);
+  const [waConnected, setWaConnected] = useState(false);
+  const [waPhoneNumber, setWaPhoneNumber] = useState<string | null>(null);
+  const [waQr, setWaQr] = useState<string | null>(null);
+  const [waLinking, setWaLinking] = useState(false);
   const [testingWaSend, setTestingWaSend] = useState(false);
 
   useEffect(() => {
@@ -140,9 +142,17 @@ export function SettingsTab(props: SettingsTabProps) {
           if (data.include_review_cta !== undefined) setWaIncludeReviewCta(data.include_review_cta);
           if (data.include_gstin_line !== undefined) setWaIncludeGstin(data.include_gstin_line);
           if (data.thank_you_line) setWaThankYou(data.thank_you_line);
-          if (data.phone_number_id) setWaPhoneNumberId(data.phone_number_id);
-          if (data.access_token) setWaAccessToken(data.access_token);
-          if (data.business_account_id) setWaBusinessAccountId(data.business_account_id);
+        }
+      } catch {
+        // ignore
+      }
+      try {
+        const s = await fetch("/api/whatsapp/status");
+        if (s.ok) {
+          const d = await s.json();
+          setWaLinked(!!d.linked);
+          setWaConnected(!!d.connected);
+          if (d.phoneNumber) setWaPhoneNumber(d.phoneNumber);
         }
       } catch {
         // ignore
@@ -164,9 +174,6 @@ export function SettingsTab(props: SettingsTabProps) {
           include_review_cta: waIncludeReviewCta,
           include_gstin_line: waIncludeGstin,
           thank_you_line: waThankYou,
-          phone_number_id: waPhoneNumberId.trim(),
-          access_token: waAccessToken.trim(),
-          business_account_id: waBusinessAccountId.trim(),
         }),
       });
       const data = await res.json();
@@ -179,9 +186,69 @@ export function SettingsTab(props: SettingsTabProps) {
     }
   }
 
+  async function handleLinkWhatsApp() {
+    setWaLinking(true);
+    setWaQr(null);
+    try {
+      const res = await fetch("/api/whatsapp/qr");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to get QR");
+      if (data.connected) {
+        setWaLinked(true);
+        setWaConnected(true);
+        props.flash("ok", "WhatsApp already linked ✓");
+        return;
+      }
+      if (data.qr) {
+        setWaQr(data.qr);
+        // Poll status every 2s up to 60s
+        let tries = 0;
+        const iv = setInterval(async () => {
+          tries++;
+          try {
+            const s = await fetch("/api/whatsapp/status");
+            const d = await s.json();
+            if (d.linked && d.connected) {
+              clearInterval(iv);
+              setWaLinked(true);
+              setWaConnected(true);
+              setWaPhoneNumber(d.phoneNumber || null);
+              setWaQr(null);
+              props.flash("ok", "WhatsApp linked successfully ✓");
+            }
+          } catch {}
+          if (tries >= 30) {
+            clearInterval(iv);
+            setWaLinking(false);
+          }
+        }, 2000);
+      }
+    } catch (err: unknown) {
+      props.flash("err", err instanceof Error ? err.message : "Failed to link WhatsApp");
+      setWaLinking(false);
+    }
+  }
+
+  async function handleDisconnectWhatsApp() {
+    try {
+      const res = await fetch("/api/whatsapp/disconnect", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to disconnect");
+      setWaLinked(false);
+      setWaConnected(false);
+      setWaPhoneNumber(null);
+      setWaQr(null);
+      props.flash("ok", "WhatsApp disconnected");
+    } catch (err: unknown) {
+      props.flash("err", err instanceof Error ? err.message : "Failed to disconnect");
+    } finally {
+      setWaLinking(false);
+    }
+  }
+
   async function handleTestWaSend() {
-    if (!waPhoneNumberId.trim() || !waAccessToken.trim()) {
-      props.flash("err", "Please configure WhatsApp Cloud API credentials first");
+    if (!waLinked) {
+      props.flash("err", "Link WhatsApp number in Settings first");
       return;
     }
     setTestingWaSend(true);
@@ -1023,46 +1090,30 @@ export function SettingsTab(props: SettingsTabProps) {
               <form onSubmit={handleSaveWaSettings} className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
-                        WhatsApp Cloud API - Phone Number ID
-                      </label>
-                      <input
-                        type="text"
-                        value={waPhoneNumberId}
-                        onChange={(e) => setWaPhoneNumberId(e.target.value)}
-                        placeholder="123456789012345"
-                        className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5] font-bold"
-                      />
-                      <p className="text-[10px] text-[#6F7185] mt-1">Get this from Meta Business Manager → WhatsApp → API Setup</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
-                        WhatsApp Cloud API - Access Token
-                      </label>
-                      <input
-                        type="password"
-                        value={waAccessToken}
-                        onChange={(e) => setWaAccessToken(e.target.value)}
-                        placeholder="EAAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                        className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5]"
-                      />
-                      <p className="text-[10px] text-[#6F7185] mt-1">Permanent access token from Meta Business Manager (never expires)</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-black text-[#17142B] uppercase tracking-wider mb-1.5">
-                        WhatsApp Business Account ID (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        value={waBusinessAccountId}
-                        onChange={(e) => setWaBusinessAccountId(e.target.value)}
-                        placeholder="987654321098765"
-                        className="w-full bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#17142B] focus:border-[#5738F5] font-bold"
-                      />
-                      <p className="text-[10px] text-[#6F7185] mt-1">Your WhatsApp Business Account ID from Meta Business Manager</p>
+                    <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-[#17142B] uppercase tracking-wider">WhatsApp Connection</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${waLinked ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                          {waLinked ? "● Linked" : "○ Not linked"}
+                        </span>
+                      </div>
+                      {waLinked && waPhoneNumber && (
+                        <p className="text-xs font-mono text-[#17142B]">Connected as {waPhoneNumber}</p>
+                      )}
+                      {waQr ? (
+                        <div className="space-y-2">
+                          <img src={waQr} alt="WhatsApp QR" className="w-48 h-48 mx-auto bg-white p-2 rounded-xl border" />
+                          <p className="text-[11px] text-center text-[#6F7185]">Waiting for scan…</p>
+                        </div>
+                      ) : waLinked ? (
+                        <button type="button" onClick={handleDisconnectWhatsApp} className="w-full px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-xl border border-red-200 transition">
+                          Disconnect WhatsApp
+                        </button>
+                      ) : (
+                        <button type="button" onClick={handleLinkWhatsApp} disabled={waLinking} className="w-full px-4 py-2 bg-[#25D366] hover:bg-[#1DA851] text-white font-black text-xs rounded-xl transition disabled:opacity-50">
+                          {waLinking ? "Linking…" : "Link WhatsApp Number"}
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -1169,7 +1220,7 @@ export function SettingsTab(props: SettingsTabProps) {
                   <button
                     type="button"
                     onClick={handleTestWaSend}
-                    disabled={testingWaSend || !waPhoneNumberId.trim() || !waAccessToken.trim()}
+                    disabled={testingWaSend || !waLinked}
                     className="px-5 py-2.5 bg-[#34C759]/10 hover:bg-[#34C759] text-[#34C759] hover:text-white font-black text-xs rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50 flex items-center gap-2"
                   >
                     {testingWaSend ? "Sending Test…" : "🧪 Send Test WhatsApp"}

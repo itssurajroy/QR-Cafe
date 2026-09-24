@@ -5,39 +5,24 @@ import { getSessionUser } from "@/lib/auth";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { DEFAULT_WA_TEMPLATE } from "@/lib/whatsapp-templates";
 
-const updateSettingsSchema = z.object({
-  // whatsapp_settings fields
-  enabled: z.boolean().optional(),
-  message_template: z.string().min(10).optional(),
-  include_review_cta: z.boolean().optional(),
-  include_gstin_line: z.boolean().optional(),
-  thank_you_line: z.string().optional(),
-  // whatsapp_accounts fields (Cloud API credentials)
-  phone_number_id: z.string().optional(),
-  access_token: z.string().optional(),
-  business_account_id: z.string().optional(),
-  verify_token: z.string().optional(),
-  webhook_url: z.string().url().optional().or(z.literal("")),
-  webhook_secret: z.string().optional(),
-  // For super_admin to target specific tenant
-  restaurant_id: z.string().uuid().optional(),
-});
+const updateSettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    message_template: z.string().max(2000).optional(),
+    include_review_cta: z.boolean().optional(),
+    include_gstin_line: z.boolean().optional(),
+    thank_you_line: z.string().max(500).optional(),
+    restaurant_id: z.string().uuid().optional(),
+  })
+  .strict();
 
 function getDefaults(restaurantId: string) {
   return {
-    // whatsapp_settings defaults
     enabled: true,
     message_template: DEFAULT_WA_TEMPLATE,
     include_review_cta: true,
     include_gstin_line: true,
     thank_you_line: "Thank you for dining with us!",
-    // whatsapp_accounts defaults (empty for credentials)
-    phone_number_id: "",
-    access_token: "",
-    business_account_id: "",
-    verify_token: "",
-    webhook_url: "",
-    webhook_secret: "",
     tenant_id: restaurantId,
   };
 }
@@ -130,22 +115,8 @@ export async function PATCH(req: NextRequest) {
     );
   }
 
-  const {
-    // whatsapp_settings fields
-    enabled,
-    message_template,
-    include_review_cta,
-    include_gstin_line,
-    thank_you_line,
-    // whatsapp_accounts fields
-    phone_number_id,
-    access_token,
-    business_account_id,
-    verify_token,
-    webhook_url,
-    webhook_secret,
-    restaurant_id: targetRestId,
-  } = parsed.data;
+  const { enabled, message_template, include_review_cta, include_gstin_line, thank_you_line, restaurant_id: targetRestId } =
+    parsed.data;
 
   const restaurantId =
     user.role === "super_admin" && targetRestId
@@ -154,7 +125,6 @@ export async function PATCH(req: NextRequest) {
 
   const db = createSupabaseAdmin();
 
-  // Prepare updates for whatsapp_settings table
   const settingsUpdates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
@@ -165,64 +135,19 @@ export async function PATCH(req: NextRequest) {
   if (include_gstin_line !== undefined) settingsUpdates.include_gstin_line = include_gstin_line;
   if (thank_you_line !== undefined) settingsUpdates.thank_you_line = thank_you_line;
 
-  // Prepare updates for whatsapp_accounts table
-  const accountsUpdates: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  };
+  if (Object.keys(settingsUpdates).length === 1) {
+    return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+  }
 
-  if (phone_number_id !== undefined) accountsUpdates.phone_number_id = phone_number_id;
-  if (access_token !== undefined) accountsUpdates.access_token = access_token;
-  if (business_account_id !== undefined) accountsUpdates.business_account_id = business_account_id;
-  if (verify_token !== undefined) accountsUpdates.verify_token = verify_token;
-  if (webhook_url !== undefined) accountsUpdates.webhook_url = webhook_url;
-  if (webhook_secret !== undefined) accountsUpdates.webhook_secret = webhook_secret;
-
-  // Execute upserts in parallel
-  const results = await Promise.all([
-    Object.keys(settingsUpdates).length > 1
-      ? db
-          .from("whatsapp_settings")
-          .upsert(
-            { tenant_id: restaurantId, ...settingsUpdates },
-            { onConflict: "tenant_id" }
-          )
-          .select()
-          .single()
-      : Promise.resolve({ data: null, error: null }),
-    Object.keys(accountsUpdates).length > 1
-      ? db
-          .from("whatsapp_accounts")
-          .upsert(
-            { tenant_id: restaurantId, ...accountsUpdates },
-            { onConflict: "tenant_id" }
-          )
-          .select()
-          .single()
-      : Promise.resolve({ data: null, error: null }),
-  ]);
-
-  const [settingsResult, accountsResult] = results;
-  const { data: updatedSettings, error: settingsError } = settingsResult;
-  const { data: updatedAccounts, error: accountsError } = accountsResult;
+  const { data: updatedSettings, error: settingsError } = await db
+    .from("whatsapp_settings")
+    .upsert({ tenant_id: restaurantId, ...settingsUpdates }, { onConflict: "tenant_id" })
+    .select()
+    .single();
 
   if (settingsError) {
     return NextResponse.json({ error: settingsError.message }, { status: 500 });
   }
-  if (accountsError) {
-    return NextResponse.json({ error: accountsError.message }, { status: 500 });
-  }
 
-  // Merge the results
-  const mergedSettings = {
-    ...(updatedSettings || {}),
-    ...(updatedAccounts || {}),
-  };
-
-  // If neither was updated (no valid fields provided), return current state
-  if (!updatedSettings && !updatedAccounts) {
-    const current = await GET(req);
-    return current;
-  }
-
-  return NextResponse.json({ ok: true, settings: mergedSettings });
+  return NextResponse.json({ ok: true, settings: updatedSettings });
 }
