@@ -580,4 +580,53 @@ describe("GET /api/cron/whatsapp-dispatch", () => {
     });
     expect(db.calls.some((c) => c.table === "orders")).toBe(false);
   });
+
+  it("sends image with caption", async () => {
+    const imageRow = {
+      ...dueBillRow,
+      id: "msg-img",
+      order_id: null,
+      message_type: "test",
+      template_variables: { text: "fallback text" },
+      media_url: "https://x.supabase.co/bucket/img.jpg",
+      media_type: "image",
+      caption: "Hi",
+    };
+    db.setResponder(baseResponder([imageRow]));
+
+    const res = await GET(cronReq("Bearer test-cron-secret"));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ image: expect.any(Object), caption: "Hi" }),
+    );
+  });
+
+  it("sends buttons", async () => {
+    const btnRow = {
+      ...dueBillRow,
+      id: "msg-btn",
+      order_id: null,
+      message_type: "test",
+      template_variables: { text: "choose" },
+      buttons: [{ id: "menu", title: "View Menu" }],
+    };
+    db.setResponder(baseResponder([btnRow]));
+
+    const res = await GET(cronReq("Bearer test-cron-secret"));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ claimed: 1, sent: 1, deferred: 0, failed: 0 });
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ buttons: expect.any(Array) }),
+    );
+    // Baileys button shape mapped from {id,title}
+    const [, payload] = sendMessageMock.mock.calls[0] as [string, Record<string, unknown>];
+    const buttons = payload.buttons as Array<Record<string, unknown>>;
+    expect(buttons[0]).toMatchObject({ buttonId: "menu", type: 1 });
+    expect((buttons[0].buttonText as Record<string, unknown>).displayText).toBe("View Menu");
+  });
 });

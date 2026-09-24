@@ -20,6 +20,10 @@ type DueRow = {
   template_variables: Record<string, unknown> | null;
   retry_count: number | null;
   max_retries: number | null;
+  media_url: string | null;
+  media_type: string | null;
+  caption: string | null;
+  buttons: { id: string; title: string }[] | null;
 };
 
 export async function GET(req: NextRequest) {
@@ -53,7 +57,7 @@ export async function GET(req: NextRequest) {
   const { data: due, error } = await db
     .from("whatsapp_messages")
     .select(
-      "id, tenant_id, order_id, message_type, recipient_phone, template_variables, retry_count, max_retries",
+      "id, tenant_id, order_id, message_type, recipient_phone, template_variables, retry_count, max_retries, media_url, media_type, caption, buttons",
     )
     .eq("status", "pending")
     .lte("scheduled_at", now)
@@ -162,7 +166,29 @@ export async function GET(req: NextRequest) {
       await manager.waitForOpen(row.tenant_id, 25_000);
       const socket = manager.getSocket(row.tenant_id);
       if (!socket) throw new Error("Socket unavailable");
-      const result = await socket.sendMessage(jid, { text });
+      let payload: any;
+      if (row.media_url && row.media_type === "image") {
+        payload = { image: { url: row.media_url }, caption: row.caption || text };
+      } else if (row.media_url && row.media_type === "document") {
+        payload = {
+          document: { url: row.media_url },
+          mimetype: "application/pdf",
+          fileName: "Invoice.pdf",
+          caption: row.caption || text,
+        };
+      } else if (row.buttons && Array.isArray(row.buttons) && row.buttons.length > 0) {
+        payload = {
+          text,
+          buttons: (row.buttons as { id: string; title: string }[]).map((b) => ({
+            buttonId: b.id,
+            buttonText: { displayText: b.title },
+            type: 1,
+          })),
+        };
+      } else {
+        payload = { text };
+      }
+      const result = await socket.sendMessage(jid, payload);
       providerId = result?.key?.id ?? null;
       sendSucceeded = true;
       await manager.release(row.tenant_id);
