@@ -6,12 +6,22 @@ import { getSessionUser } from "@/lib/auth";
 import { buildWhatsAppReceiptVars } from "@/lib/whatsapp-templates";
 import { toWhatsAppJid } from "@/lib/whatsapp-bill-text";
 
-const sendSchema = z.object({
-  order_id: z.string().uuid().optional(),
-  phone: z.string().min(1).max(20),
-  message_type: z.enum(["bill_receipt", "test"]).default("bill_receipt"),
-  variables: z.record(z.string(), z.unknown()).optional(),
-});
+const sendSchema = z
+  .object({
+    order_id: z.string().uuid().optional(),
+    phone: z.string().min(1).max(20),
+    message_type: z.enum(["bill_receipt", "test", "keyword_reply", "manual_reply"]).default("bill_receipt"),
+    variables: z.record(z.string(), z.unknown()).optional(),
+    media_url: z.string().url().optional(),
+    media_type: z.enum(["image", "document", "video", "audio"]).optional(),
+    caption: z.string().max(1024).optional(),
+    buttons: z
+      .array(z.object({ id: z.string().min(1).max(20), title: z.string().min(1).max(20) }))
+      .max(3)
+      .optional(),
+  })
+  .refine((d) => !d.media_url || !!d.media_type, { message: "media_type required", path: ["media_type"] })
+  .refine((d) => !d.media_url || d.media_url.startsWith("https://"), { message: "https only", path: ["media_url"] });
 
 export async function POST(req: NextRequest) {
   const auth = await getSessionUser();
@@ -33,7 +43,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 422 });
     }
 
-    const { order_id, phone, message_type, variables } = parsed.data;
+    const { order_id, phone, message_type, variables, media_url, media_type, caption, buttons } = parsed.data;
 
     const [settingsResult, accountsResult] = await Promise.all([
       db.from("whatsapp_settings").select("*").eq("tenant_id", restaurantId).maybeSingle(),
@@ -147,6 +157,13 @@ export async function POST(req: NextRequest) {
         template_language: templateLanguage,
         template_variables: finalVars,
         status: "pending",
+        media_url: media_url ?? null,
+        media_type: media_type ?? null,
+        caption: caption ?? null,
+        buttons: buttons ?? null,
+        inbound_id: (variables as Record<string, unknown> | undefined)?.inbound_id
+          ? String((variables as Record<string, unknown>).inbound_id)
+          : null,
       })
       .select("id")
       .single();
