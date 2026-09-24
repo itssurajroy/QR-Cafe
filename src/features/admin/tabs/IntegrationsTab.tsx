@@ -73,13 +73,25 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
     setActiveModal(item);
     setTestResult(null);
     setTestError(null);
-    if (item.id === "whatsapp") {
-      setModalInput1("123456789012345");
-      setModalInput2("EAAGm...");
-      setModalInput3("123456789012345");
-    } else if (item.id === "razorpay") {
+    if (item.id === "razorpay") {
       setModalInput1("rzp_live_...");
       setModalInput2("secret_...");
+      setModalInput3("");
+    } else if (item.id === "email") {
+      setModalInput1("re_...");
+      setModalInput2("");
+      setModalInput3("");
+    } else if (item.id === "sms") {
+      setModalInput1("AC...");
+      setModalInput2("token_...");
+      setModalInput3("+1234567890");
+    } else if (item.id === "ga4") {
+      setModalInput1("G-XXXXXXXXXX");
+      setModalInput2("");
+      setModalInput3("");
+    } else if (item.id === "google_reviews") {
+      setModalInput1("https://g.page/r/...");
+      setModalInput2("");
       setModalInput3("");
     } else if (item.id === "thermal_printer") {
       setModalInput1("192.168.1.120");
@@ -322,48 +334,49 @@ export function IntegrationsTab({ restaurant, flash }: IntegrationsTabProps) {
 
                   <div>
                     <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
-                      {activeModal.id === "thermal_printer"
-                        ? "Printer IP Address or Port"
-                        : activeModal.id === "whatsapp"
-                        ? "Phone Number ID"
-                        : "Key ID"}
+                      {activeModal.id === "thermal_printer" ? "Printer IP Address or Port" 
+                        : activeModal.id === "razorpay" ? "Key ID" 
+                        : activeModal.id === "sms" ? "Twilio Account SID"
+                        : activeModal.id === "ga4" ? "Measurement ID"
+                        : activeModal.id === "google_reviews" ? "Google Maps URL"
+                        : "API Key"}
                     </label>
                     <input
                       type="text"
                       value={modalInput1}
                       onChange={(e) => setModalInput1(e.target.value)}
-                      placeholder={activeModal.id === "whatsapp" ? "e.g. 123456789012345" : "e.g. 192.168.1.100 or key_live_..."}
+                      placeholder={activeModal.id === "razorpay" ? "e.g. rzp_live_..." : "e.g. 192.168.1.100 or key_..."}
                       className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
                     />
                   </div>
 
+                  {activeModal.id !== "ga4" && activeModal.id !== "google_reviews" && activeModal.id !== "email" && (
                   <div>
                     <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
-                      {activeModal.id === "thermal_printer"
-                        ? "Paper Width & Protocol"
-                        : activeModal.id === "whatsapp"
-                        ? "System User Access Token"
+                      {activeModal.id === "thermal_printer" ? "Paper Width & Protocol" 
+                        : activeModal.id === "sms" ? "Auth Token"
                         : "Key Secret"}
                     </label>
                     <input
                       type="password"
                       value={modalInput2}
                       onChange={(e) => setModalInput2(e.target.value)}
-                      placeholder={activeModal.id === "whatsapp" ? "EAAGm..." : "e.g. 80mm Standard or secret_..."}
+                      placeholder={activeModal.id === "thermal_printer" ? "e.g. 80mm Standard" : "e.g. secret_..."}
                       className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
                     />
                   </div>
+                  )}
 
-                  {activeModal.id === "whatsapp" && (
+                  {activeModal.id === "sms" && (
                     <div>
                       <label className="font-bold text-[#17142B] uppercase tracking-wider block mb-1">
-                        Business Account ID
+                        Twilio Phone Number
                       </label>
                       <input
                         type="text"
                         value={modalInput3}
                         onChange={(e) => setModalInput3(e.target.value)}
-                        placeholder="e.g. 123456789012345"
+                        placeholder="e.g. +1234567890"
                         className="w-full px-3 py-2 bg-[#F8F7FC] border border-[#E7E4F0] rounded-xl font-mono text-xs"
                       />
                     </div>
