@@ -9,6 +9,8 @@ try {
 import makeWASocket, { WASocket, ConnectionState, AuthenticationState, SignalDataTypeMap, BaileysEventMap } from "@whiskeysockets/baileys";
 import { initAuthCreds } from "@whiskeysockets/baileys/lib/Utils/auth-utils";
 import { BaileysSessionStore } from "./session-store";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { routeKeyword } from "@/integrations/whatsapp/keyword-router";
 import type { WhatsAppStatus } from "@/integrations/whatsapp/whatsapp.types";
 import type { ILogger } from "@whiskeysockets/baileys/lib/Utils/logger";
 
@@ -148,7 +150,7 @@ export class BaileysConnectionManager {
     eventHandlers.push({ event: "creds.update", handler: credsUpdateHandler as (...args: unknown[]) => void });
 
     const messagesUpsertHandler = ({ messages }: { messages: unknown[] }) => {
-      this.handleMessagesUpsert(tenantId, messages);
+      void this.handleMessagesUpsert(tenantId, messages);
     };
     socket.ev.on("messages.upsert", messagesUpsertHandler);
     eventHandlers.push({ event: "messages.upsert", handler: messagesUpsertHandler as (...args: unknown[]) => void });
@@ -323,7 +325,104 @@ export class BaileysConnectionManager {
     }
   }
 
-  private handleMessagesUpsert(tenantId: string, messages: unknown[]): void {
-    console.log(`[WhatsApp:${tenantId}] Received ${messages.length} message(s)`);
+  async handleMessagesUpsert(tenantId: string, messages: unknown[]): Promise<void> {
+    const db = createSupabaseAdmin();
+    for (const rawMsg of messages as unknown as Array<{
+      key?: { id?: string; remoteJid?: string; fromMe?: boolean };
+      pushName?: string;
+      message?: {
+        conversation?: string;
+        extendedTextMessage?: { text?: string };
+        imageMessage?: { caption?: string };
+        documentMessage?: { caption?: string };
+      };
+    }>) {
+      try {
+        if (rawMsg?.key?.fromMe) continue;
+        const remoteJid = rawMsg?.key?.remoteJid;
+        const msgId = rawMsg?.key?.id;
+        if (!remoteJid || !msgId) continue;
+        const bodyRaw =
+          rawMsg?.message?.conversation ??
+          rawMsg?.message?.extendedTextMessage?.text ??
+          rawMsg?.message?.imageMessage?.caption ??
+          rawMsg?.message?.documentMessage?.caption ??
+          "";
+        const body = String(bodyRaw).trim();
+        if (!body) continue;
+        const pushName = (rawMsg as { pushName?: string }).pushName ?? null;
+
+        let inboundUuid: string | null = null;
+        let inboundError: { code?: string; message?: string } | null = null;
+        let inboundData: { id?: string }[] | { id?: string } | null = null;
+        try {
+          const payload = {
+            tenant_id: tenantId,
+            remote_jid: remoteJid,
+            push_name: pushName,
+            body,
+            raw: rawMsg as unknown as Record<string, unknown>,
+            inbound_id: msgId,
+          };
+          const chain: unknown = (db.from("whatsapp_inbound_messages") as unknown as { insert: (p: unknown) => unknown }).insert(payload);
+          const result = (chain as { select?: () => Promise<{ data: unknown; error: unknown }> }).select
+            ? await (chain as { select: () => Promise<{ data: unknown; error: unknown }> }).select()
+            : (await chain) as { data: unknown; error: unknown };
+          inboundError = result?.error as { code?: string; message?: string } | null;
+          inboundData = result?.data as { id?: string }[] | { id?: string } | null;
+          if (Array.isArray(inboundData) && inboundData.length > 0) {
+            inboundUuid = (inboundData[0] as { id?: string }).id ?? null;
+          } else if (inboundData && typeof inboundData === "object" && "id" in inboundData) {
+            inboundUuid = (inboundData as { id?: string }).id ?? null;
+          }
+        } catch (e: unknown) {
+          const err = e as { code?: string };
+          if (err?.code === "23505") continue;
+          console.error(`[WhatsApp:${tenantId}] inbound insert failed:`, e);
+          continue;
+        }
+        if (inboundError) {
+          if (inboundError.code === "23505") continue;
+          console.error(`[WhatsApp:${tenantId}] inbound insert error:`, inboundError);
+          continue;
+        }
+
+        try {
+          const phone = remoteJid.split("@")[0].split(":")[0];
+          await (db.from("whatsapp_tickets") as unknown as { upsert: (p: unknown, o: unknown) => Promise<unknown> }).upsert(
+            {
+              tenant_id: tenantId,
+              customer_jid: remoteJid,
+              customer_phone: phone,
+              push_name: pushName,
+              last_message_at: new Date().toISOString(),
+            },
+            { onConflict: "tenant_id,customer_jid" } as unknown as never,
+          );
+        } catch (e) {
+          console.error(`[WhatsApp:${tenantId}] ticket upsert failed:`, e);
+        }
+
+        const routed = routeKeyword(body, {});
+        if (routed) {
+          try {
+            const phone = remoteJid.split("@")[0].split(":")[0];
+            await (db.from("whatsapp_messages") as unknown as { insert: (p: unknown) => Promise<unknown> }).insert({
+              tenant_id: tenantId,
+              recipient_phone: phone,
+              message_type: "keyword_reply",
+              status: "pending",
+              template_variables: { text: routed.reply },
+              buttons: (routed as { buttons?: unknown }).buttons ?? null,
+              inbound_id: inboundUuid,
+            });
+          } catch (e) {
+            console.error(`[WhatsApp:${tenantId}] enqueue keyword reply failed:`, e);
+          }
+        }
+      } catch (e) {
+        console.error(`[WhatsApp:${tenantId}] handleMessagesUpsert error:`, e);
+      }
+    }
   }
 }
