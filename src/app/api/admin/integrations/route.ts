@@ -25,16 +25,6 @@ export async function GET(req: NextRequest) {
   // Derive integration status from actual configuration
   const integrations = [
     {
-      id: "whatsapp",
-      name: "WhatsApp Cloud API",
-      category: "communication" as const,
-      status: configMap.get("whatsapp_enabled") === true ? "connected" : "not_connected",
-      description: "Automated digital receipts, order tracking updates, and 1-click customer re-engagement.",
-      connectedSince: configMap.get("whatsapp_enabled") === true ? "Active" : undefined,
-      icon: "💬",
-      docsUrl: "/admin/settings?category=whatsapp",
-    },
-    {
       id: "razorpay",
       name: "Payment Gateway (Razorpay / UPI)",
       category: "payment" as const,
@@ -125,7 +115,6 @@ export async function PATCH(req: NextRequest) {
     const { integrationId, status, config } = body;
     
     const keyMap: Record<string, string> = {
-      whatsapp: "whatsapp_enabled",
       razorpay: "razorpay_key",
       thermal_printer: "printer_configured",
       email: "email_configured",
@@ -140,19 +129,6 @@ export async function PATCH(req: NextRequest) {
     if (!key) return NextResponse.json({ error: "Invalid integration" }, { status: 400 });
     
     const value = status === "connected" ? true : false;
-    
-    if (integrationId === "whatsapp" && config && value) {
-      await db.from("whatsapp_accounts").upsert({
-        tenant_id: restaurantId,
-        phone_number_id: config.input1,
-        access_token: config.input2,
-        business_account_id: config.input3,
-        status: "connected",
-        updated_at: new Date().toISOString()
-      }, { onConflict: "tenant_id" });
-    } else if (integrationId === "whatsapp" && !value) {
-      await db.from("whatsapp_accounts").update({ status: "disconnected" }).eq("tenant_id", restaurantId);
-    }
     
     if (integrationId === "razorpay" && config && value) {
       await db.from("razorpay_accounts").upsert({
