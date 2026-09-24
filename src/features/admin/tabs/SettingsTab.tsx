@@ -132,16 +132,48 @@ export function SettingsTab(props: SettingsTabProps) {
   const [testingWaSend, setTestingWaSend] = useState(false);
 
   useEffect(() => {
-    async function loadWaSettings() {
+    async function loadSettings() {
       try {
-        const res = await fetch("/api/admin/whatsapp/settings");
+        const res = await fetch("/api/admin/settings");
         if (res.ok) {
           const data = await res.json();
-          if (data.message_template) setWaTemplate(data.message_template);
-          if (data.enabled !== undefined) setWaEnabled(data.enabled);
-          if (data.include_review_cta !== undefined) setWaIncludeReviewCta(data.include_review_cta);
-          if (data.include_gstin_line !== undefined) setWaIncludeGstin(data.include_gstin_line);
-          if (data.thank_you_line) setWaThankYou(data.thank_you_line);
+          if (data.gstin) setGstin(data.gstin);
+          if (data.fssai) setFssai(data.fssai);
+          if (data.restaurantEmail) setRestaurantEmail(data.restaurantEmail);
+          if (data.currency) setCurrency(data.currency);
+          if (data.timezone) setTimezone(data.timezone);
+          if (data.invoicePrefix) setInvoicePrefix(data.invoicePrefix);
+          if (data.tagline) setTagline(data.tagline);
+          if (data.accentColor) setAccentColor(data.accentColor);
+          if (data.googleReviewUrl) setGoogleReviewUrl(data.googleReviewUrl);
+          if (data.businessHours) setBusinessHours(data.businessHours);
+          if (data.cgstRate !== undefined) setCgstRate(data.cgstRate);
+          if (data.sgstRate !== undefined) setSgstRate(data.sgstRate);
+          if (data.igstRate !== undefined) setIgstRate(data.igstRate);
+          if (data.serviceChargeRate !== undefined) setServiceChargeRate(data.serviceChargeRate);
+          if (data.isInclusivePricing !== undefined) setIsInclusivePricing(data.isInclusivePricing);
+          if (data.roundToNearestRupee !== undefined) setRoundToNearestRupee(data.roundToNearestRupee);
+          if (data.enableCash !== undefined) setEnableCash(data.enableCash);
+          if (data.enableCard !== undefined) setEnableCard(data.enableCard);
+          if (data.enableUpi !== undefined) setEnableUpi(data.enableUpi);
+          if (data.qrType) setQrType(data.qrType);
+          if (data.afterScanAction) setAfterScanAction(data.afterScanAction);
+          if (data.allowCustomerOrdering !== undefined) setAllowCustomerOrdering(data.allowCustomerOrdering);
+          if (data.requireTableSelection !== undefined) setRequireTableSelection(data.requireTableSelection);
+          if (data.showQrBranding !== undefined) setShowQrBranding(data.showQrBranding);
+          if (data.printers) setPrinters(data.printers);
+          if (data.soundAlerts !== undefined) setSoundAlerts(data.soundAlerts);
+          if (data.emailAlerts !== undefined) setEmailAlerts(data.emailAlerts);
+          if (data.orderReadySms !== undefined) setOrderReadySms(data.orderReadySms);
+          
+          if (data.waTemplate) setWaTemplate(data.waTemplate);
+          if (data.waEnabled !== undefined) setWaEnabled(data.waEnabled);
+          if (data.waIncludeReviewCta !== undefined) setWaIncludeReviewCta(data.waIncludeReviewCta);
+          if (data.waIncludeGstin !== undefined) setWaIncludeGstin(data.waIncludeGstin);
+          if (data.waThankYou) setWaThankYou(data.waThankYou);
+          if (data.autoSendWaBill !== undefined) setAutoSendWaBill(data.autoSendWaBill);
+          if (data.includePdfInvoice !== undefined) setIncludePdfInvoice(data.includePdfInvoice);
+          if (data.includeOrderAgainBtn !== undefined) setIncludeOrderAgainBtn(data.includeOrderAgainBtn);
         }
       } catch {
         // ignore
@@ -158,7 +190,7 @@ export function SettingsTab(props: SettingsTabProps) {
         // ignore
       }
     }
-    loadWaSettings();
+    loadSettings();
   }, []);
 
   async function handleSaveWaSettings(e: React.FormEvent) {
@@ -290,7 +322,29 @@ export function SettingsTab(props: SettingsTabProps) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update settings");
+      if (!res.ok) throw new Error(data.error || "Failed to update core settings");
+
+      // Save platform_config settings
+      const settingsRes = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gstin, fssai, restaurantEmail, currency, timezone, invoicePrefix,
+          tagline, accentColor, googleReviewUrl,
+          businessHours,
+          cgstRate, sgstRate, igstRate, serviceChargeRate, isInclusivePricing, roundToNearestRupee,
+          enableCash, enableCard, enableUpi,
+          qrType, afterScanAction, allowCustomerOrdering, requireTableSelection, showQrBranding,
+          printers,
+          soundAlerts, emailAlerts, orderReadySms,
+          waEnabled, waTemplate, waIncludeReviewCta, waIncludeGstin, waThankYou, autoSendWaBill, includePdfInvoice, includeOrderAgainBtn
+        }),
+      });
+      if (!settingsRes.ok) {
+        const sdata = await settingsRes.json();
+        throw new Error(sdata.error || "Failed to update extended settings");
+      }
+
       props.flash("ok", "Restaurant settings saved successfully across all stations! ✓");
     } catch (err: unknown) {
       props.flash("err", err instanceof Error ? err.message : "Failed to update settings");
