@@ -31,27 +31,27 @@ import {
 
 describe("paise()", () => {
   it("formats integer paise as ₹ string", () => {
-    expect(paise(10000)).toBe("₹100");
-    expect(paise(50000)).toBe("₹500");
-    expect(paise(150)).toBe("₹1.5");
+    expect(paise(10000)).toBe("₹100.00");
+    expect(paise(50000)).toBe("₹500.00");
+    expect(paise(150)).toBe("₹1.50");
   });
 
   it("handles zero", () => {
-    expect(paise(0)).toBe("₹0");
+    expect(paise(0)).toBe("₹0.00");
   });
 
   it("handles negative gracefully (clamps to 0)", () => {
-    expect(paise(-100)).toBe("₹0");
+    expect(paise(-100)).toBe("₹0.00");
   });
 
   it("alias formatPaise works", () => {
-    expect(formatPaise(10000)).toBe("₹100");
+    expect(formatPaise(10000)).toBe("₹100.00");
   });
 });
 
 describe("formatRupees()", () => {
   it("formats whole rupees", () => {
-    expect(formatRupees(500)).toBe("₹500");
+    expect(formatRupees(500)).toBe("₹500.00");
   });
 });
 

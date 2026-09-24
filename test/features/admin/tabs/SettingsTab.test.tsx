@@ -52,34 +52,23 @@ function stubFetchOk(payload: unknown = {}) {
 
 async function openWhatsAppSection() {
   fireEvent.click(screen.getByText("WhatsApp Receipts"));
-  await waitFor(() => screen.getByText("WhatsApp Cloud API - Phone Number ID"));
+  await waitFor(() => screen.getByText("WhatsApp Connection"));
 }
 
 describe("SettingsTab WhatsApp section", () => {
-  it("renders Cloud API credential fields and test-send button", async () => {
+  it("renders Baileys link panel and test-send button", async () => {
     const fetchMock = stubFetchOk({});
     render(<SettingsTab {...mockProps} />);
     await openWhatsAppSection();
-    expect(screen.getByPlaceholderText("123456789012345")).not.toBeNull();
+    expect(screen.getByText("WhatsApp Connection")).not.toBeNull();
     expect(screen.getByText(/Send Test WhatsApp/)).not.toBeNull();
-    // Loads from the merged Task 3 admin endpoint (settings + accounts)
     expect(fetchMock).toHaveBeenCalledWith("/api/admin/whatsapp/settings");
   });
 
-  it("saves Cloud API credentials via the admin settings endpoint", async () => {
+  it("saves behavioral fields via the admin settings endpoint", async () => {
     const fetchMock = stubFetchOk({});
     render(<SettingsTab {...mockProps} />);
     await openWhatsAppSection();
-
-    const phoneInputs = screen.getAllByPlaceholderText("123456789012345");
-    fireEvent.change(phoneInputs[0], { target: { value: "123456789012345" } });
-    fireEvent.change(screen.getByPlaceholderText("987654321098765"), {
-      target: { value: "999888777666555" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText("EAAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
-      { target: { value: "test-access-token" } },
-    );
 
     fireEvent.click(screen.getByText(/Save WhatsApp Template/));
 
@@ -90,23 +79,14 @@ describe("SettingsTab WhatsApp section", () => {
     const patchCall = fetchMock.mock.calls.find((c) => c[1]?.method === "PATCH");
     expect(patchCall?.[0]).toBe("/api/admin/whatsapp/settings");
     const body = JSON.parse(patchCall?.[1]?.body as string);
-    expect(body.phone_number_id).toBe("123456789012345");
-    expect(body.access_token).toBe("test-access-token");
-    expect(body.business_account_id).toBe("999888777666555");
+    expect(body).not.toHaveProperty("phone_number_id");
+    expect(body).not.toHaveProperty("access_token");
   });
 
   it("sends a test message via POST /api/whatsapp/send", async () => {
-    const fetchMock = stubFetchOk({});
+    const fetchMock = stubFetchOk({ linked: true, connected: true });
     render(<SettingsTab {...mockProps} />);
     await openWhatsAppSection();
-
-    fireEvent.change(screen.getByPlaceholderText("123456789012345"), {
-      target: { value: "123456789012345" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText("EAAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
-      { target: { value: "test-access-token" } },
-    );
 
     fireEvent.click(screen.getByText(/Send Test WhatsApp/));
 

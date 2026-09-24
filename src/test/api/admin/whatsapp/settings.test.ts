@@ -62,13 +62,12 @@ describe("WhatsApp Settings API /api/admin/whatsapp/settings", () => {
     });
 
     it("returns settings with Cloud API credentials when they exist", async () => {
-      (getSessionUser as any).mockResolvedValue({ 
-        userId: "user-1", 
-        role: "owner", 
-        restaurantId: "rest-1" 
+      (getSessionUser as any).mockResolvedValue({
+        userId: "user-1",
+        role: "owner",
+        restaurantId: "rest-1",
       });
 
-      // Mock whatsapp_settings table
       mockMaybeSingle
         .mockResolvedValueOnce({
           data: {
@@ -81,36 +80,23 @@ describe("WhatsApp Settings API /api/admin/whatsapp/settings", () => {
           },
           error: null,
         })
-        // Mock whatsapp_accounts table
         .mockResolvedValueOnce({
-          data: {
-            tenant_id: "rest-1",
-            phone_number_id: "123456789",
-            access_token: "token-abc",
-            business_account_id: "biz-123",
-            verify_token: "verify-123",
-            webhook_url: "https://example.com/webhook",
-            webhook_secret: "secret-123",
-          },
+          data: null,
           error: null,
         });
 
       const req = new NextRequest("http://localhost/api/admin/whatsapp/settings", { method: "GET" });
       const res = await GET(req);
-      
+
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(data).toHaveProperty("enabled", true);
-      expect(data).toHaveProperty("phone_number_id", "123456789");
-      expect(data).toHaveProperty("access_token", "token-abc");
-      expect(data).toHaveProperty("business_account_id", "biz-123");
-      expect(data).toHaveProperty("verify_token", "verify-123");
-      expect(data).toHaveProperty("webhook_url", "https://example.com/webhook");
-      expect(data).toHaveProperty("webhook_secret", "secret-123");
       expect(data).toHaveProperty("message_template", "Custom template");
       expect(data).toHaveProperty("include_review_cta", true);
       expect(data).toHaveProperty("include_gstin_line", true);
       expect(data).toHaveProperty("thank_you_line", "Thanks!");
+      expect(data).not.toHaveProperty("phone_number_id");
+      expect(data).not.toHaveProperty("access_token");
     });
 
     it("returns defaults when settings don't exist", async () => {
@@ -168,10 +154,10 @@ describe("WhatsApp Settings API /api/admin/whatsapp/settings", () => {
     });
 
     it("updates whatsapp_settings and whatsapp_accounts tables", async () => {
-      (getSessionUser as any).mockResolvedValue({ 
-        userId: "user-1", 
-        role: "owner", 
-        restaurantId: "rest-1" 
+      (getSessionUser as any).mockResolvedValue({
+        userId: "user-1",
+        role: "owner",
+        restaurantId: "rest-1",
       });
 
       mockSingle.mockResolvedValue({ data: { tenant_id: "rest-1", enabled: false }, error: null });
@@ -180,12 +166,6 @@ describe("WhatsApp Settings API /api/admin/whatsapp/settings", () => {
         method: "PATCH",
         body: JSON.stringify({
           enabled: false,
-          phone_number_id: "987654321",
-          access_token: "new-token",
-          business_account_id: "biz-999",
-          verify_token: "verify-999",
-          webhook_url: "https://new.example.com/webhook",
-          webhook_secret: "new-secret",
           message_template: "New template",
           include_review_cta: false,
           include_gstin_line: false,
@@ -193,11 +173,30 @@ describe("WhatsApp Settings API /api/admin/whatsapp/settings", () => {
         }),
       });
       const res = await PATCH(req);
-      
+
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(data.ok).toBe(true);
       expect(data.settings).toHaveProperty("enabled", false);
+    });
+
+    it("rejects Cloud credentials with 422", async () => {
+      (getSessionUser as any).mockResolvedValue({
+        userId: "user-1",
+        role: "owner",
+        restaurantId: "rest-1",
+      });
+
+      const req = new NextRequest("http://localhost/api/admin/whatsapp/settings", {
+        method: "PATCH",
+        body: JSON.stringify({
+          phone_number_id: "987654321",
+          access_token: "new-token",
+        }),
+      });
+      const res = await PATCH(req);
+
+      expect(res.status).toBe(422);
     });
 
     it("returns 422 for invalid input", async () => {
