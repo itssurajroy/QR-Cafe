@@ -4,8 +4,8 @@
   "description": "Seamless QR table ordering, real-time kitchen display, and full POS billing.",
   "start_url": "/pos",
   "display": "standalone",
-  "background_color": "#0c0a09",
-  "theme_color": "#0c0a09",
+  "background_color": "#5738F5",
+  "theme_color": "#5738F5",
   "orientation": "any",
   "categories": ["business", "productivity", "food"],
   "icons": [

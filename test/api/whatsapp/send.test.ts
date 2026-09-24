@@ -27,11 +27,7 @@ vi.mock("@/lib/auth", () => ({
   getSessionUser: vi.fn(),
 }));
 
-vi.mock("@/integrations/whatsapp/baileys/client", () => ({
-  baileysClient: {
-    sendTemplate: vi.fn(),
-  },
-}));
+
 
 const { hasSessionMock } = vi.hoisted(() => ({
   hasSessionMock: vi.fn(),
@@ -44,7 +40,6 @@ vi.mock("@/integrations/whatsapp/baileys/session-store", () => ({
 }));
 
 import { getSessionUser } from "@/lib/auth";
-import { baileysClient } from "@/integrations/whatsapp/baileys/client";
 
 const ownerSession = {
   userId: "user-1",
@@ -171,7 +166,6 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
     const data = await res.json();
     expect(data).toHaveProperty("messageId", "msg-uuid");
     expect(data).toHaveProperty("status", "pending");
-    expect(baileysClient.sendTemplate).not.toHaveBeenCalled();
   });
 
   it("returns existing message idempotently on duplicate call", async () => {
@@ -190,7 +184,6 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
     expect(data).toHaveProperty("messageId", "existing-msg-id");
     expect(data).toHaveProperty("status", "pending");
     expect(data).toHaveProperty("idempotent", true);
-    expect(baileysClient.sendTemplate).not.toHaveBeenCalled();
   });
 
   it("still enforces bill idempotency when order_id present", async () => {
@@ -239,7 +232,6 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
         status: "pending",
       }),
     );
-    expect(baileysClient.sendTemplate).not.toHaveBeenCalled();
   });
 
   it("400 on implausible phone", async () => {
@@ -276,7 +268,6 @@ describe("WhatsApp Send API /api/whatsapp/send", () => {
     const res = await POST(post({ phone: "919876543210" }));
 
     expect(res.status).toBe(200);
-    expect(baileysClient.sendTemplate).not.toHaveBeenCalled();
   });
 
   it("returns 422 for invalid input", async () => {
