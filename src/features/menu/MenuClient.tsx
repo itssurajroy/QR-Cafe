@@ -55,6 +55,7 @@ export function MenuClient({
   items,
   accentColor,
   upiQrUrl,
+  upiId,
 }: {
   qrToken: string;
   tableLabel: string;
@@ -63,6 +64,7 @@ export function MenuClient({
   items: Item[];
   accentColor?: string;
   upiQrUrl?: string;
+  upiId?: string;
 }) {
   const router = useRouter();
   const t = I18N.en;
@@ -597,6 +599,7 @@ export function MenuClient({
         onUpdateNote={updateNotes}
         t={t}
         upiQrUrl={upiQrUrl}
+        upiId={upiId}
       />
     </main>
   );

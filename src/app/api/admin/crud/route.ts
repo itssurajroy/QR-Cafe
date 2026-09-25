@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
     if (!isManagerOrOwner) {
       return NextResponse.json({ error: "Forbidden: Manager or Owner role required" }, { status: 403 });
     }
-    const { categoryId, name, pricePaise, description, isVeg, imageUrl } = data;
+    const { categoryId, name, pricePaise, description, isVeg, imageUrl, isBestseller, spiceIndex, tags } = data;
     const { data: item, error } = await admin
       .from("menu_items")
       .insert({
@@ -107,6 +107,9 @@ export async function POST(req: NextRequest) {
         price_paise: Number(pricePaise || 0),
         description: String(description || "").trim(),
         is_veg: Boolean(isVeg),
+        is_bestseller: Boolean(isBestseller),
+        spice_index: Number(spiceIndex || 0),
+        tags: Array.isArray(tags) ? tags : [],
         image_url: imageUrl || null,
         available: true,
       })

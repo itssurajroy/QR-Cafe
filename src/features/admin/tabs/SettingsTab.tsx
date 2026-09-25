@@ -98,9 +98,7 @@ export function SettingsTab(props: SettingsTabProps) {
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [orderReadySms, setOrderReadySms] = useState(false);
 
-  // Wa link state (wa.me only — no Baileys)
-  const [waLinked, setWaLinked] = useState(false);
-  const [waPhoneNumber, setWaPhoneNumber] = useState<string | null>(null);
+
 
   useEffect(() => {
     async function loadSettings() {
@@ -136,17 +134,6 @@ export function SettingsTab(props: SettingsTabProps) {
           if (data.soundAlerts !== undefined) setSoundAlerts(data.soundAlerts);
           if (data.emailAlerts !== undefined) setEmailAlerts(data.emailAlerts);
           if (data.orderReadySms !== undefined) setOrderReadySms(data.orderReadySms);
-        }
-      } catch {
-        // ignore
-      }
-      // Fetch wa.me link status (no Baileys)
-      try {
-        const s = await fetch("/api/admin/settings");
-        if (s.ok) {
-          const d = await s.json();
-          setWaLinked(!!d.wa_linked);
-          if (d.wa_phone_number) setWaPhoneNumber(d.wa_phone_number);
         }
       } catch {
         // ignore
@@ -188,7 +175,7 @@ export function SettingsTab(props: SettingsTabProps) {
           qrType, afterScanAction, allowCustomerOrdering, requireTableSelection, showQrBranding,
           printers,
           soundAlerts, emailAlerts, orderReadySms,
-          waEnabled: waLinked, waTemplate: "", waIncludeReviewCta: true, waIncludeGstin: true, waThankYou: "", autoSendWaBill: true, includePdfInvoice: true, includeOrderAgainBtn: true
+          waEnabled: false, waTemplate: "", waIncludeReviewCta: true, waIncludeGstin: true, waThankYou: "", autoSendWaBill: true, includePdfInvoice: true, includeOrderAgainBtn: true
         }),
       });
       if (!settingsRes.ok) {
@@ -250,12 +237,6 @@ export function SettingsTab(props: SettingsTabProps) {
     receiptUrl: "https://qrslice.com/receipt/sample-token",
   };
 
-  // wa.me preview (no Baileys template rendering)
-  const waPreview = (
-    <p className="whitespace-pre-wrap break-words text-slate-800">
-      Thank you for dining with us! Your receipt will be sent to <a href="https://wa.me" target="_blank" rel="noreferrer" className="text-blue underline">wa.me</a>.
-    </p>
-  );
 
   const categories: Array<{ id: SettingsCategory; label: string; icon: any }> = [
     { id: "restaurant", label: "Restaurant Info", icon: GearIcon },
@@ -266,7 +247,6 @@ export function SettingsTab(props: SettingsTabProps) {
     { id: "qr", label: "Tables & QR", icon: QrCodeIcon },
     { id: "printers", label: "Printers", icon: PrinterIcon },
     { id: "notifications", label: "Notifications", icon: BellIcon },
-    { id: "wa-link", label: "WhatsApp Link", icon: MessageCircleIcon },
     { id: "loyalty", label: "CRM & Loyalty", icon: SparklesIcon },
   ];
 
@@ -974,46 +954,7 @@ export function SettingsTab(props: SettingsTabProps) {
             </div>
           )}
 
-          {/* 9. WHATSAPP LINK */}
-          {activeCategory === "wa-link" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E4F0] pb-4">
-                <div>
-                  <h3 className="text-sm font-black text-[#17142B] uppercase tracking-wider">
-                    WhatsApp Integration
-                  </h3>
-                  <p className="text-xs text-[#6F7185]">
-                    Connect with customers via WhatsApp using wa.me links.
-                  </p>
-                </div>
-              </div>
 
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-[#F8F7FC] border border-[#E7E4F0] space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-[#17142B] uppercase tracking-wider">WhatsApp Connection</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${waLinked ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                      {waLinked ? "● Linked" : "○ Not linked"}
-                    </span>
-                  </div>
-                  {waLinked && waPhoneNumber && (
-                    <p className="text-xs font-mono text-[#17142B]">Connected as {waPhoneNumber}</p>
-                  )}
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setWaLinked(!waLinked)}
-                      className="px-4 py-2 bg-[#25D366] hover:bg-[#1DA851] text-white font-bold text-xs rounded-xl transition cursor-pointer"
-                    >
-                      {waLinked ? "Unlink WhatsApp" : "Link WhatsApp Number"}
-                    </button>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    Use <a href="https://wa.me" target="_blank" rel="noreferrer" className="text-blue underline">wa.me</a> to start a WhatsApp conversation with your restaurant number.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* 10. CRM & LOYALTY */}
           {activeCategory === "loyalty" && (

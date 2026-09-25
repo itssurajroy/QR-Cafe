@@ -24,7 +24,6 @@ import { OrdersTab, type OrderData } from "@/features/admin/tabs/OrdersTab";
 import { ModifiersTab } from "@/features/admin/tabs/ModifiersTab";
 import { StaffTab } from "@/features/admin/tabs/StaffTab";
 import { CrmTab } from "@/features/admin/tabs/CrmTab";
-import { CommunicationsTab } from "@/features/admin/tabs/CommunicationsTab";
 import { AccountTab } from "@/features/admin/tabs/AccountTab";
 import { IntegrationsTab } from "@/features/admin/tabs/IntegrationsTab";
 import { AdminAppShell, type AdminSectionId } from "@/components/shell/AdminAppShell";
@@ -35,6 +34,8 @@ import type { Category, MenuItem as Item, Table } from "@/types";
 import { speakHumanVoice } from "@/lib/tts";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { canAccessTab, getDefaultTabForRole } from "@/lib/role-permissions";
+import { getTierLimits } from "@/lib/tier-limits";
+import { UpgradeRequired } from "@/components/UpgradeRequired";
 
 type Report = { orders: number; paid: number; revenue: number; avg: number };
 
@@ -124,6 +125,8 @@ export default function AdminClient({
     return initial as AdminSectionId | AdminTabId;
   });
 
+  const tierLimits = getTierLimits(activeRestaurant.tier);
+
   useEffect(() => {
     const handlePopState = () => {
       const urlTab = new URLSearchParams(window.location.search).get("tab");
@@ -196,6 +199,9 @@ export default function AdminClient({
   const [newItemCatId, setNewItemCatId] = useState(categories[0]?.id || "");
   const [newItemDesc, setNewItemDesc] = useState("");
   const [newItemVeg, setNewItemVeg] = useState(true);
+  const [newItemBestseller, setNewItemBestseller] = useState(false);
+  const [newItemSpiceIndex, setNewItemSpiceIndex] = useState(0);
+  const [newItemTags, setNewItemTags] = useState("");
   const [newItemImageFile, setNewItemImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -444,6 +450,9 @@ export default function AdminClient({
           pricePaise: Math.round(priceNum * 100),
           description: newItemDesc.trim(),
           isVeg: newItemVeg,
+          isBestseller: newItemBestseller,
+          spiceIndex: newItemSpiceIndex,
+          tags: newItemTags.split(',').map(t => t.trim()).filter(Boolean),
           imageUrl: uploadedUrl,
         }),
       });
@@ -454,6 +463,9 @@ export default function AdminClient({
       setNewItemPrice("");
       setNewItemDesc("");
       setNewItemImageFile(null);
+      setNewItemBestseller(false);
+      setNewItemSpiceIndex(0);
+      setNewItemTags("");
       setShowItemModal(false);
       flash("ok", "Menu item added successfully!");
     } catch (err) {
@@ -937,13 +949,16 @@ export default function AdminClient({
 
         {/* TAB: CRM & LOYALTY */}
         {tab === "crm" && (
-          <CrmTab flash={flash} />
+          <div className="animate-fade-in-up space-y-6">
+            {!tierLimits.crm ? (
+              <UpgradeRequired featureName="Customer Engagement Hub" requiredTier="enterprise" />
+            ) : (
+              <CrmTab flash={flash} />
+            )}
+          </div>
         )}
 
-        {/* TAB: COMMUNICATIONS HISTORY (WhatsApp) */}
-        {tab === "communications" && (
-          <CommunicationsTab flash={flash} userRole={userRole} />
-        )}
+        {/* TAB: COMMUNICATIONS (WhatsApp) Removed */}
 
         {/* TAB: INBOX (B3 handoff) */}
         
@@ -1010,32 +1025,43 @@ export default function AdminClient({
         {/* TAB 4: ADVANCED FLOOR INTELLIGENCE & ANALYTICS */}
         {(tab === "analytics" || tab === "report") && (
           <div className="animate-fade-in-up space-y-6">
-            <FloorIntelligence
-              loadingAnalytics={loadingAnalytics}
-              analytics={analytics}
-              loadAnalytics={loadAnalytics}
-            />
-            <ReportSummary report={report} />
+            {!tierLimits.analytics ? (
+              <UpgradeRequired featureName="Advanced Analytics" requiredTier="pro" />
+            ) : (
+              <>
+                <FloorIntelligence
+                  loadingAnalytics={loadingAnalytics}
+                  analytics={analytics}
+                  loadAnalytics={loadAnalytics}
+                />
+                <ReportSummary report={report} />
+              </>
+            )}
           </div>
         )}
 
         {/* TAB 5: CUSTOM BRANDING (PRO ONLY) */}
         {tab === "branding" && (
           <div className="animate-fade-in-up">
-            <BrandingTab
-              brandingLogoUrl={brandingLogoUrl}
-              brandingTagline={brandingTagline}
-              brandingGoogleReviewUrl={brandingGoogleReviewUrl}
-              brandingAccentColor={brandingAccentColor}
-              savingBranding={savingBranding}
-              setBrandingLogoUrl={setBrandingLogoUrl}
-              setBrandingTagline={setBrandingTagline}
-              setBrandingGoogleReviewUrl={setBrandingGoogleReviewUrl}
-              setBrandingAccentColor={setBrandingAccentColor}
-              handleSaveBranding={handleSaveBranding}
-            />
+            {!tierLimits.branding ? (
+              <UpgradeRequired featureName="Custom Branding" requiredTier="pro" />
+            ) : (
+              <BrandingTab
+                brandingLogoUrl={brandingLogoUrl}
+                brandingTagline={brandingTagline}
+                brandingGoogleReviewUrl={brandingGoogleReviewUrl}
+                brandingAccentColor={brandingAccentColor}
+                savingBranding={savingBranding}
+                setBrandingLogoUrl={setBrandingLogoUrl}
+                setBrandingTagline={setBrandingTagline}
+                setBrandingGoogleReviewUrl={setBrandingGoogleReviewUrl}
+                setBrandingAccentColor={setBrandingAccentColor}
+                handleSaveBranding={handleSaveBranding}
+              />
+            )}
           </div>
         )}
+
 
         {/* TAB: OWNER ACCOUNT CONTROL CENTER */}
         {tab === "account" && (
@@ -1109,7 +1135,7 @@ export default function AdminClient({
                   <span>🛠️ Live Floor &amp; Hardware Self-Diagnostics</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Test your browser audio, WhatsApp URL encoding, and tax calculations before operating live.
+                  Test your browser audio and tax calculations before operating live.
                 </p>
               </div>
 
@@ -1128,31 +1154,7 @@ export default function AdminClient({
                   <div className="text-xs text-slate-400 font-mono">Speak: Table 01 Call</div>
                 </button>
 
-                {/* Test 2: WhatsApp Link Test */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sampleMsg = `🧾 *TEST RECEIPT: ${restaurant?.name || "QRslice"}*\n` +
-                      `Bill: #POS-TEST | Date: ${new Date().toLocaleDateString("en-IN")}\n` +
-                      `• Hazelnut Cold Brew x1 = ₹220.00\n` +
-                      `• Truffle Pizza x1 = ₹380.00\n` +
-                      `---------------------------------\n` +
-                      `Subtotal: ₹600.00\n` +
-                      `GST (5%): ₹30.00\n` +
-                      `*TOTAL: ₹630.00* (PAID IN CASH)\n` +
-                      `Loyalty Points: +6 pts\n` +
-                      `---------------------------------\n` +
-                      `Thank you for dining with us! 🙏`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent(sampleMsg)}`, "_blank");
-                    flash("ok", "💬 WhatsApp Test Receipt Dispatched!");
-                  }}
-                  className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-left space-y-1.5 transition-all cursor-pointer group"
-                >
-                  <span className="text-xl block group-hover:scale-110 transition-transform">💬</span>
-                  <div className="text-xs font-bold text-emerald-600">Test WhatsApp Bill</div>
-                  <div className="text-xs text-slate-400 font-mono">Launch pre-formatted text</div>
-                </button>
-
+                {/* WhatsApp test removed */}
                 {/* Test 3: GST Tax Calculation */}
                 <button
                   type="button"
@@ -1270,7 +1272,7 @@ export default function AdminClient({
                   Current Review URL: {restaurant?.google_review_url || "Not configured yet (Add in Branding tab)"}
                 </div>
                 <p className="text-slate-500">
-                  Whenever a guest rates their meal 4★ or 5★ on the live order tracker, or receives a WhatsApp bill, they are 1-click routed directly to leave a 5-star Google review.
+                  Whenever a guest rates their meal 4★ or 5★ on the live order tracker, they are 1-click routed directly to leave a 5-star Google review.
                 </p>
               </div>
             </div>
@@ -1409,6 +1411,41 @@ export default function AdminClient({
                 />
                 <span>🌱 Vegetarian Item</span>
               </label>
+
+              <label className="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newItemBestseller}
+                  onChange={(e) => setNewItemBestseller(e.target.checked)}
+                  className="w-4 h-4 accent-[#5738F5] rounded"
+                />
+                <span>👑 Mark as Bestseller / Chef's Pick</span>
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Spice Level</label>
+                  <select
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-brand"
+                    value={newItemSpiceIndex}
+                    onChange={(e) => setNewItemSpiceIndex(Number(e.target.value))}
+                  >
+                    <option value={0}>Mild (0)</option>
+                    <option value={1}>Medium (1 🌶️)</option>
+                    <option value={2}>Spicy (2 🌶️🌶️)</option>
+                    <option value={3}>Extra Spicy (3 🌶️🌶️🌶️)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tags (Comma Sep)</label>
+                  <input
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 w-full focus:outline-none focus:border-brand"
+                    placeholder="e.g. Vegan, Gluten-Free"
+                    value={newItemTags}
+                    onChange={(e) => setNewItemTags(e.target.value)}
+                  />
+                </div>
+              </div>
 
               <div className="flex gap-2 pt-2">
                 <button

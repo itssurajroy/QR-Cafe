@@ -26,6 +26,7 @@ export type OrderRow = {
   customer_phone?: string | null;
   total_paise?: number;
   priority?: boolean;
+  delay_minutes?: number;
   items?: KitchenItem[];
 };
 
@@ -67,14 +68,17 @@ export function KitchenOrderCard({
     const calculateElapsed = () => {
       if (!order.created_at) return;
       const start = new Date(order.created_at).getTime();
-      const mins = Math.max(0, Math.floor((Date.now() - start) / 60000));
+      let mins = Math.max(0, Math.floor((Date.now() - start) / 60000));
+      if (order.delay_minutes) {
+        mins = Math.max(0, mins - order.delay_minutes);
+      }
       setElapsedMins(mins);
     };
 
     calculateElapsed();
     const interval = setInterval(calculateElapsed, 10000);
     return () => clearInterval(interval);
-  }, [order.created_at]);
+  }, [order.created_at, order.delay_minutes]);
 
   const toggleItemBump = (itemId: string) => {
     setBumpedItems((prev) => ({ ...prev, [itemId]: !prev[itemId] }));

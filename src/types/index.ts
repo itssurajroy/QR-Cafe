@@ -132,7 +132,7 @@ export type Table = {
 // ─── Restaurant ───────────────────────────────────────────────────────────────
 
 export type RestaurantPlan = "trial" | "active" | "suspended" | "cancelled";
-export type RestaurantTier = "all_in_one" | "pro" | "basic";
+export type RestaurantTier = "enterprise" | "pro" | "starter";
 
 export type Restaurant = {
   id: string;

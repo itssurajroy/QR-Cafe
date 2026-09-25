@@ -1,6 +1,8 @@
 // Copyright (c) 2026 QRslice. All rights reserved.
 "use client";
 
+import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import { ShoppingBagIcon } from "@/components/Icons";
 import { paise } from "@/lib/utils";
 import type { CartLine } from "@/types";
@@ -28,6 +30,7 @@ interface MenuCartDrawerProps {
   onUpdateNote: (id: string, note: string) => void;
   t: Record<string, string>;
   upiQrUrl?: string;
+  upiId?: string;
   bookingCode?: string;
   setBookingCode?: (v: string) => void;
 }
@@ -55,10 +58,24 @@ export function MenuCartDrawer({
   onUpdateNote,
   t,
   upiQrUrl,
+  upiId,
   bookingCode,
   setBookingCode,
 }: MenuCartDrawerProps) {
   if (!cartOpen) return null;
+
+  const [dynamicUpiQr, setDynamicUpiQr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (paymentMethod === "online" && !upiQrUrl && upiId && totalPaise > 0) {
+      const amount = (totalPaise / 100).toFixed(2);
+      const pn = encodeURIComponent(restaurantName);
+      const uri = `upi://pay?pa=${upiId}&pn=${pn}&am=${amount}&cu=INR`;
+      QRCode.toDataURL(uri, { width: 220, margin: 1 }).then(setDynamicUpiQr).catch(() => {});
+    } else {
+      setDynamicUpiQr(null);
+    }
+  }, [paymentMethod, upiQrUrl, upiId, totalPaise, restaurantName]);
 
   return (
     <div
@@ -215,12 +232,12 @@ export function MenuCartDrawer({
           </div>
 
           {/* Render UPI QR if selected and available */}
-          {paymentMethod === "online" && upiQrUrl && (
+          {paymentMethod === "online" && (upiQrUrl || dynamicUpiQr) && (
             <div className="flex flex-col items-center p-4 bg-slate-50 border border-slate-200 rounded-2xl animate-fade-in-up">
               <span className="text-xs font-black text-slate-900 mb-2 uppercase tracking-widest text-center">
                 Scan Store QR to Pay
               </span>
-              <img src={upiQrUrl} alt="Store UPI QR" className="w-32 h-32 rounded-xl bg-white p-2 border border-slate-200 shadow-sm" />
+              <img src={(upiQrUrl || dynamicUpiQr) as string} alt="Store UPI QR" className="w-32 h-32 rounded-xl bg-white p-2 border border-slate-200 shadow-sm" />
               <span className="text-xs font-bold text-[#5738F5] mt-2 text-center font-mono">
                 Pay exact amount ₹{(totalPaise / 100).toFixed(2)}
               </span>

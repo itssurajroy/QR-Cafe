@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const { data: orders, error } = await db
     .from("orders")
     .select(
-      "id, order_number, status, payment_status, payment_method, total_paise, subtotal_paise, priority, created_at, table_id, customer_name, customer_phone, restaurant_tables(id, label, seats), order_items(*)",
+      "id, order_number, status, payment_status, payment_method, total_paise, subtotal_paise, priority, created_at, delay_minutes, table_id, customer_name, customer_phone, restaurant_tables(id, label, seats), order_items(*)",
     )
     .eq("restaurant_id", user.restaurantId)
     .or("status.in.(pending,confirmed,preparing,ready),and(status.eq.served,payment_status.eq.unpaid)")
@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
     total_paise: o.total_paise,
     subtotal_paise: o.subtotal_paise,
     created_at: o.created_at,
+    delay_minutes: o.delay_minutes || 0,
     table_id: o.table_id,
     table_label: o.restaurant_tables?.label || "Takeaway / Counter",
     customer_name: o.customer_name || "Guest",

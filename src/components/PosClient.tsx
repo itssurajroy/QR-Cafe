@@ -7,11 +7,9 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { RegisterView } from "@/features/pos/RegisterView";
 import { KitchenView } from "@/features/pos/KitchenView";
 import { VisualFloorGrid } from "@/features/pos/VisualFloorGrid";
-import { WhatsAppBillButton } from "@/features/pos/WhatsAppBillButton";
 import { generateBeautifulBillPdf } from "@/lib/bill-pdf";
 import { api } from "@/lib/api";
 import { getWaLink, isValidIndianPhone, normalizeWaPhone } from "@/lib/utils";
-import { renderWhatsAppMessage, buildWhatsAppReceiptVars } from "@/lib/whatsapp-templates";
 import { speakHumanVoice } from "@/lib/tts";
 import { useToast } from "@/components/ToastProvider";
 import { usePrinter } from "@/components/printer/PrinterProvider";
@@ -294,58 +292,8 @@ export default function PosClient({
         flash("err", "Please enter a valid 10-digit mobile number");
         return;
       }
-
-      setIsSendingWa(true);
-      flash("ok", `Opening WhatsApp bill for +${normalizeWaPhone(cleanPhone)}...`);
-
-      try {
-        if (orderDetails.orderId && !orderDetails.orderId.startsWith("POS-")) {
-          api.updateOrderCustomer(orderDetails.orderId, cleanPhone).catch(() => {});
-        }
-
-        const host = typeof window !== "undefined" ? window.location.origin : "https://qrslice.com";
-        const receiptUrl = `${host}/receipt/${orderDetails.statusToken}`;
-
-        const vars = buildWhatsAppReceiptVars({
-          restaurantName: restaurant.name || "our café",
-          restaurantGstin: restaurant.gstin,
-          orderNumber: orderDetails.orderNumber,
-          tableLabel: orderDetails.tableLabel,
-          totalPaise: orderDetails.totalPaise,
-          paymentMethod: orderDetails.paymentMethod,
-          receiptUrl,
-        });
-
-        const message = renderWhatsAppMessage(waSettings?.message_template, vars);
-        const waLink = getWaLink(cleanPhone, message);
-
-        // Telemetry logging
-        fetch("/api/whatsapp/log-event", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            order_id: orderDetails.orderId && !orderDetails.orderId.startsWith("POS-") ? orderDetails.orderId : null,
-            restaurant_id: restaurant.id,
-            event_type: "sent",
-            phone: cleanPhone,
-            meta: { order_number: orderDetails.orderNumber, source: "pos" },
-          }),
-        }).catch(() => {});
-
-        const win = window.open(waLink, "_blank");
-        if (!win || win.closed || typeof win.closed === "undefined") {
-          setBlockedWaUrl(waLink);
-          flash("err", "Pop-up blocked by browser. Please use the Copy Link button below.");
-        } else {
-          setWaModal(null);
-        }
-      } catch {
-        flash("err", "Failed to prepare WhatsApp message");
-      } finally {
-        setTimeout(() => setIsSendingWa(false), 600);
-      }
     },
-    [restaurant.name, restaurant.gstin, restaurant.id, waSettings, flash]
+    [restaurant.id, flash]
   );
 
   const openWhatsAppModal = useCallback(
@@ -1698,25 +1646,7 @@ export default function PosClient({
                   <span>💬 WhatsApp</span>
                 </button>
 
-                {/* Queued server-side bill via POST /api/whatsapp/send (async outbox). */}
-                {lastBill.id && (
-                  <WhatsAppBillButton
-                    orderId={lastBill.id}
-                    phone={lastBill.customer_phone || customerPhone || ""}
-                    notify={flash}
-                    onPhoneRequired={() =>
-                      openWhatsAppModal({
-                        orderId: lastBill.id || "",
-                        orderNumber: lastBill.order_number || lastBill.orderNumber || "",
-                        customerPhone: "",
-                        totalPaise: lastBill.finalTotalPaise ?? lastBill.total_paise ?? 0,
-                        statusToken: lastBill.status_token || lastBill.id || "",
-                        tableLabel: lastBill.table_label,
-                        paymentMethod: lastBill.paymentMethod || lastBill.payment_method,
-                      })
-                    }
-                  />
-                )}
+                {/* WhatsApp button removed */}
 
                 <button
                   type="button"
