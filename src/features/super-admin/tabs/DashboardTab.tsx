@@ -25,23 +25,15 @@ export function DashboardTab() {
   const [metricMode, setMetricMode] = useState<MetricMode>("gmv");
   const [timeRange, setTimeRange] = useState<TimeRange>("14d");
 
-  const mrrRupees = Math.round((kpis?.mrr || 99900) / 100);
-  const rev30dRupees = Math.round((kpis?.revenue30d || 655300) / 100);
-  const activeTenants = kpis?.active || 1;
-  const trialTenants = kpis?.trial || 1;
-  const totalTenants = kpis?.total || 2;
-  const ordersCount = kpis?.todayOrders ? Math.max(kpis.todayOrders * 12, 428) : 428;
+  const mrrRupees = Math.round((kpis?.mrr || 0) / 100);
+  const rev30dRupees = Math.round((kpis?.revenue30d || 0) / 100);
+  const activeTenants = kpis?.active || 0;
+  const trialTenants = kpis?.trial || 0;
+  const totalTenants = kpis?.total || 0;
+  const ordersCount = kpis?.todayOrders || 0;
 
   // Transform / synthesize chart data based on range
-  const rawChartData = charts?.revenue14 || [
-    { date: "Sep 04", revenue: 2100, orders: 11 },
-    { date: "Sep 06", revenue: 2850, orders: 15 },
-    { date: "Sep 08", revenue: 3200, orders: 16 },
-    { date: "Sep 10", revenue: 2400, orders: 12 },
-    { date: "Sep 12", revenue: 4100, orders: 20 },
-    { date: "Sep 14", revenue: 3900, orders: 19 },
-    { date: "Sep 16", revenue: 3420, orders: 18 },
-  ];
+  const rawChartData = charts?.revenue14 || [];
 
   const processedChartData = rawChartData.map((d: any) => {
     const orders = d.orders || Math.max(1, Math.round((d.revenue || 1000) / 190));
@@ -64,15 +56,15 @@ export function DashboardTab() {
   ];
 
   const restaurantHealthList = (cafes && cafes.length > 0)
-    ? cafes.slice(0, 10).map((c: any, i: number) => {
+    ? cafes.slice(0, 10).map((c: any) => {
         const top = (charts?.topCafes || []).find((tc: any) => tc.id === c.id);
-        const orderCount = top ? Math.max(1, Math.round((top.revenue_paise || 20000) / 19000)) : (i === 0 ? 48 : 21);
+        const orderCount = top ? Math.max(1, Math.round((top.revenue_paise || 0) / 19000)) : 0;
         return {
           id: c.id,
           name: c.name,
           slug: c.slug,
           orders: orderCount,
-          lastActive: i === 0 ? "2 min ago" : "18 min ago",
+          lastActive: c.created_at ? new Date(c.created_at).toLocaleDateString() : "Unknown",
           payments: "healthy",
           whatsapp: c.plan === "active" ? "healthy" : "warning",
           health: c.plan === "active" ? "Healthy" : "Attention",
@@ -98,46 +90,9 @@ export function DashboardTab() {
           dotColor,
         };
       })
-    : [
-        {
-          type: "tenant",
-          title: "New restaurant created",
-          subtitle: "Curry Leaf",
-          time: "4m ago",
-          dotColor: "bg-[#5738F5]",
-        },
-        {
-          type: "subscription",
-          title: "Subscription activated",
-          subtitle: "Wah Ji Wah — Pro Plan (₹999/mo)",
-          time: "21m ago",
-          dotColor: "bg-emerald-500",
-        },
-        {
-          type: "payment",
-          title: "Payment received",
-          subtitle: "₹999 · Razorpay rzp_live_99a81",
-          time: "1h ago",
-          dotColor: "bg-emerald-500",
-        },
-        {
-          type: "trial",
-          title: "Trial started",
-          subtitle: "Curry Leaf · 14-day evaluation",
-          time: "2h ago",
-          dotColor: "bg-amber-500",
-        },
-      ];
+    : [];
 
-  const systemHealthItems = [
-    { name: "API", status: "Operational", uptime: "99.99%" },
-    { name: "Database", status: "Operational", uptime: "99.99%" },
-    { name: "Realtime", status: "Operational", uptime: "99.98%" },
-    { name: "Payments", status: "Operational", uptime: "99.97%" },
-    { name: "WhatsApp", status: "Operational", uptime: "99.94%" },
-    { name: "Push Notifications", status: "Operational", uptime: "99.99%" },
-    { name: "Printing", status: "Operational", uptime: "99.91%" },
-  ];
+  const systemHealthItems: { name: string; status: string; uptime: string }[] = [];
 
   return (
     <div className="space-y-8 select-none">

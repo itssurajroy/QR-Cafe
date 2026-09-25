@@ -226,7 +226,7 @@ export function KitchenOrderCard({
             </button>
           ))}
           {delayAdded !== null && (
-            <span className="text-[11px] font-bold text-indigo-600">+{delayAdded}m added ✓</span>
+            <span className="text-[11px] font-bold text-brand">+{delayAdded}m added ✓</span>
           )}
           <span
             className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-black uppercase border ${

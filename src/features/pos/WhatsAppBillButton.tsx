@@ -27,9 +27,10 @@ export function WhatsAppBillButton({
   className,
 }: WhatsAppBillButtonProps) {
   const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function handleClick() {
-    if (isSending) return;
+    if (isSending || sent) return;
     const recipient = (phone || "").trim();
     if (!recipient) {
       // Never send to an empty recipient — prompt for the phone first.
@@ -57,7 +58,12 @@ export function WhatsAppBillButton({
         throw new Error(data?.error || `Request failed (${res.status})`);
       }
       // Async outbox: queued immediately, worker delivers later.
-      notify("ok", "Bill queued for WhatsApp");
+      if (data.idempotent) {
+        notify("ok", "Bill already sent via WhatsApp");
+      } else {
+        notify("ok", "Bill queued for WhatsApp");
+      }
+      setSent(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to queue WhatsApp bill";
       // Button stays mounted — retry is the same idempotent call server-side.
@@ -71,13 +77,19 @@ export function WhatsAppBillButton({
     <button
       type="button"
       onClick={handleClick}
-      disabled={isSending}
+      disabled={isSending || sent}
       className={
         className ||
-        "py-2 px-2.5 rounded-xl bg-[#34C759] hover:bg-[#2EB84E] disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+        `py-2 px-2.5 rounded-xl ${
+          sent
+            ? "bg-emerald-600 cursor-default"
+            : "bg-[#34C759] hover:bg-[#2EB84E] cursor-pointer"
+        } disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs`
       }
     >
-      <span>{isSending ? "Sending WhatsApp Bill…" : "💬 WhatsApp Bill"}</span>
+      <span>
+        {sent ? "✓ Bill Sent" : isSending ? "Sending…" : "💬 WhatsApp Bill"}
+      </span>
     </button>
   );
 }

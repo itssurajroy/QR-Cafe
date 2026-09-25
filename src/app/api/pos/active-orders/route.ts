@@ -138,7 +138,7 @@ export async function PATCH(req: NextRequest) {
     .eq("id", orderId)
     .eq("restaurant_id", user.restaurantId);
   if (payment_status === "paid") {
-    query = query.eq("payment_status", "unpaid");
+    query = query.in("payment_status", ["unpaid", "verification_pending"]);
   }
 
   const { data: updated, error } = await query.select().maybeSingle();

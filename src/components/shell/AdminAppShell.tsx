@@ -24,6 +24,7 @@ import {
   PlugIcon,
   CalendarIcon,
   MessageCircleIcon,
+  InboxIcon,
   LifebuoyIcon,
   ManualIcon,
 } from "@/components/Icons";
@@ -40,6 +41,7 @@ export type AdminSectionId =
   | "pos"
   | "kitchen"
   | "bookings"
+  | "inbox"
   // CATALOG
   | "menu"
   | "categories"
@@ -106,6 +108,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "crm", label: "Customers & Loyalty", icon: UsersIcon },
       { id: "communications", label: "Communications", icon: MessageCircleIcon },
+      { id: "inbox", label: "Inbox", icon: InboxIcon },
     ],
   },
   {

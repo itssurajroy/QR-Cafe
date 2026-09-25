@@ -55,7 +55,7 @@ interface BillData {
   finalTotalPaise?: number;
   subtotalPaise?: number;
   discountPaise?: number;
-  payment_status: "paid" | "unpaid";
+  payment_status: "paid" | "unpaid" | "verification_pending";
   payment_method?: string;
   paymentMethod?: string;
   table_label?: string;
@@ -1051,7 +1051,7 @@ export default function PosClient({
   }, [liveOrders, openingFloat, payoutsAmount, actualCashCount]);
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <main className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-brand-lavender0 selection:text-white">
       {/* POS HEADER / TOP MISSION-CRITICAL WORKSTATION BAR */}
       <header className="h-14 bg-[#F5F5F7]/90 backdrop-blur-xl border-b border-black/[0.06] px-3 sm:px-4 flex items-center justify-between shadow-xs shrink-0 z-30 sticky top-0">
         <div className="flex items-center gap-3">
@@ -1253,6 +1253,65 @@ export default function PosClient({
           </div>
         </div>
       </header>
+
+      {/* VERIFICATION PENDING BANNER (UPI) */}
+      {liveOrders.filter(o => o.payment_status === "verification_pending").map(order => (
+        <div key={`verify-${order.id}`} className="bg-amber-100 border-b-2 border-amber-300 px-4 py-3 flex items-center justify-between shadow-sm animate-in slide-in-from-top z-20 relative">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl text-white flex items-center justify-center font-black animate-pulse shadow-sm">
+              ₹
+            </div>
+            <div>
+              <h3 className="text-amber-950 font-black text-sm uppercase tracking-wider">
+                Verify UPI Payment
+              </h3>
+              <p className="text-amber-800 text-xs font-semibold">
+                Table {order.table_label || "Counter"} • Order #{order.order_number} • ₹{(order.total_paise / 100).toFixed(2)}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/pos/active-orders", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: order.id, payment_status: "unpaid" }),
+                  });
+                  if (!res.ok) throw new Error("Failed to reject");
+                  toast.error("Payment rejected");
+                  fetchLiveOrders();
+                } catch (err) {}
+              }}
+              className="px-4 py-2 bg-white text-rose-600 font-bold text-xs rounded-xl border border-rose-200 hover:bg-rose-50 shadow-sm active:scale-95 transition-all cursor-pointer"
+            >
+              Reject (Not Received)
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/pos/active-orders", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: order.id, payment_status: "paid", payment_method: "upi" }),
+                  });
+                  if (!res.ok) throw new Error("Failed to verify");
+                  toast.success("Payment verified!");
+                  flash("ok", "UPI Payment Verified ✓");
+                  speakVoice("UPI Payment Received");
+                  fetchLiveOrders();
+                } catch (err) {}
+              }}
+              className="px-4 py-2 bg-[#29A05C] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 hover:bg-[#22874d] active:scale-95 transition-all cursor-pointer"
+            >
+              Approve (Money Received)
+            </button>
+          </div>
+        </div>
+      ))}
 
       {/* POS MAIN WORKSPACE AREA */}
       {viewMode === "catalog" && (
